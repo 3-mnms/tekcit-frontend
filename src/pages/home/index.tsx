@@ -1,6 +1,6 @@
 // src/pages/home/index.tsx
 import { useState } from "react";
-import reactLogo from "../../shared/assets/react.svg"; // 별칭(@) 쓰는 경우
+import reactLogo from "../../shared/assets/logo.png"; // 별칭(@) 쓰는 경우
 import viteLogo from "/vite.svg";                  // vite.svg는 public 루트
 import "../../app/styles/App.css";                     // 전역/페이지 스타일
 
