@@ -1,0 +1,17 @@
+.button {
+  background-color: #4d9afd; /* ✅ 요청한 색상으로 변경 */
+  color: white;
+  font-weight: bold;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.button:hover {
+  background-color: #3585ea; /* ✅ 약간 더 진한 hover 색상 */
+}
+
+.button:disabled {
+  background-color: #a1cfff; /* ✅ 흐리게 (disabled 느낌) */
+  cursor: not-allowed;
+}
