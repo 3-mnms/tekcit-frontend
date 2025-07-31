@@ -1,23 +1,64 @@
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  width: 100%;
-}
-
 .row {
   display: flex;
+  align-items: center;
   width: 100%;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.hasButtonRow {
+  justify-content: space-between;
+}
+
+.inputWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  background-color: white;
+  min-width: 0; 
+}
+
+.buttonWrapper {
+  flex-shrink: 0; 
+  width: 95px;
+  height: 44px;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  color: #888;
+  margin-right: 0.5rem;
+}
+
+.icon {
+  font-size: 1rem;
+}
+
+.bar {
+  margin-left: 0.25rem;
+  font-weight: bold;
+  color: #aaa;
 }
 
 .input {
   flex: 1;
-  padding: 0.5rem;
-  border: 1px solid #333;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  background: transparent;
 }
 
-.inputFull {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #333;
+.eyeIcon {
+  cursor: pointer;
+  margin-left: 0.5rem;
+  color: #888;
+}
+
+.iconToggle {
+  font-size: 1rem;
 }
