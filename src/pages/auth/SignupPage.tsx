@@ -1,9 +1,9 @@
-// pages/SignupPage.tsx
-import React from "react";
-import Logo from "@assets/logo.png";
-import SignupInputFields from "@/components/auth/signup/SignupInputFields";
-import Button from "@/components/common/button/Button";
-import styles from "./SignupPage.module.css";
+import React from 'react'
+import Logo from '@assets/logo.png'
+import Button from '@/components/common/button/Button'
+import SignupInputField from '@/components/auth/signup/SignupInputFields'
+import { FaUser, FaLock, FaHouse, FaLocationDot, FaEye, FaEyeSlash } from 'react-icons/fa6'
+import styles from './SignupPage.module.css'
 
 const SignupPage: React.FC = () => {
   return (
@@ -12,12 +12,16 @@ const SignupPage: React.FC = () => {
         <img src={Logo} alt="tekcit logo" className={styles.logo} />
         <h2 className={styles.title}>회원가입</h2>
 
-        <SignupInputFields />
+        <SignupInputField icon={<FaUser />} placeholder="아이디" hasButton buttonText="중복 확인" />
+        <SignupInputField icon={<FaLock />} placeholder="비밀번호" type="password" />
+        <SignupInputField icon={<FaLock />} placeholder="비밀번호 확인" type="password" />
+        <SignupInputField icon={<FaHouse />} placeholder="주소" hasButton buttonText="주소 찾기" />
+        <SignupInputField icon={<FaLocationDot />} placeholder="상세주소 입력" />
 
         <Button className="w-full h-12 mt-4">가입하기</Button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SignupPage;
+export default SignupPage
