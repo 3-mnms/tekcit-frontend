@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './Header.module.css';
-import { CommonButton } from '@components/common/Button';
+import logo from '@shared/assets/logo.svg';
 import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
   return (
     <header className={styles.header}>
       <div className={styles.left}>
-        <img src="/logo.svg" alt="tekcit logo" className={styles.logo} />
+        <img src={logo}alt="tekcit logo" className={styles.logo} />
         <span className={styles.category}>콘서트 / 페스티벌 / 등</span>
       </div>
 
@@ -36,14 +36,13 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
             if (e.key === 'Enter') handleSearch();
           }}
         />
-        <CommonButton onClick={handleSearch}>검색</CommonButton>
       </div>
 
       <div className={styles.right}>
         {isLoggedIn ? (
-          <CommonButton onClick={() => navigate('/mypage')}>마이페이지</CommonButton>
+          <p>마이페이지</p>
         ) : (
-          <CommonButton onClick={() => navigate('/login')}>로그인</CommonButton>
+          <p>로그인</p>
         )}
       </div>
     </header>
