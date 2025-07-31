@@ -1,0 +1,23 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+}
+
+.input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #333;
+}
+
+.inputFull {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #333;
+}
