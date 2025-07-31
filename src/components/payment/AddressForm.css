@@ -1,0 +1,122 @@
+.address-container {
+  background-color: #dcdcdc;
+  padding: 20px;
+  font-family: sans-serif;
+  border: 1px solid #aaa;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.address-tabs {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.address-tabs .label {
+  font-weight: bold;
+}
+
+.address-tabs button {
+  background: none;
+  border: 1px solid #444;
+  padding: 4px 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+  background-color: green;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.recent-list {
+  background: #fff;
+  border: 1px solid #aaa;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.recent-list li {
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.address-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  border-top: 1px solid #555;
+  padding-top: 16px;
+}
+
+.left-section label,
+.right-section label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.left-section input,
+.right-section input,
+select {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #333;
+  background: transparent;
+  margin-bottom: 16px;
+  padding: 4px;
+  font-size: 14px;
+}
+
+.phone-inputs {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.address-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.address-row button {
+  padding: 4px 8px;
+  font-size: 13px;
+  border: 1px solid #444;
+  background-color: white;
+  cursor: pointer;
+}
+
+.submit-wrap {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.submit-wrap button {
+  padding: 8px 16px;
+  background: black;
+  color: white;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: -12px;
+  margin-bottom: 8px;
+}
