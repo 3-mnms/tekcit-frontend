@@ -1,139 +1,164 @@
+/* AddressForm.css */
+
 .address-container {
-  background-color: #dcdcdc;
-  padding: 20px;
+  padding: 32px;
+  background-color: #f3f3f3;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   font-family: sans-serif;
-  border: 1px solid #aaa;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .section-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .address-tabs {
   display: flex;
-  gap: 12px;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
+  gap: 8px;
 }
 
-.address-tabs .label {
-  font-weight: bold;
+.tabs-label {
+  margin-right: 8px;
+  font-weight: 500;
 }
 
-.address-tabs button {
-  background: none;
-  border: 1px solid #444;
-  padding: 4px 8px;
-  font-size: 14px;
+.tab-button {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+  padding: 6px 12px;
+  border-radius: 100px;
   cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
 }
 
-.dot {
+.tab-button.active {
+  border: 1px solid #4D9AFD;
+  background-color: #fff;
+  color: #4D9AFD;
+  position: relative;
+}
+
+.tab-button.active::before {
+  content: "";
   width: 8px;
   height: 8px;
-  display: inline-block;
-  border: 1px solid green;
+  background-color: #4D9AFD;
   border-radius: 50%;
-  margin-right: 4px;
-  background-color: white; /* 초기 상태: 빈 동그라미 */
+  margin-right: 6px;
 }
 
-.dot.active {
-  background-color: green; /* 클릭된 상태: 채워진 동그라미 */
-}
-
-.recent-list {
-  background: #fff;
-  border: 1px solid #aaa;
-  padding: 10px;
-  margin-bottom: 10px;
+.tab-manage-btn {
+  border: 1px solid #999;
+  background-color: #eee;
+  padding: 6px 12px;
   font-size: 14px;
-}
-
-.recent-list li {
-  padding: 4px 0;
+  border-radius: 6px;
   cursor: pointer;
 }
 
-.address-form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  border-top: 1px solid #555;
-  padding-top: 16px;
+.form-grid {
+  display: flex;
+  gap: 32px;
+  margin-top: 16px;
 }
 
-.left-section label,
-.right-section label {
-  display: block;
-  margin-bottom: 4px;
-  font-weight: bold;
+.form-left,
+.form-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.left-section input,
-.right-section input,
+label {
+  font-weight: 600;
+  margin: 12px 0 4px;
+}
+
+input,
 select {
-  width: 100%;
-  border: none;
-  border-bottom: 1px solid #333;
-  background: transparent;
-  margin-bottom: 16px;
-  padding: 4px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .phone-inputs {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.phone-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .address-row {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  align-items: center;
+}
+
+.address-row input {
+  flex: 1;
 }
 
 .address-row button {
-  padding: 4px 8px;
-  font-size: 13px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #444;
-  background-color: white;
-  cursor: pointer;
-
-  /* ✅ 줄바꿈 방지 */
-  white-space: nowrap;
-
-  /* ✅ 넉넉한 너비 확보 */
-  min-width: 72px;
-  height: 32px;
-}
-
-
-.submit-wrap {
-  text-align: right;
-  margin-top: 20px;
-}
-
-.submit-wrap button {
-  padding: 8px 16px;
-  background: black;
-  color: white;
-  border: none;
-  font-size: 14px;
-  cursor: pointer;
+  padding: 8px 12px;
+  background-color: #fff;
+  border: 1px solid #ccc;
   border-radius: 4px;
+  cursor: pointer;
+}
+
+.recent-address-list-box {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  margin-top: 16px;
+}
+
+.town-label {
+  margin-top: 8px;
+  color: #222;
 }
 
 .error {
   color: red;
   font-size: 12px;
-  margin-top: -12px;
-  margin-bottom: 8px;
+  margin-top: 2px;
+}
+
+.submit-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32px;
+}
+
+.submit-wrap button {
+  padding: 10px 20px; 
+  background-color: black;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.error-space {
+  min-height: 20px; /* 항상 공간 확보 */
 }
