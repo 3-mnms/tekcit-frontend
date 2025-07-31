@@ -1,0 +1,71 @@
+.base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  cursor: pointer;
+  border: 1px solid transparent;
+  padding: 0.5rem 1rem;
+}
+
+.base:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Variants */
+.primary {
+  background-color: #4d9afd;
+  color: white;
+}
+.primary:hover {
+  background-color: #3c85f5;
+}
+.primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(60, 133, 245, 0.5);
+}
+
+.secondary {
+  background-color: transparent;
+  border-color: #4d9afd;
+  color: #4d9afd;
+}
+.secondary:hover {
+  background-color: #4d9afd;
+  color: white;
+}
+.secondary:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(77, 154, 253, 0.5);
+}
+
+.cancel {
+  background-color: transparent;
+  border-color: #d1d5db;
+  color: #6b7280;
+}
+.cancel:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+.cancel:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(243, 244, 246, 0.7);
+}
+
+.danger {
+  background-color: transparent;
+  border-color: #fca5a5;
+  color: #ef4444;
+}
+.danger:hover {
+  background-color: #ef4444;
+  color: white;
+}
+.danger:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.5);
+}

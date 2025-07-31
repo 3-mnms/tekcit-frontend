@@ -1,0 +1,90 @@
+.sidebar {
+    position: fixed;      
+    top: 0;               
+    left: 0;         
+    width: 18%;  
+    min-width: 150px;    
+    height: 100vh;         
+    background-color: #3D3D3D;
+    color: #ecf0f1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 0; /* 패딩 제거 (내부 요소에서 조절), 삐약! */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    transition: width 0.3s ease;  /*화면 크기 바뀔 대 부드럽게*/
+}
+
+/* 새로 추가된 사용자 정보 영역 스타일! 삐약! */
+.userInfoArea {
+    padding: 20px 15px; /* 내부 패딩, 삐약! */
+    margin-bottom: 20px; /* 메뉴와의 간격, 삐약! */
+    border-bottom: 1px solid #333333; /* 하단 구분선, 삐약! */
+}
+
+.userType {
+    font-size: 16px; /* 글자 크기, 삐약! */
+    font-weight: bold;
+    color: #ffffff; /* 흰색 글자, 삐약! */
+    margin-bottom: 5px; /* 이메일과의 간격, 삐약! */
+}
+
+.userEmail {
+    font-size: 14px; /* 이메일 글자 크기, 삐약! */
+    color: #cccccc; /* 연한 회색, 삐약! */
+}
+
+
+.sidebarNav {
+    flex-grow: 1;
+    padding: 0 0px; /* 좌우 패딩 제거 (메뉴 링크에서 직접 패딩 조절), 삐약! */
+}
+
+.menuList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menuLink {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px; /* 메뉴 링크 내부 패딩을 늘려 높이를 키웁니다, 삐약! */
+    /* border-radius: 8px; */ /* 이미지에는 둥근 모서리가 없음, 삐약! */
+    color: #ecf0f1;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border-left: 5px solid transparent; /* 활성화 시 보더를 위한 공간, 삐약! */
+}
+
+.menuLink:hover {
+    background-color: #1a1a1a; /* 호버 시 배경색 변경, 삐약! */
+    color: #ffffff;
+}
+
+/* 활성화된 메뉴 스타일 조정! 삐약! */
+.menuLinkActive {
+    background-color: #333333; /* 활성화된 메뉴 배경색 (어두운 회색), 삐약! */
+    color: #ffffff;
+    font-weight: bold;
+    border-left-color: #4d9afd; /* 왼쪽 파란색 보더 추가! 삐약! */
+}
+
+.menuIcon {
+    margin-right: 12px;
+    font-size: 18px;
+}
+
+.sidebarFooter {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid #333333; /* 푸터 경계선 색상 조정, 삐약! */
+    text-align: center;
+    font-size: 12px;
+    color: #95a5a6;
+    padding-bottom: 10px; /* 하단 패딩 추가, 삐약! */
+}
