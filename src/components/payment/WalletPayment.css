@@ -1,0 +1,140 @@
+/* WalletPayment.css */
+.wallet-payment-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  display: flex;
+  max-width: 720px;
+  margin: 0 auto;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* 헤더 */
+.header {
+  padding: 20px;
+  background-color: white;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+/* 결제 섹션 */
+.payment-section {
+  background-color: white;
+  margin: 8px 16px;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.payment-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.payment-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.money-text {
+  font-size: 16px;
+  color: #333;
+  font-weight: 600;
+}
+
+.simple-payment-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 0;
+}
+
+.radio-input {
+  width: 16px;
+  height: 16px;
+}
+
+.radio-label {
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* 충전 섹션 */
+.charge-section {
+  display: flex; /* 추가 */
+  flex-direction: row; /* 가로 정렬 */
+  justify-content: space-between; /* 요소 간 공간 확보 */
+  align-items: center; /* 세로 정렬 정렬 */
+  border: 2px solid #03c75a;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  gap: 12px; /* 요소 간 간격 */
+  width: 600px;
+}
+
+.charge-input-group {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.charge-label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.amount-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.dropdown-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.account-selector {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.selected-account {
+  font-size: 14px;
+  color: #333;
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .wallet-payment-container {
+    max-width: 100%;
+  }
+
+  .payment-section {
+    margin: 8px;
+  }
+}
