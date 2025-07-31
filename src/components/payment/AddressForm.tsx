@@ -8,7 +8,7 @@ import "./AddressForm.css";
 const schema = z.object({
   name: z.string().min(1, "이름을 입력해 주세요."),
   phonePrefix: z.enum(["010", "011", "016", "017", "018", "019"]),
-  phonePart1: z.string().regex(/^\d{3,4}$/, "3~4자리 숫자"),
+  phonePart1: z.string().regex(/^\d{3,4}$/, "3~4자리 숫자를 입력해주세요"),
   phonePart2: z.string().regex(/^\d{4}$/, "4자리 숫자"),
   address1: z.string().min(1, "주소를 입력해 주세요."),
   address2: z.string().min(1, "상세 주소를 입력해 주세요."),
@@ -36,6 +36,7 @@ const AddressForm = () => {
   const [defaultAddress] = useState(dummyDefault);
   const [recentAddresses, setRecentAddresses] = useState<AddressFormInputs[]>([]);
   const [showRecentList, setShowRecentList] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<"default" | "recent" | null>(null);
 
   const onSubmit = (data: AddressFormInputs) => {
     const exists = recentAddresses.some(
@@ -53,13 +54,34 @@ const AddressForm = () => {
 
       <div className="address-tabs">
         <span className="label">배송지 선택</span>
-        <button type="button" onClick={() => reset(defaultAddress)}>
-          <span className="dot" /> 기본
+        <button
+          type="button"
+          onClick={() => {
+            setSelectedTab("default");
+            reset(defaultAddress);
+          }}
+        >
+          <span className={`dot ${selectedTab === "default" ? "active" : ""}`} /> 기본
         </button>
-        <button type="button" onClick={() => setShowRecentList((prev) => !prev)}>
-          <span className="dot" /> 최근
+
+        <button
+          type="button"
+          onClick={() => {
+            setSelectedTab("recent");
+            setShowRecentList((prev) => !prev);
+          }}
+        >
+          <span className={`dot ${selectedTab === "recent" ? "active" : ""}`} /> 최근
         </button>
-        <button type="button">배송지 관리</button>
+
+        <button type="button"
+          onClick={() => {
+            // TODO: 배송지 관리 페이지로 이동 (페이지 구현 되면 추가 예정, 파일명도 임시)
+            // navigate("/address-management");
+          }}
+        >
+          배송지 관리
+        </button>
       </div>
 
       {showRecentList && (
@@ -104,7 +126,7 @@ const AddressForm = () => {
           <label>주소 *</label>
           <div className="address-row">
             <input type="text" {...register("address1")} />
-            <button type="button" onClick={() => alert("주소 검색 미구현")}>
+            <button type="button" onClick={() => alert("주소 검색 아직 구현 안했습니당~~!!")}>
               주소 검색
             </button>
           </div>

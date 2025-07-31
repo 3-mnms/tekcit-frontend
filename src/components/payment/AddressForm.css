@@ -34,9 +34,14 @@
   width: 8px;
   height: 8px;
   display: inline-block;
-  background-color: green;
+  border: 1px solid green;
   border-radius: 50%;
   margin-right: 4px;
+  background-color: white; /* 초기 상태: 빈 동그라미 */
+}
+
+.dot.active {
+  background-color: green; /* 클릭된 상태: 채워진 동그라미 */
 }
 
 .recent-list {
@@ -94,10 +99,22 @@ select {
 .address-row button {
   padding: 4px 8px;
   font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #444;
   background-color: white;
   cursor: pointer;
+
+  /* ✅ 줄바꿈 방지 */
+  white-space: nowrap;
+
+  /* ✅ 넉넉한 너비 확보 */
+  min-width: 72px;
+  height: 32px;
 }
+
 
 .submit-wrap {
   text-align: right;
