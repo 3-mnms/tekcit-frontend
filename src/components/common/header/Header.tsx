@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './Header.module.css';
-import logo from '@shared/assets/logo.svg';
+import logo from '@shared/assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
@@ -26,23 +26,36 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
       </div>
 
       <div className={styles.center}>
-        <input
-          type="text"
-          placeholder="검색창"
-          className={styles.searchInput}
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSearch();
-          }}
-        />
+        <div className={styles.searchWrapper}>
+          <input
+            type="text"
+            placeholder="검색창"
+            className={styles.searchInput}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSearch();
+            }}
+          />
+          <i
+            className="fa-solid fa-magnifying-glass"
+            onClick={handleSearch}
+            style={{ cursor: 'pointer' }}
+          />
+        </div>
       </div>
 
       <div className={styles.right}>
         {isLoggedIn ? (
-          <p>마이페이지</p>
+          <div className={styles.rightButton} onClick={() => navigate('/login')}>
+            <i className="fa-regular fa-user" />
+            <p style={{ margin: 0 }}>로그인</p>
+          </div>
         ) : (
-          <p>로그인</p>
+          <div className={styles.rightButton} onClick={() => navigate('/mypage')}>
+            <i className="fa-regular fa-user" />
+            <p style={{ margin: 0 }}>마이페이지</p>
+          </div>
         )}
       </div>
     </header>
