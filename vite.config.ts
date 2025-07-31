@@ -30,8 +30,16 @@ export default defineConfig({
         replacement: path.resolve(__dirname, 'src/shared'),
       },
       {
-        find: '@icon',
-        replacement: path.resolve(__dirname, 'src/shared/assets/icon'),
+        find: '@assets',
+        replacement: path.resolve(__dirname, 'src/shared/assets'),
+      },
+      {
+        find: '@api',
+        replacement: path.resolve(__dirname, 'src/shared/api'),
+      },
+      {
+        find: '@storage',
+        replacement: path.resolve(__dirname, 'src/shared/storage'),
       },
     ],
   },
