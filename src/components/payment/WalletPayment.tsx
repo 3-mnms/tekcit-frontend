@@ -29,7 +29,7 @@ const WalletPayment: React.FC = () => {
                             checked={paymentMethod === 'account'}
                             onChange={() => setPaymentMethod('account')}
                         />
-                        <label htmlFor="simple-payment" className="radio-label">계좌 간편결제</label>
+                        <label htmlFor="simple-payment" className="radio-label">킷페이</label>
                     </div>
 
                     <div className="charge-section">
