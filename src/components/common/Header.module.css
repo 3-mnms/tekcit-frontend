@@ -8,9 +8,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 2%;
+  padding: 0.75rem;
   background-color: #fff;
-  gap: 1.25rem;
+
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   z-index: 1000;
 }
@@ -18,7 +18,7 @@
 .left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  margin-left: -20px;
 }
 
 .logo {
@@ -28,8 +28,7 @@
 .right {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   color: #333;
 }
 
@@ -41,12 +40,12 @@
 .logoutLink {
   display: flex;
   align-items: center;
-  gap: 4px;
   color: #333;
   cursor: pointer;
   text-decoration: none;
   font-weight: 500;
 }
+
 .logoutLink:focus,
 .logoutLink:active,
 .logoutLink:visited {
@@ -65,10 +64,10 @@
 }
 
 .extendButton {
-  padding: 4px 10px;
+  padding: 0.5px 8px;
   color: #333;
-  border: 1px solid #333;
-  font-size: 0.875rem;
+  border: 1px solid #ccc;
+  font-size: 0.7rem;
   font-weight: 500;
   cursor: pointer;
   outline: none;

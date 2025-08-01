@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from './Header.module.css';
 import logo from '@shared/assets/logo.png';
+import { IoLogOutOutline } from "react-icons/io5";
 
 interface HeaderProps {
   userName: string;
@@ -50,10 +51,10 @@ const Header: React.FC<HeaderProps> = ({ userName, onLogout, ...props }) => {
       </div>
 
        <div className={styles.right}>
-        <span className={styles.userInfo}><strong>{userName}</strong></span>
+        <span className={styles.userInfo}><strong>{userName}</strong>님</span>
         <span className={styles.separator}>|</span>
         <a href="#" onClick={(e) => {e.preventDefault(); onLogout(); navigate('/login');}} className={styles.logoutLink}>
-          로그아웃
+          로그아웃  <IoLogOutOutline size={15} style={{ marginLeft: '2px', verticalAlign: 'middle' }} />
         </a>
         <span className={styles.separator}>|</span>
         <span className={sessionTimeStyle}>{formatTime(timeLeft)}</span>
