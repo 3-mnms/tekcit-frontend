@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 
 // import TestPage from "@pages/home/test2";
-// import TestPage from "@pages/my/dropdown/NotificationDropdown";
+// import TestPage from "@/pages/home/CategoryPage";
 import TestComponent from "@components/my/sidebar/Sidebar"
 import MyPage from '@/pages/my/MyPage';
 import MyInfo from '@/pages/my/Info';
@@ -26,5 +26,4 @@ export const router = createBrowserRouter([
     // { path: 'bookmarks', element: <Bookmarks /> },
   ],
 }
-
 ]);
