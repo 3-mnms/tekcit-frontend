@@ -1,5 +1,3 @@
-// components/my/myInfo/Info.tsx
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Info.module.css';
@@ -12,7 +10,7 @@ const Info: React.FC = () => {
       <h2 className={styles.title}>내 정보</h2>
 
       {/* 기본정보 */}
-      <div className={styles.card} onClick={() => navigate('/mypage/info')}>
+      <div className={styles.card} onClick={() => navigate('/mypage/detail')}>
         <span className={styles.label}>사용자명(기본정보)</span>
         <span className={styles.arrow}>›</span>
       </div>

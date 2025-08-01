@@ -4,17 +4,19 @@ import { createBrowserRouter } from "react-router-dom";
 // import TestPage from "@pages/my/dropdown/NotificationDropdown";
 import TestComponent from "@components/my/sidebar/Sidebar"
 import MyPage from '@/pages/my/MyPage';
-import MyInfo from '@/pages/my/Info';
+import InfoPage from '@/pages/my/myInfo/Info';
+import InfoDetailPage from '@/pages/my/myInfo/InfoDetailPage';
 
 export const router = createBrowserRouter([
   // { path: "/", element: <TestPage /> },
-  { path: "/", element: <TestComponent /> },
+  // { path: "/", element: <TestComponent /> },
 
   {
   path: '/mypage',
   element: <MyPage />,
   children: [
-    { path: 'info', element: <MyInfo /> },
+    { path: 'info', element: <InfoPage /> },
+    { path: 'info/detail', element: <InfoDetailPage /> },
     // { path: 'password', element: <ChangePassword /> },
     // { path: 'linked', element: <LinkedAccounts /> },
     // { path: 'address', element: <AddressList /> },
