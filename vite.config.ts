@@ -26,8 +26,12 @@ export default defineConfig({
         replacement: path.resolve(__dirname, 'src/pages/home'),
       },
       {
-        find: '@my',
-        replacement: path.resolve(__dirname, 'src/pages/my'),
+        find: '@components',
+        replacement: path.resolve(__dirname, 'src/components'),
+      },
+      {
+        find: '@models',
+        replacement: path.resolve(__dirname, 'src/models'),
       },
       {
         find: '@shared',

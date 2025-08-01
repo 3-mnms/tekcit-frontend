@@ -1,0 +1,31 @@
+.box {
+  border: 1px solid #ccc;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.label {
+  color: #a0a0a0;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.amount {
+  font-weight: 600;
+}
+
+.charge {
+  font-size: 0.875rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: black;
+}

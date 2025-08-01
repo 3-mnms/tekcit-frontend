@@ -1,10 +1,10 @@
 // pages/LoginPage.tsx
-import React from "react";
-import Logo from "@assets/logo.png"
-import LoginInput from "@/components/auth/login/LoginInput";
-import SocialLogin from "@/components/auth/login/SocialLogin";
-import Button from "@/components/common/button/Button";
-import styles from "./LoginPage.module.css";
+import React from 'react'
+import Logo from '@assets/logo.png'
+import LoginInput from '@/components/auth/login/LoginInput'
+import SocialLogin from '@/components/auth/login/SocialLogin'
+import Button from '@/components/common/button/Button'
+import styles from './LoginPage.module.css'
 
 const LoginPage: React.FC = () => {
   return (
@@ -12,7 +12,12 @@ const LoginPage: React.FC = () => {
       <div className={styles.card}>
         <img src={Logo} alt="tekcit logo" className={styles.logo} />
 
-        <LoginInput />
+        <LoginInput
+          inputs={[
+            { type: 'text', placeholder: '아이디' },
+            { type: 'password', placeholder: '비밀번호' },
+          ]}
+        />
 
         <Button className="w-full h-12">로그인</Button>
 
@@ -28,7 +33,7 @@ const LoginPage: React.FC = () => {
         <Button className="w-full h-12">회원가입 하기</Button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage

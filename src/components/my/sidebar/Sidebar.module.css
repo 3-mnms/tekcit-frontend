@@ -1,0 +1,35 @@
+.sidebar {
+  width: 200px;
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+.section {
+  font-weight: bold;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.menu {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.menuItem {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  color: #333;
+  text-decoration: none;
+}
+
+.menuItem:hover {
+  color: #4D9AFD;
+}
+
+.active {
+  font-weight: bold;
+  color: #4D9AFD;
+}

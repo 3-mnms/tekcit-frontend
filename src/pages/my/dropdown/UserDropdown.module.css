@@ -1,0 +1,51 @@
+.dropdown {
+  width: 288px;
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.username {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.alarmButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alarmIcon {
+  font-size: 1.25rem;
+  /* color: red; */
+}
+
+.logoutButton {
+  font-size: 0.75rem;
+  color: gray;
+  text-align: right;
+  margin-top: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: block;
+  margin-left: auto; 
+  text-decoration: underline;
+}
+
+.logoutButton:hover {
+  color: #555;
+}
