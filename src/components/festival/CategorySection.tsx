@@ -28,7 +28,7 @@ const CategorySection: React.FC = () => {
 
       {/* 선택된 카테고리의 공연 카드 리스트 */}
         <div className={styles.cardSlider}>
-        {[1, 2, 3, 4, 5, 6].map((n) => (
+        {[1, 2, 3, 4, 5].map((n) => (
             <div key={n} className={styles.card}>
             {selectedCategory} 공연 {n}
             </div>

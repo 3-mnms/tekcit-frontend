@@ -61,8 +61,8 @@
 }
 
 .card {
-  min-width: 160px;
-  height: 8rem;
+  min-width: 180px;
+  height: 15rem;
   background-color: #e5e7eb;
   border-radius: 0.5rem;
   flex-shrink: 0;

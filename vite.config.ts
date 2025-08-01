@@ -18,6 +18,10 @@ export default defineConfig({
         replacement: path.resolve(__dirname, 'src/components'),
       },
       {
+        find: '@models',
+        replacement: path.resolve(__dirname, 'src/models'),
+      },
+      {
         find: '@pages',
         replacement: path.resolve(__dirname, 'src/pages'),
       },

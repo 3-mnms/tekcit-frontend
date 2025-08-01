@@ -1,0 +1,23 @@
+.section {
+  background-color: hsl(184, 36%, 42%); /* 이미지처럼 진한 와인색 느낌 */
+  color: white;
+  padding: 1rem 1.5rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.cardList {
+  display: flex;
+  gap: 1rem;
+}
+
+.card {
+  width: 100px;
+  height: 140px;
+  background-color: #e5e7eb; /* tailwind gray-200 */
+  border-radius: 0.5rem;
+}
