@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 
 // import TestPage from "@pages/home/test2";
 // import TestPage from "@pages/my/dropdown/NotificationDropdown";
-import TestComponent from "@components/my/sidebar/Sidebar"
+// import TestComponent from "@components/my/sidebar/Sidebar"
 import MyPage from '@/pages/my/MyPage';
 import InfoPage from '@/pages/my/myInfo/Info';
 import InfoDetailPage from '@/pages/my/myInfo/InfoDetailPage';
