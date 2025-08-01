@@ -47,12 +47,20 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 16px;
-  padding: 12px 0;
+  padding: 12px 12px;
+  min-height: 24px; /* 라디오 버튼 공간 확보 */
 }
 
 .radio-input {
+  appearance: auto;
+  -webkit-appearance: radio;
   width: 16px;
   height: 16px;
+  margin-left: 4px;
+  margin-right: 0;
+  position: relative;
+  top: 1px; /* 살짝 내림 */
+  z-index: 1; /* 혹시라도 label에 덮이지 않도록 */
 }
 
 .radio-label {
@@ -64,7 +72,7 @@
 
 /* 충전 섹션 */
 .charge-section {
-  display: flex; /* 추가 */
+  display: flex; 
   flex-direction: row; /* 가로 정렬 */
   justify-content: space-between; /* 요소 간 공간 확보 */
   align-items: center; /* 세로 정렬 정렬 */

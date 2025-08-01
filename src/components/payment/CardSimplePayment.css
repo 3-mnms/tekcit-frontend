@@ -1,0 +1,160 @@
+/* Button 컴포넌트 스타일 */
+.custom-button {
+  background-color: #4d9afd;
+  color: white;
+  font-weight: bold;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease-in-out;
+  border: none;
+  cursor: pointer;
+}
+
+.custom-button:hover {
+  background-color: #3585ea;
+}
+
+.custom-button.disabled {
+  background-color: #a1cfff;
+  cursor: not-allowed;
+}
+
+/* 토글 섹션 */
+.toggle-section {
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 0.75rem;
+}
+
+.toggle-radio {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.radio-input {
+  opacity: 0;
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.radio-custom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.radio-input:checked + .radio-custom {
+  border-color: #007bff;
+  background-color: #007bff;
+}
+
+.radio-input:checked + .radio-custom::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.toggle-label {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 결제 버튼들 */
+.payment-buttons-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.payment-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.payment-box {
+  border: 2px solid #007bff; /* 파란색 테두리 */
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.naver-btn {
+  background-color: #03c75a;
+  border: none;
+  color: white;
+}
+
+.naver-btn:hover {
+  background-color: #02b351;
+}
+
+.kakao-btn {
+  background-color: #fee500;
+  border: none;
+  color: #3c1e1e;
+}
+
+.kakao-btn:hover {
+  background-color: #fdd800;
+}
+
+.btn-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.naver-icon {
+  background-color: white;
+  color: #03c75a;
+}
+
+.kakao-icon {
+  background-color: #3c1e1e;
+  color: #fee500;
+}
+
+.btn-text {
+  font-size: 0.875rem;
+}
+
+.white-box {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 0 16px 16px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 200%;
+}
