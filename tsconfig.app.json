@@ -29,6 +29,7 @@
       "@app/*": ["src/app/*"],
       "@pages/*": ["src/pages/*"],
       "@components/*": ["src/components/*"],
+      "@models/*": ["src/models/*"],
       "@shared/*": ["src/shared/*"],
       "@assets/*": ["src/shared/assets/*"],
       "@home/*": ["src/pages/home/*"],

@@ -1,11 +1,25 @@
+// components/auth/login/LoginInput.tsx
 import React from "react";
 import styles from "./LoginInput.module.css";
 
-const LoginInput: React.FC = () => {
+interface LoginInputProps {
+  inputs: {
+    type: string;
+    placeholder: string;
+  }[];
+}
+
+const LoginInput: React.FC<LoginInputProps> = ({ inputs }) => {
   return (
     <div className={styles.container}>
-      <input type="text" placeholder="아이디" className={styles.input} />
-      <input type="password" placeholder="비밀번호" className={styles.input} />
+      {inputs.map((input, index) => (
+        <input
+          key={index}
+          type={input.type}
+          placeholder={input.placeholder}
+          className={styles.input}
+        />
+      ))}
     </div>
   );
 };
