@@ -14,12 +14,6 @@ const WalletPayment: React.FC = () => {
                 </div>
 
                 <div className="payment-section">
-                    <div className="payment-header">
-                        <div className="payment-logo">
-                            <span className="money-text">머니 충전결제</span>
-                        </div>
-                    </div>
-
                     <div className="simple-payment-option">
                         <input
                             type="radio"
