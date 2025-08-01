@@ -1,14 +1,7 @@
-/* WalletPayment.css */
-.wallet-payment-container {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  display: flex;
-  max-width: 720px;
-  margin: 0 auto;
-  background-color: #f8f9fa;
-  min-height: 100vh;
+.wallet-payment-container{
+  width: 50%;
 }
 
-/* 헤더 */
 .header {
   padding: 20px;
   background-color: white;
@@ -81,7 +74,6 @@
   padding: 16px;
   margin-bottom: 16px;
   gap: 12px; /* 요소 간 간격 */
-  width: 600px;
 }
 
 .charge-input-group {
@@ -139,13 +131,14 @@
   color: #333;
 }
 
-/* 반응형 */
-@media (max-width: 480px) {
-  .wallet-payment-container {
-    max-width: 100%;
-  }
-
-  .payment-section {
-    margin: 8px;
-  }
+/* 슬라이드 애니메이션 */
+.slide-toggle {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s ease;
 }
+
+.slide-toggle.open {
+  max-height: 300px; /* 충분히 큰 값 */
+}
+

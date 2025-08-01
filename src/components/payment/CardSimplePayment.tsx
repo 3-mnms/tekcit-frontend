@@ -1,8 +1,6 @@
-// CardPaymentUI.tsx
 import React, { useState } from 'react';
-import '@components/payment/CardSimplePayment.css'; // CSS 파일 import
+import '@components/payment/CardSimplePayment.css';
 
-// 기존 Button 컴포넌트 (CSS Module 사용)
 interface ButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
@@ -30,8 +28,7 @@ const Button: React.FC<ButtonProps> = ({
   );
 };
 
-// 카드 간편 결제 컴포넌트
-const CardPaymentUI: React.FC = () => {
+const CardSimplePayment: React.FC = () => {
   const [isCardPaymentEnabled, setIsCardPaymentEnabled] = useState(false);
 
   const handleToggle = () => {
@@ -44,7 +41,6 @@ const CardPaymentUI: React.FC = () => {
 
   return (
     <div className="white-box">
-
       {/* 카드 간편 결제 토글 */}
       <div className="toggle-section">
         <div className="toggle-row" onClick={handleToggle}>
@@ -61,13 +57,10 @@ const CardPaymentUI: React.FC = () => {
         </div>
       </div>
 
-      {/* 결제 방법 박스 - 토글이 켜져있을 때만 표시 */}
-      {isCardPaymentEnabled && (
+      {/* 슬라이드 애니메이션이 적용된 영역 */}
+      <div className={`slide-toggle ${isCardPaymentEnabled ? 'open' : ''}`}>
         <div className="payment-box">
-
-          {/* 결제 버튼들 */}
           <div className="payment-buttons-row">
-            {/* 네이버페이 버튼 */}
             <Button
               className="payment-btn naver-btn"
               onClick={() => handlePayment('네이버페이')}
@@ -78,7 +71,6 @@ const CardPaymentUI: React.FC = () => {
               <span className="btn-text">네이버페이</span>
             </Button>
 
-            {/* 카카오페이 버튼 */}
             <Button
               className="payment-btn kakao-btn"
               onClick={() => handlePayment('카카오페이')}
@@ -90,9 +82,9 @@ const CardPaymentUI: React.FC = () => {
             </Button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
-export default CardPaymentUI;
+export default CardSimplePayment;

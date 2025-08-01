@@ -156,5 +156,17 @@
   padding: 20px;
   margin: 0 16px 16px 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  width: 200%;
+  width: 50%;
 }
+
+/* 슬라이드 토글 */
+.slide-toggle {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.slide-toggle.open {
+  max-height: 300px; /* 충분히 큰 값으로 설정 */
+}
+

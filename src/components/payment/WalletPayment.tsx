@@ -26,23 +26,27 @@ const WalletPayment: React.FC = () => {
                         <label htmlFor="simple-payment" className="radio-label">킷페이</label>
                     </div>
 
-                    <div className="charge-section">
-                        <div className="charge-input-group">
-                            <label className="charge-label">충전</label>
+                    {/* 슬라이드 영역 */}
+                    <div className={`slide-toggle ${paymentMethod === 'account' ? 'open' : ''}`}>
+                        <div className="charge-section">
+                            <div className="charge-input-group">
+                                <label className="charge-label">충전</label>
 
-                            <div className="charge-options">
-                                <div className="amount-selector">
-                                    <span className="amount">{amount}원</span>
-                                    <button className="dropdown-btn">▼</button>
-                                </div>
+                                <div className="charge-options">
+                                    <div className="amount-selector">
+                                        <span className="amount">{amount}원</span>
+                                        <button className="dropdown-btn">▼</button>
+                                    </div>
 
-                                <div className="account-selector">
-                                    <span className="selected-account">{selectedAccount}</span>
-                                    <button className="dropdown-btn">▼</button>
+                                    <div className="account-selector">
+                                        <span className="selected-account">{selectedAccount}</span>
+                                        <button className="dropdown-btn">▼</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
