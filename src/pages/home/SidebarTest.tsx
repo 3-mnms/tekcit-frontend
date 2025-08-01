@@ -4,17 +4,19 @@ import Sidebar from "@components/common/Sidebar";
 
 const SidebarTest: React.FC = () => {
   const menuItems = [
-    { path: "/productRegist", name: "상품 등록", icon: <i className="fa-solid fa-productRegist" /> },
-    { path: "/productManage", name: "상품 관리", icon: <i className="fa-solid fa-productManage" /> },
-    { path: "/announcement", name: "공지사항", icon: <i className="fa-solid fa-announcement" /> },
-    { path: "/operatManage", name: "운영 관리", icon: <i className="fa-solid fa-operatManage" /> },
+    { path: "/productRegist", name: "상품 등록" },
+    { path: "/productManage", name: "상품 관리" },
+    { path: "/announcement", name: "공지사항" },
+    { name: "운영 관리", subMenu: [
+      {path: "/operatManage/host", name: "주최자"},
+      {path: "/operatManage/user", name: "사용자"},
+    ]}
   ];
 
   return (
     <div style={{ display: "flex" }}>
       <Sidebar
         menuItems={menuItems}
-        userType="주최자"
         userName="정혜영"
         userEmail="abc1234@test.com"
       />
