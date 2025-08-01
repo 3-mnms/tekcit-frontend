@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import './WalletPayment.css';
+import { useState } from 'react';
+import '@components/payment/WalletPayment.css';
 
 const WalletPayment: React.FC = () => {
     const [selectedAccount] = useState<string>('NH농협 302******9411');
@@ -35,32 +35,20 @@ const WalletPayment: React.FC = () => {
                     <div className="charge-section">
                         <div className="charge-input-group">
                             <label className="charge-label">충전</label>
-                            <div className="amount-selector">
-                                <span className="amount">{amount}원</span>
-                                <button
-                                    className="dropdown-btn"
-                                    onClick={() => {
-                                        console.log('금액 선택 드롭다운 클릭');
-                                    }}
-                                >▼</button>
+
+                            <div className="charge-options">
+                                <div className="amount-selector">
+                                    <span className="amount">{amount}원</span>
+                                    <button className="dropdown-btn">▼</button>
+                                </div>
+
+                                <div className="account-selector">
+                                    <span className="selected-account">{selectedAccount}</span>
+                                    <button className="dropdown-btn">▼</button>
+                                </div>
                             </div>
                         </div>
-
-                        <div className="account-selector">
-                            <span className="selected-account">{selectedAccount}</span>
-                            <button className="dropdown-btn">▼</button>
-                        </div>
                     </div>
-
-                    {/* 추후 활성화 예정
-          <button 
-            className="payment-submit-btn"
-            onClick={handlePaymentSubmit}
-            disabled={isLoading}
-          >
-            {isLoading ? '처리중...' : '결제하기'}
-          </button>
-          */}
                 </div>
             </div>
         </div>

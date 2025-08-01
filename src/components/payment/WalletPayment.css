@@ -36,12 +36,6 @@
   margin-bottom: 20px;
 }
 
-.payment-logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .money-text {
   font-size: 16px;
   color: #333;
@@ -74,7 +68,7 @@
   flex-direction: row; /* 가로 정렬 */
   justify-content: space-between; /* 요소 간 공간 확보 */
   align-items: center; /* 세로 정렬 정렬 */
-  border: 2px solid #03c75a;
+  border: 2px solid #4D9AFD;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
@@ -83,22 +77,31 @@
 }
 
 .charge-input-group {
-  flex: 1;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1; /* 💡 오른쪽 영역 꽉 채우기 위해 추가 */
 }
 
 .charge-label {
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
+  min-width: 40px;
+  font-weight: bold;
+  padding-top: 6px;
+}
+
+.charge-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+  width: 100%; /* 💡 오른쪽 끝까지 가게 만듦 */
 }
 
 .amount-selector {
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-content: flex-end;
 }
 
 .amount {
@@ -117,10 +120,10 @@
 }
 
 .account-selector {
-  flex: 1;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: flex-end; /* 오른쪽 정렬로 통일 */
+  gap: 8px; /* 계좌 텍스트와 버튼 사이 여백 */
 }
 
 .selected-account {
