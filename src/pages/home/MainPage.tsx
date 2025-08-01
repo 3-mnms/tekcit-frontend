@@ -4,7 +4,7 @@ import Hot from '@components/festival/HotSection';
 import Category from '@components/festival/CategorySection';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
-const Test: React.FC = () => {
+const MainPage: React.FC = () => {
     
   return (
     <div>
@@ -15,4 +15,4 @@ const Test: React.FC = () => {
   );
 };
 
-export default Test;
+export default MainPage;

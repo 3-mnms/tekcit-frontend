@@ -1,4 +1,5 @@
 .section {
+  width: 100vw;
   background-color: hsl(184, 36%, 42%); /* 이미지처럼 진한 와인색 느낌 */
   color: white;
   padding: 1rem 1.5rem;
@@ -12,12 +13,13 @@
 
 .cardList {
   display: flex;
-  gap: 1rem;
+  justify-content: center;
+  gap: 5rem;
 }
 
 .card {
-  width: 100px;
-  height: 140px;
+  width: 180px;
+  height: 230px;
   background-color: #e5e7eb; /* tailwind gray-200 */
   border-radius: 0.5rem;
 }
