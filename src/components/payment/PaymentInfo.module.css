@@ -1,0 +1,46 @@
+/* PaymentInfo.module.css */
+.container {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 20%;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.header {
+  display: flex;
+  height: 120px;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.posterPlaceholder {
+  width: 50%;
+  height: 100%;
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.infoTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.infoTable td {
+  padding: 6px 0;
+}
+
+.total {
+  font-weight: bold;
+  color: #e74c3c;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
