@@ -1,17 +1,5 @@
-.wallet-payment-container{
-  width: 50%;
-}
-
-.header {
-  padding: 20px;
-  background-color: white;
-}
-
-.title {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0;
-  color: #333;
+.wallet-payment-container {
+  width: 100%;
 }
 
 /* 결제 섹션 */
@@ -23,30 +11,16 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.payment-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.money-text {
-  font-size: 16px;
-  color: #333;
-  font-weight: 600;
-}
-
 .simple-payment-option {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 16px;
-  padding: 12px 12px;
-  min-height: 24px; /* 라디오 버튼 공간 확보 */
+  padding: 12px;
+  cursor: pointer;
 }
 
 .radio-input {
-  appearance: auto;
-  -webkit-appearance: radio;
   width: 16px;
   height: 16px;
   margin-left: 4px;
@@ -54,6 +28,7 @@
   position: relative;
   top: 1px; /* 살짝 내림 */
   z-index: 1; /* 혹시라도 label에 덮이지 않도록 */
+  display: none;
 }
 
 .radio-label {
@@ -63,13 +38,40 @@
   font-weight: 500;
 }
 
+.radio-custom {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.radio-input:checked + .radio-custom {
+  background-color: #4d9afd;
+  border-color: #4d9afd;
+}
+
+.radio-input:checked + .radio-custom::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background-color: white;
+  border-radius: 50%;
+}
+
 /* 충전 섹션 */
 .charge-section {
-  display: flex; 
+  display: flex;
   flex-direction: row; /* 가로 정렬 */
   justify-content: space-between; /* 요소 간 공간 확보 */
   align-items: center; /* 세로 정렬 정렬 */
-  border: 2px solid #4D9AFD;
+  border: 2px solid #4d9afd;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
@@ -78,7 +80,7 @@
 
 .charge-input-group {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   flex: 1; /* 💡 오른쪽 영역 꽉 채우기 위해 추가 */
 }
@@ -86,7 +88,6 @@
 .charge-label {
   min-width: 40px;
   font-weight: bold;
-  padding-top: 6px;
 }
 
 .charge-options {
@@ -141,4 +142,3 @@
 .slide-toggle.open {
   max-height: 300px; /* 충분히 큰 값 */
 }
-

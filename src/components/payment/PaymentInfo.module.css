@@ -1,46 +1,70 @@
-/* PaymentInfo.module.css */
 .container {
+  flex: 1;
   background: #f8f9fa;
   border-radius: 12px;
   padding: 20px;
-  max-width: 20%;
-  font-family: 'Noto Sans KR', sans-serif;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.contentWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .header {
   display: flex;
-  height: 120px;
   gap: 12px;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  height: 200px;
+  flex: 0 0 auto;
 }
 
+/* 포스터 영역 */
 .posterPlaceholder {
-  width: 50%;
+  width: 30%;
   height: 100%;
   background-color: #ccc;
   border-radius: 4px;
+  object-fit: cover;
 }
 
 .title {
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: bold;
   color: #333;
+}
+
+.tableWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .infoTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 1.5rem; /* 글씨 키움 (≈18px) */
+  line-height: 1.8; /* 줄 간격 넓힘 */
+  table-layout: fixed;
 }
 
 .infoTable td {
-  padding: 6px 0;
+  padding: 12px 0; /* 위아래 여백 늘림 */
+  color: #333;
+  font-weight: 500;
 }
 
-.total {
+.total td {
+  font-size: 1.5rem;
   font-weight: bold;
   color: #e74c3c;
   border-top: 1px solid #ccc;
-  padding-top: 10px;
+  padding-top: 16px;
 }

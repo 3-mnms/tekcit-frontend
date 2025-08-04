@@ -1,60 +1,97 @@
 /* 결제 섹션 */
 .payment-section {
-    background-color: white;
-    margin: 8px 0;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    width: 50%;
+  background-color: white;
+  margin: 8px 0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 /* 일반 결제 radio 버튼 */
 .simple-payment-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-    padding: 12px;
-    min-height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  min-height: 24px;
 }
 
 /* 일반 결제 실제 영역 */
 .general-payment-section {
-    border: 2px solid #4D9AFD;
-    border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  border: 2px solid #4d9afd;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 /* 슬라이딩 컨테이너 */
 .general-payment-slide {
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.4s ease;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s ease;
 }
 
 /* 열릴 때 max-height 넉넉히 줘야 내부 콘텐츠가 보임 (조절 가능) */
 .general-payment-slide.open {
-    max-height: 1000px;
+  max-height: 1000px;
 }
 
 .user-type-options {
-    display: flex;
-    gap: 16px;
-    font-size: 14px;
-    color: #333;
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: #333;
 }
 
 .user-type-options input[type='radio'] {
-    margin-right: 4px;
+  margin-right: 4px;
 }
 
 .dropdown-select {
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.radio-input {
+  display: none;
+}
+
+.radio-custom {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.radio-input:checked + .radio-custom {
+  background-color: #4d9afd;
+  border-color: #4d9afd;
+}
+
+.radio-input:checked + .radio-custom::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.radio-label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
 }

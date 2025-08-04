@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import '@components/payment/CardSimplePayment.css';
+import { useState } from 'react'
+import '@components/payment/CardSimplePayment.css'
 
 interface ButtonProps {
-  children: React.ReactNode;
-  onClick?: () => void;
-  type?: 'button' | 'submit' | 'reset';
-  className?: string;
-  disabled?: boolean;
+  children: React.ReactNode
+  onClick?: () => void
+  type?: 'button' | 'submit' | 'reset'
+  className?: string
+  disabled?: boolean
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -25,19 +25,19 @@ const Button: React.FC<ButtonProps> = ({
     >
       {children}
     </button>
-  );
-};
+  )
+}
 
 const CardSimplePayment: React.FC = () => {
-  const [isCardPaymentEnabled, setIsCardPaymentEnabled] = useState(false);
+  const [isCardPaymentEnabled, setIsCardPaymentEnabled] = useState(false)
 
   const handleToggle = () => {
-    setIsCardPaymentEnabled(!isCardPaymentEnabled);
-  };
+    setIsCardPaymentEnabled(!isCardPaymentEnabled)
+  }
 
   const handlePayment = (method: string) => {
-    alert(`${method}로 결제를 진행합니다.`);
-  };
+    alert(`${method}로 결제를 진행합니다.`)
+  }
 
   return (
     <div className="white-box">
@@ -61,20 +61,14 @@ const CardSimplePayment: React.FC = () => {
       <div className={`slide-toggle ${isCardPaymentEnabled ? 'open' : ''}`}>
         <div className="payment-box">
           <div className="payment-buttons-row">
-            <Button
-              className="payment-btn naver-btn"
-              onClick={() => handlePayment('네이버페이')}
-            >
+            <Button className="payment-btn naver-btn" onClick={() => handlePayment('네이버페이')}>
               <div className="btn-icon naver-icon">
                 <span className="icon-text">N</span>
               </div>
               <span className="btn-text">네이버페이</span>
             </Button>
 
-            <Button
-              className="payment-btn kakao-btn"
-              onClick={() => handlePayment('카카오페이')}
-            >
+            <Button className="payment-btn kakao-btn" onClick={() => handlePayment('카카오페이')}>
               <div className="btn-icon kakao-icon">
                 <span className="icon-text">K</span>
               </div>
@@ -84,7 +78,7 @@ const CardSimplePayment: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CardSimplePayment;
+export default CardSimplePayment

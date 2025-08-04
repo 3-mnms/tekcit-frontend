@@ -10,15 +10,6 @@
   cursor: pointer;
 }
 
-.custom-button:hover {
-  background-color: #3585ea;
-}
-
-.custom-button.disabled {
-  background-color: #a1cfff;
-  cursor: not-allowed;
-}
-
 /* 토글 섹션 */
 .toggle-section {
   border-radius: 0.5rem;
@@ -55,11 +46,13 @@
   transition: all 0.2s ease;
 }
 
+/* 라디오 버튼 클릭시 원 채우기 */
 .radio-input:checked + .radio-custom {
   border-color: #007bff;
   background-color: #007bff;
 }
 
+/* 라디오 버튼 클릭시 원 안에 빈 원 생기기 */
 .radio-input:checked + .radio-custom::after {
   content: '';
   position: absolute;
@@ -97,12 +90,16 @@
 }
 
 .payment-box {
-  border: 2px solid #007bff; /* 파란색 테두리 */
-  border-radius: 8px;
-  padding: 16px;
+  width: 100%;
+  min-height: 120px;
+  padding: 24px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .naver-btn {
@@ -169,4 +166,3 @@
 .slide-toggle.open {
   max-height: 300px; /* 충분히 큰 값으로 설정 */
 }
-
