@@ -1,29 +1,11 @@
-import { createBrowserRouter } from "react-router-dom";
-
-// import TestPage from "@pages/home/test2";
-// import TestPage from "@/pages/home/CategoryPage";
-import TestComponent from "@components/my/sidebar/Sidebar"
-import MyPage from '@/pages/my/MyPage';
-import MyInfo from '@/pages/my/Info';
+import { createBrowserRouter } from 'react-router-dom'
+// import CardSimplePayment from '@components/payment/CardSimplePayment'
+// import WalletPayment from '@components/payment/WalletPayment'
+// import GeneralCardPayment from '@components/payment/GeneralCardPayment'
+// import HomePage from '@components/payment/PaymentInfo'
+import HomePage from '@pages/payment/BookingPaymentPage'
+// import AddressForm from '@components/payment/AddressForm'
 
 export const router = createBrowserRouter([
-  // { path: "/", element: <TestPage /> },
-  { path: "/", element: <TestComponent /> },
-
-  {
-  path: '/mypage',
-  element: <MyPage />,
-  children: [
-    { path: 'info', element: <MyInfo /> },
-    // { path: 'password', element: <ChangePassword /> },
-    // { path: 'linked', element: <LinkedAccounts /> },
-    // { path: 'address', element: <AddressList /> },
-    // { path: 'withdraw', element: <Withdraw /> },
-    // { path: 'verification', element: <Verification /> },
-    // { path: 'tickets', element: <TicketHistory /> },
-    // { path: 'transfer', element: <Transfer /> },
-    // { path: 'entry', element: <EntryView /> },
-    // { path: 'bookmarks', element: <Bookmarks /> },
-  ],
-}
-]);
+  { path: '/', element: <HomePage /> },
+])
