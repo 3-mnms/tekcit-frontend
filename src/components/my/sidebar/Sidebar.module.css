@@ -1,35 +1,25 @@
 .sidebar {
+  padding: 1rem;
   width: 200px;
   background-color: #f9f9f9;
-  padding: 1rem;
-  border-radius: 1rem;
+  flex-shrink: 0;
 }
 
-.section {
+.parent {
   font-weight: bold;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
+  margin-top: 1rem;
+  cursor: pointer;
 }
 
-.menu {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-}
-
-.menuItem {
-  display: block;
-  padding: 0.25rem 0.5rem;
-  color: #333;
-  text-decoration: none;
-}
-
-.menuItem:hover {
-  color: #4D9AFD;
+.child {
+  margin-left: 1rem;
+  margin-top: 0.5rem;
+  cursor: pointer;
+  font-size: 0.95rem;
 }
 
 .active {
-  font-weight: bold;
-  color: #4D9AFD;
+  background-color: #f0f0f0;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.5rem;
 }

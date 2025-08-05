@@ -1,0 +1,15 @@
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  background-color: white;
+}
+
+.name {
+  font-size: 1rem;
+  font-weight: 500;
+}

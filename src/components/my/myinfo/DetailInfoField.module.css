@@ -1,0 +1,15 @@
+.field {
+  margin-bottom: 1rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-bottom: 0.25rem;
+}
+
+.value {
+  font-size: 1rem;
+  font-weight: 500;
+}
