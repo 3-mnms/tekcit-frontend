@@ -1,5 +1,4 @@
 import { createBrowserRouter } from 'react-router-dom'
-import '../../pages/payment/BookingPaymentPage.css';
 
 // mainpage
 import HomePage from '@pages/home/MainPage'
@@ -18,7 +17,7 @@ import WithdrawPage from '@/pages/my/myInfo/withdraw/WithdrawPage'
 
 // payment
 import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
-import DeliveryHeader from '@/components/payment/DeliveryHeader';
+import DeliveryManagePage from '@pages/payment/DeliveryManagePage';
 
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -52,10 +51,10 @@ export const router = createBrowserRouter([
   // payment
   {
     path: '/payment',
-    element: <BookingPaymentPage />, 
+    element: <BookingPaymentPage />,
   },
   {
-    path: '/delivery',
-    element: <DeliveryHeader />,
-  }
+    path: '/DeliveryManagePage',
+    element: <DeliveryManagePage />,
+  },
 ])

@@ -1,0 +1,66 @@
+.container {
+  padding: 24px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.address-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.address-item {
+  padding: 16px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.address-info {
+  flex: 1;
+}
+
+.name {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.default-label {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  background-color: #4d9afd;
+  color: white;
+  font-size: 0.75rem;
+  border-radius: 4px;
+}
+
+.buttons button {
+  margin-left: 8px;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.footer {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.add-button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  border-radius: 8px;
+}
