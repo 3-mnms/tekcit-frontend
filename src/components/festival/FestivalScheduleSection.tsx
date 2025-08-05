@@ -37,6 +37,7 @@ const FestivalScheduleSection: React.FC = () => {
     <div className={styles.container}>
       {/* 관람일 */}
       <p className={styles.title}>관람일</p>
+      <div className={styles.datepickerWrapper}>
       <DatePicker
         inline
         locale={ko}
@@ -63,6 +64,7 @@ const FestivalScheduleSection: React.FC = () => {
           );
         }}
       />
+      </div>
 
       {/* 시간 */}
       <div className={styles.section}>
@@ -91,7 +93,7 @@ const FestivalScheduleSection: React.FC = () => {
               alert(`${formatDateKey(selectedDate)} ${selectedTime} 예매 시작!`)
             }
           >
-            확인
+            예매하기
           </button>
         </div>
       </div>

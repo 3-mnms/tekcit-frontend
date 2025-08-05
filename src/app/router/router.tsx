@@ -5,7 +5,7 @@ import { createBrowserRouter } from "react-router-dom";
 // import TestComponent from "@components/my/sidebar/Sidebar"
 // import MyPage from '@/pages/my/MyPage';
 // import MyInfo from '@/pages/my/Info';
-import FesInfo from '@pages/festival-detail/test';
+import FesInfo from '@/pages/festival-detail/FestivalDetailPage';
 
 export const router = createBrowserRouter([
   // { path: "/", element: <TestPage /> },

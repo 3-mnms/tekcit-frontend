@@ -23,7 +23,7 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  border-radius: 50%;
+  border-radius: 60%;
   transition: 0.2s;
 }
 .active {
@@ -92,4 +92,10 @@
 .confirmBtn:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+.datepickerWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
