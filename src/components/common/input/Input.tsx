@@ -1,17 +1,17 @@
-import React from 'react';
-import styles from './Input.module.css';
+import React from 'react'
+import styles from './Input.module.css'
 
 interface FormInputProps {
-  type?: string;
-  placeholder?: string;
-  value?: string;
-  defaultValue?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  label?: string;
-  options?: string[]; // select용
-  disabled?: boolean;
-  className?: string;
-  rightElement?: React.ReactNode; 
+  type?: string
+  placeholder?: string
+  value?: string
+  defaultValue?: string
+  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
+  label?: string
+  options?: string[] // select용
+  disabled?: boolean
+  className?: string
+  rightElement?: React.ReactNode
 }
 
 const Input: React.FC<FormInputProps> = ({
@@ -47,8 +47,11 @@ const Input: React.FC<FormInputProps> = ({
           <input
             type={type}
             value={value}
+            defaultValue={defaultValue}
+            onChange={onChange}
             disabled={disabled}
-            className={`${styles.input}`}
+            className={`${styles.input} ${className}`}
+            placeholder={placeholder}
           />
           {rightElement}
         </div>
@@ -64,7 +67,7 @@ const Input: React.FC<FormInputProps> = ({
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Input;
+export default Input
