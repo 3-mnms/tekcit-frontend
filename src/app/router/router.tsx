@@ -18,7 +18,6 @@ import WithdrawPage from '@/pages/my/myInfo/withdraw/WithdrawPage'
 // payment
 import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
 import DeliveryManagePage from '@pages/payment/DeliveryManagePage'
-import AddressItem from '@components/payment/AddressItem'
 
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -57,9 +56,5 @@ export const router = createBrowserRouter([
   {
     path: '/DeliveryManagePage',
     element: <DeliveryManagePage />,
-  },
-  {
-    path: '/AddressItem',
-    element: <AddressItem />,
   },
 ])

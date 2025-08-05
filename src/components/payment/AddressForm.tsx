@@ -55,12 +55,6 @@ const AddressForm = () => {
         >
           기본
         </Button>
-        <Button
-          className={`${styles['tab-button']} ${selectedTab === 'recent' ? styles['active'] : ''}`}
-          onClick={() => setSelectedTab('recent')}
-        >
-          최근
-        </Button>
         <button
           type="button"
           className={`plain-button ${styles['tab-manage-btn']}`}
@@ -93,19 +87,25 @@ const AddressForm = () => {
                 <option value="011">02</option>
               </select>
               <div className={styles['error-space']}>
-                {errors.phonePrefix && <p className={styles['error']}>{errors.phonePrefix.message}</p>}
+                {errors.phonePrefix && (
+                  <p className={styles['error']}>{errors.phonePrefix.message}</p>
+                )}
               </div>
             </div>
             <div className={`${styles['phone-box']} ${styles['phone-part1']}`}>
               <input type="text" maxLength={4} {...register('phonePart1' as const)} />
               <div className={styles['error-space']}>
-                {errors.phonePart1 && <p className={styles['error']}>{errors.phonePart1.message}</p>}
+                {errors.phonePart1 && (
+                  <p className={styles['error']}>{errors.phonePart1.message}</p>
+                )}
               </div>
             </div>
             <div className={`${styles['phone-box']} ${styles['phone-part2']}`}>
               <input type="text" maxLength={4} {...register('phonePart2' as const)} />
               <div className={styles['error-space']}>
-                {errors.phonePart2 && <p className={styles['error']}>{errors.phonePart2.message}</p>}
+                {errors.phonePart2 && (
+                  <p className={styles['error']}>{errors.phonePart2.message}</p>
+                )}
               </div>
             </div>
           </div>
