@@ -1,16 +1,11 @@
 import { createBrowserRouter } from 'react-router-dom'
+import '../../pages/payment/BookingPaymentPage.css';
 
-// payment
-// import CardSimplePayment from '@components/payment/CardSimplePayment'
-// import WalletPayment from '@components/payment/WalletPayment'
-// import GeneralCardPayment from '@components/payment/GeneralCardPayment'
-// import HomePage from '@components/payment/PaymentInfo'
-import HomePage from '@pages/payment/BookingPaymentPage'
-// import AddressForm from '@components/payment/AddressForm'
+// mainpage
+import HomePage from '@pages/home/MainPage'
 
 // mypage
 import MyPage from '@/pages/my/MyPage'
-import Sidebar from '@components/my/sidebar/Sidebar'
 import MyInfoPage from '@/pages/my/myInfo/MyInfoPage'
 import DetailPage from '@/pages/my/myInfo/basicinfo/DetailPage'
 import VerifyPasswordPage from '@/pages/my/myInfo/basicinfo/VerifyPasswordPage'
@@ -20,6 +15,10 @@ import LinkedAccounts from '@/pages/my/myInfo/linkedaccount/LinkedAccountsPage'
 import AddressListPage from '@/pages/my/myInfo/adress/AddressListPage'
 import AddressFormPage from '@/pages/my/myInfo/adress/AddressFormPage'
 import WithdrawPage from '@/pages/my/myInfo/withdraw/WithdrawPage'
+
+// payment
+import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
+import DeliveryHeader from '@/components/payment/DeliveryHeader';
 
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -49,4 +48,14 @@ export const router = createBrowserRouter([
       { path: 'verifypassword', element: <VerifyPasswordPage /> },
     ],
   },
+
+  // payment
+  {
+    path: '/payment',
+    element: <BookingPaymentPage />, 
+  },
+  {
+    path: '/delivery',
+    element: <DeliveryHeader />,
+  }
 ])
