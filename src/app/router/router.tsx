@@ -11,6 +11,7 @@ import HomePage from '@pages/payment/BookingPaymentPage'
 // mypage
 import MyPage from '@/pages/my/MyPage'
 // import Sidebar from '@components/my/sidebar/Sidebar'
+import SignupPage from '@/pages/auth/LoginPage'
 import MyInfoPage from '@/pages/my/myInfo/MyInfoPage'
 import DetailPage from '@/pages/my/myInfo/basicinfo/DetailPage'
 import VerifyPasswordPage from '@/pages/my/myInfo/basicinfo/VerifyPasswordPage'
@@ -22,7 +23,7 @@ import AddressFormPage from '@/pages/my/myInfo/adress/AddressFormPage'
 import WithdrawPage from '@/pages/my/myInfo/withdraw/WithdrawPage'
 
 export const router = createBrowserRouter([
-  { path: '/', element: <HomePage /> },
+  { path: '/', element: <SignupPage /> },
 
   {
     path: '/mypage',

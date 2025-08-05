@@ -1,4 +1,3 @@
-// components/auth/login/LoginInput.tsx
 import React from "react";
 import styles from "./LoginInput.module.css";
 
