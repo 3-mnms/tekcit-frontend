@@ -1,0 +1,9 @@
+.card-select-dropdown {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: white;
+  width: 100%;
+  cursor: pointer;
+}
