@@ -25,7 +25,7 @@ const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => { // subTitle 
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
-    alert('로그아웃 되었습니다, 삐약!');
+    alert('로그아웃 되었습니다');
     navigate('/login');
   };
 
@@ -52,6 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => { // subTitle 
   }, []);
 
   const headerHeight = '10vh';
+  const subHeaderHeight = '5vh';
 
  return (
     <div className="flex min-h-screen bg-gray-100">
@@ -73,15 +74,22 @@ const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => { // subTitle 
           marginTop: headerHeight,
           width: `calc(100% - ${sidebarWidth})`,
           height: `calc(100vh - ${headerHeight})`,
-          overflowY: 'auto',
         }}
         className="flex flex-col"
       >
-        <SubHeader title={subTitle} />
-        
-        <main className="flex-1" style={{ padding: '24px' }}>
-          {children}
-        </main>
+      <div>
+      <SubHeader title={subTitle} />
+      </div>
+      <main 
+        className="flex-1" 
+        style={{ 
+            padding: '24px', 
+            overflowY: 'auto',
+            height: `calc(100vh - ${headerHeight} - ${subHeaderHeight})`
+        }}
+      >
+        {children}
+      </main>
       </div>
     </div>
   );

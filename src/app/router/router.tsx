@@ -3,10 +3,13 @@ import HomePage from "@/pages/home/HomePage";
 import Header from "@/pages/home/HeaderTestPage";
 import Sidebar from "@/pages/home/SidebarTest";
 import Layout from "@/pages/home/LayoutTestPage";
+import OperatManage from "@/pages/admin/OperatManageUser";
 
 export const router = createBrowserRouter([
   { path: "/", element: <HomePage /> }, 
   { path: "/header", element: <Header /> }, 
   { path: "/sidebar", element: <Sidebar /> }, 
   { path: "/layout", element: <Layout/>},
+  { path: "/operatManage/user", element: < OperatManage/>},
+
 ]);

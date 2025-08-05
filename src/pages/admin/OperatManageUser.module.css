@@ -1,0 +1,29 @@
+/* src/pages/OperatManageUserPage.module.css */
+.container {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.totalUsersText {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+}
+
+.tableSection {
+    /* 테이블 섹션에 필요한 스타일 추가 */
+}
