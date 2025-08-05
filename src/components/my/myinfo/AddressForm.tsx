@@ -29,15 +29,11 @@ const AddressForm: React.FC = () => {
 
   return (
     <div className={styles.form}>
-      {/* 이름 */}
       <FormInput label="이름" value={name} onChange={(e) => setName(e.target.value)} />
 
-      {/* 주소 */}
       <div className={styles.addressGroup}>
-        {/* 배송지 라벨 */}
         <label className={styles.label}>배송지</label>
 
-        {/* 우편번호 + 주소 검색 */}
         <div className={styles.addressRow}>
           <FormInput
             placeholder="우편번호"
@@ -50,10 +46,8 @@ const AddressForm: React.FC = () => {
           </div>
         </div>
 
-        {/* 주소 */}
         <FormInput placeholder="주소" value={address} disabled className={styles.addressInput} />
 
-        {/* 상세주소 */}
         <FormInput
           placeholder="상세주소"
           value={addressDetail}
@@ -62,7 +56,6 @@ const AddressForm: React.FC = () => {
         />
       </div>
 
-      {/* 전화번호 */}
       <FormInput
         label="전화번호"
         type="tel"
@@ -70,13 +63,11 @@ const AddressForm: React.FC = () => {
         onChange={(e) => setPhone(e.target.value)}
       />
 
-      {/* 기본 배송지 체크박스 */}
       <label className={styles.checkboxLabel}>
         <input type="checkbox" checked={isDefault} onChange={() => setIsDefault(!isDefault)} />
         기본 배송지로 설정
       </label>
 
-      {/* 저장 버튼 */}
       <Button className={styles.submitButton}>저장</Button>
     </div>
   )

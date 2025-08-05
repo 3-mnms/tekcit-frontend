@@ -1,0 +1,36 @@
+.container {
+  padding: 1.5rem;
+  background-color: white;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.noticeBox {
+  border: 1px solid #ccc;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  margin-bottom: 1rem;
+}
+
+.notice {
+  font-size: 0.95rem;
+  color: #444;
+  line-height: 1.6;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.withdrawButton {
+  width: 100%;
+}
