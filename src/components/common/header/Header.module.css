@@ -31,6 +31,7 @@
   gap: 8px;
 }
 
+
 .searchWrapper {
     display: flex;
     align-items: center;
@@ -38,7 +39,7 @@
     border-radius: 6px;
     padding: 6px 10px;
     background-color: white;
-    gap: 10px;
+    gap: 150px;
 }
 
 .searchInput {
