@@ -14,6 +14,7 @@ const BookingPaymentPage: React.FC = () => {
 
   return (
     <div className="booking-container">
+      
       {/* 왼쪽: 배송지 + 결제 수단 */}
       <div className="left-panel">
         <section className="section">
