@@ -1,0 +1,22 @@
+.container {
+  padding: 1.5rem;
+  width: 100%;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1.25rem;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background-color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+.addButton {
+  width: 100%;
+}
