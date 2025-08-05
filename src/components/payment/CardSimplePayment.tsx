@@ -1,5 +1,9 @@
-import { useState } from 'react'
-import '@components/payment/CardSimplePayment.css'
+import styles from '@components/payment/CardSimplePayment.module.css'
+
+interface CardSimplePaymentProps {
+  isOpen: boolean
+  onToggle: () => void
+}
 
 interface ButtonProps {
   children: React.ReactNode
@@ -18,7 +22,7 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   return (
     <button
-      className={`custom-button ${className} ${disabled ? 'disabled' : ''}`}
+      className={`${styles['custom-button']} ${className} ${disabled ? styles.disabled : ''}`}
       type={type}
       onClick={onClick}
       disabled={disabled}
@@ -28,51 +32,51 @@ const Button: React.FC<ButtonProps> = ({
   )
 }
 
-const CardSimplePayment: React.FC = () => {
-  const [isCardPaymentEnabled, setIsCardPaymentEnabled] = useState(false)
-
-  const handleToggle = () => {
-    setIsCardPaymentEnabled(!isCardPaymentEnabled)
-  }
-
+const CardSimplePayment: React.FC<CardSimplePaymentProps> = ({ isOpen, onToggle }) => {
   const handlePayment = (method: string) => {
     alert(`${method}로 결제를 진행합니다.`)
   }
 
   return (
-    <div className="white-box">
+    <div className={styles['payment-section']}>
       {/* 카드 간편 결제 토글 */}
-      <div className="toggle-section">
-        <div className="toggle-row" onClick={handleToggle}>
-          <div className="toggle-radio">
+      <div className={styles['toggle-section']}>
+        <div className={styles['toggle-row']} onClick={onToggle}>
+          <div className={styles['toggle-radio']}>
             <input
               type="radio"
-              checked={isCardPaymentEnabled}
-              onChange={handleToggle}
-              className="radio-input"
+              checked={isOpen}
+              onChange={onToggle}
+              className={styles['radio-input']}
             />
-            <span className="radio-custom"></span>
+            <span className={styles['radio-custom']}></span>
           </div>
-          <span className="toggle-label">카드 간편 결제</span>
+          <span className={styles['toggle-label']}>카드 간편 결제</span>
         </div>
       </div>
 
-      {/* 슬라이드 애니메이션이 적용된 영역 */}
-      <div className={`slide-toggle ${isCardPaymentEnabled ? 'open' : ''}`}>
-        <div className="payment-box">
-          <div className="payment-buttons-row">
-            <Button className="payment-btn naver-btn" onClick={() => handlePayment('네이버페이')}>
-              <div className="btn-icon naver-icon">
+      {/* 슬라이드 영역 */}
+      <div className={`${styles['slide-toggle']} ${isOpen ? styles.open : ''}`}>
+        <div className={styles['payment-box']}>
+          <div className={styles['payment-buttons-row']}>
+            <Button
+              className={`${styles['payment-btn']} ${styles['naver-btn']}`}
+              onClick={() => handlePayment('네이버페이')}
+            >
+              <div className={`${styles['btn-icon']} ${styles['naver-icon']}`}>
                 <span className="icon-text">N</span>
               </div>
-              <span className="btn-text">네이버페이</span>
+              <span className={styles['btn-text']}>네이버페이</span>
             </Button>
 
-            <Button className="payment-btn kakao-btn" onClick={() => handlePayment('카카오페이')}>
-              <div className="btn-icon kakao-icon">
+            <Button
+              className={`${styles['payment-btn']} ${styles['kakao-btn']}`}
+              onClick={() => handlePayment('카카오페이')}
+            >
+              <div className={`${styles['btn-icon']} ${styles['kakao-icon']}`}>
                 <span className="icon-text">K</span>
               </div>
-              <span className="btn-text">카카오페이</span>
+              <span className={styles['btn-text']}>카카오페이</span>
             </Button>
           </div>
         </div>

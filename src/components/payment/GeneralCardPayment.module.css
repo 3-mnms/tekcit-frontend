@@ -1,14 +1,15 @@
-/* 결제 섹션 */
-.payment-section {
-  background-color: white;
-  margin: 8px 0;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  width: 50%;
+.general-card-payment-container {
+  width: 100%;
 }
 
-/* 일반 결제 radio 버튼 */
+.payment-section {
+  width: 100%; /* ← 부모 너비 채우기 */
+  margin: 0;
+  padding: 24px;
+  border-radius: 12px;
+  box-sizing: border-box; /* ← 이거 안 하면 padding이 너비에서 빠짐 */
+}
+
 .simple-payment-option {
   display: flex;
   align-items: center;
@@ -18,7 +19,6 @@
   min-height: 24px;
 }
 
-/* 일반 결제 실제 영역 */
 .general-payment-section {
   border: 2px solid #4d9afd;
   border-radius: 8px;
@@ -28,14 +28,12 @@
   gap: 12px;
 }
 
-/* 슬라이딩 컨테이너 */
 .general-payment-slide {
   overflow: hidden;
   max-height: 0;
   transition: max-height 0.4s ease;
 }
 
-/* 열릴 때 max-height 넉넉히 줘야 내부 콘텐츠가 보임 (조절 가능) */
 .general-payment-slide.open {
   max-height: 1000px;
 }

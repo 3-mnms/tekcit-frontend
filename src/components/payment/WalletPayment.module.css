@@ -1,14 +1,18 @@
 .wallet-payment-container {
-  width: 70%;
+  width: 100%;
+}
+
+.main-content {
+  width: 100%;
 }
 
 /* 결제 섹션 */
 .payment-section {
-  background-color: white;
-  margin: 8px 16px;
+  width: 100%; /* ← 부모 너비 채우기 */
+  margin: 0;
+  padding: 24px;
   border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box; /* ← 이거 안 하면 padding이 너비에서 빠짐 */
 }
 
 /* 💡 킷페이 + 충전 버튼 수평 정렬 */
@@ -35,8 +39,8 @@
   margin-left: 4px;
   margin-right: 0;
   position: relative;
-  top: 1px; /* 살짝 내림 */
-  z-index: 1; /* 혹시라도 label에 덮이지 않도록 */
+  top: 1px;
+  z-index: 1;
   display: none;
 }
 
@@ -77,21 +81,21 @@
 /* 충전 섹션 */
 .charge-section {
   display: flex;
-  flex-direction: row; /* 가로 정렬 */
-  justify-content: space-between; /* 요소 간 공간 확보 */
-  align-items: center; /* 세로 정렬 정렬 */
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   border: 2px solid #4d9afd;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
-  gap: 12px; /* 요소 간 간격 */
+  gap: 12px;
 }
 
 .charge-input-group {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex: 1; /* 💡 오른쪽 영역 꽉 채우기 위해 추가 */
+  flex: 1;
 }
 
 .charge-label {
@@ -104,7 +108,7 @@
   flex-direction: column;
   gap: 8px;
   align-items: flex-end;
-  width: 100%; /* 💡 오른쪽 끝까지 가게 만듦 */
+  width: 100%;
 }
 
 .amount-selector {
@@ -132,8 +136,8 @@
 .account-selector {
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* 오른쪽 정렬로 통일 */
-  gap: 8px; /* 계좌 텍스트와 버튼 사이 여백 */
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .selected-account {
@@ -148,6 +152,6 @@
   transition: max-height 0.4s ease;
 }
 
-.slide-toggle.open {
-  max-height: 300px; /* 충분히 큰 값 */
+.open {
+  max-height: 300px;
 }

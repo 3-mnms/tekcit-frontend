@@ -1,16 +1,20 @@
+import { useState } from 'react' // ✅ useState import
 import AddressForm from '@/components/payment/AddressForm'
 import WalletPayment from '@/components/payment/WalletPayment'
 import CardSimplePayment from '@/components/payment/CardSimplePayment'
 import GeneralCardPayment from '@/components/payment/GeneralCardPayment'
 import PaymentInfo from '@/components/payment/PaymentInfo'
-import Button from '@/components/common/button/Button' // 재사용 버튼
+import Button from '@/components/common/button/Button'
 
-import '@pages/payment/BookingPaymentPage.css' // 스타일은 따로 관리
+import '@pages/payment/BookingPaymentPage.css'
 
 const BookingPaymentPage: React.FC = () => {
+  // ✅ 슬라이드 열림 상태 관리 (하나만 열리도록)
+  const [openedMethod, setOpenedMethod] = useState<'wallet' | 'cardSimple' | 'general' | null>(null)
+
   return (
     <div className="booking-container">
-      {/* 왼쪽: 배송지 + 결제수단 */}
+      {/* 왼쪽: 배송지 + 결제 수단 */}
       <div className="left-panel">
         <section className="section">
           <h2 className="section-title">배송지 정보</h2>
@@ -20,10 +24,25 @@ const BookingPaymentPage: React.FC = () => {
         <section className="section">
           <h2 className="section-title">결제 수단</h2>
 
-          <div>
-            <WalletPayment />
-            <CardSimplePayment />
-            <GeneralCardPayment />
+          <div className="payment-method-wrapper">
+            <WalletPayment
+              isOpen={openedMethod === 'wallet'}
+              onToggle={() =>
+                setOpenedMethod(openedMethod === 'wallet' ? null : 'wallet')
+              }
+            />
+            <CardSimplePayment
+              isOpen={openedMethod === 'cardSimple'}
+              onToggle={() =>
+                setOpenedMethod(openedMethod === 'cardSimple' ? null : 'cardSimple')
+              }
+            />
+            <GeneralCardPayment
+              isOpen={openedMethod === 'general'}
+              onToggle={() =>
+                setOpenedMethod(openedMethod === 'general' ? null : 'general')
+              }
+            />
           </div>
         </section>
       </div>

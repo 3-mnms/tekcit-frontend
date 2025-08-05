@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Button from '@components/common/button/Button'
-import '@components/payment/AddressForm.css'
+import styles from '@components/payment/AddressForm.module.css' // ✅ module.css 적용
 
 const schema = z.object({
   name: z.string().min(1, '이름을 입력해 주세요.'),
@@ -43,11 +43,11 @@ const AddressForm = () => {
   }
 
   return (
-    <form className="address-container" onSubmit={handleSubmit(onSubmit)}>
-      <div className="address-tabs">
-        <span className="tabs-label">배송지 선택</span>
+    <form className={styles['address-container']} onSubmit={handleSubmit(onSubmit)}>
+      <div className={styles['address-tabs']}>
+        <span className={styles['tabs-label']}>배송지 선택</span>
         <Button
-          className={`tab-button ${selectedTab === 'default' ? 'active' : ''}`}
+          className={`${styles['tab-button']} ${selectedTab === 'default' ? styles['active'] : ''}`}
           onClick={() => {
             setSelectedTab('default')
             reset(dummyDefault)
@@ -56,14 +56,14 @@ const AddressForm = () => {
           기본
         </Button>
         <Button
-          className={`tab-button ${selectedTab === 'recent' ? 'active' : ''}`}
+          className={`${styles['tab-button']} ${selectedTab === 'recent' ? styles['active'] : ''}`}
           onClick={() => setSelectedTab('recent')}
         >
           최근
         </Button>
         <button
           type="button"
-          className="plain-button tab-manage-btn"
+          className={`plain-button ${styles['tab-manage-btn']}`}
           onClick={() => {
             // TODO: 배송지 관리 페이지로 이동
             // navigate("/address-management");
@@ -74,66 +74,65 @@ const AddressForm = () => {
       </div>
 
       {selectedTab === 'recent' && (
-        <div className="recent-address-list-box">
+        <div className={styles['recent-address-list-box']}>
           <p>최근 배송지 목록 표시 영역</p>
         </div>
       )}
 
-      <div className="form-grid">
-        <div className="form-left">
+      <div className={styles['form-grid']}>
+        <div className={styles['form-left']}>
           <label>받는 사람 *</label>
           <input type="text" {...register('name')} />
-          {errors.name && <p className="error">{errors.name.message}</p>}
+          {errors.name && <p className={styles['error']}>{errors.name.message}</p>}
 
           <label>연락처 *</label>
-          <div className="phone-inputs">
-            <div className="phone-box">
+          <div className={styles['phone-inputs']}>
+            <div className={styles['phone-box']}>
               <select {...register('phonePrefix')}>
                 <option value="010">010</option>
                 <option value="011">02</option>
               </select>
-              <div className="error-space">
-                {errors.phonePrefix && <p className="error">{errors.phonePrefix.message}</p>}
+              <div className={styles['error-space']}>
+                {errors.phonePrefix && <p className={styles['error']}>{errors.phonePrefix.message}</p>}
               </div>
             </div>
-            <div className="phone-box phone-part1">
+            <div className={`${styles['phone-box']} ${styles['phone-part1']}`}>
               <input type="text" maxLength={4} {...register('phonePart1' as const)} />
-              <div className="error-space">
-                {errors.phonePart1 && <p className="error">{errors.phonePart1.message}</p>}
+              <div className={styles['error-space']}>
+                {errors.phonePart1 && <p className={styles['error']}>{errors.phonePart1.message}</p>}
               </div>
             </div>
-            <div className="phone-box phone-part2">
+            <div className={`${styles['phone-box']} ${styles['phone-part2']}`}>
               <input type="text" maxLength={4} {...register('phonePart2' as const)} />
-              <div className="error-space">
-                {errors.phonePart2 && <p className="error">{errors.phonePart2.message}</p>}
+              <div className={styles['error-space']}>
+                {errors.phonePart2 && <p className={styles['error']}>{errors.phonePart2.message}</p>}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="form-right">
+        <div className={styles['form-right']}>
           <label>주소 *</label>
-          <div className="address-row">
+          <div className={styles['address-row']}>
             <input type="text" {...register('address1')} />
             <button
               type="button"
-              className="plain-button address-search-btn"
+              className={`plain-button ${styles['address-search-btn']}`}
               onClick={() => {
                 // TODO: 주소 검색 모달 열기
-                // openAddressModal();
               }}
             >
               주소 검색
             </button>
           </div>
-          {errors.address1 && <p className="error">{errors.address1.message}</p>}
+          {errors.address1 && <p className={styles['error']}>{errors.address1.message}</p>}
 
           <input type="text" placeholder="상세 주소" {...register('address2')} />
-          {errors.address2 && <p className="error">{errors.address2.message}</p>}
+          {errors.address2 && <p className={styles['error']}>{errors.address2.message}</p>}
         </div>
       </div>
 
-      <div className="submit-wrap">
+      <div className={styles['submit-wrap']}>
         <button type="submit" className="plain-button w-full h-12">
           저장
         </button>
