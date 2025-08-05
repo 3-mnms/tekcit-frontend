@@ -5,8 +5,9 @@ import styles from './AddressForm.module.css'
 
 const AddressForm: React.FC = () => {
   const [name, setName] = useState('')
+  const [zonecode, setZonecode] = useState('')
   const [address, setAddress] = useState('')
-  const [addressDetail, setAddressDetail] = useState('') 
+  const [addressDetail, setAddressDetail] = useState('')
   const [phone, setPhone] = useState('')
   const [isDefault, setIsDefault] = useState(false)
 
@@ -20,8 +21,8 @@ const AddressForm: React.FC = () => {
         zonecode?: string
         [key: string]: unknown
       }) {
-        const fullAddress = data.address
-        setAddress(fullAddress)
+        setZonecode(data.zonecode || '')
+        setAddress(data.address || '')
       },
     }).open()
   }
@@ -31,17 +32,28 @@ const AddressForm: React.FC = () => {
       {/* 이름 */}
       <FormInput label="이름" value={name} onChange={(e) => setName(e.target.value)} />
 
-      {/* 주소 + 검색 버튼 */}
+      {/* 주소 */}
       <div className={styles.addressGroup}>
+        {/* 배송지 라벨 */}
+        <label className={styles.label}>배송지</label>
+
+        {/* 우편번호 + 주소 검색 */}
         <div className={styles.addressRow}>
-          {/* ✅ label 사용하고 placeholder 제거 */}
-          <FormInput label="주소" value={address} disabled className={styles.addressInput} />
+          <FormInput
+            placeholder="우편번호"
+            value={zonecode}
+            disabled
+            className={styles.zonecodeInput}
+          />
           <div className={styles.searchButtonWrapper}>
             <Button onClick={handleSearchAddress}>주소 검색</Button>
           </div>
         </div>
 
-        {/* ✅ 상세주소 */}
+        {/* 주소 */}
+        <FormInput placeholder="주소" value={address} disabled className={styles.addressInput} />
+
+        {/* 상세주소 */}
         <FormInput
           placeholder="상세주소"
           value={addressDetail}
