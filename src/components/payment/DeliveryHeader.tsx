@@ -1,22 +1,19 @@
-import { useNavigate } from 'react-router-dom';
-import styles from '@components/payment/DeliveryHeader.module.css';
+import styles from '@pages/payment/DeliveryManagePage.module.css'
+import XLogo from '@shared/assets/X_logo.png'
 
-const DeliveryHeader: React.FC = () => {
-  const navigate = useNavigate();
+interface HeaderProps {
+  onClose?: () => void
+}
 
+const Header = ({ onClose }: HeaderProps) => {
   return (
-    <div className={styles['delivery-header']}>
-      <div className={styles['delivery-header-top']}>
-        <button className={styles['close-button']} onClick={() => navigate(-1)}>
-          닫기
-        </button>
-        <h2 className={styles['delivery-title']}>배송지 관리</h2>
-      </div>
-      <p className={styles['delivery-description']}>
-        배송지를 선택하시면 주문하실 상품의 배송지로 설정됩니다.
-      </p>
+    <div className={styles['title-row']}>
+      <h2 className={styles['title']}>배송지 관리</h2>
+      <button className={styles['close-button']} onClick={onClose}>
+        <img src={XLogo} alt="닫기" className={styles['close-icon']} />
+      </button>
     </div>
-  );
-};
+  )
+}
 
-export default DeliveryHeader;
+export default Header
