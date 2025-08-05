@@ -1,0 +1,10 @@
+.dropdown {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    /* 삐약! 이 부분을 수정했어요! */
+    width: 200px;  /* 삐약! 드롭다운의 고정된 넓이를 설정합니다! */
+    min-width: 150px; /* 삐약! 최소 넓이를 설정해서 너무 줄어들지 않게 합니다! */
+}

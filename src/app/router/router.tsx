@@ -1,15 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
 import HomePage from "@/pages/home/HomePage";
-import Header from "@/pages/home/HeaderTestPage";
-import Sidebar from "@/pages/home/SidebarTest";
 import Layout from "@/pages/home/LayoutTestPage";
-import OperatManage from "@/pages/admin/OperatManageUser";
+import OperatManageUser from "@/pages/admin/OperatManageUserPage";
+import OperatManageHost from "@/pages/admin/OperatManageHostPage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <HomePage /> }, 
-  { path: "/header", element: <Header /> }, 
-  { path: "/sidebar", element: <Sidebar /> }, 
   { path: "/layout", element: <Layout/>},
-  { path: "/operatManage/user", element: < OperatManage/>},
+  { path: "/operatManage/user", element: < OperatManageUser/>},
+    { path: "/operatManage/host", element: < OperatManageHost/>},
 
 ]);

@@ -1,0 +1,33 @@
+/* src/components/shared/Table.module.css */
+.tableContainer {
+    width: 100%;
+    overflow-x: auto; /* 삐약! 테이블이 너무 넓으면 스크롤바가 생기도록 합니다! */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse; /* 삐약! 테이블 경계선이 겹치도록 합니다! */
+    font-size: 0.9rem;
+    color: #555;
+    min-width: 800px; /* 삐약! 테이블 너비가 줄어들어도 깨지지 않게 최소 너비 설정! */
+}
+
+.table thead tr {
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table th, .table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-right: 1px solid #e0e0e0;
+    white-space: nowrap; /* 삐약! 내용이 한 줄에 표시되도록 설정합니다! */
+}
+
+.table th:last-child, .table td:last-child {
+    border-right: none;
+}
+
+.table tbody tr:hover {
+    background-color: #f0f8ff; /* 삐약! 마우스 오버 시 색상 변경! */
+}

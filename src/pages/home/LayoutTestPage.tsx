@@ -1,6 +1,6 @@
 // src/pages/admin/NoticeListPage.tsx
 import React from 'react';
-import Layout from '../../components/common/Layout';
+import Layout from '@components/layout/Layout';
 
 const NoticeListPage: React.FC = () => {
   return (
