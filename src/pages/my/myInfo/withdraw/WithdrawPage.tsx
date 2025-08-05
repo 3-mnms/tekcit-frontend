@@ -19,7 +19,7 @@ const WithdrawPage: React.FC = () => {
         <p className={styles.notice}>
           - 탈퇴 시 모든 계정 정보가 삭제되며 복구가 불가능합니다. <br />
           - 보유한 티켓 및 예매 정보 또한 함께 삭제됩니다. <br />
-          - 탈퇴 후에는 동일한 이메일로 재가입이 제한될 수 있습니다.
+          - 탈퇴 후 90일 이내에는 동일한 이메일로 재가입이 가능하지만, 이후에는 제한될 수 있습니다.
         </p>
       </div>
 
@@ -29,7 +29,7 @@ const WithdrawPage: React.FC = () => {
           checked={checked}
           onChange={() => setChecked(!checked)}
         />
-        위 사항을 모두 확인했습니다.
+        <span className={styles.checkboxText}>위 사항을 모두 확인했습니다.</span>
       </label>
 
       <Button

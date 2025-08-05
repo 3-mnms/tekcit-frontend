@@ -10,7 +10,7 @@ import HomePage from '@pages/payment/BookingPaymentPage'
 
 // mypage
 import MyPage from '@/pages/my/MyPage'
-import Sidebar from '@components/my/sidebar/Sidebar'
+// import Sidebar from '@components/my/sidebar/Sidebar'
 import MyInfoPage from '@/pages/my/myInfo/MyInfoPage'
 import DetailPage from '@/pages/my/myInfo/basicinfo/DetailPage'
 import VerifyPasswordPage from '@/pages/my/myInfo/basicinfo/VerifyPasswordPage'
@@ -36,6 +36,7 @@ export const router = createBrowserRouter([
           { path: 'detail/editinfo', element: <EditInfoPage /> },
           { path: 'changepassword', element: <ChangePasswordPage /> },
           { path: 'linkedaccount', element: <LinkedAccounts /> },
+          { path: 'verifypassword', element: <VerifyPasswordPage /> },
           {
             path: 'address',
             children: [
@@ -46,7 +47,6 @@ export const router = createBrowserRouter([
           { path: 'withdraw', element: <WithdrawPage /> },
         ],
       },
-      { path: 'verifypassword', element: <VerifyPasswordPage /> },
     ],
   },
 ])
