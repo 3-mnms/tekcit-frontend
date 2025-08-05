@@ -1,6 +1,6 @@
 .container {
   padding: 24px;
-  width: 30%; /* 부모 기준 반응형 */
+  width: 100%; /* 부모 기준 반응형 */
   max-width: 100%;
   margin: 0 auto;
 }

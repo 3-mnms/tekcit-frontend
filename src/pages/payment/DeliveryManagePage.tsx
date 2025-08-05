@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import styles from '@pages/payment/DeliveryManagePage.module.css'
-import { mockAddresses } from '@models/delivery/Address.ts'
+import { mockAddresses } from '@models/delivery/Address'
+import type { Address } from '@models/delivery/Address'
 import AddressItem from '@/components/payment/AddressItem'
 import Header from '@/components/payment/DeliveryHeader'
 import Footer from '@/components/payment/DeliveryFooter'
 
-interface Address {
-  id: number
-  address1: string
-  address2: string
-  isDefault: boolean
+// src/pages/payment/DeliveryManagePage.tsx
+
+interface DeliveryManagePageProps {
+  onClose: () => void
 }
 
-const DeliveryManagePage = () => {
+const DeliveryManagePage: React.FC<DeliveryManagePageProps> = ({ onClose }) => {
   const [addresses, setAddresses] = useState<Address[]>(mockAddresses)
 
   const setAsDefault = (id: number) => {
@@ -24,7 +24,7 @@ const DeliveryManagePage = () => {
   }
 
   const handleClose = () => {
-    console.log('닫기 버튼 클릭됨!') // 실제로는 모달 닫기
+    onClose() // 모달 닫기 실행
   }
 
   return (

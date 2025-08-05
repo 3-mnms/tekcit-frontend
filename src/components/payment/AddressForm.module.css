@@ -39,17 +39,17 @@
 }
 
 .tab-button.active {
-  border: 1px solid #4D9AFD;
+  border: 1px solid #4d9afd;
   background-color: #fff;
-  color: #4D9AFD;
+  color: #4d9afd;
   position: relative;
 }
 
 .tab-button.active::before {
-  content: "";
+  content: '';
   width: 8px;
   height: 8px;
-  background-color: #4D9AFD;
+  background-color: #4d9afd;
   border-radius: 50%;
   margin-right: 6px;
 }
@@ -61,6 +61,26 @@
   font-size: 14px;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  width: 640px;
+  max-height: 90vh;
+  background: #fff;
+  margin: 60px auto;
+  padding: 24px;
+  border-radius: 12px;
+  overflow-y: auto;
 }
 
 .form-grid {
