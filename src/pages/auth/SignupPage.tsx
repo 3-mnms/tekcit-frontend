@@ -2,7 +2,14 @@ import React from 'react'
 import Logo from '@assets/logo.png'
 import Button from '@/components/common/button/Button'
 import SignupInputField from '@/components/auth/signup/SignupInputFields'
-import { FaUser, FaLock, FaHouse, FaLocationDot, FaEnvelope } from 'react-icons/fa6'
+import {
+  FaUser,
+  FaLock,
+  FaHouse,
+  FaLocationDot,
+  FaEnvelope,
+  FaShieldHalved,
+} from 'react-icons/fa6'
 import styles from './SignupPage.module.css'
 
 const SignupPage: React.FC = () => {
@@ -23,6 +30,14 @@ const SignupPage: React.FC = () => {
           hasButton
           buttonText="인증하기"
         />
+        {/* ✅ 인증 코드 입력 + 버튼 */}
+        <SignupInputField
+          icon={<FaShieldHalved />}
+          placeholder="인증 코드 입력"
+          hasButton
+          buttonText="인증 확인"
+        />
+
         <Button className="w-full h-12 mt-4">가입하기</Button>
       </div>
     </div>
