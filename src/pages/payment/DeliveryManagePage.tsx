@@ -6,10 +6,8 @@ import AddressItem from '@/components/payment/AddressItem'
 import Header from '@/components/payment/DeliveryHeader'
 import Footer from '@/components/payment/DeliveryFooter'
 
-// src/pages/payment/DeliveryManagePage.tsx
-
 interface DeliveryManagePageProps {
-  onClose: () => void
+  onClose?: () => void
 }
 
 const DeliveryManagePage: React.FC<DeliveryManagePageProps> = ({ onClose }) => {
@@ -24,7 +22,7 @@ const DeliveryManagePage: React.FC<DeliveryManagePageProps> = ({ onClose }) => {
   }
 
   const handleClose = () => {
-    onClose() // 모달 닫기 실행
+    onClose?.()
   }
 
   return (
