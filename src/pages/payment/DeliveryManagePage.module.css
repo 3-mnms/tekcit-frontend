@@ -1,0 +1,95 @@
+.container {
+  padding: 24px;
+  width: 100%; /* 부모 기준 반응형 */
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.title-row {
+  position: relative;
+  display: flex;
+  justify-content: center; /* 제목 가운데 정렬 */
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+.close-button {
+  position: absolute;
+  right: 0; /* 오른쪽 끝에 배치 */
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.close-icon {
+  width: 15px; /* 원하는 크기로 조절 가능 */
+  height: 15px;
+  object-fit: contain;
+}
+
+.address-wrapper {
+  background-color: #f9f9f9; /* 💡 회색 배경 */
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* 💡 살짝 그림자 */
+  width: 100%;
+  box-sizing: border-box;
+  height: 400px;
+}
+
+.address-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  width: 100%; /* 💡 리스트는 부모에 맞게 */
+}
+
+.address-item {
+  width: 100%; /* 💡 전체 너비 사용 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.address-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.address-text {
+  margin: 0;
+  font-size: 1rem;
+  flex: 1;
+}
+
+.address-info {
+  flex: 1;
+}
+
+.default-label {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  background-color: #4d9afd;
+  color: white;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}

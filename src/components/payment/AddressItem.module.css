@@ -1,0 +1,66 @@
+.addressItem {
+  padding: 16px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: #ffffff;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  transition:
+    background-color 0.2s ease,
+    border 0.2s ease;
+}
+
+.addressItem:hover {
+  background-color: #4d9afd;
+}
+
+.addressItem:hover .addressText {
+  color: #fff;
+}
+
+/* ✅ 선택된 상태일 때 유지되는 스타일 */
+.selected {
+  background-color: #4d9afd;
+  border: 2px solid #000;
+}
+
+.selected .addressText {
+  color: #fff;
+  font-weight: bold;
+}
+
+.addressInfo {
+  flex: 1;
+}
+
+.addressRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.addressText {
+  margin: 0;
+  font-size: 1rem;
+  flex: 1;
+  color: #000;
+  transition:
+    color 0.2s ease,
+    font-weight 0.2s ease;
+}
+
+.defaultLabel {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #4d9afd;
+  color: white;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: right;
+}
