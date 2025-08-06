@@ -32,7 +32,7 @@ const sidebarItems: SidebarItem[] = [
   {
     label: '북마크',
     path: '/mypage/bookmark',
-    children: [{ label: '관심 공연 목록', path: '/mypage/bookmark' }],
+    // children: [{ label: '관심 공연 목록', path: '/mypage/bookmark' }],
   },
 ];
 
