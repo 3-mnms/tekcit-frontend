@@ -1,0 +1,182 @@
+.address-container {
+  padding: 32px;
+  background-color: #f3f3f3;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.address-tabs {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+
+.tabs-label {
+  margin-right: 8px;
+  font-weight: 500;
+}
+
+.tab-button {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+  padding: 6px 12px;
+  border-radius: 100px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.tab-button.active {
+  border: 1px solid #4d9afd;
+  background-color: #fff;
+  color: #4d9afd;
+  position: relative;
+}
+
+.tab-button.active::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background-color: #4d9afd;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.tab-manage-btn {
+  border: 1px solid #999;
+  background-color: #eee;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  width: 640px;
+  max-height: 90vh;
+  background: #fff;
+  margin: 60px auto;
+  padding: 24px;
+  border-radius: 12px;
+  overflow-y: auto;
+}
+
+.form-grid {
+  display: flex;
+  gap: 32px;
+  margin-top: 16px;
+}
+
+.form-left,
+.form-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-weight: 600;
+  margin: 12px 0 4px;
+}
+
+input,
+select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.phone-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.phone-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.address-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.address-row input {
+  flex: 1;
+}
+
+.address-row button {
+  padding: 8px 12px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.recent-address-list-box {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  margin-top: 16px;
+}
+
+.town-label {
+  margin-top: 8px;
+  color: #222;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.submit-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32px;
+}
+
+.submit-wrap button {
+  padding: 10px 20px;
+  background-color: black;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.error-space {
+  min-height: 20px;
+}

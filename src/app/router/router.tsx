@@ -1,30 +1,64 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter } from 'react-router-dom'
 
-// import TestPage from "@pages/home/test2";
-// import TestPage from "@/pages/home/CategoryPage";
-// import TestComponent from "@components/my/sidebar/Sidebar"
-// import MyPage from '@/pages/my/MyPage';
-// import MyInfo from '@/pages/my/Info';
-import FesInfo from '@/pages/festival-detail/FestivalDetailPage';
+// mainpage
+import HomePage from '@pages/home/MainPage'
+
+// mypage
+import MyPage from '@/pages/my/MyPage'
+// import Sidebar from '@components/my/sidebar/Sidebar'
+import SignupPage from '@/pages/my/dropdown/UserDropdown'
+import MyInfoPage from '@/pages/my/myInfo/MyInfoPage'
+import DetailPage from '@/pages/my/myInfo/basicinfo/DetailPage'
+import VerifyPasswordPage from '@/pages/my/myInfo/basicinfo/VerifyPasswordPage'
+import EditInfoPage from '@/pages/my/myInfo/basicinfo/EditInfoPage'
+import ChangePasswordPage from '@/pages/my/myInfo/changepassword/ChangePasswordPage'
+import LinkedAccounts from '@/pages/my/myInfo/linkedaccount/LinkedAccountsPage'
+import AddressListPage from '@/pages/my/myInfo/adress/AddressListPage'
+import AddressFormPage from '@/pages/my/myInfo/adress/AddressFormPage'
+import WithdrawPage from '@/pages/my/myInfo/withdraw/WithdrawPage'
+import BookmarkPage from '@/pages/my/myInfo/bookmark/BookmarkPage'
+
+// payment
+import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
+import DeliveryManagePage from '@pages/payment/DeliveryManagePage'
 
 export const router = createBrowserRouter([
-  // { path: "/", element: <TestPage /> },
-  { path: "/", element: <FesInfo /> },
+  { path: '/', element: <SignupPage /> },
 
   {
-  path: '/mypage',
-  element: <FesInfo />,
-  children: [
-    // { path: 'info', element: <MyInfo /> },
-    // { path: 'password', element: <ChangePassword /> },
-    // { path: 'linked', element: <LinkedAccounts /> },
-    // { path: 'address', element: <AddressList /> },
-    // { path: 'withdraw', element: <Withdraw /> },
-    // { path: 'verification', element: <Verification /> },
-    // { path: 'tickets', element: <TicketHistory /> },
-    // { path: 'transfer', element: <Transfer /> },
-    // { path: 'entry', element: <EntryView /> },
-    // { path: 'bookmarks', element: <Bookmarks /> },
-  ],
-}
-]);
+    path: '/mypage',
+    element: <MyPage />,
+    children: [
+      {
+        path: 'myinfo',
+        children: [
+          { path: '', element: <MyInfoPage /> },
+          { path: 'detail', element: <DetailPage /> },
+          { path: 'detail/editinfo', element: <EditInfoPage /> },
+          { path: 'changepassword', element: <ChangePasswordPage /> },
+          { path: 'linkedaccount', element: <LinkedAccounts /> },
+          { path: 'verifypassword', element: <VerifyPasswordPage /> },
+          {
+            path: 'address',
+            children: [
+              { path: '', element: <AddressListPage /> },
+              { path: 'new', element: <AddressFormPage /> },
+            ],
+          },
+          { path: 'withdraw', element: <WithdrawPage /> },
+        ],
+      },
+      { path: 'bookmark', element: <BookmarkPage /> },
+    ],
+  },
+
+  // payment
+  {
+    path: '/payment',
+    element: <BookingPaymentPage />,
+  },
+  {
+    path: '/DeliveryManagePage',
+    element: <DeliveryManagePage />,
+  },
+])

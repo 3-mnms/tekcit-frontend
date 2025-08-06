@@ -1,0 +1,157 @@
+.wallet-payment-container {
+  width: 100%;
+}
+
+.main-content {
+  width: 100%;
+}
+
+/* 결제 섹션 */
+.payment-section {
+  width: 100%; /* ← 부모 너비 채우기 */
+  margin: 0;
+  padding: 24px;
+  border-radius: 12px;
+  box-sizing: border-box; /* ← 이거 안 하면 padding이 너비에서 빠짐 */
+}
+
+/* 💡 킷페이 + 충전 버튼 수평 정렬 */
+.payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.simple-payment-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.radio-input {
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  margin-right: 0;
+  position: relative;
+  top: 1px;
+  z-index: 1;
+  display: none;
+}
+
+.radio-label {
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.radio-custom {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.radio-input:checked + .radio-custom {
+  background-color: #4d9afd;
+  border-color: #4d9afd;
+}
+
+.radio-input:checked + .radio-custom::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+/* 충전 섹션 */
+.charge-section {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid #4d9afd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.charge-input-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.charge-label {
+  min-width: 40px;
+  font-weight: bold;
+}
+
+.charge-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.amount-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.dropdown-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.account-selector {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.selected-account {
+  font-size: 14px;
+  color: #333;
+}
+
+/* 슬라이드 애니메이션 */
+.slide-toggle {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s ease;
+}
+
+.open {
+  max-height: 300px;
+}

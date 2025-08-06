@@ -1,62 +1,71 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 
-const sidebarItems = [
+interface SidebarItem {
+  label: string;
+  path: string;
+  children?: SidebarItem[];
+}
+
+const sidebarItems: SidebarItem[] = [
   {
-    section: '내 정보 수정',
-    items: [
-      { label: '기본정보', to: 'info' },
-      { label: '비밀번호 변경', to: 'password' },
-      { label: '연결된 계정', to: 'linked' },
-      { label: '배송지 관리', to: 'address' },
-      { label: '회원 탈퇴', to: 'withdraw' },
+    label: '내 정보 수정',
+    path: '/mypage/myinfo',
+    children: [
+      { label: '기본정보', path: '/mypage/myinfo/detail' },
+      { label: '비밀번호 변경', path: '/mypage/myinfo/changepassword' },
+      { label: '연결된 계정', path: '/mypage/myinfo/linkedaccount' },
+      { label: '배송지 관리', path: '/mypage/myinfo/address' },
+      { label: '회원 탈퇴', path: '/mypage/myinfo/withdraw' },
     ],
   },
   {
-    section: '인증 정보',
-    items: [
-      { label: '본인인증', to: 'verification' },
+    label: '내 티켓',
+    path: '/mypage/ticket',
+    children: [
+      { label: '예매 / 취소 내역', path: '/mypage/ticket/history' },
+      { label: '양도', path: '/mypage/ticket/transfer' },
+      { label: '입장 인원 수 조회', path: '/mypage/ticket/count' },
     ],
   },
   {
-    section: '내 티켓',
-    items: [
-      { label: '예매/취소 내역', to: 'tickets' },
-      { label: '양도', to: 'transfer' },
-      { label: '입장 인원 수 조회', to: 'entry' },
-    ],
-  },
-  {
-    section: '북마크',
-    items: [
-      { label: '공연 북마크', to: 'bookmarks' },
-    ],
+    label: '북마크',
+    path: '/mypage/bookmark',
+    children: [{ label: '관심 공연 목록', path: '/mypage/bookmark' }],
   },
 ];
 
 const Sidebar: React.FC = () => {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const isActive = (path: string) => pathname === path;
+  const isParentActive = (parent: string) => pathname.startsWith(parent);
+
   return (
     <aside className={styles.sidebar}>
-      {sidebarItems.map((group, index) => (
-        <div key={index}>
-          <p className={styles.section}>{group.section}</p>
-          {group.items && (
-            <ul className={styles.menu}>
-              {group.items.map((item, idx) => (
-                <li key={idx}>
-                  <NavLink
-                    to={`/mypage/${item.to}`}
-                    className={({ isActive }) =>
-                      `${styles.menuItem} ${isActive ? styles.active : ''}`
-                    }
-                  >
-                    {item.label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          )}
+      {sidebarItems.map((item) => (
+        <div key={item.label}>
+          <div
+            className={`${styles.parent} ${
+              isParentActive(item.path) ? styles.active : ''
+            }`}
+            onClick={() => navigate(item.path)}
+          >
+            {item.label}
+          </div>
+          {item.children?.map((child) => (
+            <div
+              key={child.label}
+              className={`${styles.child} ${
+                isActive(child.path) ? styles.active : ''
+              }`}
+              onClick={() => navigate(child.path)}
+            >
+              {child.label}
+            </div>
+          ))}
         </div>
       ))}
     </aside>

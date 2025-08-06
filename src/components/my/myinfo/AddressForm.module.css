@@ -1,0 +1,80 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.addressGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.addressRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.addressInput {
+  flex: 1;
+  min-width: 100vh;
+  margin-top: -1rem; 
+}
+
+.detailInput {
+  margin-top: -1rem; 
+}
+
+.searchButtonWrapper {
+  /* padding-top: 1.8rem;  */
+}
+
+.searchButton {
+  white-space: nowrap;
+  padding: 0.6rem 1rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.submitButton {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.checkboxWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  accent-color: #4D9AFD;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* .label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.25rem;
+} */

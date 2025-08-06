@@ -1,0 +1,46 @@
+.container {
+  padding: 1.5rem;
+  background-color: white;
+  text-align: left;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.noticeBox {
+  border: 1px solid #ccc;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  margin-bottom: 1rem;
+}
+
+.notice {
+  font-size: 0.95rem;
+  color: #444;
+  line-height: 1.6;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.checkboxLabel input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: #4D9AFD;
+}
+
+.withdrawButton {
+  width: 100%;
+}
