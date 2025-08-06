@@ -1,5 +1,5 @@
 // PaymentInfo.tsx
-import styles from '@components/payment/PaymentInfo.module.css'
+import styles from '@components/payment/pay/PaymentInfo.module.css'
 
 const PaymentInfo = () => {
   return (

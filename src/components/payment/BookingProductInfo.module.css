@@ -1,0 +1,41 @@
+.productSection {
+  margin-bottom: 32px;
+}
+
+.productBox {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #f9f9f9;
+}
+
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.productTitle {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.productDetail,
+.productSeat {
+  font-size: 14px;
+  color: #555;
+}
+
+.productPrice {
+  font-size: 18px;
+  font-weight: bold;
+  color: #e60023;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}

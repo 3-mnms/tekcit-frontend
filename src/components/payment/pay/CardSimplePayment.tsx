@@ -1,4 +1,4 @@
-import styles from '@components/payment/CardSimplePayment.module.css'
+import styles from '@components/payment/pay/CardSimplePayment.module.css'
 
 interface CardSimplePaymentProps {
   isOpen: boolean

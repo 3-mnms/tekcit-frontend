@@ -17,9 +17,9 @@ import WithdrawPage from '@/pages/my/myInfo/withdraw/WithdrawPage'
 
 // payment
 import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
-import DeliveryManagePage from '@pages/payment/DeliveryManagePage'
 import PaymentCompletePage from '@pages/payment/PaymentCompletePage'
 import PaymentFailPage from '@pages/payment/PaymentFailPage'
+import TransferPaymentPage from '@pages/payment/TransferPaymentPage'
 
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -56,15 +56,15 @@ export const router = createBrowserRouter([
     element: <BookingPaymentPage />,
   },
   {
-    path: '/DeliveryManagePage',
-    element: <DeliveryManagePage />,
-  },
-  {
     path: '/PaymentCompletePage',
     element: <PaymentCompletePage />,
   },
   {
     path: '/PaymentFailPage',
     element: <PaymentFailPage />,
+  },
+  {
+    path: '/TransferPaymentPage',
+    element: <TransferPaymentPage />,
   },
 ])
