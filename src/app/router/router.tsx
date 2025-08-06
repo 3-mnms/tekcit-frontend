@@ -23,6 +23,7 @@ import TransferPaymentPage from '@pages/payment/TransferPaymentPage'
 import TransferFeePaymentPage from '@pages/payment/TransferFeePaymentPage'
 import PayPointPage from '@pages/payment/PayPointPage'
 import CancelRequestPage from '@pages/payment/CancelRequestPage'
+import CancelSuccessPage from '@pages/payment/CancelSuccessPage'
 
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
       { path: 'transfer-fee', element: <TransferFeePaymentPage /> }, // /payment/transfer-fee
       { path: 'paypoint', element: <PayPointPage /> },
       { path: 'cancelRequest', element: <CancelRequestPage /> },
+      { path: 'cancelSuccess', element: <CancelSuccessPage /> },
     ],
   },
 ])

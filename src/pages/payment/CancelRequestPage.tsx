@@ -1,4 +1,3 @@
-import React from 'react'
 import styles from './CancelRequestPage.module.css'
 import TransferTicketInfo from '@/components/payment/transfer/TransferTicketInfo'
 import Button from '@/components/common/button/Button'
