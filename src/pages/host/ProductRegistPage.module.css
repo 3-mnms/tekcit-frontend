@@ -17,14 +17,6 @@
     align-items: flex-start;
 }
 
-.dateGroup {
-    display: flex;
-    flex-direction: row;
-    & > * {
-        flex: 1;
-    }
-}
-
 .formItem {
     flex: 1;
     display: flex;

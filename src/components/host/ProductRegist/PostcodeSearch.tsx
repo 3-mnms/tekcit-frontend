@@ -1,4 +1,3 @@
-// src/components/shared/PostcodeSearch.tsx
 import React, { useState } from 'react';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 import styles from './PostcodeSearch.module.css';

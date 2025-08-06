@@ -1,11 +1,9 @@
-// src/pages/admin/ProductRegister.tsx
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import Input from '@components/shared/Input';
 import DatePicker from '@components/shared/DatePicker';
 import Button from '@components/common/Button';
-// 삐약! 새로 만든 컴포넌트를 불러옵니다!
-import PostcodeSearch from '@components/shared/PostcodeSearch';
+import PostcodeSearch from '@/components/host/ProductRegist/PostcodeSearch';
 import styles from './ProductRegistPage.module.css';
 
 interface ConfirmModalState {
@@ -23,6 +21,8 @@ const ProductRegisterPage: React.FC = () => {
         venueAddress: '', // 삐약! 이 필드에 주소가 들어갑니다!
         startDate: '',
         endDate: '',
+        startTime:'',
+        endTime:'',
         runningTime: '',
         intermission: '',
         price: '',
@@ -162,30 +162,37 @@ const ProductRegisterPage: React.FC = () => {
                         </div>
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
-                                {/* <label className={styles.label}>5. 공연 일시/ 종료일</label> */}
-                                <div className={styles.dateGroup}>
-                                    <DatePicker 
-                                        label="5. 공연 일시" 
-                                        name="startDate" 
-                                        value={productData.startDate} 
-                                        onChange={handleChange} 
-                                    />
+                                <DatePicker 
+                                    label="5. 공연 일시" 
+                                    name="startDate" 
+                                    value={productData.startDate} 
+                                    onChange={handleChange} 
+                                />
+                            </div>
+                            <div className={styles.formItem}>
                                     <DatePicker 
                                         label="종료일" 
                                         name="endDate" 
                                         value={productData.endDate} 
                                         onChange={handleChange} 
                                     />
-                                </div>
                             </div>
                             <div className={styles.formItem}>
                                 <Input 
                                     label="6. 공연 시간" 
-                                    type="text" 
-                                    name="runningTime" 
-                                    placeholder="예) 3.5H" 
-                                    value={productData.runningTime} 
+                                    type="time" 
+                                    name="startTime" 
+                                    value={productData.startTime} 
                                     onChange={handleChange} 
+                                />
+                            </div>
+                            <div className={styles.formItem}>
+                                <Input 
+                                    label="공연 종료 시간" 
+                                    type="time"
+                                    name="endTime"
+                                    value={productData.endTime}
+                                    onChange={handleChange}
                                 />
                             </div>
                         </div>
@@ -206,6 +213,7 @@ const ProductRegisterPage: React.FC = () => {
                                     <label><input type="radio" name="maxPurchase" value="1장" checked={productData.maxPurchase === '1장'} onChange={handleChange} /> 1장</label>
                                     <label><input type="radio" name="maxPurchase" value="2장" checked={productData.maxPurchase === '2장'} onChange={handleChange} /> 2장</label>
                                     <label><input type="radio" name="maxPurchase" value="3장" checked={productData.maxPurchase === '3장'} onChange={handleChange} /> 3장</label>
+                                    <label><input type="radio" name="maxPurchase" value="4장" checked={productData.maxPurchase === '4장'} onChange={handleChange} /> 4장</label>
                                 </div>
                             </div>
                         </div>

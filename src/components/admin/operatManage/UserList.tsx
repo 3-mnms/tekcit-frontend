@@ -1,8 +1,8 @@
 import React from 'react';
 import Table from '@/components/shared/Table';
 import type { Column } from '@/components/shared/Table';
-import ToggleSwitch from '@components/common/ToggleSwitch';
-import AddressDropdown from '@components/shared/AddressDropdown';
+import ToggleSwitch from '@/components/admin/operatManage/ToggleSwitch';
+import AddressDropdown from '@/components/admin/operatManage/AddressDropdown';
 import type { User } from '../../../models/User';
 
 interface UserListProps {
