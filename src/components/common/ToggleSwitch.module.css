@@ -1,10 +1,8 @@
-/* src/components/shared/ToggleSwitch.module.css */
-/* 삐약! 토글 스위치 스타일! */
 .switch {
   position: relative;
   display: inline-block;
-  width: 80px;
-  height: 24px;
+  width: 3rem;   /* 약 48px */
+  height: 1.2rem; /* 약 18px */
 }
 
 .switch input {
@@ -21,19 +19,18 @@
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  transition: .4s;
-  border-radius: 24px;
+  border-radius: 999px;
 }
 
 .slider:before {
-  position: absolute;
   content: "";
-  height: 20px;
-  width: 20px;
-  left: 2px;
-  bottom: 2px;
+  position: absolute;
+  height: 1rem;   /* 약 16px */
+  width: 1rem;
+  left: 0.1rem;
+  bottom: 0.1rem;
   background-color: white;
-  transition: .4s;
+  transition: 0.3s;
   border-radius: 50%;
 }
 
@@ -42,26 +39,27 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-  transform: translateX(56px);
+  transform: translateX(1.8rem); /* 슬라이더 이동 거리 */
 }
 
 .onText, .offText {
   position: absolute;
   color: white;
-  font-size: 12px;
-  line-height: 24px;
+  font-size: 0.5rem;
+  line-height: 1.2rem;
   font-weight: 600;
   top: 0;
-  transition: opacity .4s;
+  transition: opacity 0.3s;
+  pointer-events: none;
 }
 
 .onText {
-  left: 10px;
+  left: 0.4rem;
   opacity: 0;
 }
 
 .offText {
-  right: 10px;
+  right: 0.4rem;
   opacity: 1;
 }
 

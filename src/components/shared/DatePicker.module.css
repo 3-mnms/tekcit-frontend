@@ -1,0 +1,21 @@
+.label {
+    display: block;
+    font-weight: bold;
+    font-size: 0.8rem;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
+
+.datePicker {
+    width: 100%;
+    padding: 0.5% 0.5rem;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.7rem;
+}
+
+.datePicker:focus {
+    border-color: #4d9afd;
+    outline: none;
+}

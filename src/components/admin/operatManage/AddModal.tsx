@@ -82,7 +82,6 @@ const AddPartnerModal: React.FC<AddPartnerModalProps> = ({ isOpen, onClose, onSa
                     <label htmlFor="genre">장르</label>
                     <input type="text" id="genre" name="genre" value={partnerData.genre} onChange={handleChange} />
                 </div>
-                {/* 삐약! businessName 필드를 추가합니다! */}
                 <div className={styles.formGroup}>
                     <label htmlFor="businessName">사업자명</label>
                     <input type="text" id="businessName" name="businessName" value={partnerData.businessName} onChange={handleChange} />

@@ -83,7 +83,7 @@ const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => { // subTitle 
       <main 
         className="flex-1" 
         style={{ 
-            padding: '24px', 
+            padding: '10px', 
             overflowY: 'auto',
             height: `calc(100vh - ${headerHeight} - ${subHeaderHeight})`
         }}

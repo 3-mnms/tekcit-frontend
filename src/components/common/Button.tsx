@@ -9,6 +9,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;   
   className?: string; // 너비/높이 tailwind로 조정 가능
   disabled?: boolean;
+  type?: 'button';
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -16,6 +17,7 @@ const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   className = '',
   disabled,
+  type = 'button',
   ...props
 }) => {
  const variantClassMap = {
@@ -29,6 +31,7 @@ const Button: React.FC<ButtonProps> = ({
     <button
       className={`${styles.base} ${variantClassMap[variant]} ${className}`}
       disabled={disabled}
+      type={type}
       {...props}
     >
       {children}
