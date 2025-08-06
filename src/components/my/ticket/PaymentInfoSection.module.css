@@ -7,43 +7,37 @@
 .title {
   font-size: 1.2rem;
   font-weight: bold;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.meta {
-  display: flex;
-  gap: 2rem;
-  margin-bottom: 1rem;
-}
-
-.meta div {
-  display: flex;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-}
-
-.table {
+.sharedTable {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   font-size: 0.95rem;
 }
 
-.table th,
-.table td {
+.sharedTable th,
+.sharedTable td {
   border: 1px solid #ddd;
   padding: 0.6rem;
   text-align: center;
 }
 
-.summary {
+.paymentSummary {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.6rem;
   font-size: 0.95rem;
 }
 
-.total {
+.row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.total span:last-child {
   font-weight: bold;
   color: #d33;
 }

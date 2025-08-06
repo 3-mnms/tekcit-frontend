@@ -23,7 +23,7 @@ const TicketInfoCard: React.FC = () => {
             <span className={styles.value}>A123456789</span>
           </div>
           <div className={styles.row}>
-            <span className={styles.label}>이용일</span>
+            <span className={styles.label}>일시</span>
             <span className={styles.value}>2025년 10월 18일 (토) 17:00</span>
           </div>
           <div className={styles.row}>
