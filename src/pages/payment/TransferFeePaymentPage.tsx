@@ -1,16 +1,28 @@
-// src/pages/payment/TransferFeePaymentPage.tsx
-import React from 'react'
+import { useState } from 'react'
 import Button from '@/components/common/button/Button'
 import TransferTicketInfo from '@/components/payment/transfer/TransferTicketInfo'
 import TransferFeeInfo from '@/components/payment/transfer/TransferFeeInfo'
+import ConfirmModal from '@pages/payment/ConfirmModal'
+
 import { bookingTransfer } from '@/models/payment/BookingTransfer'
 import { transferFee } from '@/models/payment/TransferFee'
 
-import styles from '@/pages/payment/TransferFeePaymentPage.module.css'
+import styles from '@pages/payment/TransferFeePaymentPage.module.css'
 
 const TransferFeePaymentPage: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
   const handlePayment = () => {
-    console.log('수수료 결제하기 클릭됨!')
+    setIsModalOpen(true)
+  }
+
+  const handleConfirm = () => {
+    setIsModalOpen(false)
+    console.log('결제 처리 로직 실행') // 실제 결제 API 호출
+  }
+
+  const handleCancel = () => {
+    setIsModalOpen(false)
   }
 
   return (
@@ -18,7 +30,6 @@ const TransferFeePaymentPage: React.FC = () => {
       <div className={styles.container}>
         <h1 className={styles.title}>양도 수수료 결제</h1>
 
-        {/* 공연/좌석/양도 정보 */}
         <TransferTicketInfo
           title={bookingTransfer.product.title}
           date={bookingTransfer.product.datetime}
@@ -28,7 +39,6 @@ const TransferFeePaymentPage: React.FC = () => {
         />
       </div>
 
-      {/* 수수료 정보 */}
       <div className={styles.feeSection}>
         <TransferFeeInfo
           perFee={transferFee.perFee}
@@ -36,13 +46,18 @@ const TransferFeePaymentPage: React.FC = () => {
         />
       </div>
 
-      {/* 결제 버튼 */}
       <div className={styles.buttonWrapper}>
         <Button className="w-full h-12" onClick={handlePayment}>
           수수료 결제하기
         </Button>
       </div>
 
+      {isModalOpen && (
+        <ConfirmModal
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+        />
+      )}
     </>
   )
 }

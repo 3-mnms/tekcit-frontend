@@ -21,6 +21,7 @@ import PaymentCompletePage from '@pages/payment/PaymentCompletePage'
 import PaymentFailPage from '@pages/payment/PaymentFailPage'
 import TransferPaymentPage from '@pages/payment/TransferPaymentPage'
 import TransferFeePaymentPage from '@pages/payment/TransferFeePaymentPage'
+import ConfirmModal from '@pages/payment/ConfirmModal'
 
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -71,5 +72,9 @@ export const router = createBrowserRouter([
   {
     path: '/TransferFeePaymentPage',
     element: <TransferFeePaymentPage />,
+  },
+  {
+    path: '/ConfirmModal',
+    element: <ConfirmModal />,
   },
 ])
