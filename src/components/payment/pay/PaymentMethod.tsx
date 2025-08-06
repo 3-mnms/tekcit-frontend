@@ -5,7 +5,7 @@ import GeneralCardPayment from '@components/payment/pay/GeneralCardPayment'
 import styles from '@components/payment/pay/PaymentMethod.module.css'
 
 const PaymentMethod: React.FC = () => {
-  const [method, setMethod] = useState<'wallet' | 'simple' | 'general'>('wallet')
+  const [method, setMethod] = useState<'wallet' | 'simple' | 'general' | null>(null) 
 
   const handleMethodChange = (selected: typeof method) => {
     setMethod(selected)
@@ -13,7 +13,6 @@ const PaymentMethod: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>결제 수단</h2>
 
       {/* ✅ 세 컴포넌트에 props로 상태 전달 */}
       <WalletPayment

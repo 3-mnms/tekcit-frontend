@@ -1,13 +1,7 @@
-/* PaymentMethod.module.css */
-
 .container {
   display: flex;
   flex-direction: column;
-  gap: 32px;
-}
-
-.title {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 12px;
+  align-items: flex-start; /* ✅ 왼쪽 정렬 고정 */
+  width: 100%;              /* ✅ 부모 기준 너비 */
+  gap: 12px;
 }

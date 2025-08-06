@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import Button from '@components/common/button/Button'
 import styles from '@components/payment//address/AddressForm.module.css'
-import { defaultAddress } from '@models/delivery/defaultAddress' // ← 외부에서 기본값만 import
+import { defaultAddress } from '@/models/payment/defaultAddress' // ← 외부에서 기본값만 import
 import DeliveryManagePage from '@/pages/payment/DeliveryManagePage'
 
 // ✅ 여기서 zod 스키마 직접 정의

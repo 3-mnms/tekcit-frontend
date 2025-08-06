@@ -17,7 +17,7 @@
 }
 
 .sectionTitle {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   margin-bottom: 16px;
 }
@@ -87,23 +87,21 @@
   flex-direction: column;
   gap: 16px;
   align-items: flex-start;
+  width: 100%;
 }
 
-/* ✅ label 안 요소 가로 정렬 */
 .checkboxLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px; /* 체크박스와 텍스트 간격 더 넓게 */
+  display: flex;              /* 가로 정렬 핵심! */
+  align-items: flex-start;        /* 세로 가운데 정렬 */
+  gap: 0px;                   /* 체크박스와 텍스트 사이 간격 */
   font-size: 14px;
   line-height: 1.5;
-  cursor: pointer;
-  flex-wrap: nowrap; /* 줄바꿈 방지 */
+  width: 100%;
 }
 
-/* ✅ 체크박스 텍스트 부분 줄바꿈 방지 또는 잘 정렬되도록 */
 .checkboxText {
-  white-space: normal; /* 필요 시 줄바꿈 허용 */
+  flex: 1;
+  min-width: 0;
   word-break: keep-all;
-  line-height: 1.4;
+  max-width: 100%;
 }
-
