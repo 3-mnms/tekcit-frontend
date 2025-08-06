@@ -1,0 +1,78 @@
+.page {
+  width: 100%;
+  padding: 1.5rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.poster {
+  width: 100px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.transferBtn {
+  padding: 0.5rem 1.2rem;
+  background-color: #4D9AFD;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.transferBtn:hover {
+  background-color: #3579cc;
+}
+
+.disabledBtn {
+  padding: 0.5rem 1.2rem;
+  background-color: #ccc;
+  color: #666;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: not-allowed;
+}
+
+.transferredBadge {
+  padding: 0.4rem 0.9rem;
+  background-color: #e0e7ff;
+  color: #3b47a2;
+  border: 1px solid #b8c2ff;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
