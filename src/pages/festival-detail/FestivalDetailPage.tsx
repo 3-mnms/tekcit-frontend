@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import Header from '@components/common/header/Header';
 import Info from '@components/festival/FestivalInfoSection';
 import Scheduler from '@components/festival/FestivalScheduleSection';
+import InfoDetail from '@components/festival/FestivalInfoDetailSection';
+import Statistics from '@components/festival/FestivalStatisticsSection';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import styles from './FestivalDetailPage.module.css';
 
@@ -14,32 +16,38 @@ const FestivalDetailPage: React.FC = () => {
 
       <div className={styles.contentWrapper}>
         <Info />
-        <Scheduler />
+        <div className={styles.schedulerSticky}>
+          <Scheduler />
+        </div>
       </div>
 
       {/* 탭 메뉴 */}
       <div className={styles.tabWrapper}>
         <div className={styles.tabMenu}>
-          <button
-            className={`${styles.tab} ${activeTab === 'info' ? styles.active : ''}`}
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => setActiveTab('info')}
+            className={`${styles.tab} ${activeTab === 'info' ? styles.active : ''}`}
           >
             공연정보
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'sale' ? styles.active : ''}`}
+          </div>
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => setActiveTab('sale')}
+            className={`${styles.tab} ${activeTab === 'sale' ? styles.active : ''}`}
           >
             예매자통계
-          </button>
+          </div>
         </div>
 
         {/* 선택된 탭 내용 */}
         <div className={styles.tabContent}>
           {activeTab === 'info' ? (
-            <div>🎭 공연 정보 상세 내용</div>
+            <div><InfoDetail /></div>
           ) : (
-            <div>💸 판매 정보 상세 내용</div>
+            <div><Statistics /></div>
           )}
         </div>
       </div>

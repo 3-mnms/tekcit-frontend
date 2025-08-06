@@ -1,0 +1,27 @@
+.container {
+  width: 100%;
+  padding: 1.5rem 2%;
+  background-color: white;
+  border-radius: 1rem;
+  border: 1px solid #ddd;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icon {
+  font-size: 1.2rem;
+  color: #4D9AFD;
+}
+
+.description {
+  font-size: 0.95rem;
+  color: #555;
+}

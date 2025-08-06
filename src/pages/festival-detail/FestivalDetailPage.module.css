@@ -1,52 +1,70 @@
-.contentWrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 2rem;
-  padding: 2rem;
+.pageWrapper {
+  width: 100vw;
+  max-width: 100vw;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
-/* 탭 메뉴 영역 */
+.contentWrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 2rem;
+  padding: 2rem 5%;
+  padding-left: 5%;
+  padding-right: 28%;
+}
+
+.schedulerSticky {
+  position: fixed;
+  top: 120px; /* 헤더 아래에 띄우고 싶으면 조정 */
+  right: 5%;
+  width: 20%; /* 적절히 조정 */
+  z-index: 10;
+  padding-right: 5%;
+}
+
+/* 탭 메뉴 아래도 똑같이 수정해줘야 정렬 맞음 */
 .tabWrapper {
+  padding: 0 5%;
   margin-top: 3rem;
-  padding: 0 2rem;
+  padding-right: 28%;
+}
+
+.tabWrapper {
+  margin-top: 2rem;
+  width: 100%;
 }
 
 .tabMenu {
   display: flex;
   gap: 2rem;
-  border-bottom: 1px solid #dcdfe3;
+  border-bottom: 1px solid #ccc;
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
+  font-size: 1.1rem;
 }
 
 .tab {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #888;
-  padding-bottom: 0.5rem;
-  border: none;
+  all: unset;
   background: none;
+  border: none;
+  outline: none;
   cursor: pointer;
-  position: relative;
+  font-weight: 500;
+  color: #666;
+  padding-bottom: 0.25rem;
 }
 
-.tab.active {
+.active {
+  color: black;
   font-weight: 700;
-  color: #000;
-}
-
-.tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background-color: #333;
+  border-bottom: 2px solid #000;
 }
 
 .tabContent {
-  font-size: 0.95rem;
-  color: #333;
+  background-color: #fff;
+  padding: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
 }

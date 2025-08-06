@@ -34,51 +34,53 @@ const FestivalScheduleSection: React.FC = () => {
   const availableTimes = timeTableByDate[formatDateKey(selectedDate)] || [];
 
   return (
-    <div className={styles.container}>
-      {/* 관람일 */}
-      <p className={styles.title}>관람일</p>
-      <div className={styles.datepickerWrapper}>
-      <DatePicker
-        inline
-        locale={ko}
-        selected={selectedDate}
-        onChange={(date) => {
-          setSelectedDate(date);
-          setSelectedTime(null); // 날짜 바뀌면 시간 초기화
-        }}
-        minDate={minDate}
-        maxDate={maxDate}
-        includeDates={availableDates}
-        dateFormat="yyyy.MM.dd"
-        renderDayContents={(day, date) => {
-          const isAvailable = availableDates.some((d) => isSameDay(d, date));
-          const isSelected = selectedDate && isSameDay(date, selectedDate);
-          return (
-            <div
-              className={`${styles.day} ${isAvailable ? styles.active : styles.inactive} ${
-                isSelected ? styles.selected : ''
-              }`}
-            >
-              {day}
-            </div>
-          );
-        }}
-      />
-      </div>
+    <>
+      <div className={styles.container}>
+        {/* 관람일 */}
+        <p className={styles.title}>관람일</p>
+        <div className={styles.datepickerWrapper}>
+        <DatePicker
+          inline
+          locale={ko}
+          selected={selectedDate}
+          onChange={(date) => {
+            setSelectedDate(date);
+            setSelectedTime(null); // 날짜 바뀌면 시간 초기화
+          }}
+          minDate={minDate}
+          maxDate={maxDate}
+          includeDates={availableDates}
+          dateFormat="yyyy.MM.dd"
+          renderDayContents={(day, date) => {
+            const isAvailable = availableDates.some((d) => isSameDay(d, date));
+            const isSelected = selectedDate && isSameDay(date, selectedDate);
+            return (
+              <div
+                className={`${styles.day} ${isAvailable ? styles.active : styles.inactive} ${
+                  isSelected ? styles.selected : ''
+                }`}
+              >
+                {day}
+              </div>
+            );
+          }}
+        />
+        </div>
 
-      {/* 시간 */}
-      <div className={styles.section}>
-        <p className={styles.label}>시간</p>
-        <div className={styles.timeGroup}>
-          {availableTimes.map((time) => (
-            <button
-              key={time}
-              className={`${styles.timeBtn} ${selectedTime === time ? styles.selectedBtn : ''}`}
-              onClick={() => setSelectedTime(time)}
-            >
-              {time}
-            </button>
-          ))}
+        {/* 시간 */}
+        <div className={styles.section}>
+          <p className={styles.label}>시간</p>
+          <div className={styles.timeGroup}>
+            {availableTimes.map((time) => (
+              <button
+                key={time}
+                className={`${styles.timeBtn} ${selectedTime === time ? styles.selectedBtn : ''}`}
+                onClick={() => setSelectedTime(time)}
+              >
+                {time}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -90,14 +92,14 @@ const FestivalScheduleSection: React.FC = () => {
             className={styles.confirmBtn}
             disabled={!selectedDate || !selectedTime}
             onClick={() =>
-              alert(`${formatDateKey(selectedDate)} ${selectedTime} 예매 시작!`)
+            alert(`${formatDateKey(selectedDate)} ${selectedTime} 예매 시작!`)
             }
           >
             예매하기
           </button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
