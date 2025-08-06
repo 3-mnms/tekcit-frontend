@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import styles from '@components/payment/pay/CardSimplePayment.module.css'
 
 interface CardSimplePaymentProps {
@@ -33,9 +34,7 @@ const Button: React.FC<ButtonProps> = ({
 }
 
 const CardSimplePayment: React.FC<CardSimplePaymentProps> = ({ isOpen, onToggle }) => {
-  const handlePayment = (method: string) => {
-    alert(`${method}로 결제를 진행합니다.`)
-  }
+  const [selectedMethod, setSelectedMethod] = useState<'네이버페이' | '카카오페이' | null>(null)
 
   return (
     <div className={styles['payment-section']}>
@@ -60,8 +59,10 @@ const CardSimplePayment: React.FC<CardSimplePaymentProps> = ({ isOpen, onToggle 
         <div className={styles['payment-box']}>
           <div className={styles['payment-buttons-row']}>
             <Button
-              className={`${styles['payment-btn']} ${styles['naver-btn']}`}
-              onClick={() => handlePayment('네이버페이')}
+              className={`${styles['payment-btn']} ${styles['naver-btn']} ${
+                selectedMethod === '네이버페이' ? styles.selected : ''
+              }`}
+              onClick={() => setSelectedMethod('네이버페이')}
             >
               <div className={`${styles['btn-icon']} ${styles['naver-icon']}`}>
                 <span className="icon-text">N</span>
@@ -70,8 +71,10 @@ const CardSimplePayment: React.FC<CardSimplePaymentProps> = ({ isOpen, onToggle 
             </Button>
 
             <Button
-              className={`${styles['payment-btn']} ${styles['kakao-btn']}`}
-              onClick={() => handlePayment('카카오페이')}
+              className={`${styles['payment-btn']} ${styles['kakao-btn']} ${
+                selectedMethod === '카카오페이' ? styles.selected : ''
+              }`}
+              onClick={() => setSelectedMethod('카카오페이')}
             >
               <div className={`${styles['btn-icon']} ${styles['kakao-icon']}`}>
                 <span className="icon-text">K</span>
