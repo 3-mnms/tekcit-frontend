@@ -19,6 +19,7 @@ import WithdrawPage from '@/pages/my/myInfo/withdraw/WithdrawPage'
 import BookmarkPage from '@/pages/my/myInfo/bookmark/BookmarkPage'
 import TicketHistoryPage from '@/pages/my/ticket/TicketHistoryPage'
 import MyTicketPage from '@/pages/my/ticket/MyTicketPage'
+import TicketDetailPage from '@/pages/my/ticket/TicketDetailPage'
 
 // payment
 import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '', element: <MyTicketPage /> },
           { path: 'history', element: <TicketHistoryPage /> },
+           { path: 'detail/:id', element: <TicketDetailPage /> },
           // {
           //   path: 'address',
           //   children: [

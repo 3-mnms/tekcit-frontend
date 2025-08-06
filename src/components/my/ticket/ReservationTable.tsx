@@ -1,7 +1,23 @@
 import React from 'react';
 import styles from './ReservationTable.module.css';
+import { useNavigate } from 'react-router-dom';
 
-const dummyData = [
+interface Reservation {
+  id: number;
+  date: string; 
+  number: string;
+  title: string;
+  dateTime: string;
+  count: number;
+  status: string;
+}
+
+interface Props {
+  startDate: Date | null;
+  endDate: Date | null;
+}
+
+const dummyData: Reservation[] = [
   {
     id: 1,
     date: '2025.07.01',
@@ -13,7 +29,7 @@ const dummyData = [
   },
   {
     id: 2,
-    date: '2025.07.02',
+    date: '2025.06.15',
     number: 'B654321',
     title: 'GMF 2025',
     dateTime: '2025.10.19 18:00',
@@ -22,7 +38,20 @@ const dummyData = [
   },
 ];
 
-const ReservationTable: React.FC = () => {
+const ReservationTable: React.FC<Props> = ({ startDate, endDate }) => {
+  const navigate = useNavigate();
+
+  const handleRowClick = (id: number) => {
+    navigate(`/mypage/ticket/detail/${id}`);
+  };
+
+  const filteredData = dummyData.filter((item) => {
+    const reservationDate = new Date(item.date.replace(/\./g, '-')); // '2025.07.01' -> '2025-07-01'
+    if (startDate && reservationDate < startDate) return false;
+    if (endDate && reservationDate > endDate) return false;
+    return true;
+  });
+
   return (
     <div className={styles.tableWrapper}>
       <table className={styles.table}>
@@ -37,8 +66,8 @@ const ReservationTable: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {dummyData.map((item) => (
-            <tr key={item.id}>
+          {filteredData.map((item) => (
+            <tr key={item.id} onClick={() => handleRowClick(item.id)} className={styles.clickableRow}>
               <td>{item.date}</td>
               <td>{item.number}</td>
               <td>{item.title}</td>
