@@ -20,6 +20,7 @@ import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
 import PaymentCompletePage from '@pages/payment/PaymentCompletePage'
 import PaymentFailPage from '@pages/payment/PaymentFailPage'
 import TransferPaymentPage from '@pages/payment/TransferPaymentPage'
+import TransferFeePaymentPage from '@pages/payment/TransferFeePaymentPage'
 
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -66,5 +67,9 @@ export const router = createBrowserRouter([
   {
     path: '/TransferPaymentPage',
     element: <TransferPaymentPage />,
+  },
+  {
+    path: '/TransferFeePaymentPage',
+    element: <TransferFeePaymentPage />,
   },
 ])
