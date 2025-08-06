@@ -21,6 +21,7 @@ import LinkedAccounts from '@/pages/my/myInfo/linkedaccount/LinkedAccountsPage'
 import AddressListPage from '@/pages/my/myInfo/adress/AddressListPage'
 import AddressFormPage from '@/pages/my/myInfo/adress/AddressFormPage'
 import WithdrawPage from '@/pages/my/myInfo/withdraw/WithdrawPage'
+import BookmarkPage from '@/pages/my/myInfo/bookmark/BookmarkPage'
 
 export const router = createBrowserRouter([
   { path: '/', element: <SignupPage /> },
@@ -48,6 +49,7 @@ export const router = createBrowserRouter([
           { path: 'withdraw', element: <WithdrawPage /> },
         ],
       },
+      { path: 'bookmark', element: <BookmarkPage /> },
     ],
   },
 ])
