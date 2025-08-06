@@ -63,10 +63,12 @@ const AddressForm: React.FC = () => {
         onChange={(e) => setPhone(e.target.value)}
       />
 
-      <label className={styles.checkboxLabel}>
-        <input type="checkbox" checked={isDefault} onChange={() => setIsDefault(!isDefault)} />
-        기본 배송지로 설정
-      </label>
+      <div className={styles.checkboxWrapper}>
+        <label className={styles.checkboxLabel}>
+          <input type="checkbox" checked={isDefault} onChange={() => setIsDefault(!isDefault)} />
+          <span>기본 배송지로 설정</span>
+        </label>
+      </div>
 
       <Button className={styles.submitButton}>저장</Button>
     </div>

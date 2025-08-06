@@ -5,6 +5,8 @@ import HomePage from '@pages/home/MainPage'
 
 // mypage
 import MyPage from '@/pages/my/MyPage'
+// import Sidebar from '@components/my/sidebar/Sidebar'
+import SignupPage from '@/pages/my/dropdown/UserDropdown'
 import MyInfoPage from '@/pages/my/myInfo/MyInfoPage'
 import DetailPage from '@/pages/my/myInfo/basicinfo/DetailPage'
 import VerifyPasswordPage from '@/pages/my/myInfo/basicinfo/VerifyPasswordPage'
@@ -14,13 +16,14 @@ import LinkedAccounts from '@/pages/my/myInfo/linkedaccount/LinkedAccountsPage'
 import AddressListPage from '@/pages/my/myInfo/adress/AddressListPage'
 import AddressFormPage from '@/pages/my/myInfo/adress/AddressFormPage'
 import WithdrawPage from '@/pages/my/myInfo/withdraw/WithdrawPage'
+import BookmarkPage from '@/pages/my/myInfo/bookmark/BookmarkPage'
 
 // payment
 import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
 import DeliveryManagePage from '@pages/payment/DeliveryManagePage'
 
 export const router = createBrowserRouter([
-  { path: '/', element: <HomePage /> },
+  { path: '/', element: <SignupPage /> },
 
   {
     path: '/mypage',
@@ -34,6 +37,7 @@ export const router = createBrowserRouter([
           { path: 'detail/editinfo', element: <EditInfoPage /> },
           { path: 'changepassword', element: <ChangePasswordPage /> },
           { path: 'linkedaccount', element: <LinkedAccounts /> },
+          { path: 'verifypassword', element: <VerifyPasswordPage /> },
           {
             path: 'address',
             children: [
@@ -44,7 +48,7 @@ export const router = createBrowserRouter([
           { path: 'withdraw', element: <WithdrawPage /> },
         ],
       },
-      { path: 'verifypassword', element: <VerifyPasswordPage /> },
+      { path: 'bookmark', element: <BookmarkPage /> },
     ],
   },
 

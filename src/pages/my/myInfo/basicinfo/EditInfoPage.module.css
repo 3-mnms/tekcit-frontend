@@ -35,6 +35,9 @@
 }
 
 .submitButton {
-  margin-top: 2rem;
   width: 100%;
+}
+
+.authCodeRow {
+  margin-top: -1rem;
 }

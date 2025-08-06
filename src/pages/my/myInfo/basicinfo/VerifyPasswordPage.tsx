@@ -16,7 +16,7 @@ const VerifyPasswordPage: React.FC = () => {
 
       <Button
         className={styles.button}
-        onClick={() => navigate('../myinfo/detail/editinfo')}
+        onClick={() => navigate('../detail/editinfo')}
       >
         확인
       </Button>

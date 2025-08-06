@@ -21,11 +21,6 @@ const sidebarItems: SidebarItem[] = [
     ],
   },
   {
-    label: '인증 정보',
-    path: '/mypage/auth',
-    children: [{ label: '본인인증', path: '/mypage/auth' }],
-  },
-  {
     label: '내 티켓',
     path: '/mypage/ticket',
     children: [
