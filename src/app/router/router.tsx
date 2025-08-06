@@ -17,6 +17,8 @@ import AddressListPage from '@/pages/my/myInfo/adress/AddressListPage'
 import AddressFormPage from '@/pages/my/myInfo/adress/AddressFormPage'
 import WithdrawPage from '@/pages/my/myInfo/withdraw/WithdrawPage'
 import BookmarkPage from '@/pages/my/myInfo/bookmark/BookmarkPage'
+import TicketHistoryPage from '@/pages/my/ticket/TicketHistoryPage'
+import MyTicketPage from '@/pages/my/ticket/MyTicketPage'
 
 // payment
 import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
@@ -49,6 +51,20 @@ export const router = createBrowserRouter([
         ],
       },
       { path: 'bookmark', element: <BookmarkPage /> },
+      {
+        path: 'ticket',
+        children: [
+          { path: '', element: <MyTicketPage /> },
+          { path: 'history', element: <TicketHistoryPage /> },
+          // {
+          //   path: 'address',
+          //   children: [
+          //     { path: '', element: <AddressListPage /> },
+          //     { path: 'new', element: <AddressFormPage /> },
+          //   ],
+          // },
+        ],
+      },
     ],
   },
 
@@ -62,4 +78,3 @@ export const router = createBrowserRouter([
     element: <DeliveryManagePage />,
   },
 ])
-
