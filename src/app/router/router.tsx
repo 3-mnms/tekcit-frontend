@@ -4,6 +4,7 @@ import Layout from "@/pages/home/LayoutTestPage";
 import OperatManageUser from "@/pages/admin/OperatManageUserPage";
 import OperatManageHost from "@/pages/admin/OperatManageHostPage";
 import ProductRegister from "@/pages/host/ProductRegistPage";
+import AnnouncementListPage from "@/pages/announcement/AnnouncementListPage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <HomePage /> }, 
@@ -11,5 +12,5 @@ export const router = createBrowserRouter([
   { path: "/operatManage/user", element: < OperatManageUser/>},
   { path: "/operatManage/host", element: < OperatManageHost/>},
   { path: "/productRegist", element: < ProductRegister/>},
-
+  { path: "/announcement", element: < AnnouncementListPage/>},
 ]);
