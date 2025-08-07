@@ -29,7 +29,8 @@ import PaymentCompletePage from '@pages/payment/PaymentCompletePage'
 import PaymentFailPage from '@pages/payment/PaymentFailPage'
 import TransferPaymentPage from '@pages/payment/TransferPaymentPage'
 import TransferFeePaymentPage from '@pages/payment/TransferFeePaymentPage'
-import ConfirmModal from '@pages/payment/ConfirmModal'
+import PayPointPage from '@pages/payment/PayPointPage'
+import MoneyChargePage from '@pages/payment/MoneyChargePage'
 
 export const router = createBrowserRouter([
   { path: '/', element: <SignupPage /> },
@@ -81,26 +82,14 @@ export const router = createBrowserRouter([
   // payment
   {
     path: '/payment',
-    element: <BookingPaymentPage />,
-  },
-  {
-    path: '/PaymentCompletePage',
-    element: <PaymentCompletePage />,
-  },
-  {
-    path: '/PaymentFailPage',
-    element: <PaymentFailPage />,
-  },
-  {
-    path: '/TransferPaymentPage',
-    element: <TransferPaymentPage />,
-  },
-  {
-    path: '/TransferFeePaymentPage',
-    element: <TransferFeePaymentPage />,
-  },
-  {
-    path: '/ConfirmModal',
-    element: <ConfirmModal />,
+    children: [
+      { path: '', element: <BookingPaymentPage /> }, // /payment
+      { path: 'complete', element: <PaymentCompletePage /> }, // /payment/complete
+      { path: 'fail', element: <PaymentFailPage /> }, // /payment/fail
+      { path: 'transfer', element: <TransferPaymentPage /> }, // /payment/transfer
+      { path: 'transfer-fee', element: <TransferFeePaymentPage /> }, // /payment/transfer-fee
+      { path: 'paypoint', element: <PayPointPage /> },
+      { path: 'moneyCharge', element: <MoneyChargePage /> },
+    ],
   },
 ])
