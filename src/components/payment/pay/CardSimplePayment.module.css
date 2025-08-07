@@ -1,7 +1,7 @@
 .payment-section {
   width: 100%; /* ← 부모 너비 채우기 */
   margin: 0;
-  padding: 24px;
+  /* padding: 24px; */
   border-radius: 12px;
   box-sizing: border-box; /* ← 이거 안 하면 padding이 너비에서 빠짐 */
 }
@@ -21,7 +21,7 @@
 /* 토글 섹션 */
 .toggle-section {
   border-radius: 0.5rem;
-  padding: 1rem;
+  padding: 10px;
   margin-bottom: 1rem;
 }
 

@@ -26,12 +26,15 @@ import BookmarkPage from '@/pages/my/myInfo/bookmark/BookmarkPage'
 import TicketHistoryPage from '@/pages/my/ticket/TicketHistoryPage'
 import MyTicketPage from '@/pages/my/ticket/MyTicketPage'
 import TicketDetailPage from '@/pages/my/ticket/TicketDetailPage'
-import TransferTicketPage from '@/pages/my/ticket/TransferTicketPage'
-import EntranceCheckPage from '@/pages/my/ticket/EntranceCheckPage'
 
 // payment
 import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
-import DeliveryManagePage from '@pages/payment/DeliveryManagePage'
+import PaymentCompletePage from '@pages/payment/PaymentCompletePage'
+import PaymentFailPage from '@pages/payment/PaymentFailPage'
+import TransferPaymentPage from '@pages/payment/TransferPaymentPage'
+import TransferFeePaymentPage from '@pages/payment/TransferFeePaymentPage'
+import PayPointPage from '@pages/payment/PayPointPage'
+import MoneyChargePage from '@pages/payment/MoneyChargePage'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -69,9 +72,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '', element: <MyTicketPage /> },
           { path: 'history', element: <TicketHistoryPage /> },
-          { path: 'detail/:id', element: <TicketDetailPage /> },
-          { path: 'transfer', element: <TransferTicketPage /> },
-          { path: 'entrancecheck', element: <EntranceCheckPage /> },
+           { path: 'detail/:id', element: <TicketDetailPage /> },
           // {
           //   path: 'address',
           //   children: [
@@ -87,10 +88,14 @@ export const router = createBrowserRouter([
   // payment
   {
     path: '/payment',
-    element: <BookingPaymentPage />,
-  },
-  {
-    path: '/DeliveryManagePage',
-    element: <DeliveryManagePage />,
+    children: [
+      { path: '', element: <BookingPaymentPage /> }, // /payment
+      { path: 'complete', element: <PaymentCompletePage /> }, // /payment/complete
+      { path: 'fail', element: <PaymentFailPage /> }, // /payment/fail
+      { path: 'transfer', element: <TransferPaymentPage /> }, // /payment/transfer
+      { path: 'transfer-fee', element: <TransferFeePaymentPage /> }, // /payment/transfer-fee
+      { path: 'paypoint', element: <PayPointPage /> },
+      { path: 'moneyCharge', element: <MoneyChargePage /> },
+    ],
   },
 ])

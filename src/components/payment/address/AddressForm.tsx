@@ -6,8 +6,8 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import Button from '@components/common/button/Button'
-import styles from '@components/payment/AddressForm.module.css'
-import { defaultAddress } from '@models/delivery/defaultAddress' // ← 외부에서 기본값만 import
+import styles from '@components/payment//address/AddressForm.module.css'
+import { defaultAddress } from '@/models/payment/defaultAddress' // ← 외부에서 기본값만 import
 import DeliveryManagePage from '@/pages/payment/DeliveryManagePage'
 
 // ✅ 여기서 zod 스키마 직접 정의
@@ -25,7 +25,6 @@ type AddressFormInputs = z.infer<typeof schema>
 const AddressForm = () => {
   const {
     register,
-    handleSubmit,
     reset,
     formState: { errors },
   } = useForm<AddressFormInputs>({ resolver: zodResolver(schema) })
@@ -33,13 +32,8 @@ const AddressForm = () => {
   const [selectedTab, setSelectedTab] = useState<'default' | 'recent' | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const onSubmit = (data: AddressFormInputs) => {
-    console.log('제출 데이터:', data)
-    alert('배송지 저장 완료!')
-  }
-
   return (
-    <form className={styles['address-container']} onSubmit={handleSubmit(onSubmit)}>
+    <form className={styles['address-container']}>
       <div className={styles['address-tabs']}>
         <span className={styles['tabs-label']}>배송지 선택</span>
         <Button
@@ -138,12 +132,6 @@ const AddressForm = () => {
           <input type="text" placeholder="상세 주소" {...register('address2')} />
           {errors.address2 && <p className={styles['error']}>{errors.address2.message}</p>}
         </div>
-      </div>
-
-      <div className={styles['submit-wrap']}>
-        <button type="submit" className="plain-button w-full h-12">
-          저장
-        </button>
       </div>
     </form>
   )

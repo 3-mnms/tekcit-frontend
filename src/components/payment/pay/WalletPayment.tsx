@@ -1,4 +1,4 @@
-import styles from '@components/payment/WalletPayment.module.css'
+import styles from '@components/payment/pay/WalletPayment.module.css'
 import Button from '@components/common/button/Button'
 
 interface WalletPaymentProps {

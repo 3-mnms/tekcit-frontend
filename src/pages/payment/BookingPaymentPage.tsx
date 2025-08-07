@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import AddressForm from '@/components/payment/AddressForm'
-import WalletPayment from '@/components/payment/WalletPayment'
-import CardSimplePayment from '@/components/payment/CardSimplePayment'
-import GeneralCardPayment from '@/components/payment/GeneralCardPayment'
-import PaymentInfo from '@/components/payment/PaymentInfo'
+import WalletPayment from '@/components/payment/pay/WalletPayment'
+import CardSimplePayment from '@/components/payment/pay/CardSimplePayment'
+import GeneralCardPayment from '@/components/payment/pay/GeneralCardPayment'
+import PaymentInfo from '@/components/payment/pay/PaymentInfo'
 import Button from '@/components/common/button/Button'
 
 import styles from '@pages/payment/BookingPaymentPage.module.css'
@@ -13,16 +12,10 @@ const BookingPaymentPage: React.FC = () => {
 
   return (
     <div className={styles['booking-container']}>
-      {/* 왼쪽: 배송지 + 결제 수단 */}
+      {/* 왼쪽: 결제 수단 */}
       <div className={styles['left-panel']}>
         <section className={styles['section']}>
-          <h2 className={styles['section-title']}>배송지 정보</h2>
-          <AddressForm />
-        </section>
-
-        <section className={styles['section']}>
           <h2 className={styles['section-title']}>결제 수단</h2>
-
           <div className={styles['payment-method-wrapper']}>
             <WalletPayment
               isOpen={openedMethod === 'wallet'}
@@ -40,7 +33,7 @@ const BookingPaymentPage: React.FC = () => {
         </section>
       </div>
 
-      {/* 오른쪽: 공연 요약 + 결제 정보 + 결제 버튼 */}
+      {/* 오른쪽: 결제 정보 */}
       <div className={styles['right-panel']}>
         <div className={styles['payment-summary-wrapper']}>
           <PaymentInfo />

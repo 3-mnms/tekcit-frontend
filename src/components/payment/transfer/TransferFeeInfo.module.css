@@ -1,0 +1,27 @@
+.feeBox {
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 32px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feeRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: bold;
+  color: #111;
+}
+
+.feeLabel {
+  text-align: left;
+}
+
+.feeValue {
+  text-align: right;
+}
