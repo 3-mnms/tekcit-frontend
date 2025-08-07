@@ -1,19 +1,17 @@
+/* PaymentInfo.module.css */
+
 .container {
-  flex: 1;
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 20px;
+  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
 }
 
 .contentWrapper {
-  flex: 1;
+  flex: 1;            /* ✅ 남은 공간 모두 차지 */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-between; /* ✅ 위(정보) - 아래(총금액)을 끝까지 밀어냄 */
 }
 
 .header {
@@ -21,14 +19,13 @@
   gap: 12px;
   align-items: center;
   margin-bottom: 20px;
-  height: 200px;
   flex: 0 0 auto;
 }
 
-/* 포스터 영역 */
 .posterPlaceholder {
-  width: 30%;
-  height: 100%;
+  width: 45%;
+  min-height: 150px; /* ✅ 최소 높이 확보 */
+  height: 30%;
   background-color: #ccc;
   border-radius: 4px;
   object-fit: cover;
@@ -42,83 +39,44 @@
 
 .tableWrapper {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  overflow: visible;   /* ✅ 스크롤 제거 */
+  height: auto;        /* ✅ 고정 높이 제거 */
 }
 
 .infoTable {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 1.1rem; /* 글씨 키움 (≈18px) */
-  line-height: 1.8; /* 줄 간격 넓힘 */
   table-layout: fixed;
-}
-
-.infoTable td {
-  padding: 12px 0; /* 위아래 여백 늘림 */
-  color: #333;
-  font-weight: 500;
-}
-
-.total td {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #e74c3c;
-  border-top: 1px solid #ccc;
-  padding-top: 16px;
+  border-collapse: collapse;
 }
 
 .label {
-  border-bottom: 1px solid #ddd;
-  padding: 10px 0;
+  font-size: 14px;
   font-weight: 500;
-  color: #444;
-  text-align: left;
+  color: #333;
+  padding: 6px 0;
 }
 
 .value {
-  border-bottom: 1px solid #ddd;
-  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 400;
+  color: #111;
   text-align: right;
-  color: #222;
-}
-
-.warning {
-  color: red;
-}
-
-.detailBtn {
-  margin-left: 8px;
-  padding: 2px 6px;
-  font-size: 0.75rem;
-  color: #555;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-  cursor: pointer;
+  padding: 6px 0;
 }
 
 .totalRow {
-  background-color: #f3f3f3;
-  font-weight: bold;
+  background-color: #f6f6f6;
 }
 
 .totalLabel {
-  padding: 12px 0;
-  font-size: 1.1rem;
-  text-align: left;
+  font-weight: bold;
+  color: #000;
+  padding-top: 12px;
 }
 
 .totalValue {
-  padding: 12px 0;
-  font-size: 1.4rem;
-  color: #e74c3c !important; 
+  font-weight: bold;
+  color: red;
+  padding-top: 12px;
   text-align: right;
 }
-
-.firstRow td {
-  border-top: 2px solid #666;
-}
-
-
