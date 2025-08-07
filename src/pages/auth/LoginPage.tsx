@@ -1,5 +1,5 @@
-// pages/LoginPage.tsx
 import React from 'react'
+import { Link } from 'react-router-dom' // 이거 꼭 추가해야 해!
 import Logo from '@assets/logo.png'
 import LoginInput from '@/components/auth/login/LoginInput'
 import SocialLogin from '@/components/auth/login/SocialLogin'
@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
         <Button className="w-full h-12">로그인</Button>
 
         <div className={styles.findLinks}>
-          <a href="#">아이디 찾기</a> | <a href="#">비번 찾기</a>
+          <Link to="/find-id">아이디 찾기</Link> | <Link to="/find-password">비번 찾기</Link>
         </div>
 
         <SocialLogin />
