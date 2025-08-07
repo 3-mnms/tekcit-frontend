@@ -2,6 +2,8 @@ import React from 'react';
 import styles from './Header.module.css';
 import logo from '@shared/assets/logo.png';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { getFestivalCategories } from '@shared/api/festival/FestivalApi';
 
 interface HeaderProps {
   isLoggedIn: boolean;
@@ -18,11 +20,42 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
     }
   };
 
+  const { data: categories } = useQuery({
+    queryKey: ['festivalCategories'],
+    queryFn: getFestivalCategories,
+  });
+
+  const groupCategories = (original: string[]): string[] => {
+    const grouped = new Set<string>();
+
+    original.forEach((category) => {
+      if (['대중무용', '무용(서양/한국무용)'].includes(category)) {
+        grouped.add('무용');
+      } else if (category === '대중음악') {
+        grouped.add('대중음악');
+      } else if (['뮤지컬', '연극'].includes(category)) {
+        grouped.add('뮤지컬/연극');
+      } else if (['서양음악(클래식)', '한국음악(국악)'].includes(category)) {
+        grouped.add('클래식/전통음악');
+      } else {
+        grouped.add(category);
+      }
+    });
+
+    return Array.from(grouped);
+  };
+
+  const groupedCategories = categories ? groupCategories(categories) : [];
+
   return (
     <header className={styles.header}>
       <div className={styles.left}>
-        <img src={logo}alt="tekcit logo" className={styles.logo} />
-        <span className={styles.category}>콘서트 / 페스티벌 / 등</span>
+        <img src={logo} alt="tekcit logo" className={styles.logo} />
+        <div className={styles.categoryList}>
+          {groupedCategories.map((cat) => (
+            <span key={cat}>{cat}</span>
+          ))}
+        </div>
       </div>
 
       <div className={styles.center}>
@@ -47,14 +80,14 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
 
       <div className={styles.right}>
         {isLoggedIn ? (
-          <div className={styles.rightButton} onClick={() => navigate('/login')}>
-            <i className="fa-regular fa-user" />
-            <p style={{ margin: 0 }}>로그인</p>
-          </div>
-        ) : (
           <div className={styles.rightButton} onClick={() => navigate('/mypage')}>
             <i className="fa-regular fa-user" />
-            <p style={{ margin: 0 }}>마이페이지</p>
+            <span>마이페이지</span>
+          </div>
+        ) : (
+          <div className={styles.rightButton} onClick={() => navigate('/login')}>
+            <i className="fa-regular fa-user" />
+            <span>로그인</span>
           </div>
         )}
       </div>
