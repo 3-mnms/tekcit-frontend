@@ -1,4 +1,3 @@
-// PaymentInfo.tsx
 import styles from '@components/payment/pay/PaymentInfo.module.css'
 
 const deliveryType = 'QR'

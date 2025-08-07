@@ -17,13 +17,13 @@ import WithdrawPage from '@/pages/my/myInfo/withdraw/WithdrawPage'
 
 // payment
 import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
-import PaymentCompletePage from '@pages/payment/PaymentCompletePage'
-import PaymentFailPage from '@pages/payment/PaymentFailPage'
-import TransferPaymentPage from '@pages/payment/TransferPaymentPage'
-import TransferFeePaymentPage from '@pages/payment/TransferFeePaymentPage'
-import PayPointPage from '@pages/payment/PayPointPage'
-import CancelRequestPage from '@pages/payment/CancelRequestPage'
-import CancelSuccessPage from '@pages/payment/CancelSuccessPage'
+import PaymentCompletePage from '@/pages/payment/pay/PaymentCompletePage'
+import PaymentFailPage from '@/pages/payment/pay/PaymentFailPage'
+import TransferPaymentPage from '@/pages/payment/transfer/TransferPaymentPage'
+import TransferFeePaymentPage from '@/pages/payment/transfer/TransferFeePaymentPage'
+import PayPointPage from '@/pages/payment/pay/PayPointPage'
+import CancelRequestPage from '@/pages/payment/refund/CancelRequestPage'
+import TransferSuccessPage from '@/pages/payment/transfer/TransferSuccessPage'
 
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
@@ -65,7 +65,7 @@ export const router = createBrowserRouter([
       { path: 'transfer-fee', element: <TransferFeePaymentPage /> }, // /payment/transfer-fee
       { path: 'paypoint', element: <PayPointPage /> },
       { path: 'cancelRequest', element: <CancelRequestPage /> },
-      { path: 'cancelSuccess', element: <CancelSuccessPage /> },
+      { path: 'transfer-success', element: <TransferSuccessPage /> },
     ],
   },
 ])

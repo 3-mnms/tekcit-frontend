@@ -1,16 +1,22 @@
 // AddressForm.tsx
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import Button from '@components/common/button/Button'
-import styles from '@components/payment//address/AddressForm.module.css'
-import { defaultAddress } from '@/models/payment/defaultAddress' // ← 외부에서 기본값만 import
-import DeliveryManagePage from '@/pages/payment/DeliveryManagePage'
+import { defaultAddress } from '@/models/payment/defaultAddress'
+import DeliveryManagePage from '@/pages/payment/modal/DeliveryManageModal'
 
-// ✅ 여기서 zod 스키마 직접 정의
+import styles from './AddressForm.module.css'
+
+// ✅ props 인터페이스 추가
+interface AddressFormProps {
+  onValidChange?: (isValid: boolean) => void
+}
+
+// ✅ zod 스키마 정의
 const schema = z.object({
   name: z.string().min(1, '이름을 입력해 주세요.'),
   phonePrefix: z.enum(['010', '011', '016', '017', '018', '019']),
@@ -22,15 +28,34 @@ const schema = z.object({
 
 type AddressFormInputs = z.infer<typeof schema>
 
-const AddressForm = () => {
+const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
   const {
     register,
     reset,
+    watch,
     formState: { errors },
-  } = useForm<AddressFormInputs>({ resolver: zodResolver(schema) })
+  } = useForm<AddressFormInputs>({
+    resolver: zodResolver(schema),
+    mode: 'onChange',
+  })
 
   const [selectedTab, setSelectedTab] = useState<'default' | 'recent' | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const watchAll = watch() // 👀 전체 입력 감시
+
+  // ✅ 입력 값이 바뀔 때마다 유효성 검사 실행 → 부모에게 알려줌
+  useEffect(() => {
+    const isValid =
+      watchAll.name?.trim() &&
+      watchAll.phonePrefix &&
+      /^\d{3,4}$/.test(watchAll.phonePart1 || '') &&
+      /^\d{4}$/.test(watchAll.phonePart2 || '') &&
+      watchAll.address1?.trim() &&
+      watchAll.address2?.trim()
+
+    onValidChange?.(!!isValid)
+  }, [watchAll, onValidChange])
 
   return (
     <form className={styles['address-container']}>
@@ -41,7 +66,7 @@ const AddressForm = () => {
           className={`${styles['tab-button']} ${selectedTab === 'default' ? styles['active'] : ''}`}
           onClick={() => {
             setSelectedTab('default')
-            reset(defaultAddress as AddressFormInputs) // ✅ 외부에서 가져온 더미 데이터로 채움
+            reset(defaultAddress as AddressFormInputs) // 기본 배송지로 설정
           }}
         >
           기본
@@ -49,7 +74,7 @@ const AddressForm = () => {
         <button
           type="button"
           className={`plain-button ${styles['tab-manage-btn']}`}
-          onClick={() => setIsModalOpen(true)} // ← 여는 함수
+          onClick={() => setIsModalOpen(true)}
         >
           배송지 관리
         </button>
@@ -63,14 +88,14 @@ const AddressForm = () => {
         )}
       </div>
 
-      {/* 최근 배송지 선택 영역 */}
+      {/* 최근 배송지 선택 탭 */}
       {selectedTab === 'recent' && (
         <div className={styles['recent-address-list-box']}>
           <p>최근 배송지 목록 표시 영역</p>
         </div>
       )}
 
-      {/* 폼 영역 */}
+      {/* 주소 입력 폼 */}
       <div className={styles['form-grid']}>
         <div className={styles['form-left']}>
           <label>받는 사람 *</label>
@@ -121,7 +146,7 @@ const AddressForm = () => {
               type="button"
               className={`plain-button ${styles['address-search-btn']}`}
               onClick={() => {
-                // TODO: 주소 검색 모달 열기
+                // 주소 검색 모달 열기 (추후 구현)
               }}
             >
               주소 검색

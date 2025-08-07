@@ -1,4 +1,4 @@
-import styles from '@components/payment/transfer/TransferFeeInfo.module.css'
+import styles from './TransferFeeInfo.module.css'
 
 interface TransferFeeInfoProps {
   perFee: number

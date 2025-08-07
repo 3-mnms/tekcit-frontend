@@ -1,9 +1,9 @@
-import styles from '@components/payment/transfer/TransferTicketInfo.module.css'
+import styles from './TransferTicketInfo.module.css'
 
 interface TransferTicketInfoProps {
   title: string
   date: string
-  seat: string
+  ticket: number
   sender: string
   receiver: string
 }
@@ -11,7 +11,7 @@ interface TransferTicketInfoProps {
 const TransferTicketInfo: React.FC<TransferTicketInfoProps> = ({
   title,
   date,
-  seat,
+  ticket,
   sender,
   receiver,
 }) => {
@@ -28,8 +28,8 @@ const TransferTicketInfo: React.FC<TransferTicketInfoProps> = ({
           <span className={styles.value}>{date}</span>
         </div>
         <div className={styles.infoRow}>
-          <span className={styles.label}>좌석</span>
-          <span className={styles.value}>{seat}</span>
+          <span className={styles.label}>티켓 매수</span>
+          <span className={styles.value}>{ticket}</span>
         </div>
         <div className={styles.infoRow}>
           <span className={styles.label}>양도자</span>

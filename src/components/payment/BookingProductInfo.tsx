@@ -11,7 +11,7 @@ const BookingProductInfo: React.FC = () => {
             {bookingProduct.datetime} · {bookingProduct.location}
           </p>
           <p className={styles.productSeat}>
-            좌석: {bookingProduct.seat.join(', ')}
+            티켓 매수: {bookingProduct.ticket}
           </p>
 
         </div>

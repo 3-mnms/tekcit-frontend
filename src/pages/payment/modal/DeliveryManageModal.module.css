@@ -22,13 +22,15 @@
 
 .close-button {
   position: absolute;
-  right: 0; /* 오른쪽 끝에 배치 */
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   padding: 4px;
   cursor: pointer;
+  font-size: 8px;
+  line-height: 1;
 }
 
 .close-icon {

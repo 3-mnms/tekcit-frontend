@@ -1,7 +1,7 @@
 // MoneyChargePage.tsx
 
 import React, { useState } from 'react'
-import styles from '@pages/payment/MoneyChargeMordal.module.css'
+import styles from '@pages/payment/modal/MoneyChargeModal.module.css'
 import Input from '@/components/common/input/Input'
 import CardSimplePayment from '@/components/payment/pay/CardSimplePayment'
 
