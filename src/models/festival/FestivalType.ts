@@ -6,6 +6,7 @@ export interface Festival {
   poster: string;
   fcltynm: string;
   area: string;
+  genrename: string; 
 }
 
 export interface FestivalWithViews extends Festival {

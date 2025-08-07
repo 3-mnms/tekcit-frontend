@@ -1,45 +1,58 @@
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 12px 24px;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #ddd;
   background-color: #fff;
-  gap: 20px;
+  gap: 16px;
+  flex-wrap: nowrap; /* ✅ 한줄 유지 */
+  overflow: hidden;
 }
 
 .left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
 .logo {
   height: 28px;
 }
 
-.category {
-  font-size: 1rem;
-  font-weight: 500;
+.categoryList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
 }
 
 .center {
+  flex: 1 1 auto;
   display: flex;
-  align-items: center;
-  flex: 1;
-  max-width: 500px;
-  gap: 8px;
+  justify-content: center;
+  min-width: 200px;
 }
 
-
+/* ✅ 검색창 영역 기본 표시 */
 .searchWrapper {
-    display: flex;
-    align-items: center;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 6px 10px;
-    background-color: white;
-    gap: 150px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 6px 12px;
+  gap: 8px;
+  width: 90%;
+}
+
+/* ✅ 좁은 화면일 때 검색창 숨김 */
+@media (max-width: 800px) {
+  .center {
+    display: none;
+  }
 }
 
 .searchInput {
@@ -47,11 +60,13 @@
   outline: none;
   flex: 1;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .right {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .rightButton {
@@ -60,5 +75,6 @@
   gap: 6px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 600;
   color: #333;
 }

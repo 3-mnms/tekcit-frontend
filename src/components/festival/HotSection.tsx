@@ -9,15 +9,14 @@ const HotSection = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      const width = window.innerWidth;
+      const vw = window.innerWidth / window.innerHeight;
 
-      if (width < 640) setVisibleCount(2);        // 모바일
-      else if (width < 1024) setVisibleCount(3);  // 태블릿
-      else if (width < 1280) setVisibleCount(4);  // 중간 사이즈
-      else setVisibleCount(5);                    // PC
+      if (vw < 0.7) setVisibleCount(2); // 세로 길이가 훨씬 긴 화면 (모바일)
+      else if (vw < 0.8) setVisibleCount(3); // 중간 뷰포트 비율 (태블릿)
+      else if (vw < 1.2) setVisibleCount(4); // 노트북 등
+      else setVisibleCount(5); // 와이드 PC
     };
-
-    handleResize(); // 초기 실행
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
