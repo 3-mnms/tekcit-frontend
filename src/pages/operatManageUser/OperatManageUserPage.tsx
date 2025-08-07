@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import SearchBar from '@/components/common/SearchBox';
-import UserList from '@components/admin/operatManage/UserList';
+import UserList from '@/components/operatManage/UserList';
 import styles from './OperatManageUser.module.css';
 import Layout from '@components/layout/Layout';
-import type { User } from '../../models/User';
+import type { User } from '@/models/User';
 
 const MOCK_USERS: User[] = [
     {

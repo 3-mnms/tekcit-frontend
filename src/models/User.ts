@@ -13,10 +13,10 @@ export interface User {
     phone: string;
     email: string;
     age: number;
-    resident_num: string;
-    birth: string;
+    resident_num: string; // 낙타화법 residentNum
+    birth: string;  // 
     gender: Gender;
-    address: Address[];
-    pw?: string;
-    isActive: boolean;
+    address: Address[]; // addresses
+    pw?: string; // loginPw
+    isActive: boolean; 
 }

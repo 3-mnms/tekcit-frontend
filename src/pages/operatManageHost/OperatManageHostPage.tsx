@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import SearchBar from '@/components/common/SearchBox';
-import UserList from '@components/admin/operatManage/HostList';
-import Button from '@components/common/Button';
+import UserList from '@/components/operatManage/HostList';
+import Button from '@/components/common/Button';
 import styles from './OperatManageHost.module.css';
 import Layout from '@components/layout/Layout';
-import AddPartner from '@/components/admin/operatManage/AddModal';
-import type {NewPartnerData} from '@/components/admin/operatManage/AddModal';
-import type { User } from '../../models/Host';
+import AddPartner from '@/components/operatManage/AddModal';
+import type {NewPartnerData} from '@/components/operatManage/AddModal';
+import type { User } from '@/models/Host';
 
 const MOCK_PARTNERS: User[] = [
         { id: 1, name: '김철수', userId: 'kimcs', phone: '010-1111-2222', email: 'kimcs@test.com', genre: '뮤지컬', businessName: '뮤지컬 컴퍼니', pw: 'password1', isActive: true },

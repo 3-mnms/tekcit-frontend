@@ -33,3 +33,11 @@
 .table tbody tr:hover {
     background-color: #f0f8ff; /* 삐약! 마우스 오버 시 색상 변경! */
 }
+
+.clickableRow {
+    cursor: pointer;
+}
+
+.clickableRow:hover {
+    background-color: #f0f0f0; /* 삐약! hover 시 배경색을 변경해서 클릭 가능한 느낌을 줍니다! */
+}

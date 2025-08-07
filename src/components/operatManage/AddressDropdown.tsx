@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Address } from '../../../models/User';
+import type { Address } from '@/models/User';
 import styles from './AddressDropdown.module.css';
 
 interface AddressDropdownProps {

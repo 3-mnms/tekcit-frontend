@@ -1,21 +1,20 @@
-// src/components/shared/Table.tsx
 import React, { useState } from 'react';
 import styles from './Table.module.css';
 
 export interface Column<T> {
-    id: keyof T;
+    columnId: keyof T | 'actions' | 'checkbox';
     label: string;
     render?: (item: T) => React.ReactNode;
 }
 
-// 삐약! id 속성이 string 또는 number 타입이어야 한다고 명확하게 제약 조건을 걸어줍니다!
 interface TableProps<T extends { id: string | number }> {
     columns: Column<T>[];
     data: T[];
+    onRowClick?: (item: T) => void;
+    isSelectable?: boolean; 
 }
 
-// 삐약! 컴포넌트의 제네릭에도 동일한 제약 조건을 적용합니다!
-const Table = <T extends { id: string | number }>({ columns, data }: TableProps<T>) => {
+const Table = <T extends { id: string | number }>({ columns, data, onRowClick, isSelectable = false }: TableProps<T>) => {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,33 +41,41 @@ const Table = <T extends { id: string | number }>({ columns, data }: TableProps<
             <table className={styles.table}>
                 <thead>
                     <tr>
-                        <th>
+                        {isSelectable && (
+                        <th key="checkbox-header" className={styles.th}>
                             <input
                                 type="checkbox"
                                 onChange={handleSelectAll}
                                 checked={isAllSelected}
                             />
                         </th>
+                        )}
                         {columns.map(column => (
-                            <th key={column.id as string}>{column.label}</th>
+                            // 삐약! 모든 <th>에 고유한 key를 부여합니다.
+                            <th key={column.columnId as string} className={styles.th}>
+                                {column.label}
+                            </th>
                         ))}
                     </tr>
                 </thead>
                 <tbody>
                     {data.map(item => (
-                        <tr key={item.id}>
-                            <td>
+                        <tr key={item.id} onClick={() => onRowClick?.(item)}
+                        className={onRowClick ? styles.clickableRow : ''}
+                    >   {isSelectable && (
+                            <td key={`${item.id}-checkbox`} className={styles.td}>
                                 <input
                                     type="checkbox"
                                     onChange={() => handleSelectOne(item.id as number)}
                                     checked={selectedIds.includes(item.id as number)}
                                 />
                             </td>
-                            {columns.map(column => (
-                                <td key={column.id as string}>
-                                    {column.render ? column.render(item) : (item[column.id] as React.ReactNode)}
-                                </td>
-                            ))}
+                        )}
+                        {columns.map(column => (
+                            <td key={`${item.id}-${String(column.columnId)}`}> 
+                                {column.render ? column.render(item) : (item[column.columnId as keyof T] as React.ReactNode)}
+                            </td>
+                        ))}
                         </tr>
                     ))}
                 </tbody>

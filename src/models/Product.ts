@@ -4,7 +4,10 @@ export interface FestivalScheduleDTO {
 }
 
 export interface ProductType {
+    id: number;
     fname: string; // 페스티벌 이름
+    fcast: string[]; // 출연진
+    businessName: string; // 사업자명
     genrenm: string; // 장르
     fage: string; // 관람 연령
     fcltynm: string; // 공연장
@@ -23,7 +26,10 @@ export interface ProductType {
 }
 
 export const initialProductData: ProductType = {
+    id: 0,
     fname: '',
+    fcast: [],
+    businessName: '',
     genrenm: '',
     fage: '',
     fcltynm: '',
