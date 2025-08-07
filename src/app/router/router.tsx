@@ -26,6 +26,8 @@ import EntranceCheckPage from '@/pages/my/ticket/EntranceCheckPage'
 // payment
 import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
 import DeliveryManagePage from '@pages/payment/DeliveryManagePage'
+import PaymentCompletePage from '@pages/payment/PaymentCompletePage'
+import PaymentFailPage from '@pages/payment/PaymentFailPage'
 
 export const router = createBrowserRouter([
   { path: '/', element: <SignupPage /> },
@@ -82,5 +84,13 @@ export const router = createBrowserRouter([
   {
     path: '/DeliveryManagePage',
     element: <DeliveryManagePage />,
+  },
+  {
+    path: '/PaymentCompletePage',
+    element: <PaymentCompletePage />,
+  },
+  {
+    path: '/PaymentFailPage',
+    element: <PaymentFailPage />,
   },
 ])
