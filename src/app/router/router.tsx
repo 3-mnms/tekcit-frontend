@@ -23,7 +23,7 @@ import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
 import DeliveryManagePage from '@pages/payment/DeliveryManagePage'
 
 export const router = createBrowserRouter([
-  { path: '/', element: <SignupPage /> },
+  { path: '/', element: <HomePage /> },
 
   {
     path: '/mypage',
