@@ -1,4 +1,3 @@
-// src/components/shared/DatePicker.tsx
 import React from 'react';
 import styles from './DatePicker.module.css';
 

@@ -15,6 +15,7 @@
     display: flex;
     margin-bottom: 1rem;
     align-items: flex-start;
+    gap: 0.5rem;
 }
 
 .formItem {
@@ -105,7 +106,6 @@
     margin-top: 2rem;
 }
 
-/* 삐약! 모달 스타일을 더 깔끔하게 다듬습니다! */
 .modalBackdrop {
     position: fixed;
     top: 0;
@@ -157,20 +157,7 @@
     cursor: pointer;
 }
 
-/* 삐약! 반응형 디자인을 위한 미디어 쿼리입니다! */
-@media (max-width: 768px) {
-    .formRow {
-        flex-direction: column;
-        gap: 0;
-    }
-    
-    .formItem {
-        width: 100%;
-        margin-bottom: 1rem;
-    }
-    
-    .radioGroup {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+.unit {
+    margin-left: -1rem;
+    font-size: 0.7rem;
 }

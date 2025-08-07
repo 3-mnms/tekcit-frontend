@@ -1,0 +1,48 @@
+.scheduleInputGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* 삐약! 드롭다운과 버튼 사이의 간격입니다! */
+}
+
+.select {
+    width: 100%;
+    padding: 0.5% 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.7rem; 
+}
+
+.addButton {
+    white-space: nowrap;
+    padding: 0.5% 0.5rem;
+    font-size: 0.7rem;
+}
+
+.scheduleList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.scheduleTag {
+    display: flex;
+    align-items: center;
+    background-color: #e9ecef;
+    border-radius: 20px;
+    padding: 0.3rem 0.7rem; 
+    font-size: 0.7rem; 
+    color: #495057;
+}
+
+.scheduleTag button {
+    background: none;
+    border: none;
+    color: #495057;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 0;
+    line-height: 1;
+}
