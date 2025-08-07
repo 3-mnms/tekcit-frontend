@@ -35,14 +35,35 @@
   border-radius: 0.5rem;
 }
 
-.resultInput {
-  width: 100%;
-  padding: 0.75rem;
+.resultRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-top: 1rem;
+}
+
+.resultInput {
   background-color: #f5f5f5;
-  border: 1px solid #ddd;
   border-radius: 0.5rem;
   color: #333;
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+}
+
+.copyButton {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.copied {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: green;
+  text-align: right;
 }
 
 .error {

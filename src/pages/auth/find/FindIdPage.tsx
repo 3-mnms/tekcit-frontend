@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { FaRegCopy } from 'react-icons/fa6'
 import Logo from '@assets/logo.png'
 import Button from '@/components/common/button/Button'
 import styles from './FindIdPage.module.css'
@@ -8,20 +9,29 @@ const FindIdPage: React.FC = () => {
   const [email, setEmail] = useState('')
   const [foundId, setFoundId] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const handleFindId = () => {
-    // 예시 데이터
-    if (email === 'test@example.com' && name === '홍길동') {
+    if (email === 'test@example.com' && name === 'test') {
       setFoundId('tekcit_user01')
       setNotFound(false)
     } else {
       setFoundId(null)
       setNotFound(true)
     }
+    setCopied(false) 
   }
 
   const handleGoToLogin = () => {
     window.location.href = '/login'
+  }
+
+  const handleCopy = async () => {
+    if (foundId) {
+      await navigator.clipboard.writeText(foundId)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000) // 2초 후 복사 상태 초기화
+    }
   }
 
   return (
@@ -53,12 +63,18 @@ const FindIdPage: React.FC = () => {
         {/* 아이디 찾음 */}
         {foundId && (
           <>
-            <input
-              type="text"
-              className={styles.resultInput}
-              value={foundId}
-              readOnly
-            />
+            <div className={styles.resultRow}>
+              <input
+                type="text"
+                className={styles.resultInput}
+                value={foundId}
+                readOnly
+              />
+              <button onClick={handleCopy} className={styles.copyButton}>
+                <FaRegCopy />
+              </button>
+            </div>
+            {copied && <p className={styles.copied}>아이디가 복사되었어요!</p>}
             <Button onClick={handleGoToLogin} className="w-full h-11 mt-2">
               로그인 하기
             </Button>

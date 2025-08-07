@@ -4,13 +4,15 @@ import { createBrowserRouter } from 'react-router-dom'
 import HomePage from '@pages/home/MainPage'
 
 //auth
-import FindIdPage from '@/pages/auth/find/FindIdPage'
 import LoginPage from '@/pages/auth/LoginPage'
+import SignupPage from '@/pages/auth/SignupPage'
+import FindIdPage from '@/pages/auth/find/FindIdPage'
+import FindPasswordPage from '@/pages/auth/find/FindPasswordPage'
+import ResetPasswordPage from '@/pages/auth/find/ResetPasswordPage'
 
 // mypage
 import MyPage from '@/pages/my/MyPage'
 // import Sidebar from '@components/my/sidebar/Sidebar'
-import SignupPage from '@/pages/my/dropdown/UserDropdown'
 import MyInfoPage from '@/pages/my/myInfo/MyInfoPage'
 import DetailPage from '@/pages/my/myInfo/basicinfo/DetailPage'
 import VerifyPasswordPage from '@/pages/my/myInfo/basicinfo/VerifyPasswordPage'
@@ -32,8 +34,11 @@ import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
 import DeliveryManagePage from '@pages/payment/DeliveryManagePage'
 
 export const router = createBrowserRouter([
-  { path: '/find-id', element: <FindIdPage /> },
   { path: '/login', element: <LoginPage /> },
+  { path: '/singup', element: <SignupPage /> },
+  { path: '/find-id', element: <FindIdPage /> },
+  { path: '/find-password', element: <FindPasswordPage /> },
+  { path: '/reset-password', element: <ResetPasswordPage /> },
 
   {
     path: '/mypage',
