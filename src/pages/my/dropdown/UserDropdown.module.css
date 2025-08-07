@@ -13,9 +13,24 @@
   margin-bottom: 1rem;
 }
 
+.usernameButton {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
 .username {
   font-size: 1.25rem;
   font-weight: 600;
+}
+
+.usernameIcon {
+  font-size: 1rem;
+  color: #999;
 }
 
 .alarmButton {

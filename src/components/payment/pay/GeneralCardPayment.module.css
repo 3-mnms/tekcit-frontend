@@ -1,0 +1,95 @@
+.general-card-payment-container {
+  width: 100%;
+}
+
+.payment-section {
+  width: 100%; /* ← 부모 너비 채우기 */
+  margin: 0;
+  /* padding: 24px; */
+  border-radius: 12px;
+  box-sizing: border-box; /* ← 이거 안 하면 padding이 너비에서 빠짐 */
+}
+
+.simple-payment-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 11px;
+  min-height: 24px;
+}
+
+.general-payment-section {
+  border: 2px solid #4d9afd;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.general-payment-slide {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s ease;
+}
+
+.general-payment-slide.open {
+  max-height: 1000px;
+}
+
+.user-type-options {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: #333;
+}
+
+.user-type-options input[type='radio'] {
+  margin-right: 4px;
+}
+
+.dropdown-select {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.radio-input {
+  display: none;
+}
+
+.radio-custom {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.radio-input:checked + .radio-custom {
+  background-color: #4d9afd;
+  border-color: #4d9afd;
+}
+
+.radio-input:checked + .radio-custom::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.radio-label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
