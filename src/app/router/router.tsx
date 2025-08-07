@@ -3,6 +3,10 @@ import { createBrowserRouter } from 'react-router-dom'
 // mainpage
 import HomePage from '@pages/home/MainPage'
 
+//auth
+import FindIdPage from '@/pages/auth/find/FindIdPage'
+import LoginPage from '@/pages/auth/LoginPage'
+
 // mypage
 import MyPage from '@/pages/my/MyPage'
 // import Sidebar from '@components/my/sidebar/Sidebar'
@@ -28,7 +32,8 @@ import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
 import DeliveryManagePage from '@pages/payment/DeliveryManagePage'
 
 export const router = createBrowserRouter([
-  { path: '/', element: <SignupPage /> },
+  { path: '/find-id', element: <FindIdPage /> },
+  { path: '/login', element: <LoginPage /> },
 
   {
     path: '/mypage',
