@@ -4,6 +4,9 @@ import Input from '@components/shared/Input';
 import DatePicker from '@components/shared/DatePicker';
 import Button from '@components/common/Button';
 import PostcodeSearch from '@/components/host/ProductRegist/PostcodeSearch';
+import ScheduleDropdown from '@/components/host/ProductRegist/ScheduleDropdown';
+import {initialProductData } from './../../models/Product';
+import type {ProductType} from './../../models/Product';
 import styles from './ProductRegistPage.module.css';
 
 interface ConfirmModalState {
@@ -12,27 +15,7 @@ interface ConfirmModalState {
 }
 
 const ProductRegisterPage: React.FC = () => {
-    const [productData, setProductData] = useState({
-        productName: '',
-        subTitle: '',
-        genre: '',
-        ageRating: '',
-        venueName: '',
-        venueAddress: '', // 삐약! 이 필드에 주소가 들어갑니다!
-        startDate: '',
-        endDate: '',
-        startTime:'',
-        endTime:'',
-        runningTime: '',
-        intermission: '',
-        price: '',
-        maxPurchase: '제한 없음',
-        ticketMethod: '일괄 배송',
-        description: '',
-        posterFile: null as File | null,
-        detailImageFiles: [] as File[],
-    });
-
+    const [productData, setProductData] = useState<ProductType>(initialProductData);
     const [confirmModal, setConfirmModal] = useState<ConfirmModalState>({
         isOpen: false,
         onConfirm: () => {},
@@ -46,39 +29,56 @@ const ProductRegisterPage: React.FC = () => {
         }));
     };
     
-    // 삐약! PostcodeSearch 컴포넌트에서 주소를 받아올 함수를 추가합니다!
     const handleAddressComplete = (address: string) => {
         setProductData(prevData => ({
             ...prevData,
-            venueAddress: address,
+            faddress: address,
         }));
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, files } = e.target;
-    if (!files) return;
+        const { name, files } = e.target;
+        if (!files) return;
 
-    if (name === 'posterFile') {
-        // 삐약! 포스터 파일은 하나만 추가해야 하니 기존 로직 유지!
-        setProductData(prevData => ({ ...prevData, posterFile: files[0] }));
-    } else if (name === 'detailImageFiles') {
-        // 삐약! 상세 정보 이미지는 여러 개를 따로 추가할 수 있도록 수정합니다!
-        const newFiles = Array.from(files);
-        setProductData(prevData => ({ 
-            ...prevData, 
-            detailImageFiles: [...prevData.detailImageFiles, ...newFiles] 
-        }));
-    }
-};
+        if (name === 'posterFile') {
+            setProductData(prevData => ({ ...prevData, posterFile: files[0] }));
+        } else if (name === 'contentFile') {
+            const newFiles = Array.from(files);
+            setProductData(prevData => ({ 
+                ...prevData, 
+                contentFile: [...prevData.contentFile, ...newFiles] 
+            }));
+        }
+    };
     
     const handleRemoveDetailImage = (fileNameToRemove: string) => {
-    setProductData(prevData => ({
-        ...prevData,
-        detailImageFiles: prevData.detailImageFiles.filter(file => file.name !== fileNameToRemove),
-    }));
+        setProductData(prevData => ({
+            ...prevData,
+            contentFile: prevData.contentFile.filter(file => file.name !== fileNameToRemove),
+        }));
     };
+
+    const handleAddSchedule = (day: string, time: string) => {
+        const isDuplicate = productData.festivalSchedules.some(
+            (schedule) => schedule.dayOfWeek === day && schedule.time === time
+        );
+        if (!isDuplicate) {
+            setProductData((prevData) => ({
+                ...prevData,
+                festivalSchedules: [...prevData.festivalSchedules, { dayOfWeek: day, time: time }],
+            }));
+        }
+    };
+
+    const handleRemoveSchedule = (indexToRemove: number) => {
+        setProductData((prevData) => ({
+            ...prevData,
+            festivalSchedules: prevData.festivalSchedules.filter((_, index) => index !== indexToRemove),
+        }));
+    };
+
     const handleRegisterClick = () => {
-        if (!productData.productName) {
+        if (!productData.fname) {
             alert('삐약! 상품명을 입력해주세요!');
             return;
         }
@@ -112,9 +112,9 @@ const ProductRegisterPage: React.FC = () => {
                                 <Input 
                                     label="1. 상품명" 
                                     type="text" 
-                                    name="productName" 
+                                    name="fname" 
                                     placeholder="상품명을 입력하세요." 
-                                    value={productData.productName} 
+                                    value={productData.fname} 
                                     onChange={handleChange} 
                                 />
                             </div>
@@ -122,7 +122,7 @@ const ProductRegisterPage: React.FC = () => {
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
                                 <label>2. 상품 장르</label>
-                                <select name="genre" className={styles.select} value={productData.genre} onChange={handleChange}>
+                                <select name="genrenm" className={styles.select} value={productData.genrenm} onChange={handleChange}>
                                     <option value="">선택해주세요</option>
                                     <option value="뮤지컬">뮤지컬</option>
                                     <option value="대중음악">대중음악(콘서트)</option>
@@ -133,7 +133,7 @@ const ProductRegisterPage: React.FC = () => {
                             </div>
                             <div className={styles.formItem}>
                                 <label>3. 관람 등급</label>
-                                <select name="ageRating" className={styles.select} value={productData.ageRating} onChange={handleChange}>
+                                <select name="fage" className={styles.select} value={productData.fage} onChange={handleChange}>
                                     <option value="">선택해주세요</option>
                                     <option value="전체">전체</option>
                                     <option value="12세 이상">12세 이상</option>
@@ -147,9 +147,9 @@ const ProductRegisterPage: React.FC = () => {
                                 <Input 
                                     label="4. 공연장" 
                                     type="text" 
-                                    name="venueName" 
+                                    name="fcltynm" 
                                     placeholder="공연장을 작성해주세요" 
-                                    value={productData.venueName} 
+                                    value={productData.fcltynm} 
                                     onChange={handleChange} 
                                 />
                             </div>
@@ -163,52 +163,69 @@ const ProductRegisterPage: React.FC = () => {
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
                                 <DatePicker 
-                                    label="5. 공연 일시" 
-                                    name="startDate" 
-                                    value={productData.startDate} 
+                                    label="5. 공연 시작일" 
+                                    name="fdto" 
+                                    value={productData.fdto} 
                                     onChange={handleChange} 
                                 />
                             </div>
                             <div className={styles.formItem}>
                                     <DatePicker 
                                         label="종료일" 
-                                        name="endDate" 
-                                        value={productData.endDate} 
+                                        name="fdfrom" 
+                                        value={productData.fdfrom} 
                                         onChange={handleChange} 
                                     />
                             </div>
+                        </div>
+                        <div className={styles.formRow}>
                             <div className={styles.formItem}>
-                                <Input 
-                                    label="6. 공연 시간" 
-                                    type="time" 
-                                    name="startTime" 
-                                    value={productData.startTime} 
-                                    onChange={handleChange} 
-                                />
-                            </div>
-                            <div className={styles.formItem}>
-                                <Input 
-                                    label="공연 종료 시간" 
-                                    type="time"
-                                    name="endTime"
-                                    value={productData.endTime}
-                                    onChange={handleChange}
+                                <label>6. 공연 날짜 및 시간</label>
+                                <ScheduleDropdown
+                                    schedules={productData.festivalSchedules}
+                                    onAddSchedule={handleAddSchedule}
+                                    onRemoveSchedule={handleRemoveSchedule}
                                 />
                             </div>
                         </div>
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
                                 <Input 
-                                    label="7. 가격" 
-                                    type="number" 
-                                    name="price" 
-                                    placeholder="선택해주세요" 
-                                    value={productData.price} 
+                                    label="7. 러닝 타임" 
+                                    type="text" 
+                                    name="runningTime" 
+                                    placeholder="ex) 120분" 
+                                    value={productData.runningTime} 
                                     onChange={handleChange} 
                                 />
                             </div>
                             <div className={styles.formItem}>
-                                <label>8. 구매 매수 제한</label>
+                                <div className={styles.formItem}>
+                                    <Input
+                                        label="8. 수용인원"
+                                        type="number"
+                                        name="availableNOP"
+                                        placeholder="수용인원을 입력해주세요"
+                                        value={productData.availableNOP}
+                                        onChange={handleChange}
+                                    />
+                                    <p className={styles.unit}>명</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className={styles.formRow}>
+                            <div className={styles.formItem}>
+                                <Input 
+                                    label="9. 가격" 
+                                    type="number" 
+                                    name="ticketPrice" 
+                                    placeholder="선택해주세요" 
+                                    value={productData.ticketPrice} 
+                                    onChange={handleChange} 
+                                />
+                            </div>
+                            <div className={styles.formItem}>
+                                <label>10. 구매 매수 제한</label>
                                 <div className={styles.radioGroup}>
                                     <label><input type="radio" name="maxPurchase" value="1장" checked={productData.maxPurchase === '1장'} onChange={handleChange} /> 1장</label>
                                     <label><input type="radio" name="maxPurchase" value="2장" checked={productData.maxPurchase === '2장'} onChange={handleChange} /> 2장</label>
@@ -221,9 +238,9 @@ const ProductRegisterPage: React.FC = () => {
                             <div className={styles.formItem}>
                                 <label>9. 고객 티켓 수령 방법</label>
                                 <div className={styles.radioGroup}>
-                                    <label><input type="radio" name="maxPurchase" value="일괄 배송" checked={productData.maxPurchase === '일괄 배송'} onChange={handleChange} /> 일괄 배송</label>
-                                    <label><input type="radio" name="maxPurchase" value="현장 수령(QR)" checked={productData.maxPurchase === '현장 수령(QR)'} onChange={handleChange} /> 현장 수령(QR)</label>
-                                    <label><input type="radio" name="maxPurchase" value="배송&현장 수령(QR)" checked={productData.maxPurchase === '배송&현장 수령(QR)'} onChange={handleChange} /> 배송&현장 수령(QR)</label>
+                                    <label><input type="radio" name="fticketPick" value="일괄 배송" checked={productData.fticketPick === '일괄 배송'} onChange={handleChange} /> 일괄 배송</label>
+                                    <label><input type="radio" name="fticketPick" value="현장 수령(QR)" checked={productData.fticketPick === '현장 수령(QR)'} onChange={handleChange} /> 현장 수령(QR)</label>
+                                    <label><input type="radio" name="fticketPick" value="배송&현장 수령(QR)" checked={productData.fticketPick === '배송&현장 수령(QR)'} onChange={handleChange} /> 배송&현장 수령(QR)</label>
                                 </div>
                             </div>
                         </div>
@@ -235,7 +252,6 @@ const ProductRegisterPage: React.FC = () => {
                                         type="file"
                                         name="posterFile"
                                         onChange={handleFileChange}
-                                        // 삐약! 파일을 한 개만 받습니다!
                                     />
                                     {productData.posterFile && <span className={styles.fileName}>{productData.posterFile.name}</span>}
                                 </div>
@@ -243,9 +259,9 @@ const ProductRegisterPage: React.FC = () => {
                                 <div className={styles.fileUploadItem}>
                                     <label>10-2. 작품 설명</label>
                                     <textarea 
-                                        name="description" 
+                                        name="story" 
                                         className={styles.textarea} 
-                                        value={productData.description} 
+                                        value={productData.story} 
                                         onChange={handleChange} 
                                     />
                                 </div>
@@ -254,13 +270,13 @@ const ProductRegisterPage: React.FC = () => {
                                     <label>10-3. 상세 정보 이미지</label>
                                     <Input 
                                         type="file"
-                                        name="detailImageFiles"
+                                        name="contentFile"
                                         onChange={handleFileChange}
                                         multiple // 삐약! 여러 파일을 받을 수 있게 합니다!
                                     />
-                                    {productData.detailImageFiles.length > 0 && (
+                                    {productData.contentFile.length > 0 && (
                                         <div className={styles.fileNames}>
-                                            {productData.detailImageFiles.map(file => (
+                                            {productData.contentFile.map(file => (
                                                 <div key={file.name} className={styles.fileNameWrapper}>
                                                     <span className={styles.fileName}>{file.name}</span>
                                                     {/* 삐약! 삭제 버튼을 추가합니다! */}
