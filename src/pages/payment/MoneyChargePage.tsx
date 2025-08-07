@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import styles from './MoneyChargePage.module.css'
 import Input from '@/components/common/input/Input'
 import CardSimplePayment from '@/components/payment/pay/CardSimplePayment'
