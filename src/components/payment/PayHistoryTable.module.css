@@ -7,10 +7,9 @@
 .usageBox {
   background-color: #ddd;
   width: 100%;
-  max-width: 1200px; /* ✅ 더 넓게! 기존 800px에서 늘림 */
   border-radius: 8px;
   padding: 0;
-  overflow-x: auto; /* ✅ 너무 커지면 스크롤 가능하게 */
+  overflow-x: auto;
 }
 
 .historyHeader {
@@ -19,7 +18,7 @@
   padding: 12px 16px;
   background-color: #ccc;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 16px;
   border-bottom: 1px solid #bbb;
 }
 
@@ -35,23 +34,23 @@
   justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid #ccc;
-  font-size: 14px;
+  font-size: 15px;
   background-color: white;
 }
 
 .historyDate {
-  flex: 1;
+  flex: 1.5; /* ⬅ 날짜 칼럼 살짝 넓게 */
   color: #555;
 }
 
 .historyDesc {
-  flex: 2;
+  flex: 3; /* ⬅ 내역 칼럼 더 넓게 */
   text-align: center;
   color: #333;
 }
 
 .historyAmount {
-  flex: 1;
+  flex: 1.5; /* ⬅ 금액도 여유 있게 */
   text-align: right;
   font-weight: bold;
   color: #111;

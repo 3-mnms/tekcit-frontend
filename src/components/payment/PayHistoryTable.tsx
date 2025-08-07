@@ -1,14 +1,9 @@
-// src/components/payment/PayHistoryTable.tsx
-
-import React from 'react';
-import styles from './PayHistoryTable.module.css';
-import { payHistory } from '@/models/payment/payHistory';
+import styles from './PayHistoryTable.module.css'
+import { payHistory } from '@/models/payment/payHistory'
 
 const PayHistoryTable: React.FC = () => {
   return (
     <div>
-      <div className={styles.usageTitle}>이용내역</div>
-
       <div className={styles.usageBox}>
         <div className={styles.historyHeader}>
           <span className={styles.historyDate}>날짜</span>
@@ -27,7 +22,7 @@ const PayHistoryTable: React.FC = () => {
         </ul>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PayHistoryTable;
+export default PayHistoryTable
