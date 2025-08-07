@@ -1,4 +1,4 @@
-import styles from '@components/payment/DeliveryFooter.module.css'
+import styles from '@components/payment/delivery/DeliveryFooter.module.css'
 import Button from '@/components/common/button/Button'
 
 interface DeliveryFooterProps {

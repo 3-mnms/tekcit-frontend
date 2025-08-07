@@ -1,25 +1,25 @@
 import { useState } from 'react'
 import styles from '@pages/payment/DeliveryManagePage.module.css'
-import { mockAddresses } from '@models/delivery/Address'
-import type { Address } from '@models/delivery/Address'
-import AddressItem from '@/components/payment/AddressItem'
-import Header from '@/components/payment/DeliveryHeader'
-import Footer from '@/components/payment/DeliveryFooter'
+import { mockAddresses } from '@/models/payment/Address'
+import type { Address } from '@/models/payment/Address'
+import AddressItem from '@/components/payment/address/AddressItem'
+import Header from '@/components/payment/delivery/DeliveryHeader'
+import Footer from '@/components/payment/delivery/DeliveryFooter'
 
 interface DeliveryManagePageProps {
   onClose?: () => void
 }
 
 const DeliveryManagePage: React.FC<DeliveryManagePageProps> = ({ onClose }) => {
-  const [addresses, setAddresses] = useState<Address[]>(mockAddresses)
+  const [addresses] = useState<Address[]>(mockAddresses)
 
-  const setAsDefault = (id: number) => {
-    const updated = addresses.map((addr) => ({
-      ...addr,
-      isDefault: addr.id === id,
-    }))
-    setAddresses(updated)
-  }
+  // const setAsDefault = (id: number) => {
+  //   const updated = addresses.map((addr) => ({
+  //     ...addr,
+  //     isDefault: addr.id === id,
+  //   }))
+  //   setAddresses(updated)
+  // }
 
   const handleClose = () => {
     onClose?.()

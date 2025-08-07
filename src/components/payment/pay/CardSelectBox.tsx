@@ -1,5 +1,4 @@
-import React from 'react'
-import styles from '@components/payment/CardSelectBox.module.css'
+import styles from '@components/payment/pay/CardSelectBox.module.css'
 
 interface CardSelectBoxProps {
   selectedCard: string

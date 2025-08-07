@@ -10,7 +10,7 @@
 .payment-section {
   width: 100%; /* ← 부모 너비 채우기 */
   margin: 0;
-  padding: 24px;
+  padding: 0;
   border-radius: 12px;
   box-sizing: border-box; /* ← 이거 안 하면 padding이 너비에서 빠짐 */
 }
@@ -20,7 +20,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 8px; 
 }
 
 .simple-payment-option {

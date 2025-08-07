@@ -1,0 +1,107 @@
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background-color: #fff;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+/* 상품 정보 */
+.productSection {
+  margin-bottom: 32px;
+}
+
+.productBox {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #f9f9f9;
+}
+
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.productTitle {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.productDetail,
+.productSeat {
+  font-size: 14px;
+  color: #555;
+}
+
+.productPrice {
+  font-size: 18px;
+  font-weight: bold;
+  color: #e60023;
+}
+
+/* 결제 요약 */
+.priceSummary {
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  padding: 20px 0;
+  margin-bottom: 32px;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.priceTotal {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+/* 약관 및 버튼 */
+.terms {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.checkboxLabel {
+  display: flex;              /* 가로 정렬 핵심! */
+  align-items: flex-start;        /* 세로 가운데 정렬 */
+  gap: 0px;                   /* 체크박스와 텍스트 사이 간격 */
+  font-size: 14px;
+  line-height: 1.5;
+  width: 100%;
+}
+
+.checkboxText {
+  flex: 1;
+  min-width: 0;
+  word-break: keep-all;
+  max-width: 100%;
+}

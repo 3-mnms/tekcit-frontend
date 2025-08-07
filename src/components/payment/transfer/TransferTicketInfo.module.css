@@ -1,0 +1,40 @@
+.ticketBox {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 12px;
+  background-color: #f2f2f2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.thumbnail {
+  width: 80px;
+  height: 100px;
+  background-color: #d9d9d9;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.ticketDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  color: #111;
+}
+
+.label {
+  font-weight: 400;
+}
+
+.value {
+  font-weight: 600;
+}
