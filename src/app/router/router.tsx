@@ -38,7 +38,7 @@ import MoneyChargePage from '@pages/payment/MoneyChargePage'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
-  { path: '/singup', element: <SignupPage /> },
+  { path: '/signup', element: <SignupPage /> },
   { path: '/find-id', element: <FindIdPage /> },
   { path: '/find-password', element: <FindPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },

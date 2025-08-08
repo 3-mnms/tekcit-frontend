@@ -25,3 +25,21 @@
   font-size: 1.2rem;
   margin-bottom: 1.5rem;
 }
+
+.rrnRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.rrnRow .inputWrapper {
+  flex: 1;
+}
+
+.hyphen {
+  font-size: 1.5rem;
+  margin: 0 0.2rem;
+  color: #aaa;
+}

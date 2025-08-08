@@ -10,6 +10,8 @@ interface SignupInputProps {
   buttonText?: string;
   onButtonClick?: () => void;
   type?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const SignupInputField: React.FC<SignupInputProps> = ({
@@ -19,6 +21,8 @@ const SignupInputField: React.FC<SignupInputProps> = ({
   buttonText,
   onButtonClick,
   type = "text",
+  value,
+  onChange,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
@@ -36,12 +40,20 @@ const SignupInputField: React.FC<SignupInputProps> = ({
           type={inputType}
           placeholder={placeholder}
           className={styles.input}
+          value={value}
+          onChange={onChange}
         />
 
-        {/* 👁️ 아이콘은 패스워드 필드에서만 보이게 */}
         {isPassword && (
-          <div className={styles.eyeIcon} onClick={() => setShowPassword(!showPassword)}>
-            {showPassword ? <FaEye className={styles.iconToggle} /> : <FaEyeSlash className={styles.iconToggle} />}
+          <div
+            className={styles.eyeIcon}
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? (
+              <FaEye className={styles.iconToggle} />
+            ) : (
+              <FaEyeSlash className={styles.iconToggle} />
+            )}
           </div>
         )}
       </div>
