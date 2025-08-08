@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import styles from '@components/payment/pay/GeneralCardPayment.module.css'
 import CardSelectBox from '@/components/payment/pay/CardSelectBox'
+
+import styles from './GeneralCardPayment.module.css'
 
 interface GeneralCardPaymentProps {
   isOpen: boolean

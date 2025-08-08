@@ -1,6 +1,6 @@
-import styles from '@components/payment/address/AddressItem.module.css'
 import Button from '@/components/common/button/Button'
 
+import styles from './AddressItem.module.css'
 interface AddressItemProps {
   address1: string
   address2: string

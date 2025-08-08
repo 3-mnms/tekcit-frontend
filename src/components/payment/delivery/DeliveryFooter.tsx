@@ -1,5 +1,6 @@
-import styles from '@components/payment/delivery/DeliveryFooter.module.css'
 import Button from '@/components/common/button/Button'
+
+import styles from './DeliveryFooter.module.css'
 
 interface DeliveryFooterProps {
   onSelect?: () => void

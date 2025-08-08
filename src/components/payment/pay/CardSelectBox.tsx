@@ -1,4 +1,4 @@
-import styles from '@components/payment/pay/CardSelectBox.module.css'
+import styles from './CardSelectBox.module.css'
 
 interface CardSelectBoxProps {
   selectedCard: string
