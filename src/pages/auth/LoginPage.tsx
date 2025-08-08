@@ -1,19 +1,19 @@
-// src/pages/auth/login/LoginPage.tsx
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import Logo from '@assets/logo.png';
-import LoginInput from '@/components/auth/login/LoginInput';
-import SocialLogin from '@/components/auth/login/SocialLogin';
-import Button from '@/components/common/button/Button';
-import styles from './LoginPage.module.css';
+import React from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import Logo from '@assets/logo.png'
+import LoginInput from '@/components/auth/login/LoginInput'
+import SocialLogin from '@/components/auth/login/SocialLogin'
+import Button from '@/components/common/button/Button'
+import styles from './LoginPage.module.css'
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { loginSchema, type LoginForm } from '@/models/auth/schema/loginSchema';
-import { useLoginMutation } from '@/models/auth/tanstack-query/useLogin';
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { loginSchema, type LoginForm } from '@/models/auth/schema/loginSchema'
+import { useLoginMutation } from '@/models/auth/tanstack-query/useLogin'
+import { tokenStore } from '@/shared/storage/tokenStore'
 
 const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const {
     register,
@@ -22,25 +22,27 @@ const LoginPage: React.FC = () => {
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     mode: 'onChange',
-  });
+  })
 
-  const loginMut = useLoginMutation();
+  const loginMut = useLoginMutation()
 
   const onSubmit = (form: LoginForm) => {
+    tokenStore.clear() // ✅ 이전 accessToken 제거(선택)
     loginMut.mutate(form, {
-      onSuccess: () => {
-        alert('로그인에 성공했습니다!');
-        navigate('/'); 
+      onSuccess: (data: any) => {
+        if (data?.accessToken) tokenStore.set(data.accessToken)
+        alert('로그인이 완료되었습니다!')
+        navigate('/')
       },
       onError: (e: any) => {
         const msg =
           e?.response?.data?.errorMessage ||
           e?.response?.data?.message ||
-          '아이디 또는 비밀번호를 확인하세요.';
-        alert(msg);
+          '아이디 또는 비밀번호를 확인하세요.'
+        alert(msg)
       },
-    });
-  };
+    })
+  }
 
   return (
     <div className={styles.page}>
@@ -67,7 +69,11 @@ const LoginPage: React.FC = () => {
             ]}
           />
 
-          <Button className="w-full h-12 mt-2" type="submit" disabled={!isValid || loginMut.isPending}>
+          <Button
+            className="w-full h-12 mt-2"
+            type="submit"
+            disabled={!isValid || loginMut.isPending}
+          >
             {loginMut.isPending ? '로그인 중...' : '로그인'}
           </Button>
         </form>
@@ -86,7 +92,7 @@ const LoginPage: React.FC = () => {
         </Link>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage
