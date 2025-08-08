@@ -28,17 +28,20 @@ import MyTicketPage from '@/pages/my/ticket/MyTicketPage'
 import TicketDetailPage from '@/pages/my/ticket/TicketDetailPage'
 
 // payment
-import BookingPaymentPage from '@pages/payment/BookingPaymentPage'
+import BookingPaymentPage from '@/pages/payment/BookingPaymentPage'
 import PaymentCompletePage from '@/pages/payment/pay/PaymentCompletePage'
 import PaymentFailPage from '@/pages/payment/pay/PaymentFailPage'
 import TransferPaymentPage from '@/pages/payment/transfer/TransferPaymentPage'
 import TransferFeePaymentPage from '@/pages/payment/transfer/TransferFeePaymentPage'
-import PayPointPage from '@/pages/payment/pay/PayPointPage'
-import CancelRequestPage from '@/pages/payment/refund/CancelRequestPage'
 import TransferSuccessPage from '@/pages/payment/transfer/TransferSuccessPage'
+import RefundPage from '@/pages/payment/refund/RefundPage'
+import RefundSuccessPage from '@/pages/payment/refund/RefundSuccessPage'
+import WalletPointPage from '@/pages/payment/pay/WalletPointPage'
+import WalletChargePage from '@/pages/payment/pay/WalletChargePage'
+import ChargeCompletePage from '@/pages/payment/pay/ChargeCompletePage'
 
 export const router = createBrowserRouter([
-  { path: '/', element: <HomePage /> },
+  { path: '/', element: <HomePage /> }, 
   { path: '/login', element: <LoginPage /> },
   { path: '/singup', element: <SignupPage /> },
   { path: '/find-id', element: <FindIdPage /> },
@@ -74,7 +77,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '', element: <MyTicketPage /> },
           { path: 'history', element: <TicketHistoryPage /> },
-           { path: 'detail/:id', element: <TicketDetailPage /> },
+          { path: 'detail/:id', element: <TicketDetailPage /> },
           // {
           //   path: 'address',
           //   children: [
@@ -91,14 +94,32 @@ export const router = createBrowserRouter([
   {
     path: '/payment',
     children: [
-      { path: '', element: <BookingPaymentPage /> }, // /payment
-      { path: 'complete', element: <PaymentCompletePage /> }, // /payment/complete
-      { path: 'fail', element: <PaymentFailPage /> }, // /payment/fail
-      { path: 'transfer', element: <TransferPaymentPage /> }, // /payment/transfer
-      { path: 'transfer-fee', element: <TransferFeePaymentPage /> }, // /payment/transfer-fee
-      { path: 'paypoint', element: <PayPointPage /> },
-      { path: 'cancelRequest', element: <CancelRequestPage /> },
-      { path: 'transfer-success', element: <TransferSuccessPage /> },
+      { path: '', element: <BookingPaymentPage /> }, 
+      { path: 'payment-complete', element: <PaymentCompletePage /> }, 
+      { path: 'payment-fail', element: <PaymentFailPage /> }, 
+      {
+        path: 'transfer',
+        children: [
+          { path: '', element: <TransferPaymentPage /> }, 
+          { path: 'transfer-fee', element: <TransferFeePaymentPage /> },
+          { path: 'transfer-success', element: <TransferSuccessPage /> },
+        ]
+      },
+      {
+        path: 'refund',
+        children: [
+          {path: '', element: <RefundPage /> },
+          {path: 'refund-success', element: <RefundSuccessPage /> },
+        ]
+      },
+      {
+        path: 'wallet-point',
+        children: [
+          {path: '', element: <WalletPointPage /> },
+          {path: 'money-charge', element: <WalletChargePage /> },
+          {path: 'charge-complete', element: <ChargeCompletePage /> },
+        ]
+      },
     ],
   },
 ])

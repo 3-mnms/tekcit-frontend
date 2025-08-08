@@ -1,5 +1,5 @@
-import styles from './PayHistoryTable.module.css'
-import { payHistory } from '@/models/payment/payHistory'
+import styles from './WalletHistory.module.css'
+import { payHistory } from '@/models/payment/WalletHistory'
 
 const PayHistoryTable: React.FC = () => {
   return (

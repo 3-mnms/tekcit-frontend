@@ -1,5 +1,5 @@
+import { useNavigate } from 'react-router-dom'
 import Button from '@components/common/button/Button'
-
 import styles from './WalletPayment.module.css'
 
 interface WalletPaymentProps {
@@ -9,9 +9,10 @@ interface WalletPaymentProps {
 
 const WalletPayment: React.FC<WalletPaymentProps> = ({ isOpen, onToggle }) => {
   const amount = '20,000'
+  const navigate = useNavigate() 
 
   const handleChargeClick = () => {
-    alert('충전하기 버튼 클릭됨!')
+    navigate('/payment/wallet-point/money-charge')
   }
 
   return (
