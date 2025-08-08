@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import Button from '@/components/common/Button';
-import { getProductDetail } from '@/shared/api/products';
+import { getProductDetail, deleteProduct } from '@/shared/api/festival';
 import styles from './ProductDetailPage.module.css';
-import type { FestivalScheduleDTO } from '@/models/Product';
+import type { FestivalScheduleDTO} from '@/models/festival';
 
 const ProductDetailPage: React.FC = () => {
     const navigate = useNavigate();
-    // 삐약! URL에서 상품 ID를 가져옵니다.
+    const queryClient = useQueryClient();
     const { id } = useParams<{ id: string }>(); 
     const productId = id ? parseInt(id, 10) : undefined;
 
@@ -23,6 +23,19 @@ const ProductDetailPage: React.FC = () => {
             return getProductDetail(productId);
         },
         enabled: !!productId,
+    });
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: (productId: number) => deleteProduct(productId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['products'] }); // 삐약! 'products' 쿼리 캐시를 무효화합니다!
+            alert('상품이 성공적으로 삭제되었습니다!');
+            navigate('/productManage'); // 삐약! 상품 관리 페이지로 돌아갑니다!
+        },
+        onError: (error) => {
+            console.error('상품 삭제 실패:', error);
+            alert('상품 삭제에 실패했습니다. 다시 시도해 주세요.');
+        },
     });
 
     useEffect(() => {
@@ -74,6 +87,18 @@ const ProductDetailPage: React.FC = () => {
         );
     };
 
+    const handleEditClick = () => {
+        console.log('삐약! 수정 버튼 클릭!');
+        navigate(`/productRegist?id=${productId}`); 
+    };
+
+    const handleDeleteClick = () => {
+        if (window.confirm('삐약! 정말로 이 상품을 삭제하시겠습니까?')) {
+            mutate(productId as number);
+        };
+        
+    };
+
     return (
         <Layout subTitle={`상품 상세 정보: ${product.fname}`}>
             <div className={styles.container}>
@@ -116,6 +141,8 @@ const ProductDetailPage: React.FC = () => {
                     </div>
                 </div>
                 <div className={styles.buttonWrapper}>
+                    <Button onClick={handleEditClick} disabled={isPending} variant="secondary">수정</Button>
+                    <Button onClick={handleDeleteClick} disabled={isPending} variant="danger">삭제</Button>
                     <Button onClick={() => navigate(-1)}>뒤로가기</Button>
                 </div>
             </div>

@@ -16,6 +16,7 @@ const UserList: React.FC<UserListProps> = ({ users, onToggleStatus }) => {
         { columnId: 'loginId', label: '로그인 ID' },
         { columnId: 'phone', label: '전화번호' },
         { columnId: 'email', label: '이메일' },
+        { columnId: 'residentNum', label: '주민번호' },
         { columnId: 'birth', label: '생년월일' },
         { columnId: 'gender', label: '성별' },
         { columnId: 'address', label: '주소', render: (user: User) => (

@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams  } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery} from '@tanstack/react-query';
 import Input from '@/components/shared/Input';
 import DatePicker from '@components/shared/DatePicker';
 import Button from '@components/common/Button';
 import PostcodeSearch from '@/components/product/PostcodeSearch';
 import ScheduleDropdown from '@/components/product/ScheduleDropdown';
-import {initialProductData } from '@/models/Product';
-import type {ProductType} from '@/models/Product';
+import {initialProductData } from '@/models/festival';
+import type {ProductType} from '@/models/festival';
 import CastInput from '@/components/product/CastInput';
 import styles from './ProductRegistPage.module.css';
 
-import { createProduct } from '@/shared/api/products';
+import { createProduct, getProductDetail, updateProduct } from '@/shared/api/festival';
 
 interface ConfirmModalState {
     isOpen: boolean;
@@ -22,26 +22,48 @@ interface ConfirmModalState {
 const ProductRegisterPage: React.FC = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const [searchParams] = useSearchParams();
+    const [isEditMode, setIsEditMode] = useState(false);
+    const productId = searchParams.get('id');
+
+    const { data: existingProduct } = useQuery({
+        queryKey: ['festival', productId],
+        queryFn: () => getProductDetail(Number(productId)),
+        enabled: !!productId,
+    });
+
     const [productData, setProductData] = useState<ProductType>(initialProductData);
     const [confirmModal, setConfirmModal] = useState<ConfirmModalState>({
         isOpen: false,
         onConfirm: () => {},
     });
 
-     // 삐약! 상품 등록을 위한 useMutation 훅을 사용합니다!
+    useEffect(() => {
+        if (existingProduct) {
+            setProductData(existingProduct);
+            setIsEditMode(true); // 삐약! 수정 모드로 전환합니다!
+        } else {
+            setIsEditMode(false);
+            setProductData(initialProductData); // 삐약! 수정 모드가 아니면 초기화합니다!
+        }
+    }, [existingProduct]);
+
     const { mutate, isPending } = useMutation({
-        mutationFn: createProduct,
+        mutationFn: (data: ProductType) => {
+            if (isEditMode) {
+                return updateProduct(data);
+            }
+            return createProduct(data);
+        },
         onSuccess: () => {
-            // 삐약! 상품 등록이 성공하면 이 함수가 실행됩니다!
-            queryClient.invalidateQueries({ queryKey: ['products'] }); // 'products' 쿼리 캐시를 무효화해서 상품 목록을 새로고침합니다!
+            queryClient.invalidateQueries({ queryKey: ['products'] });
             setConfirmModal({ ...confirmModal, isOpen: false });
-            alert('상품이 성공적으로 등록되었습니다!'); // 삐약! alert을 띄우고
-            navigate('/productManage'); // 삐약! 상품 관리 페이지로 이동합니다!
+            alert(`상품이 성공적으로 ${isEditMode ? '수정' : '등록'}되었습니다!`);
+            navigate('/productManage');
         },
         onError: (error) => {
-            // 삐약! 등록 실패 시 오류를 처리합니다!
-            console.error('상품 등록 실패:', error);
-            alert('상품 등록에 실패했습니다. 다시 시도해 주세요.');
+            console.error('상품 등록/수정 실패:', error);
+            alert(`상품 ${isEditMode ? '수정' : '등록'}에 실패했습니다. 다시 시도해 주세요.`);
         },
     });
 
@@ -132,7 +154,7 @@ const ProductRegisterPage: React.FC = () => {
     };
 
     return (
-        <Layout subTitle="상품 등록">
+        <Layout subTitle={isEditMode ? '상품 수정' : '상품 등록'}>
             <div className={styles.container}>
                 <div className={styles.header}>
                     <p className={styles.infoText}>*** 제공된 템플릿에 맞춰 입력해주세요 ***</p>
@@ -259,7 +281,7 @@ const ProductRegisterPage: React.FC = () => {
                             <div className={styles.formItem}>
                                 <label>10. 출연진</label>
                                 <CastInput
-                                    casts={productData.fcast}
+                                    fcasts={Array.isArray(productData.fcast) ? productData.fcast : []}
                                     onAddCast={handleAddCast}
                                     onRemoveCast={handleRemoveCast}
                                 />
@@ -286,8 +308,20 @@ const ProductRegisterPage: React.FC = () => {
                         </div>
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
+                                <Input 
+                                    label="13. 사업자명" 
+                                    type="string" 
+                                    name="businessName" 
+                                    placeholder="상품명을 입력하세요." 
+                                    value={productData.businessName} 
+                                    onChange={handleChange} 
+                                />
+                            </div>
+                        </div>
+                        <div className={styles.formRow}>
+                            <div className={styles.formItem}>
                                 <div className={styles.fileUploadItem}>
-                                    <label>13-1. 포스터 이미지</label>
+                                    <label>14-1. 포스터 이미지</label>
                                     <Input 
                                         type="file"
                                         name="posterFile"
@@ -297,7 +331,7 @@ const ProductRegisterPage: React.FC = () => {
                                 </div>
                                 {/* 2. 상세 정보 입력 */}
                                 <div className={styles.fileUploadItem}>
-                                    <label>13-2. 작품 설명</label>
+                                    <label>14-2. 작품 설명</label>
                                     <textarea 
                                         name="story" 
                                         className={styles.textarea} 
@@ -307,7 +341,7 @@ const ProductRegisterPage: React.FC = () => {
                                 </div>
                                 {/* 3. 상세 정보 이미지 업로드 */}
                                 <div className={styles.fileUploadItem}>
-                                    <label>13-3. 상세 정보 이미지</label>
+                                    <label>14-3. 상세 정보 이미지</label>
                                     <Input 
                                         type="file"
                                         name="contentFile"
@@ -337,10 +371,10 @@ const ProductRegisterPage: React.FC = () => {
                     </div>
                 </form>
                 <div className={styles.registerButtonWrapper}>
-                    <Button onClick={handleRegisterClick} disabled={isPending}>
-                        {isPending ? '등록 중...' : '등록하기'}
-                    </Button>
-                </div>
+                <Button onClick={handleRegisterClick} disabled={isPending}>
+                    {isPending ? '처리 중...' : (isEditMode ? '수정하기' : '등록하기')}
+                </Button>
+            </div>
             </div>
             
             {confirmModal.isOpen && (

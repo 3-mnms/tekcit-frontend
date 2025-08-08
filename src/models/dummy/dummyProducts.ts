@@ -1,11 +1,11 @@
-import type { ProductType } from '@/models/Product'; 
+import type { ProductType } from '@/models/festival'; 
 
 // 삐약! ProductType을 사용해서 더미 데이터를 만듭니다!
 export const dummyProducts: ProductType[] = [
     {
         id: 1,
         fname: '뮤지컬 갈라 콘서트',
-        fcast: '카이, 조규현, 최재림',
+        fcast: ["카이", "조규현", "최재림"],
         businessName: 'yg',
         genrenm: '뮤지컬',
         fage: '전체',
@@ -26,7 +26,7 @@ export const dummyProducts: ProductType[] = [
     {
         id: 2,
         fname: 'K-POP 아이돌 콘서트',
-        fcast: '카이, 조규현, 최재림',
+        fcast: ["카이", "조규현", "최재림"],
         businessName: 'sm',
         genrenm: '대중음악',
         fage: '12세 이상',

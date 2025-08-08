@@ -5,12 +5,12 @@ import Button from '@/components/common/Button';
 import styles from './CastInput.module.css';
 
 interface CastInputProps {
-    casts: string[];
-    onAddCast: (cast: string) => void;
-    onRemoveCast: (cast: string) => void;
+    fcasts: string[];
+    onAddCast: (fcast: string) => void;
+    onRemoveCast: (fcast: string) => void;
 }
 
-const CastInput: React.FC<CastInputProps> = ({ casts, onAddCast, onRemoveCast }) => {
+const CastInput: React.FC<CastInputProps> = ({ fcasts, onAddCast, onRemoveCast }) => {
     const [castInput, setCastInput] = useState<string>('');
 
     const handleCastInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,7 +45,7 @@ const CastInput: React.FC<CastInputProps> = ({ casts, onAddCast, onRemoveCast })
                 <Button onClick={handleAddCast}>추가</Button>
             </div>
             <div className={styles.castTagsContainer}>
-                {casts.map((castMember, index) => (
+                {fcasts.map((castMember, index) => (
                     <div key={index} className={styles.castTag}>
                         <span>{castMember}</span>
                         <button 

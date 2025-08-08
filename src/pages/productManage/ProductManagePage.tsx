@@ -8,8 +8,8 @@ import type {Column} from '@/components/shared/Table';
 import Button from '@/components/common/Button';
 import styles from './ProductManagePage.module.css';
 
-import { getProducts } from '@/shared/api/products';
-import type { ProductType } from '@/models/Product';
+import { getProducts } from '@/shared/api/festival';
+import type { ProductType } from '@/models/festival';
 // import { dummyProducts } from '@/models/dummy/dummyProducts';
 
 const ProductManagePage: React.FC = () => {
@@ -28,14 +28,14 @@ const ProductManagePage: React.FC = () => {
     };
 
     // 삐약! 버튼 클릭 핸들러를 따로 만듭니다!
-    const handleViewAttendees = (e: React.MouseEvent, pid: number) => {
+    const handleViewTicketHolderList = (e: React.MouseEvent, productId: number) => {
         e.stopPropagation(); // 삐약! 행 클릭 이벤트가 발생하는 것을 막아줍니다!
-        console.log(`예매자 명단 조회: ${pid}`);
+        navigate(`/productManage/${productId}/TicketHolderList`);
     };
 
-    const handleViewStats = (e: React.MouseEvent, pid: number) => {
+    const handleViewStats = (e: React.MouseEvent, productId: number) => {
         e.stopPropagation(); // 삐약! 행 클릭 이벤트가 발생하는 것을 막아줍니다!
-        console.log(`통계 조회: ${pid}`);
+        navigate(`/productManage/Statistics/${productId}`);
     };
 
     const columns: Column<ProductType>[] = [
@@ -48,7 +48,7 @@ const ProductManagePage: React.FC = () => {
             label: '액션',
             render: (item) => (
                 <div className={styles.buttons}>
-                    <Button onClick={(e) => handleViewAttendees(e, item.id)}>예매자명단</Button>
+                    <Button onClick={(e) => handleViewTicketHolderList(e, item.id)}>예매자명단</Button>
                     <Button onClick={(e) => handleViewStats(e, item.id)}>통계 조회</Button>
                 </div>
             )
