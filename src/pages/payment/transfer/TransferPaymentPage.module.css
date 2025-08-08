@@ -91,17 +91,12 @@
 }
 
 .checkboxLabel {
-  display: flex;              /* 가로 정렬 핵심! */
-  align-items: flex-start;        /* 세로 가운데 정렬 */
-  gap: 0px;                   /* 체크박스와 텍스트 사이 간격 */
+  display: flex;
+  gap: 8px;
+  align-items: center;
   font-size: 14px;
-  line-height: 1.5;
-  width: 100%;
 }
 
 .checkboxText {
-  flex: 1;
-  min-width: 0;
-  word-break: keep-all;
-  max-width: 100%;
+  line-height: 1.4;
 }

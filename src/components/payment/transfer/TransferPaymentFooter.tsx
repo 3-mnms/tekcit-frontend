@@ -1,5 +1,3 @@
-// src/components/payment/TransferPaymentFooter.tsx
-
 import styles from './TransferPaymentFooter.module.css'
 
 const TransferPaymentFooter: React.FC = () => {

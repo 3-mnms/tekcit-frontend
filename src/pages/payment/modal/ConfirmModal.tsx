@@ -1,5 +1,5 @@
 import Button from '@/components/common/button/Button'
-import styles from '@pages/payment/ConfirmModal.module.css'
+import styles from '@pages/payment/modal/ConfirmModal.module.css'
 
 interface ConfirmModalProps {
   onCancel: () => void

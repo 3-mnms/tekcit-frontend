@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Button from '@/components/common/button/Button'
 import styles from './PayPointPage.module.css'
 import PayHistoryTable from '@/components/payment/PayHistoryTable'
-import MoneyChargeModal from '@/pages/payment/MoneyChargeMordal' // ✅ 모달 import
+import MoneyChargeModal from '@/pages/payment/modal/MoneyChargeModal' // ✅ 모달 import
 
 const PayPointPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)

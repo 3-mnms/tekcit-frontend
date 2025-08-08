@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import styles from '@pages/payment/DeliveryManagePage.module.css'
 import { mockAddresses } from '@/models/payment/Address'
 import type { Address } from '@/models/payment/Address'
 import AddressItem from '@/components/payment/address/AddressItem'
-import Header from '@/components/payment/delivery/DeliveryHeader'
-import Footer from '@/components/payment/delivery/DeliveryFooter'
+import Header from '@components/payment/delivery/DeliveryHeader'
+import Footer from '@components/payment/delivery/DeliveryFooter'
+
+import styles from './DeliveryManageModal.module.css'
 
 interface DeliveryManagePageProps {
   onClose?: () => void

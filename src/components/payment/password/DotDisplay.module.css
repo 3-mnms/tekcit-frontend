@@ -1,0 +1,18 @@
+.dotContainer {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid #aaa;
+  background-color: transparent;
+}
+
+.filled {
+  background-color: #111;
+}

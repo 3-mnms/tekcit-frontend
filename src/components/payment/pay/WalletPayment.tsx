@@ -1,5 +1,6 @@
-import styles from '@components/payment/pay/WalletPayment.module.css'
 import Button from '@components/common/button/Button'
+
+import styles from './WalletPayment.module.css'
 
 interface WalletPaymentProps {
   isOpen: boolean
