@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import Button from '@/components/common/Button';
 import { getProductDetail } from '@/shared/api/products';
 import styles from './ProductDetailPage.module.css';
+import type { FestivalScheduleDTO } from '@/models/Product';
 
 const ProductDetailPage: React.FC = () => {
     const navigate = useNavigate();
@@ -21,10 +22,22 @@ const ProductDetailPage: React.FC = () => {
             }
             return getProductDetail(productId);
         },
-        enabled: !!productId, // 삐약! productId가 있을 때만 쿼리를 실행합니다.
+        enabled: !!productId,
     });
 
-    // 삐약! 로딩 및 에러 상태 처리
+    useEffect(() => {
+        return () => {
+            if (product?.posterFile) {
+                URL.revokeObjectURL(URL.createObjectURL(product.posterFile));
+            }
+            if (product?.contentFile) {
+                product.contentFile.forEach(file => {
+                    URL.revokeObjectURL(URL.createObjectURL(file));
+                });
+            }
+        };
+    }, [product]);
+
     if (isLoading) {
         return <Layout subTitle="상품 상세 정보"><div>삐약! 상품 정보를 불러오는 중...</div></Layout>;
     }
@@ -36,7 +49,31 @@ const ProductDetailPage: React.FC = () => {
             </Layout>
         );
     }
-    
+
+    const renderFiles = (files: File[]) => {
+        return (
+            <div className={styles.fileList}>
+                {files.length > 0 ? (
+                    files.map(file => {
+                        const isImage = file.type.startsWith('image/');
+                        const url = isImage ? URL.createObjectURL(file) : null;
+                        return (
+                            <div key={file.name} className={styles.fileItem}>
+                                {isImage && url ? ( 
+                                    <img src={url} alt={file.name} className={styles.fileImage} />
+                                ) : (
+                                    <span>{file.name}</span>
+                                )}
+                            </div>
+                        );
+                    })
+                ) : (
+                    <span>없음</span>
+                )}
+            </div>
+        );
+    };
+
     return (
         <Layout subTitle={`상품 상세 정보: ${product.fname}`}>
             <div className={styles.container}>
@@ -50,13 +87,33 @@ const ProductDetailPage: React.FC = () => {
                     <p>공연장 주소: {product.faddress}</p>
                     <p>공연 시작일: {product.fdto}</p>
                     <p>공연 종료일: {product.fdfrom}</p>
-                    {/* <p>공연 스케쥴: {product.festivalSchedules}</p> */}
+                    {product.festivalSchedules && product.festivalSchedules.length > 0 && (
+                        <p>공연 스케줄: 
+                            <span className={styles.scheduleTags}>
+                                {product.festivalSchedules.map((schedule: FestivalScheduleDTO, index: number) => (
+                                    <span key={index} className={styles.scheduleTag}>
+                                        {`${schedule.dayOfWeek} - ${schedule.time}`}
+                                    </span>
+                                ))}
+                            </span>
+                        </p>
+                    )}
                     <p>러닝 타임: {product.runningTime}</p>
                     <p>수용 인원: {product.availableNOP}명</p>
                     <p>가격: {product.ticketPrice}원</p>
                     <p>구매 매수 제한: {product.maxPurchase}</p>
                     <p>티켓 수령 방법: {product.fticketPick}</p>
-                    {/* 삐약! 더 많은 상세 정보를 여기에 추가하세요! */}
+                    <p>상세 정보: {product.story}</p>
+                    <div className={styles.fileSection}>
+                        <p>포스터 파일:</p>
+                        {product.posterFile && product.posterFile.type.startsWith('image/') ? (
+                            <img src={URL.createObjectURL(product.posterFile)} alt="포스터 이미지" className={styles.posterImage} />
+                        ) : (
+                            <span>{product.posterFile ? product.posterFile.name : '없음'}</span>
+                        )}
+                        <p>상세 정보 이미지:</p>
+                        {renderFiles(product.contentFile)}
+                    </div>
                 </div>
                 <div className={styles.buttonWrapper}>
                     <Button onClick={() => navigate(-1)}>뒤로가기</Button>

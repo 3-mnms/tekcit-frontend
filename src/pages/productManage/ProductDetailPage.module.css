@@ -31,9 +31,52 @@
     margin-bottom: 0.5rem;
 }
 
-.buttonWrapper {
-    margin-top: 2rem;
-    width: 100%;
-    max-width: 800px;
-    text-align: right;
+/* 삐약! 스케줄 태그를 위한 스타일입니다! */
+.scheduleTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.scheduleTag {
+    display: inline-block;
+    background-color: #e9ecef;
+    border-radius: 20px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.8rem;
+    color: #495057;
+}
+
+.posterImage {
+    max-width: 300px;
+    height: auto;
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.fileList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.fileItem {
+    width: 150px;
+    height: 150px;
+    overflow: hidden;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fileImage {    
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
 }
