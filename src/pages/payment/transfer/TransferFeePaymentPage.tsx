@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import Button from '@/components/common/button/Button'
-import TransferTicketInfo from '@/components/payment/transfer/TransferTicketInfo'
+import TransferTicketInfo from '@/components/payment/refund/RefundTicketInfo'
 import TransferFeeInfo from '@/components/payment/transfer/TransferFeeInfo'
 import PaymentMethod from '@/components/payment/pay/PaymentMethod'
-import ConfirmModal from '@/pages/payment/modal/ConfirmModal'
+import ConfirmModal from '@/pages/payment/modal/AlertModal'
 import PasswordInputModal from '@/pages/payment/modal/PasswordInputModal'
 
 import { bookingTransfer } from '@/models/payment/BookingTransfer'

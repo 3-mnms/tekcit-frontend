@@ -1,5 +1,5 @@
 import styles from './BookingProductInfo.module.css'
-import { bookingProduct } from '@/models/payment/bookingProduct'
+import { bookingProduct } from '@models/payment/bookingProduct'
 
 const BookingProductInfo: React.FC = () => {
   return (

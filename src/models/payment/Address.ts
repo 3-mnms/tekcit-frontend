@@ -1,4 +1,3 @@
-// 타입 정의
 export interface Address {
   id: number
   address1: string

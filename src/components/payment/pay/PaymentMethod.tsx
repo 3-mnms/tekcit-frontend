@@ -1,4 +1,4 @@
-// src/components/payment/pay/PaymentMethod.tsx
+// PaymentMethod.tsx
 import { useState } from 'react'
 import WalletPayment from '@components/payment/pay/WalletPayment'
 import CardSimplePayment from '@components/payment/pay/CardSimplePayment'
@@ -13,28 +13,32 @@ interface PaymentMethodProps {
 const PaymentMethod: React.FC<PaymentMethodProps> = ({ onSelect }) => {
   const [method, setMethod] = useState<'wallet' | 'simple' | 'general' | null>(null)
 
-  const handleMethodChange = (selected: typeof method) => {
-    setMethod(selected)
-    if (selected === 'wallet') {
-      onSelect?.('킷페이') // 상위 컴포넌트에 전달할 실제 이름
-    } else {
-      onSelect?.('기타')
-    }
+  // 카드 간편 결제에서 실제 선택값 받을 때
+  const handleSimpleSelect = (method: '네이버페이' | '카카오페이') => {
+    setMethod('simple')
+    onSelect?.(method) // ★ 바로 올려줌
   }
 
   return (
     <div className={styles.container}>
       <WalletPayment
         isOpen={method === 'wallet'}
-        onToggle={() => handleMethodChange('wallet')}
+        onToggle={() => {
+          setMethod('wallet')
+          onSelect?.('킷페이')
+        }}
       />
       <CardSimplePayment
         isOpen={method === 'simple'}
-        onToggle={() => handleMethodChange('simple')}
+        onToggle={() => setMethod('simple')}
+        onSelect={handleSimpleSelect}
       />
       <GeneralCardPayment
         isOpen={method === 'general'}
-        onToggle={() => handleMethodChange('general')}
+        onToggle={() => {
+          setMethod('general')
+          onSelect?.('일반결제')
+        }}
       />
     </div>
   )

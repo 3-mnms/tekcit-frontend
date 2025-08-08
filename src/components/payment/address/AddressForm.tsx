@@ -1,5 +1,3 @@
-// AddressForm.tsx
-
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -27,6 +25,12 @@ const schema = z.object({
 })
 
 type AddressFormInputs = z.infer<typeof schema>
+
+// 주소 타입 예시 (mockAddresses, DeliveryManagePage와 동일하게 맞춰야 함)
+type SimpleAddress = {
+  address1: string
+  address2: string
+}
 
 const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
   const {
@@ -57,6 +61,16 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
     onValidChange?.(!!isValid)
   }, [watchAll, onValidChange])
 
+  // ⭐️ 배송지 선택 시 address1/address2만 폼에 반영 (이름/연락처는 그대로)
+  const handleAddressSelect = (addr: SimpleAddress) => {
+    reset({
+      ...watchAll, // 기존 입력값은 유지
+      address1: addr.address1,
+      address2: addr.address2,
+    })
+    setIsModalOpen(false)
+  }
+
   return (
     <form className={styles['address-container']}>
       <div className={styles['address-tabs']}>
@@ -82,7 +96,10 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
         {isModalOpen && (
           <div className={styles['modal-overlay']}>
             <div className={styles['modal-content']}>
-              <DeliveryManagePage onClose={() => setIsModalOpen(false)} />
+              <DeliveryManagePage
+                onClose={() => setIsModalOpen(false)}
+                onSelectAddress={handleAddressSelect}  
+              />
             </div>
           </div>
         )}

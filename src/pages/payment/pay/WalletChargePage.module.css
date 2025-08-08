@@ -1,0 +1,82 @@
+/* WalletChargePage.module.css */
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: #fff;
+}
+
+.wrapper {
+  margin-top: 60px;
+  width: 500px; /* ← 420px → 500~600px 정도로 넓혀줘 */
+  max-width: 90vw;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.08);
+  padding: 40px 36px 32px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f8f9fb;
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin-bottom: 0;
+}
+
+.label {
+  font-size: 1.04rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.chargeBtn {
+  width: 100%;
+  height: 48px;
+  margin-top: 16px;
+  font-size: 1.13rem;
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.inputWithPresets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.presetGroup {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  justify-content: flex-start;
+}
+.presetBtn {
+  min-width: 60px;
+  font-size: 1rem;
+  height: 38px;
+  border-radius: 7px;
+  background: #f5f6fa;
+  border: 1px solid #d5d7dd;
+  color: #222;
+  cursor: pointer;
+}
+
+.presetBtn:hover {
+  border-color: #4d9afd;
+  background: #e9f3ff;
+  color: #2c77e6;
+}
+
