@@ -1,4 +1,4 @@
-import styles from '@pages/payment/PaymentCompletePage.module.css'
+import styles from './PaymentFailPage.module.css'
 import Button from '@/components/common/button/Button'
 
 const PaymentCompletePage: React.FC = () => {

@@ -1,4 +1,4 @@
-import styles from '@components/payment/pay/PaymentInfo.module.css'
+import styles from './PaymentInfo.module.css'
 
 const deliveryType = 'QR'
 

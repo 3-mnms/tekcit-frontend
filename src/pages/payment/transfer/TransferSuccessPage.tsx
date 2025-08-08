@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom' // ✅ 추가 멍!
-import styles from './PaymentCompletePage.module.css'
+import styles from '@/pages/payment/pay/PaymentCompletePage.module.css'
 import Button from '@/components/common/button/Button'
 
-const PaymentCompletePage: React.FC = () => {
+const TransferSuccessPage: React.FC = () => {
   const navigate = useNavigate() // ✅ 추가 멍!
 
   const handleDetailClick = () => {
@@ -22,4 +22,4 @@ const PaymentCompletePage: React.FC = () => {
   )
 }
 
-export default PaymentCompletePage
+export default TransferSuccessPage
