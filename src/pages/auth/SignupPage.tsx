@@ -18,14 +18,14 @@ import AddressSearchModal from '@/components/auth/signup/AddressSearchModal'
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { signupSchema, type SignupForm } from '@/models/auth/signupSchema'
+import { signupSchema, type SignupForm } from '@/models/auth/schema/signupSchema'
 import {
   useSignupMutation,
   useCheckLoginId,
   useSendEmailCode,
   useVerifyEmailCode,
   useCheckEmail,
-} from '@/models/auth/useSignup'
+} from '@/models/auth/tanstack-query/useSignup'
 
 const SignupPage: React.FC = () => {
   const [showModal, setShowModal] = useState(false)
