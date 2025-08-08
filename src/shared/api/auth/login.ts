@@ -5,6 +5,8 @@ export interface LoginPayload {
   loginPw: string;
 }
 
+export interface LoginResponseDTO { accessToken?: string; }
+
 export const login = async (payload: LoginPayload) => {
   const { data } = await api.post('/users/login', payload);
   return data; // LoginResponseDTO
