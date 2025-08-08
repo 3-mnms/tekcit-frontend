@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Logo from '@assets/logo.png'
+import { useNavigate } from 'react-router-dom';
 import Button from '@/components/common/button/Button'
 import SignupInputField from '@/components/auth/signup/SignupInputFields'
 import {
@@ -28,59 +29,49 @@ import {
 
 const SignupPage: React.FC = () => {
   const [showModal, setShowModal] = useState(false)
+  const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
     setValue,
     getValues,
-    formState: { errors, isSubmitting },
+    formState: { errors, touchedFields },
   } = useForm<SignupForm>({
     resolver: zodResolver(signupSchema),
-    defaultValues: {
-      loginId: '',
-      password: '',
-      passwordConfirm: '',
-      name: '',
-      phone: '',
-      rrnFront: '',
-      rrnBackFirst: '',
-      zonecode: '',
-      address: '',
-      detailAddress: '',
-      email: '',
-      emailCode: '',
-    },
+    mode: 'onChange', 
+    reValidateMode: 'onChange',
   })
 
-  // API 훅들 (페이지는 훅만 사용)
   const signupMut = useSignupMutation()
   const checkLoginIdMut = useCheckLoginId()
   const checkEmailMut = useCheckEmail()
   const sendCodeMut = useSendEmailCode()
   const verifyCodeMut = useVerifyEmailCode()
 
-  const handleAddressComplete = (data: { zonecode: string; address: string }) => {
-    setValue('zonecode', data.zonecode, { shouldValidate: true })
+  const handleAddressComplete = (data: { zipcode: string; address: string }) => {
+    setValue('zipCode', data.zipcode, { shouldValidate: true })
     setValue('address', data.address, { shouldValidate: true })
   }
 
   const onSubmit = (form: SignupForm) => {
-    // DTO 변환이 필요하면 여기서 맞춰서 변환
     const dto = {
       loginId: form.loginId,
-      password: form.password,
+      loginPw: form.loginPw,
       name: form.name,
-      phone: form.phone.replace(/-/g, ''),
-      rrnFront: form.rrnFront,
-      rrnBackFirst: form.rrnBackFirst,
-      zonecode: form.zonecode,
-      address: form.address,
-      detailAddress: form.detailAddress,
+      phone: form.phone,
       email: form.email,
+      userProfile: {
+        residentNum: `${form.rrnFront}-${form.rrnBackFirst}`,
+        address: `${form.address} ${form.detailAddress}`.trim(),
+        zipCode: form.zipCode,
+      },
     }
     signupMut.mutate(dto, {
-      onSuccess: () => alert('회원가입 성공!'),
+      onSuccess: () => {
+        alert('회원가입을 성공했습니다.\n이제 로그인 페이지로 이동합니다.')
+        navigate('/login')
+      },
       onError: (e: unknown) => {
         if (e && typeof e === 'object' && 'response' in e) {
           const err = e as { response?: { data?: { message?: string } } }
@@ -104,7 +95,6 @@ const SignupPage: React.FC = () => {
   const onSendEmailCode = () => {
     const email = getValues('email')
     if (!email) return alert('이메일을 먼저 입력하세요')
-    // 중복 이메일 확인 먼저
     checkEmailMut.mutate(email, {
       onSuccess: (ok) => {
         if (!ok) return alert('이미 사용 중인 이메일입니다')
@@ -144,21 +134,26 @@ const SignupPage: React.FC = () => {
           buttonText="중복 확인"
           onButtonClick={onCheckLoginId}
           error={errors.loginId?.message}
+          touched={!!touchedFields.loginId}
         />
         <SignupInputField
-          {...register('password')}
+          {...register('loginPw')}
           icon={<FaLock />}
           placeholder="비밀번호"
           type="password"
-          error={errors.password?.message}
+          error={errors.loginPw?.message}
+          touched={!!touchedFields.loginPw}
         />
+
         <SignupInputField
           {...register('passwordConfirm')}
           icon={<FaLock />}
           placeholder="비밀번호 확인"
           type="password"
           error={errors.passwordConfirm?.message}
+          touched={!!touchedFields.passwordConfirm}
         />
+
         <SignupInputField
           {...register('name')}
           icon={<FaUser />}
@@ -168,8 +163,9 @@ const SignupPage: React.FC = () => {
         <SignupInputField
           {...register('phone')}
           icon={<FaPhone />}
-          placeholder="전화번호 (예: 010-1234-5678)"
+          placeholder="전화번호 (예: 010-0000-0000)"
           error={errors.phone?.message}
+          touched={!!touchedFields.phone}
         />
 
         <div className={styles.rrnRow}>
@@ -190,13 +186,13 @@ const SignupPage: React.FC = () => {
         </div>
 
         <SignupInputField
-          {...register('zonecode')}
+          {...register('zipCode')}
           icon={<FaLocationDot />}
           placeholder="우편번호"
           hasButton
           buttonText="주소 찾기"
           onButtonClick={() => setShowModal(true)}
-          error={errors.zonecode?.message}
+          error={errors.zipCode?.message}
         />
         <SignupInputField
           {...register('address')}
@@ -237,12 +233,7 @@ const SignupPage: React.FC = () => {
           error={errors.emailCode?.message}
         />
 
-        <Button
-          type="submit"
-          className="w-full h-12 mt-4"
-          disabled={isSubmitting || signupMut.isPending}
-          onClick={handleSubmit(onSubmit)}
-        >
+        <Button type="submit" className="w-full h-12 mt-4" onClick={handleSubmit(onSubmit)}>
           {signupMut.isPending ? '가입 중...' : '가입하기'}
         </Button>
       </div>

@@ -15,12 +15,19 @@ export const checkEmail = async (email: string) => {
   return res.data as boolean;
 };
 
-export const sendEmailCode = async (email: string) => {
-  const res = await axios.post('/api/mail/sendCode', { email });
-  return res.data;
+export const sendEmailCode = async (
+  email: string,
+  type: 'SIGNUP' | 'EMAIL_UPDATE' | 'PASSWORD_FIND' = 'SIGNUP'
+) => {
+  const { data } = await axios.post('api/mail/sendCode', { email, type }); // ✅ type 추가
+  return data;
 };
 
-export const verifyEmailCode = async (email: string, code: string) => {
-  const res = await axios.post('/api/mail/verifyCode', { email, code, type: 'SIGNUP' });
-  return res.data;
+export const verifyEmailCode = async (
+  email: string,
+  code: string,
+  type: 'SIGNUP' | 'EMAIL_UPDATE' | 'PASSWORD_FIND' = 'SIGNUP'
+) => {
+  const { data } = await axios.post('api/mail/verifyCode', { email, code, type }); // 이미 OK
+  return data;
 };
