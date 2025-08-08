@@ -43,7 +43,7 @@ import ChargeCompletePage from '@/pages/payment/pay/ChargeCompletePage'
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> }, 
   { path: '/login', element: <LoginPage /> },
-  { path: '/singup', element: <SignupPage /> },
+  { path: '/signup', element: <SignupPage /> },
   { path: '/find-id', element: <FindIdPage /> },
   { path: '/find-password', element: <FindPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
