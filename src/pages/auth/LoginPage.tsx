@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom' // 이거 꼭 추가해야 해!
+import { Link } from 'react-router-dom'
 import Logo from '@assets/logo.png'
 import LoginInput from '@/components/auth/login/LoginInput'
 import SocialLogin from '@/components/auth/login/SocialLogin'
@@ -30,7 +30,9 @@ const LoginPage: React.FC = () => {
         <div className={styles.divider} />
         <p className={styles.notMemberText}>아직 회원이 아니신가요?</p>
 
-        <Button className="w-full h-12">회원가입 하기</Button>
+        <Link to="/signup" className="w-full">
+          <Button className="w-full h-12">회원가입 하기</Button>
+        </Link>
       </div>
     </div>
   )
