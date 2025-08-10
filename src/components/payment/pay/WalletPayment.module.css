@@ -6,76 +6,85 @@
   width: 100%;
 }
 
+/* 라디오: 전역 오염 방지 위해 컨테이너로 스코프 멍 */
+.wallet-payment-container input[type='radio'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+  transition: 0.2s;
+  vertical-align: middle;
+}
+
+.wallet-payment-container input[type='radio']:checked {
+  border-color: #4d9afd;
+  background: #4d9afd;
+}
+
+.wallet-payment-container input[type='radio']:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.wallet-payment-container input[type='radio']:hover {
+  border-color: #4d9afd;
+}
+
+.wallet-payment-container input[type='radio']:focus-visible {
+  outline: 2px solid #275cb3;
+  outline-offset: 2px;
+}
+
+/* 라벨 및 헤더 멍 */
+label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.radio-label {
+  font-size: 14px;
+  color: #222;
+  font-weight: 600;
+}
+
 /* 결제 섹션 */
 .payment-section {
-  width: 100%; /* ← 부모 너비 채우기 */
+  width: 100%;
   margin: 0;
   padding: 0;
   border-radius: 12px;
-  box-sizing: border-box; /* ← 이거 안 하면 padding이 너비에서 빠짐 */
+  box-sizing: border-box;
 }
 
-/* 💡 킷페이 + 충전 버튼 수평 정렬 */
+/* 킷페이 + 충전 버튼 수평 정렬 */
 .payment-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px; 
+  margin-bottom: 8px;
 }
 
 .simple-payment-option {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 16px;
-  padding: 12px;
-  cursor: pointer;
+  padding: 12px 4px;
   margin: 0;
-}
-
-.radio-input {
-  width: 16px;
-  height: 16px;
-  margin-left: 4px;
-  margin-right: 0;
-  position: relative;
-  top: 1px;
-  z-index: 1;
-  display: none;
-}
-
-.radio-label {
-  font-size: 14px;
-  color: #333;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.radio-custom {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #ccc;
-  border-radius: 50%;
-  position: relative;
-  display: inline-block;
-  transition: all 0.2s ease;
-}
-
-.radio-input:checked + .radio-custom {
-  background-color: #4d9afd;
-  border-color: #4d9afd;
-}
-
-.radio-input:checked + .radio-custom::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 6px;
-  height: 6px;
-  background-color: white;
-  border-radius: 50%;
+  min-height: 24px;
 }
 
 /* 충전 섹션 */

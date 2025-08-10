@@ -33,20 +33,22 @@ const TransferPaymentPage: React.FC = () => {
     if (pendingMethod === '킷페이') {
       setIsModalOpen(true)
     } else {
-      // 실제 결제 구현 전이면 여기서만 닫기
-      // 예: alert('아직 해당 결제 방식은 지원되지 않아요!')
+      navigate('/payment/transfer/transfer-success') // ← 일반/간편 결제는 즉시 완료 페이지로 이동
     }
+    setPendingMethod('') // ← 다음 시도 대비 초기화
   }
 
   // AlertModal에서 취소
   const handleAlertCancel = () => {
     setIsAlertOpen(false)
+    setPendingMethod('') // ← 취소 시에도 초기화
   }
 
+  // 킷페이(비밀번호 입력 완료 시)
   const handlePasswordComplete = (password: string) => {
     console.log('입력된 비밀번호:', password)
     setIsModalOpen(false)
-    navigate('/payment/transfer-success')
+    navigate('/payment/transfer/transfer-success')
   }
 
   return (
@@ -107,13 +109,8 @@ const TransferPaymentPage: React.FC = () => {
 
       {/* AlertModal */}
       {isAlertOpen && (
-        <AlertModal
-          title="결제 안내"
-          onCancel={handleAlertCancel}
-          onConfirm={handleAlertConfirm}
-        >
-          양도로 구매한 티켓은 환불 불가합니다.
-          결제 하시겠습니까?
+        <AlertModal title="결제 안내" onCancel={handleAlertCancel} onConfirm={handleAlertConfirm}>
+          양도로 구매한 티켓은 환불 불가합니다. 결제 하시겠습니까?
         </AlertModal>
       )}
 

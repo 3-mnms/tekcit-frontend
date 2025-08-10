@@ -1,167 +1,179 @@
 .payment-section {
-  width: 100%; /* ← 부모 너비 채우기 */
+  width: 100%;
   margin: 0;
-  /* padding: 24px; */
   border-radius: 12px;
-  box-sizing: border-box; /* ← 이거 안 하면 padding이 너비에서 빠짐 */
+  box-sizing: border-box;
 }
 
-/* Button 컴포넌트 스타일 */
-.custom-button {
-  background-color: #4d9afd;
-  color: white;
-  font-weight: bold;
-  border-radius: 0.75rem;
-  padding: 0.5rem 1rem;
-  transition: all 0.2s ease-in-out;
-  border: none;
-  cursor: pointer;
-}
-
-/* 토글 섹션 */
-.toggle-section {
-  border-radius: 0.5rem;
-  padding: 10px;
-  margin-bottom: 1rem;
-}
-
-.toggle-row {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  gap: 0.75rem;
-}
-
-.toggle-radio {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.radio-input {
-  opacity: 0;
-  position: absolute;
-  width: 0;
-  height: 0;
-}
-
-.radio-custom {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #ddd;
+/* 라디오 (공통) 멍 */
+.payment-section input[type='radio'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ccc;
   border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
   position: relative;
-  transition: all 0.2s ease;
+  transition: 0.2s;
+  vertical-align: middle;
 }
-
-/* 라디오 버튼 클릭시 원 채우기 */
-.radio-input:checked + .radio-custom {
-  border-color: #007bff;
-  background-color: #007bff;
+.payment-section input[type='radio']:checked {
+  border-color: #4d9afd;
+  background: #4d9afd;
 }
-
-/* 라디오 버튼 클릭시 원 안에 빈 원 생기기 */
-.radio-input:checked + .radio-custom::after {
+.payment-section input[type='radio']:checked::after {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   width: 6px;
   height: 6px;
-  background-color: white;
+  background: #fff;
   border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.payment-section input[type='radio']:hover {
+  border-color: #4d9afd;
+}
+.payment-section input[type='radio']:focus-visible {
+  outline: 2px solid #275cb3;
+  outline-offset: 2px;
 }
 
-.toggle-label {
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
-}
-
-/* 결제 버튼들 */
-.payment-buttons-row {
-  display: flex;
-  gap: 1rem;
-}
-
-.payment-btn {
-  flex: 1;
+.simple-payment-option {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 4px;
+  min-height: 24px;
+  cursor: pointer;
+}
+.radio-label {
+  font-size: 14px;
+  color: #222;
   font-weight: 600;
-  transition: all 0.2s ease;
+}
+
+/* 헤더/박스 멍 */
+.toggle-section {
+  border-radius: 8px;
+  padding: 10px 0;
+  margin-bottom: 12px;
 }
 
 .payment-box {
   width: 100%;
   min-height: 120px;
-  padding: 24px;
+  padding: 16px;
   border: 1px solid #007bff;
   border-radius: 12px;
-  background-color: #fff;
+  background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 
-.naver-btn {
-  background-color: #03c75a;
+/* 버튼 레이아웃: 3등분 그리드 멍 */
+.payment-buttons-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+/* 버튼 공통 멍 */
+.payment-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  height: 56px;
+  padding: 0 14px;
+  border-radius: 12px;
   border: none;
-  color: white;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
 }
 
-.naver-btn:hover {
-  background-color: #02b351;
+.payment-btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+.payment-btn:focus-visible {
+  outline: 3px solid rgba(39, 92, 179, 0.5);
+  outline-offset: 2px;
 }
 
-.kakao-btn {
-  background-color: #fee500;
-  border: none;
-  color: #3c1e1e;
+/* 선택 상태 통일: data-selected 사용 멍 */
+.payment-btn[data-selected='true'] {
+  outline: 2px solid rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.kakao-btn:hover {
-  background-color: #fdd800;
-}
-
+/* 아이콘 공통 멍 */
 .btn-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
-  font-weight: bold;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  flex: 0 0 28px;
 }
 
-.naver-icon {
-  background-color: white;
+/* 텍스트 멍 */
+.btn-text {
+  font-size: 15px;
+  letter-spacing: -0.2px;
+  line-height: 1;
+}
+
+/* 브랜드별 변형: data-variant로 제어 멍 */
+.payment-btn[data-variant='네이버페이'] {
+  background: #03c75a;
+  color: #fff;
+}
+.payment-btn[data-variant='네이버페이']:hover {
+  background: #02b351;
+}
+.payment-btn[data-variant='카카오페이'] {
+  background: #fee500;
+  color: #3c1e1e;
+}
+.payment-btn[data-variant='카카오페이']:hover {
+  background: #fdd800;
+}
+.payment-btn[data-variant='토스페이'] {
+  background: #0064ff;
+  color: #fff;
+}
+.payment-btn[data-variant='토스페이']:hover {
+  background: #0053d6;
+}
+
+/* 아이콘 대비 멍 */
+.payment-btn[data-variant='네이버페이'] .btn-icon {
+  background: #fff;
   color: #03c75a;
 }
-
-.kakao-icon {
-  background-color: #3c1e1e;
+.payment-btn[data-variant='카카오페이'] .btn-icon {
+  background: #3c1e1e;
   color: #fee500;
 }
-
-.btn-text {
-  font-size: 0.875rem;
-}
-
-/* 슬라이드 토글 */
-.slide-toggle {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease;
-}
-
-.slide-toggle.open {
-  max-height: 300px; /* 충분히 큰 값으로 설정 */
+.payment-btn[data-variant='토스페이'] .btn-icon {
+  background: #fff;
+  color: #0064ff;
 }
