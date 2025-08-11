@@ -11,6 +11,10 @@
   background-color: #3585ea
 }
 
+.button:focus {
+  outline: none; 
+}
+
 .button:disabled {
   background-color: #a1cfff;
   cursor: not-allowed;
