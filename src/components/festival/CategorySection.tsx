@@ -8,12 +8,12 @@ const CATEGORY_MAP: { [key: string]: string } = {
   '무용(서양/한국무용)': '무용',
   '뮤지컬': '뮤지컬/연극',
   '연극': '뮤지컬/연극',
-  '서양음악(클래식)': '클래식',
-  '한국음악(국악)': '클래식',
+  '서양음악(클래식)': '클래식/국악',
+  '한국음악(국악)': '클래식/국악',
   '서커스/마술': '서커스/마술',
 };
 
-const SIMPLIFIED_CATEGORIES = ['대중음악', '무용', '뮤지컬/연극', '클래식', '서커스/마술'];
+const SIMPLIFIED_CATEGORIES = ['대중음악', '무용', '뮤지컬/연극', '클래식/국악', '서커스/마술', '복합'];
 
 const CategorySection: React.FC = () => {
   const [categories] = useState<string[]>(SIMPLIFIED_CATEGORIES);
@@ -48,7 +48,8 @@ const CategorySection: React.FC = () => {
   }, []);
 
   const filteredFestivals = festivals.filter((festival) => {
-    const mapped = CATEGORY_MAP[festival.genrename];
+    const raw = festival.genrename ?? '';
+    const mapped = CATEGORY_MAP[raw] ?? '복합';
     return mapped === selectedCategory;
   });
 

@@ -4,11 +4,31 @@ import logo from '@shared/assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getFestivalCategories } from '@shared/api/festival/FestivalApi';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 interface HeaderProps {
   isLoggedIn: boolean;
   onSearch: (keyword: string) => void;
 }
+
+const CATEGORY_ORDER = [
+  '무용',
+  '대중음악',
+  '뮤지컬/연극',
+  '복합',
+  '클래식/국악',
+  '서커스/미술',
+];
+
+// ✅ 한글 ↔ 영어 매핑
+const categoryMap: Record<string, string> = {
+  '무용': 'dance',
+  '대중음악': 'pop',
+  '뮤지컬/연극': 'theater',
+  '복합': 'mix',
+  '클래식/국악': 'classic',
+  '서커스/미술': 'art',
+};
 
 const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
   const navigate = useNavigate();
@@ -36,13 +56,15 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
       } else if (['뮤지컬', '연극'].includes(category)) {
         grouped.add('뮤지컬/연극');
       } else if (['서양음악(클래식)', '한국음악(국악)'].includes(category)) {
-        grouped.add('클래식/전통음악');
+        grouped.add('클래식/국악');
+      } else if (category === '서커스/마술') {
+        grouped.add('서커스/미술');
       } else {
         grouped.add(category);
       }
     });
 
-    return Array.from(grouped);
+    return CATEGORY_ORDER.filter((cat) => grouped.has(cat));
   };
 
   const groupedCategories = categories ? groupCategories(categories) : [];
@@ -50,10 +72,23 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
   return (
     <header className={styles.header}>
       <div className={styles.left}>
-        <img src={logo} alt="tekcit logo" className={styles.logo} />
+        <img
+          src={logo}
+          alt="tekcit logo"
+          className={styles.logo}
+          onClick={() => navigate('/')}
+          style={{ cursor: 'pointer' }}
+        />
+
         <div className={styles.categoryList}>
           {groupedCategories.map((cat) => (
-            <span key={cat}>{cat}</span>
+            <span
+              key={cat}
+              className={styles.categoryItem}
+              onClick={() => navigate(`/category/${categoryMap[cat]}`)}
+            >
+              {cat}
+            </span>
           ))}
         </div>
       </div>

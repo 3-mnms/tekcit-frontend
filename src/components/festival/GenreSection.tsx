@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from './GenreSection.module.css'; // 파일명도 바뀜!
+import styles from './CategorySection.module.css'; // 파일명도 바뀜!
 
 const genres = ['콘서트', '뮤지컬', '연극', '페스티벌'];
 
