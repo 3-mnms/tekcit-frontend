@@ -1,14 +1,15 @@
-import React from 'react';
-import styles from './Header.module.css';
-import logo from '@shared/assets/logo.png';
-import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getFestivalCategories } from '@shared/api/festival/FestivalApi';
+import React, { useState, useRef, useEffect } from 'react'
+import styles from './Header.module.css'
+import logo from '@shared/assets/logo.png'
+import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { getFestivalCategories } from '@shared/api/festival/FestivalApi'
+import { useAuthStore } from '@shared/storage/useAuthStore'
+import UserDropdown from '@/pages/my/dropdown/UserDropdown'
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 interface HeaderProps {
-  isLoggedIn: boolean;
-  onSearch: (keyword: string) => void;
+  onSearch: (keyword: string) => void
 }
 
 const CATEGORY_ORDER = [
@@ -36,38 +37,54 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
 
   const handleSearch = () => {
     if (keyword.trim()) {
-      onSearch(keyword.trim());
+      onSearch(keyword.trim())
     }
-  };
+  }
 
   const { data: categories } = useQuery({
     queryKey: ['festivalCategories'],
     queryFn: getFestivalCategories,
-  });
+  })
 
   const groupCategories = (original: string[]): string[] => {
-    const grouped = new Set<string>();
+    const grouped = new Set<string>()
 
     original.forEach((category) => {
       if (['대중무용', '무용(서양/한국무용)'].includes(category)) {
-        grouped.add('무용');
+        grouped.add('무용')
       } else if (category === '대중음악') {
-        grouped.add('대중음악');
+        grouped.add('대중음악')
       } else if (['뮤지컬', '연극'].includes(category)) {
-        grouped.add('뮤지컬/연극');
+        grouped.add('뮤지컬/연극')
       } else if (['서양음악(클래식)', '한국음악(국악)'].includes(category)) {
         grouped.add('클래식/국악');
       } else if (category === '서커스/마술') {
         grouped.add('서커스/미술');
       } else {
-        grouped.add(category);
+        grouped.add(category)
       }
-    });
+    })
 
     return CATEGORY_ORDER.filter((cat) => grouped.has(cat));
   };
 
-  const groupedCategories = categories ? groupCategories(categories) : [];
+  const groupedCategories = categories ? groupCategories(categories) : []
+
+  const getRoleDisplayName = () => {
+    if (!user) {
+      return '사용자'
+    }
+    switch (user.role) {
+      case 'USER':
+        return `${user.name} 님`
+      case 'HOST':
+        return '호스트 님'
+      case 'ADMIN':
+        return '관리자 님'
+      default:
+        return '사용자 님'
+    }
+  }
 
   return (
     <header className={styles.header}>
@@ -102,7 +119,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') handleSearch();
+              if (e.key === 'Enter') handleSearch()
             }}
           />
           <i
@@ -113,12 +130,20 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
         </div>
       </div>
 
-      <div className={styles.right}>
+      <div className={styles.right} ref={dropdownRef}>
         {isLoggedIn ? (
-          <div className={styles.rightButton} onClick={() => navigate('/mypage')}>
-            <i className="fa-regular fa-user" />
-            <span>마이페이지</span>
-          </div>
+          <>
+            <div className={styles.rightButton} onClick={() => setIsDropdownOpen((prev) => !prev)}>
+              <i className="fa-regular fa-user" />
+              <span>{getRoleDisplayName()}</span>
+            </div>
+
+            {isDropdownOpen && (
+              <div className={styles.dropdownWrapper}>
+                <UserDropdown />
+              </div>
+            )}
+          </>
         ) : (
           <div className={styles.rightButton} onClick={() => navigate('/login')}>
             <i className="fa-regular fa-user" />
@@ -127,7 +152,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
         )}
       </div>
     </header>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

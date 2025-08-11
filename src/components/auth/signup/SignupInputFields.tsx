@@ -9,12 +9,13 @@ interface BaseProps extends React.InputHTMLAttributes<HTMLInputElement> {
   hasButton?: boolean;
   buttonText?: string;
   onButtonClick?: () => void;
+  buttonDisabled?: boolean;
   error?: string;
   touched?: boolean;
 }
 
 const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
-  ({ icon, placeholder, hasButton = false, buttonText, onButtonClick, type = "text", error, touched, ...inputProps }, ref) => {
+  ({ icon, placeholder, hasButton = false, buttonText, onButtonClick, buttonDisabled = false, type = "text", error, touched, ...inputProps }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === "password";
     const inputType = isPassword ? (showPassword ? "text" : "password") : type;
@@ -29,9 +30,12 @@ const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
             styles.inputWrapper,
             showError ? styles.invalid : "",
             showSuccess ? styles.valid : "",
+            inputProps.readOnly
+              ? '!bg-gray-100 rounded-md cursor-not-allowed border border-gray-100'
+              : ''
           ].join(" ")}
         >
-          <div className={styles.left}>
+          <div className={`${styles.left}`}>
             {icon}
             <span className={styles.bar}>&nbsp;|</span>
           </div>
@@ -40,7 +44,8 @@ const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
             ref={ref}
             type={inputType}
             placeholder={placeholder}
-            className={styles.input}
+            disabled={inputProps.readOnly}
+            className={`${styles.input} ${inputProps.readOnly ? 'bg-gray-100 border-none text-gray-600' : ''}`}
             aria-invalid={showError}
             aria-describedby={showError ? `${inputProps.name}-error` : undefined}
             {...inputProps}
@@ -58,9 +63,10 @@ const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
           )}
         </div>
 
+
         {hasButton && (
           <div className={styles.buttonWrapper}>
-            <Button onClick={onButtonClick} className="w-[95px] h-[44px] text-sm">
+            <Button type="button" onClick={onButtonClick} disabled={buttonDisabled} className="w-[95px] h-[44px] text-sm">
               {buttonText}
             </Button>
           </div>

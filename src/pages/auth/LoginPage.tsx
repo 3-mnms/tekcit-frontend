@@ -1,19 +1,24 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import Logo from '@assets/logo.png'
-import LoginInput from '@/components/auth/login/LoginInput'
-import SocialLogin from '@/components/auth/login/SocialLogin'
-import Button from '@/components/common/button/Button'
-import styles from './LoginPage.module.css'
+// src/pages/auth/login/LoginPage.tsx
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Logo from '@assets/logo.png';
+import LoginInput from '@/components/auth/login/LoginInput';
+import SocialLogin from '@/components/auth/login/SocialLogin';
+import Button from '@/components/common/button/Button';
+import styles from './LoginPage.module.css';
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { loginSchema, type LoginForm } from '@/models/auth/schema/loginSchema'
-import { useLoginMutation } from '@/models/auth/tanstack-query/useLogin'
-import { tokenStore } from '@/shared/storage/tokenStore'
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, type LoginForm } from '@/models/auth/schema/loginSchema';
+import { useLoginMutation } from '@/models/auth/tanstack-query/useLogin';
+
+// ✅ zustand import
+import { useAuthStore } from '@/shared/storage/useAuthStore';
+import { parseJwt } from '@/shared/storage/jwt';
 
 const LoginPage: React.FC = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { setUser } = useAuthStore(); // ✅ zustand에서 setUser 함수 가져오기
 
   const {
     register,
@@ -22,27 +27,38 @@ const LoginPage: React.FC = () => {
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     mode: 'onChange',
-  })
+  });
 
-  const loginMut = useLoginMutation()
+  const loginMut = useLoginMutation();
 
   const onSubmit = (form: LoginForm) => {
-    tokenStore.clear() // ✅ 이전 accessToken 제거(선택)
     loginMut.mutate(form, {
       onSuccess: (data: any) => {
-        if (data?.accessToken) tokenStore.set(data.accessToken)
-        alert('로그인이 완료되었습니다!')
-        navigate('/')
+        if (data?.accessToken) {
+          // ✅ 토큰 파싱 후 user 객체 생성
+          const decoded = parseJwt(data.accessToken);
+          if (decoded) {
+            const user = {
+              userId: decoded.userId,
+              role: decoded.role,
+              name: decoded.name,
+              loginId: decoded.sub,
+            };
+            setUser(user); // ✅ zustand 전역 상태에 user 정보 저장
+          }
+        }
+        alert('로그인이 완료되었습니다!');
+        navigate('/');
       },
       onError: (e: any) => {
         const msg =
           e?.response?.data?.errorMessage ||
           e?.response?.data?.message ||
-          '아이디 또는 비밀번호를 확인하세요.'
-        alert(msg)
+          '아이디 또는 비밀번호를 확인하세요.';
+        alert(msg);
       },
-    })
-  }
+    });
+  };
 
   return (
     <div className={styles.page}>
@@ -79,7 +95,8 @@ const LoginPage: React.FC = () => {
         </form>
 
         <div className={styles.findLinks}>
-          <Link to="/find-id">아이디 찾기</Link> | <Link to="/find-password">비번 찾기</Link>
+          <Link to="/find-id">아이디 찾기</Link> |{' '}
+          <Link to="/find-password">비번 찾기</Link>
         </div>
 
         <SocialLogin />
@@ -92,7 +109,7 @@ const LoginPage: React.FC = () => {
         </Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default LoginPage;
