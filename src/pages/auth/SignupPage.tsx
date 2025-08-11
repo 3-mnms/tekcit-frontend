@@ -71,6 +71,7 @@ const SignupPage: React.FC = () => {
       register,
       handleSubmit,
       getValues,
+      setValue,
       formState: { errors, touchedFields },
     } = useForm<Step1>({
       resolver: zodResolver(signupStep1),
@@ -81,11 +82,15 @@ const SignupPage: React.FC = () => {
         loginPw: acc.loginPw ?? '',
         passwordConfirm: '',
       },
+      shouldUnregister: false,
     })
 
     const onCheckLoginId = () => {
       const id = getValues('loginId')
       if (!id) return alert('아이디를 먼저 입력하세요')
+      setAcc((p) => ({ ...p, loginId: id }))
+      setValue('loginId', id, { shouldValidate: true, shouldDirty: false })
+
       checkLoginIdMut.mutate(id, {
         onSuccess: (ok) => alert(ok ? '사용 가능' : '이미 사용 중'),
         onError: () => alert('아이디 확인 실패'),
@@ -220,7 +225,6 @@ const SignupPage: React.FC = () => {
     )
   }
 
-  // ========== Step3 Form ==========
   // ========== Step3 Form ==========
   const Step3Form: React.FC<{ onPrev: () => void; onNext: () => void }> = ({ onPrev, onNext }) => {
     const {
