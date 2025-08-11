@@ -1,12 +1,12 @@
 import { useNavigate } from 'react-router-dom' // ✅ 추가 멍!
-import styles from '@/pages/payment/pay/PaymentCompletePage.module.css'
+import styles from './TransferSuccessPage.module.css'
 import Button from '@/components/common/button/Button'
 
 const TransferSuccessPage: React.FC = () => {
   const navigate = useNavigate() // ✅ 추가 멍!
 
   const handleDetailClick = () => {
-    navigate('/payment/transfer-fee') // ✅ 여기서 페이지 이동 멍!
+    navigate('/payment/transfer/transfer-fee') // ✅ 여기서 페이지 이동 멍!
   }
 
   return (

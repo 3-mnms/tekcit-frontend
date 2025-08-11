@@ -11,7 +11,14 @@ const RefundPage: React.FC = () => {
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false)
   const navigate = useNavigate()
 
-  // ⬇️ 환불 취소 버튼 클릭 시 내 티켓(예매 내역) 페이지로 이동!
+  // ✅ 모의 환불 API: URL에 ?fail=1이면 실패 처리
+  const requestRefund = async () => {
+    await new Promise((r) => setTimeout(r, 400)) // 로딩 흉내
+    const params = new URLSearchParams(window.location.search)
+    const forceFail = params.get('fail') === '1'
+    return { ok: !forceFail }
+  }
+
   const handleCancel = () => {
     navigate('/mypage/ticket')
   }
@@ -20,10 +27,19 @@ const RefundPage: React.FC = () => {
     setIsRefundModalOpen(true)
   }
 
-  const handleRefundConfirm = () => {
+  // ✅ 성공/실패 분기하여 각각 페이지로 이동
+  const handleRefundConfirm = async () => {
     setIsRefundModalOpen(false)
-    // 환불 완료 페이지로 이동!
-    navigate('/payment/refund/refund-success') 
+    try {
+      const res = await requestRefund()
+      if (res.ok) {
+        navigate('/payment/refund/refund-success')
+      } else {
+        navigate('/payment/refund/refund-fail')
+      }
+    } catch {
+      navigate('/payment/refund/refund-fail')
+    }
   }
 
   const handleRefundModalCancel = () => {
@@ -66,7 +82,6 @@ const RefundPage: React.FC = () => {
         </Button>
       </div>
 
-      {/* 환불 확인 모달 */}
       {isRefundModalOpen && (
         <AlertModal
           title="환불 확인"

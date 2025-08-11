@@ -1,0 +1,80 @@
+.container {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 28px;
+  text-align: center;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #fde8e8; /* 연한 빨강 */
+  color: #ef4444; /* 아이콘 빨강 */
+  margin: 0 auto 12px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 4px 0 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.infoBox {
+  text-align: left;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 0 auto 20px;
+  max-width: 420px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 4px;
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.value {
+  color: #111827;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}

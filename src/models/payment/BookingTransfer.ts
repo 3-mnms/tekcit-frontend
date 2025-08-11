@@ -17,7 +17,7 @@ export interface BookingTransfer {
 // 테스트용 더미 데이터 (API 연동 전까지 사용 가능)
 export const bookingTransfer: BookingTransfer = {
   product: {
-    title: '하울❤️의 움직이는 성🏰',
+    title: '콘서트',
     datetime: '2025.09.21 (일) 오후 3시',
     location: '강남아트홀 1관',
     ticket: 2,

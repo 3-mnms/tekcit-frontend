@@ -10,7 +10,7 @@ export const mockAddresses: Address[] = [
   {
     id: 1,
     address1: '서울특별시 강남구 테헤란로 123',
-    address2: '한빛타워 101호',
+    address2: '강남타워 101호',
     isDefault: true,
   },
   {

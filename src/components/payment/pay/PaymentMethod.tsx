@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import WalletPayment from '@components/payment/pay/WalletPayment'
 import CardSimplePayment from '@components/payment/pay/CardSimplePayment'
+import type { SimpleMethod } from '@components/payment/pay/CardSimplePayment'
 import GeneralCardPayment from '@components/payment/pay/GeneralCardPayment'
 
 import styles from './PaymentMethod.module.css'
@@ -13,10 +14,10 @@ interface PaymentMethodProps {
 const PaymentMethod: React.FC<PaymentMethodProps> = ({ onSelect }) => {
   const [method, setMethod] = useState<'wallet' | 'simple' | 'general' | null>(null)
 
-  // 카드 간편 결제에서 실제 선택값 받을 때
-  const handleSimpleSelect = (method: '네이버페이' | '카카오페이') => {
+  // ✅ 넓혀서 받기: SimpleMethod 전체 허용
+  const handleSimpleSelect = (m: SimpleMethod) => {
     setMethod('simple')
-    onSelect?.(method) // ★ 바로 올려줌
+    onSelect?.(m)
   }
 
   return (
@@ -28,11 +29,14 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ onSelect }) => {
           onSelect?.('킷페이')
         }}
       />
+
       <CardSimplePayment
         isOpen={method === 'simple'}
         onToggle={() => setMethod('simple')}
         onSelect={handleSimpleSelect}
+        methods={['네이버페이', '카카오페이', '토스페이']}
       />
+
       <GeneralCardPayment
         isOpen={method === 'general'}
         onToggle={() => {
