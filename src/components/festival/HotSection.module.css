@@ -41,6 +41,7 @@
   overflow: hidden;
   background-color: #eee;
   margin: 0 auto; /* 가운데 정렬 */
+  cursor: pointer;
 }
 
 .image {

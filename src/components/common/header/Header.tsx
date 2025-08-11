@@ -1,4 +1,3 @@
-// src/components/layout/Header.tsx
 import React, { useState, useRef, useEffect } from 'react'
 import styles from './Header.module.css'
 import logo from '@shared/assets/logo.png'
@@ -7,29 +6,34 @@ import { useQuery } from '@tanstack/react-query'
 import { getFestivalCategories } from '@shared/api/festival/FestivalApi'
 import { useAuthStore } from '@shared/storage/useAuthStore'
 import UserDropdown from '@/pages/my/dropdown/UserDropdown'
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 interface HeaderProps {
   onSearch: (keyword: string) => void
 }
 
-const Header: React.FC<HeaderProps> = ({ onSearch }) => {
-  const navigate = useNavigate()
-  const [keyword, setKeyword] = React.useState('')
+const CATEGORY_ORDER = [
+  '무용',
+  '대중음악',
+  '뮤지컬/연극',
+  '복합',
+  '클래식/국악',
+  '서커스/미술',
+];
 
-  const { isLoggedIn, user } = useAuthStore()
-  console.log('Current user object:', user);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+// ✅ 한글 ↔ 영어 매핑
+const categoryMap: Record<string, string> = {
+  '무용': 'dance',
+  '대중음악': 'pop',
+  '뮤지컬/연극': 'theater',
+  '복합': 'mix',
+  '클래식/국악': 'classic',
+  '서커스/미술': 'art',
+};
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsDropdownOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+const Header: React.FC<HeaderProps> = ({ isLoggedIn, onSearch }) => {
+  const navigate = useNavigate();
+  const [keyword, setKeyword] = React.useState('');
 
   const handleSearch = () => {
     if (keyword.trim()) {
@@ -53,14 +57,16 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
       } else if (['뮤지컬', '연극'].includes(category)) {
         grouped.add('뮤지컬/연극')
       } else if (['서양음악(클래식)', '한국음악(국악)'].includes(category)) {
-        grouped.add('클래식/전통음악')
+        grouped.add('클래식/국악');
+      } else if (category === '서커스/마술') {
+        grouped.add('서커스/미술');
       } else {
         grouped.add(category)
       }
     })
 
-    return Array.from(grouped)
-  }
+    return CATEGORY_ORDER.filter((cat) => grouped.has(cat));
+  };
 
   const groupedCategories = categories ? groupCategories(categories) : []
 
@@ -83,10 +89,23 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
   return (
     <header className={styles.header}>
       <div className={styles.left}>
-        <img src={logo} alt="tekcit logo" className={styles.logo} />
+        <img
+          src={logo}
+          alt="tekcit logo"
+          className={styles.logo}
+          onClick={() => navigate('/')}
+          style={{ cursor: 'pointer' }}
+        />
+
         <div className={styles.categoryList}>
           {groupedCategories.map((cat) => (
-            <span key={cat}>{cat}</span>
+            <span
+              key={cat}
+              className={styles.categoryItem}
+              onClick={() => navigate(`/category/${categoryMap[cat]}`)}
+            >
+              {cat}
+            </span>
           ))}
         </div>
       </div>

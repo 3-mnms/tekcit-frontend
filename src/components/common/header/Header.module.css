@@ -23,11 +23,21 @@
 
 .categoryList {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: 14px;
-  font-weight: 600;
+  gap: 1.25rem;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+.categoryItem {
+  font-weight: 500;
   color: #111;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.categoryItem:hover {
+  color: #4d9afd;
+  text-decoration: underline;
 }
 
 .center {

@@ -26,21 +26,6 @@
   color: #111;
 }
 
-.moneyGroup {
-  display: flex;
-  gap: 90px;
-  justify-content: center;
-  align-items: flex-start;
-  margin-top: 40px;
-}
-
-.moneyBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 30px;
-}
-
 .moneySection {
   width: 60%;
   max-width: 100%;
@@ -64,10 +49,35 @@
 }
 
 .subtitle {
-  font-size: 20px; /* ✅ 원하는 만큼 키워도 됨 */
+  font-size: 20px;
   font-weight: bold;
   color: #111;
   margin-top: 40px;
   margin-bottom: 16px;
-  align-self: flex-start; /* 왼쪽 정렬 원할 때 */
+  align-self: flex-start;
+}
+
+/* 상단: 라벨 + 금액 가로정렬 */
+.moneyInfo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* 전체를 세로로 스택 */
+.moneyGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-top: 40px;
+  gap: 0;
+}
+
+/* 하단: 버튼 우측 정렬 */
+.moneyActions {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 }

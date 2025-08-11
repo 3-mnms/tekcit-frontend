@@ -1,4 +1,4 @@
-import styles from './TransferTicketInfo.module.css'
+import styles from './RefundTicketInfo.module.css'
 
 interface TransferTicketInfoProps {
   title: string
@@ -6,6 +6,7 @@ interface TransferTicketInfoProps {
   ticket: number
   sender: string
   receiver: string
+  posterUrl?: string
 }
 
 const TransferTicketInfo: React.FC<TransferTicketInfoProps> = ({
@@ -14,10 +15,18 @@ const TransferTicketInfo: React.FC<TransferTicketInfoProps> = ({
   ticket,
   sender,
   receiver,
+  posterUrl,
 }) => {
   return (
     <div className={styles.ticketBox}>
-      <div className={styles.thumbnail} />
+      <div className={styles.thumbnail}>
+        <img
+          src={posterUrl || '/assets/no-poster.png'}
+          alt="포스터"
+          className={styles.posterImg}
+        />
+      </div>
+
       <div className={styles.ticketDetail}>
         <div className={styles.infoRow}>
           <span className={styles.label}>페스티벌 제목</span>

@@ -4,7 +4,6 @@ import Info from '@components/festival/FestivalInfoSection';
 import Scheduler from '@components/festival/FestivalScheduleSection';
 import InfoDetail from '@components/festival/FestivalInfoDetailSection';
 import Statistics from '@components/festival/FestivalStatisticsSection';
-import '@fortawesome/fontawesome-free/css/all.min.css';
 import styles from './FestivalDetailPage.module.css';
 
 const FestivalDetailPage: React.FC = () => {

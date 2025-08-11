@@ -1,12 +1,12 @@
-// src/pages/payment/TransferPaymentPage.tsx
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import AddressForm from '@/components/payment/address/AddressForm'
-import PaymentMethod from '@components/payment/pay/PaymentMethod'
+import PaymentMethod from '@/components/payment/pay/PaymentMethod'
 import BookingProductInfo from '@/components/payment/BookingProductInfo'
 import Button from '@/components/common/button/Button'
 import PasswordInputModal from '@/pages/payment/modal/PasswordInputModal'
+import AlertModal from '@/pages/payment/modal/AlertModal'
 
 import styles from './TransferPaymentPage.module.css'
 
@@ -16,20 +16,39 @@ const TransferPaymentPage: React.FC = () => {
   const [isAddressFilled, setIsAddressFilled] = useState<boolean>(false)
   const [isAgreed, setIsAgreed] = useState<boolean>(false)
 
+  const [isAlertOpen, setIsAlertOpen] = useState(false)
+  const [pendingMethod, setPendingMethod] = useState<string>('')
+
   const navigate = useNavigate()
 
+  // 기존 버튼 클릭 → Alert 띄우기만!
   const handleNextClick = () => {
-    if (selectedMethod === '킷페이') {
-      setIsModalOpen(true)
-    } else {
-      alert('아직 해당 결제 방식은 지원되지 않아요!')
-    }
+    setPendingMethod(selectedMethod)
+    setIsAlertOpen(true)
   }
 
+  // AlertModal에서 확인
+  const handleAlertConfirm = () => {
+    setIsAlertOpen(false)
+    if (pendingMethod === '킷페이') {
+      setIsModalOpen(true)
+    } else {
+      navigate('/payment/transfer/transfer-success') // ← 일반/간편 결제는 즉시 완료 페이지로 이동
+    }
+    setPendingMethod('') // ← 다음 시도 대비 초기화
+  }
+
+  // AlertModal에서 취소
+  const handleAlertCancel = () => {
+    setIsAlertOpen(false)
+    setPendingMethod('') // ← 취소 시에도 초기화
+  }
+
+  // 킷페이(비밀번호 입력 완료 시)
   const handlePasswordComplete = (password: string) => {
     console.log('입력된 비밀번호:', password)
     setIsModalOpen(false)
-    navigate('/payment/transfer-success')
+    navigate('/payment/transfer/transfer-success')
   }
 
   return (
@@ -87,6 +106,13 @@ const TransferPaymentPage: React.FC = () => {
       >
         다음
       </Button>
+
+      {/* AlertModal */}
+      {isAlertOpen && (
+        <AlertModal title="결제 안내" onCancel={handleAlertCancel} onConfirm={handleAlertConfirm}>
+          양도로 구매한 티켓은 환불 불가합니다. 결제 하시겠습니까?
+        </AlertModal>
+      )}
 
       {/* 비밀번호 입력 모달 */}
       {isModalOpen && (

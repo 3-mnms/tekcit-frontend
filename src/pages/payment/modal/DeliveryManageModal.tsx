@@ -9,18 +9,30 @@ import styles from './DeliveryManageModal.module.css'
 
 interface DeliveryManagePageProps {
   onClose?: () => void
+  onSelectAddress?: (addr: { address1: string; address2: string }) => void
 }
 
-const DeliveryManagePage: React.FC<DeliveryManagePageProps> = ({ onClose }) => {
+const DeliveryManagePage: React.FC<DeliveryManagePageProps> = ({ onClose, onSelectAddress }) => {
   const [addresses] = useState<Address[]>(mockAddresses)
+  const [selectedId, setSelectedId] = useState<number | null>(null)
 
-  // const setAsDefault = (id: number) => {
-  //   const updated = addresses.map((addr) => ({
-  //     ...addr,
-  //     isDefault: addr.id === id,
-  //   }))
-  //   setAddresses(updated)
-  // }
+  // 선택된 주소 객체 반환
+  const selectedAddress = addresses.find(addr => addr.id === selectedId)
+
+  const handleSelect = (addrId: number) => {
+    setSelectedId(addrId)
+  }
+
+  // "배송지 선택" 버튼 클릭
+  const handleSelectButton = () => {
+    if (selectedAddress) {
+      onSelectAddress?.({
+        address1: selectedAddress.address1,
+        address2: selectedAddress.address2,
+      })
+      onClose?.()
+    }
+  }
 
   const handleClose = () => {
     onClose?.()
@@ -33,17 +45,26 @@ const DeliveryManagePage: React.FC<DeliveryManagePageProps> = ({ onClose }) => {
       <div className={styles['address-wrapper']}>
         <ul className={styles['address-list']}>
           {addresses.map((addr) => (
-            <AddressItem
+            <li
               key={addr.id}
-              address1={addr.address1}
-              address2={addr.address2}
-              isDefault={addr.isDefault}
-            />
+              className={`${styles['address-list-item']} ${selectedId === addr.id ? styles.selected : ''}`}
+              onClick={() => handleSelect(addr.id)}
+              style={{ cursor: 'pointer' }}
+            >
+              <AddressItem
+                address1={addr.address1}
+                address2={addr.address2}
+                isDefault={addr.isDefault}
+              />
+            </li>
           ))}
         </ul>
       </div>
 
-      <Footer onSelect={() => console.log('배송지 선택 버튼 클릭됨!')} />
+      <Footer
+        onSelect={handleSelectButton}
+        // Footer 컴포넌트에 버튼 label, disabled 등 커스텀 props가 있으면 전달!
+      />
     </div>
   )
 }

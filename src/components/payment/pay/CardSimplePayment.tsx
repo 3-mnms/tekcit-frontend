@@ -1,92 +1,84 @@
-import React, { useState } from 'react'
-
+// src/components/payment/pay/CardSimplePayment.tsx
+import React from 'react'
 import styles from './CardSimplePayment.module.css'
+import type { SimpleMethod } from '@/shared/types/payment'
 
 interface CardSimplePaymentProps {
-  isOpen: boolean
-  onToggle: () => void
+  isOpen?: boolean
+  onToggle?: () => void
+  onSelect: (method: SimpleMethod) => void
+  compact?: boolean
+  selected?: SimpleMethod | null
+  methods?: SimpleMethod[] // ✅ 추가: 보여줄 간편결제 목록 제어
 }
 
-interface ButtonProps {
-  children: React.ReactNode
-  onClick?: () => void
-  type?: 'button' | 'submit' | 'reset'
-  className?: string
-  disabled?: boolean
-}
+const ALL_METHODS: SimpleMethod[] = ['네이버페이', '카카오페이', '토스페이']
 
-const Button: React.FC<ButtonProps> = ({
-  children,
-  onClick,
-  type = 'button',
-  className = '',
-  disabled = false,
+const CardSimplePayment: React.FC<CardSimplePaymentProps> = ({
+  isOpen = false,
+  onToggle,
+  onSelect,
+  compact = false,
+  selected = null,
+  methods = ALL_METHODS,
 }) => {
-  return (
-    <button
-      className={`${styles['custom-button']} ${className} ${disabled ? styles.disabled : ''}`}
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {children}
-    </button>
-  )
-}
+  // ✅ compact 모드: 버튼만 보여줌
+  if (compact) {
+    return (
+      <div className={styles['payment-box']}>
+        <div className={styles['payment-buttons-row']}>
+          {methods.map((m) => (
+            <button
+              key={m}
+              type="button"
+              className={styles['payment-btn']}
+              data-variant={m}
+              data-selected={selected === m}
+              onClick={() => onSelect(m)}
+            >
+              <span className={styles['btn-icon']}>
+                {m === '네이버페이' ? 'N' : m === '카카오페이' ? 'K' : 'T'}
+              </span>
+              <span className={styles['btn-text']}>{m}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
-const CardSimplePayment: React.FC<CardSimplePaymentProps> = ({ isOpen, onToggle }) => {
-  const [selectedMethod, setSelectedMethod] = useState<'네이버페이' | '카카오페이' | null>(null)
-
+  // ✅ 기본(토글) 모드
   return (
     <div className={styles['payment-section']}>
-      {/* 카드 간편 결제 토글 */}
-      <div className={styles['toggle-section']}>
-        <div className={styles['toggle-row']} onClick={onToggle}>
-          <div className={styles['toggle-radio']}>
-            <input
-              type="radio"
-              checked={isOpen}
-              onChange={onToggle}
-              className={styles['radio-input']}
-            />
-            <span className={styles['radio-custom']}></span>
-          </div>
-          <span className={styles['toggle-label']}>카드 간편 결제</span>
-        </div>
-      </div>
+      <label className={styles['simple-payment-option']}>
+        <input type="radio" name="payment-method" checked={isOpen} onChange={onToggle} />
+        <span className={styles['radio-label']}>간편결제</span>
+      </label>
 
-      {/* 슬라이드 영역 */}
-      <div className={`${styles['slide-toggle']} ${isOpen ? styles.open : ''}`}>
+      {isOpen && (
         <div className={styles['payment-box']}>
           <div className={styles['payment-buttons-row']}>
-            <Button
-              className={`${styles['payment-btn']} ${styles['naver-btn']} ${
-                selectedMethod === '네이버페이' ? styles.selected : ''
-              }`}
-              onClick={() => setSelectedMethod('네이버페이')}
-            >
-              <div className={`${styles['btn-icon']} ${styles['naver-icon']}`}>
-                <span className="icon-text">N</span>
-              </div>
-              <span className={styles['btn-text']}>네이버페이</span>
-            </Button>
-
-            <Button
-              className={`${styles['payment-btn']} ${styles['kakao-btn']} ${
-                selectedMethod === '카카오페이' ? styles.selected : ''
-              }`}
-              onClick={() => setSelectedMethod('카카오페이')}
-            >
-              <div className={`${styles['btn-icon']} ${styles['kakao-icon']}`}>
-                <span className="icon-text">K</span>
-              </div>
-              <span className={styles['btn-text']}>카카오페이</span>
-            </Button>
+            {methods.map((m) => (
+              <button
+                key={m}
+                type="button"
+                className={styles['payment-btn']}
+                data-variant={m}
+                data-selected={selected === m}
+                onClick={() => onSelect(m)}
+              >
+                <span className={styles['btn-icon']}>
+                  {m === '네이버페이' ? 'N' : m === '카카오페이' ? 'K' : 'T'}
+                </span>
+                <span className={styles['btn-text']}>{m}</span>
+              </button>
+            ))}
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
 
 export default CardSimplePayment
+export type { SimpleMethod } // ← 선택: 재노출 원하면 유지, 아니면 제거하고 사용처를 shared로 통일 멍
