@@ -1,77 +1,66 @@
 import React, { useState } from 'react';
 import SearchBar from '@/components/common/SearchBox';
-import UserList from '@/components/operatManage/HostList';
+import HostList from '@/components/operatManage/HostList';
 import Button from '@/components/common/Button';
 import styles from './OperatManageHost.module.css';
 import Layout from '@components/layout/Layout';
-import AddPartner from '@/components/operatManage/AddModal';
-import type {NewPartnerData} from '@/components/operatManage/AddModal';
-import type { User } from '@/models/Host';
-
-const MOCK_PARTNERS: User[] = [
-        { id: 1, name: '김철수', userId: 'kimcs', phone: '010-1111-2222', email: 'kimcs@test.com', genre: '뮤지컬', businessName: '뮤지컬 컴퍼니', pw: 'password1', isActive: true },
-        { id: 2, name: '이영희', userId: 'leeyh', phone: '010-3333-4444', email: 'leeyh@test.com', genre: '콘서트', businessName: '콘서트 밴드', pw: 'password2', isActive: true},
-        { id: 3, name: '박민지', userId: 'parkmj', phone: '010-5555-6666', email: 'parkmj@test.com', genre: '전시회', businessName: '전시회 그룹', pw: 'password3', isActive: true },
-        { id: 4, name: '변백현', userId: 'bbh', phone: '010-1111-2222', email: 'kimcs@test.com', genre: '뮤지컬', businessName: '뮤지컬 컴퍼니', pw: 'password1', isActive: true },
-        { id: 5, name: '김민정', userId: 'kimmj', phone: '010-3333-4444', email: 'leeyh@test.com', genre: '콘서트', businessName: '콘서트 밴드', pw: 'password2', isActive: true},
-        { id: 6, name: '박민수', userId: 'parkms', phone: '010-5555-6666', email: 'parkmj@test.com', genre: '전시회', businessName: '전시회 그룹', pw: 'password3', isActive: true },
-        { id: 7, name: '김철정', userId: 'kimcj', phone: '010-1111-2222', email: 'kimcs@test.com', genre: '뮤지컬', businessName: '뮤지컬 컴퍼니', pw: 'password1', isActive: true },
-        { id: 8, name: '이영주', userId: 'leeyj', phone: '010-3333-4444', email: 'leeyh@test.com', genre: '콘서트', businessName: '콘서트 밴드', pw: 'password2', isActive: true},
-        { id: 9, name: '박민훈', userId: 'parkmh', phone: '010-5555-6666', email: 'parkmj@test.com', genre: '전시회', businessName: '전시회 그룹', pw: 'password3', isActive: true },
-    ];
+import AddModal from '@/components/operatManage/AddModal';
+import type {NewHostData} from '@/components/operatManage/AddModal';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/models/dummy/useAuth';
+import { getHosts, registerHost } from '@/shared/api/host';
+import { USERROLE } from '@/models/User';
 
 const OperatManageHostPage: React.FC = () => {
-    // 삐약! 원본 데이터를 allUsers에 저장합니다!
-    const [users, setUsers] = useState<User[]>(MOCK_PARTNERS);
+    const queryClient = useQueryClient();
+    // const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
-    // 삐약! 모달의 열림/닫힘 상태를 관리합니다!
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const { role, userId } = useAuth();
 
-    // 삐약! allUsers를 검색어에 따라 필터링합니다!
-    const filteredUsers = users.filter(user =>
-        user.name.includes(searchTerm) ||
-        user.userId.includes(searchTerm) ||
-        user.email.includes(searchTerm) ||
-        user.genre?.toLowerCase().includes(searchTerm.toLowerCase()) || // 삐약! genre가 없을 수도 있으니 안전하게 ?. 을 사용합니다!
-        user.businessName?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const hostId = role === USERROLE.HOST ? userId : undefined;
 
-    const handleToggleStatus = (userId: string, currentIsActive: boolean) => {
-            const newIsActive = !currentIsActive;
-            if (window.confirm(`${userId} 계정을 ${newIsActive ? '활성화' : '정지'}하시겠습니까?`)) {
-                setUsers(prevUsers => 
-                    prevUsers.map(user => 
-                        user.userId === userId ? { ...user, isActive: newIsActive } : user
-                    )
-                );
-            }
-        };
+    // 삐약! useQuery 훅을 사용해 호스트 목록을 가져옵니다!
+    const { data: hosts, isLoading, isError, isFetching } = useQuery({
+        queryKey: ['hosts', hostId, searchTerm],
+        queryFn: () => getHosts(searchTerm, role, hostId),
+        enabled: !!userId,
+    });
+    
+    // 삐약! useMutation 훅을 사용해 호스트를 등록합니다!
+    const { mutate: registerHostMutation, isPending: isRegistering } = useMutation({
+        mutationFn: (newHostData: NewHostData) => registerHost(newHostData),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['hosts'] });
+            alert('호스트가 성공적으로 등록되었습니다!');
+            setIsModalOpen(false);
+        },
+        onError: (error) => {
+            console.error('호스트 등록 실패:', error);
+            alert('호스트 등록에 실패했습니다.');
+        },
+    });
 
-        const handleAddUser = () => {
-        setIsModalOpen(true); // 삐약! 버튼을 누르면 모달을 엽니다!
+    const handleToggleStatus = (userId: string) => {
+        // 삐약! 계정 상태 변경 로직을 여기에 구현합니다!
+        console.log(`계정 상태 변경: ${userId}`);
     };
 
-    const handleSavePartner = (newPartner: NewPartnerData) => {
-        // 삐약! 여기서는 더미 데이터에 새 파트너를 추가합니다.
-        // 삐약! 실제로는 API를 호출해서 데이터베이스에 저장해야 합니다!
-        const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
-        const newUser: User = {
-            id: newId,
-            name: newPartner.name,
-            userId: newPartner.userId,
-            phone: newPartner.phone,
-            email: newPartner.email,
-            genre: newPartner.genre,
-            businessName: newPartner.businessName,
-            pw: newPartner.pw,
-            isActive: true,
-        };
-        setUsers(prevUsers => [...prevUsers, newUser]);
-        alert('삐약! 파트너가 성공적으로 추가되었습니다!');
+    const handleSaveHost = (newPartner: NewHostData) => {
+        registerHostMutation(newPartner);
     };
 
-    const totalUsers = filteredUsers.length;
+    const totalUsers = hosts ? hosts.length : 0;
 
+    // 삐약! 로딩 및 에러 상태를 처리하는 UI를 추가합니다!
+    if (isLoading) {
+        return <Layout subTitle="주최자 목록"><div>삐약! 주최자 목록을 불러오는 중...</div></Layout>;
+    }
+
+    if (isError) {
+        return <Layout subTitle="주최자 목록"><div>삐약! 오류가 발생했어요. 다시 시도해 주세요.</div></Layout>;
+    }
     return (
         <Layout subTitle="주최자 목록"> 
             <div className={styles.container}>
@@ -79,17 +68,19 @@ const OperatManageHostPage: React.FC = () => {
                     <h3 className={styles.totalUsersText}>전체 주최자 {totalUsers}명</h3>
                     <div className={styles.controls}>
                         <SearchBar searchTerm={searchTerm} onSearch={setSearchTerm} />
-                        <Button onClick={handleAddUser}>파트너 추가</Button>
+                        <Button onClick={() => setIsModalOpen(true)}>파트너 추가</Button>
                     </div>
                 </div>
+                {isFetching && <div className={styles.loadingIndicator}>삐약! 새로운 주최자 목록을 가져오는 중...</div>}
                 <div className={styles.tableSection}>
-                    <UserList users={filteredUsers} onToggleStatus={handleToggleStatus} />
+                    <HostList users={hosts || []} onToggleStatus={handleToggleStatus} />
                 </div>
             </div>
-            <AddPartner
+            <AddModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSave={handleSavePartner}
+                onSave={handleSaveHost}
+                isPending={isRegistering} 
             />
         </Layout>
     );

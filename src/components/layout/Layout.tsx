@@ -5,7 +5,7 @@ import Sidebar from './Sidebar';
 import SubHeader from './SubHeader';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/models/dummy/useAuth';
-import { UserRole } from '@/models/festival';
+import { USERROLE } from '@/models/User';
 
 const adminMenuItems = [
 { path: "/productRegist", name: "상품 등록" },
@@ -22,9 +22,9 @@ interface LayoutProps {
   subTitle: string;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => { // subTitle prop 추가! 삐약!
+const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => {
   const navigate = useNavigate();
-  const { userName, userEmail, role } = useAuth();
+  const {name, email, role, userId } = useAuth();
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
@@ -55,9 +55,9 @@ const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => { // subTitle 
   const subHeaderHeight = '5vh';
 
   const filteredMenuItems = adminMenuItems.filter(item => {
-        if (role === UserRole.HOST) {
+        if (role === USERROLE.HOST) {
             return item.name === '상품 등록' || item.name === '상품 관리' || item.name === '공지사항';
-            return item.name === '공지사항';        }
+        }
         // 삐약! 관리자(admin)는 모든 메뉴를 볼 수 있도록 합니다!
         return true;
     });
@@ -66,12 +66,12 @@ const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => { // subTitle 
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar
         menuItems={filteredMenuItems}
-        userName={userName}
-        userEmail={userEmail}
+        userName={name}
+        userEmail={email}
         style={{ width: sidebarWidth }}
       />
       <Header
-        userName={userName}
+        userName={name}
         onLogout={handleLogout}
       />
 

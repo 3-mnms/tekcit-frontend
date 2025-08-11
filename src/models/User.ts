@@ -1,25 +1,48 @@
+export const USERROLE = {
+    ADMIN: 'admin',
+    HOST: 'host',
+    USER: 'user'
+} as const;
+
+export type UserRole = typeof USERROLE[keyof typeof USERROLE];
 export interface Address {
     address: string;
     is_primary: boolean; 
 }
 
-export type Gender = 'male' | 'female'
-// export type Role = 'user' | 'host' | 'admin';
-
-export interface User {
-    id: number;
-    name: string;
+export interface BaseUser {
+    userId: number;
     loginId: string;
+    loginPw: string;
+    name: string;
     phone: string;
     email: string;
+    role: UserRole;
+    userProfile?: UserProfile;
+    hostProfile?: HostProfile;
+}
+
+export type User =
+    | (BaseUser & { role: typeof USERROLE.HOST; hostProfile: HostProfile; userProfile?: undefined })
+    | (BaseUser & { role: typeof USERROLE.USER; userProfile: UserProfile; hostProfile?: undefined })
+    | (BaseUser & { role: typeof USERROLE.ADMIN; hostProfile?: undefined; userProfile?: undefined });
+
+export interface UserProfile{
     age: number;
     residentNum: string; // 주민번호
     birth: string;  
-    gender: Gender;
-    address: Address[]; // addresses
-    pw?: string; // loginPw
+    gender: 'male' | 'female';
+    address: Address[];
     isActive: boolean; 
 }
+
+export interface HostProfile{
+    genre: Genre[];
+    businessName: string;
+    isActive: boolean; 
+}
+
+export type Genre = '뮤지컬' | '대중음악(콘서트)' | '연극' | '한국음악(국악)' | '서양음악(클래식)';
 
 export interface TicketHolderType {
     id: number; 

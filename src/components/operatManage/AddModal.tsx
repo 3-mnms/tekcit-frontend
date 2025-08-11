@@ -1,32 +1,38 @@
 import React, { useState } from 'react';
+import Button from '../common/Button';
 import styles from './AddModal.module.css';
 
-export interface NewPartnerData {
-    userId: string;
+export interface NewHostData {
+    loginId: string;
+    loginPw: string;
     name: string;
     phone: string;
     email: string;
-    genre: string;
-    businessName: string;
-    pw?: string;
+    hostProfile: {
+        businessName: string;
+        genre: string;
+    };
 }
 
-interface AddPartnerModalProps {
+interface AddHostModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (newPartner: NewPartnerData) => void;
+    onSave: (newHost: NewHostData) => void;
+    isPending: boolean;
 }
 
-const AddPartnerModal: React.FC<AddPartnerModalProps> = ({ isOpen, onClose, onSave }) => {
+const AddModal: React.FC<AddHostModalProps> = ({ isOpen, onClose, onSave }) => {
     // 삐약! 입력 필드의 상태를 관리합니다!
-    const [partnerData, setPartnerData] = useState<NewPartnerData>({
-        userId: '',
+    const [hostData, setHostData] = useState<NewHostData>({
+        loginId: '',
+        loginPw: '',
         name: '',
         phone: '',
         email: '',
-        genre: '',
-        businessName: '',
-        pw: '',
+        hostProfile: {
+            businessName: '',
+            genre: '',
+        },
     });
 
     if (!isOpen) {
@@ -35,20 +41,29 @@ const AddPartnerModal: React.FC<AddPartnerModalProps> = ({ isOpen, onClose, onSa
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setPartnerData(prevData => ({
-            ...prevData,
-            [name]: value,
-        }));
+        if (['businessName', 'genre'].includes(name)) {
+            setHostData(prevData => ({
+                ...prevData,
+                hostProfile: {
+                    ...prevData.hostProfile,
+                    [name]: value,
+                },
+            }));
+        } else {
+            setHostData(prevData => ({
+                ...prevData,
+                [name]: value,
+            }));
+        }
     };
 
      const handleSave = () => {
-        // 삐약! 필요한 필드가 모두 채워졌는지 유효성 검사를 합니다!
-        if (!partnerData.userId || !partnerData.name || !partnerData.pw) {
+        if (!hostData.loginId || !hostData.loginPw || !hostData.name) {
             alert('삐약! 필수 정보를 모두 입력해주세요!');
             return;
         }
-        onSave(partnerData);
-        onClose(); // 삐약! 저장 후 모달을 닫습니다!
+        onSave(hostData);
+        onClose();
     };
 
     return (
@@ -59,40 +74,40 @@ const AddPartnerModal: React.FC<AddPartnerModalProps> = ({ isOpen, onClose, onSa
                 </button>
                 <h2 className={styles.modalTitle}>파트너 추가</h2>
                 <div className={styles.formGroup}>
-                    <label htmlFor="userId">계정(아이디)</label>
-                    <input type="text" id="userId" name="userId" value={partnerData.userId} onChange={handleChange} />
+                    <label htmlFor="loginId">계정(아이디)</label>
+                    <input type="text" id="loginId" name="loginId" value={hostData.loginId} onChange={handleChange} />
                 </div>
                 <div className={styles.formGroup}>
-                    <label htmlFor="pw">비밀번호</label>
-                    <input type="password" id="pw" name="pw" value={partnerData.pw} onChange={handleChange} />
+                    <label htmlFor="loginPw">비밀번호</label>
+                    <input type="password" id="loginPw" name="loginPw" value={hostData.loginPw} onChange={handleChange} />
                 </div>
                 <div className={styles.formGroup}>
                     <label htmlFor="name">이름</label>
-                    <input type="text" id="name" name="name" value={partnerData.name} onChange={handleChange} />
+                    <input type="text" id="name" name="name" value={hostData.name} onChange={handleChange} />
                 </div>
                 <div className={styles.formGroup}>
                     <label htmlFor="email">이메일</label>
-                    <input type="email" id="email" name="email" value={partnerData.email} onChange={handleChange} />
+                    <input type="email" id="email" name="email" value={hostData.email} onChange={handleChange} />
                 </div>
                 <div className={styles.formGroup}>
                     <label htmlFor="phone">전화번호</label>
-                    <input type="tel" id="phone" name="phone" value={partnerData.phone} onChange={handleChange} />
+                    <input type="tel" id="phone" name="phone" value={hostData.phone} onChange={handleChange} />
                 </div>
                 <div className={styles.formGroup}>
                     <label htmlFor="genre">장르</label>
-                    <input type="text" id="genre" name="genre" value={partnerData.genre} onChange={handleChange} />
+                    <input type="text" id="genre" name="genre" value={hostData.hostProfile.genre} onChange={handleChange} />
                 </div>
                 <div className={styles.formGroup}>
                     <label htmlFor="businessName">사업자명</label>
-                    <input type="text" id="businessName" name="businessName" value={partnerData.businessName} onChange={handleChange} />
+                    <input type="text" id="businessName" name="businessName" value={hostData.hostProfile.businessName} onChange={handleChange} />
                 </div>
                 <div className={styles.buttonGroup}>
-                    <button onClick={handleSave} className={styles.saveButton}>저장</button>
-                    <button onClick={onClose} className={styles.cancelButton}>취소</button>
+                    <Button onClick={handleSave} variant="secondary">저장</Button>
+                    <Button onClick={onClose} variant="cancel">취소</Button>
                 </div>
             </div>
         </div>
     );
 };
 
-export default AddPartnerModal;
+export default AddModal;

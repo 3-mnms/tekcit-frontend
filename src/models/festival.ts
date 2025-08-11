@@ -49,10 +49,3 @@ export const initialProductData: ProductType = {
     hostId: 0,
 };
 
-export const UserRole = {
-    ADMIN : 'admin',
-    HOST : 'host',
-    USER : 'user'
-} as const;
-
-export type UserRole = typeof UserRole[keyof typeof UserRole];

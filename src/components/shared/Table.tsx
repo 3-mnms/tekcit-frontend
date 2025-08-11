@@ -7,19 +7,19 @@ export interface Column<T> {
     render?: (item: T) => React.ReactNode;
 }
 
-interface TableProps<T extends { id: string | number }> {
+interface TableProps<T extends object> {
     columns: Column<T>[];
     data: T[];
     onRowClick?: (item: T) => void;
     isSelectable?: boolean; 
 }
 
-const Table = <T extends { id: string | number }>({ columns, data, onRowClick, isSelectable = false }: TableProps<T>) => {
+const Table = <T extends object>({ columns, data, onRowClick, isSelectable = false }: TableProps<T>) => {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
-            const allIds = data.map(item => item.id as number);
+            const allIds = data.map(item => (item as { id: number }).id as number);
             setSelectedIds(allIds);
         } else {
             setSelectedIds([]);
@@ -60,19 +60,19 @@ const Table = <T extends { id: string | number }>({ columns, data, onRowClick, i
                 </thead>
                 <tbody>
                     {data.map(item => (
-                        <tr key={item.id} onClick={() => onRowClick?.(item)}
+                        <tr key={(item as { id: string | number }).id} onClick={() => onRowClick?.(item)}
                         className={onRowClick ? styles.clickableRow : ''}
                     >   {isSelectable && (
-                            <td key={`${item.id}-checkbox`} className={styles.td}>
+                            <td key={`${(item as { id: string | number }).id}-checkbox`} className={styles.td}>
                                 <input
                                     type="checkbox"
-                                    onChange={() => handleSelectOne(item.id as number)}
-                                    checked={selectedIds.includes(item.id as number)}
+                                    onChange={() => handleSelectOne((item as { id: number }).id)}
+                                    checked={selectedIds.includes((item as { id: number }).id)}
                                 />
                             </td>
                         )}
                         {columns.map(column => (
-                            <td key={`${item.id}-${String(column.columnId)}`}> 
+                            <td key={`${(item as { id: string | number }).id}-${String(column.columnId)}`}> 
                                 {column.render ? column.render(item) : (item[column.columnId as keyof T] as React.ReactNode)}
                             </td>
                         ))}
