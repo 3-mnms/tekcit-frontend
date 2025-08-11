@@ -11,9 +11,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, type LoginForm } from '@/models/auth/schema/loginSchema'
 import { useLoginMutation } from '@/models/auth/tanstack-query/useLogin'
 import { tokenStore } from '@/shared/storage/tokenStore'
+import { useAuthStore } from '@/shared/storage/useAuthStore'
+import { getMyInfo } from '@/shared/api/auth/login'
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate()
+  const setUser = useAuthStore((state) => state.setUser)
 
   const {
     register,
@@ -27,10 +30,18 @@ const LoginPage: React.FC = () => {
   const loginMut = useLoginMutation()
 
   const onSubmit = (form: LoginForm) => {
-    tokenStore.clear() // ✅ 이전 accessToken 제거(선택)
+    tokenStore.clear()
     loginMut.mutate(form, {
-      onSuccess: (data: any) => {
-        if (data?.accessToken) tokenStore.set(data.accessToken)
+      onSuccess: async (data: any) => {
+        if (data?.accessToken) {
+          tokenStore.set(data.accessToken)
+          try {
+            const me = await getMyInfo() // ✅ 유저 정보 요청
+            setUser({ role: me.role, name: me.name }) // ✅ Zustand에 저장
+          } catch (err) {
+            console.error('내 정보 불러오기 실패', err)
+          }
+        }
         alert('로그인이 완료되었습니다!')
         navigate('/')
       },

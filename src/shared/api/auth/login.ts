@@ -20,3 +20,13 @@ export const reissue = async () => {
   const { data } = await api.post('/users/reissue');
   return data;
 };
+
+export interface MeResponse {
+  role: 'user' | 'host' | 'admin';
+  name: string;
+}
+
+export const getMyInfo = async (): Promise<MeResponse> => {
+  const { data } = await api.get('/users/me');
+  return data;
+};

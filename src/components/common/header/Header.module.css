@@ -78,3 +78,14 @@
   font-weight: 600;
   color: #333;
 }
+
+.rightButton:focus {
+  outline: none;
+}
+
+.dropdownWrapper {
+  position: absolute;
+  top: 60px; 
+  right: 10px;
+  z-index: 100;
+}
