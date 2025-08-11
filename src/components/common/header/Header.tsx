@@ -16,7 +16,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
   const navigate = useNavigate()
   const [keyword, setKeyword] = React.useState('')
 
-  const { isLoggedIn, user, logout } = useAuthStore()
+  const { isLoggedIn, user } = useAuthStore()
   console.log('Current user object:', user);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -116,7 +116,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
           <>
             <div className={styles.rightButton} onClick={() => setIsDropdownOpen((prev) => !prev)}>
               <i className="fa-regular fa-user" />
-              <span>{getRoleDisplayName()}</span> {/* ✅ 함수를 호출하여 역할에 맞는 이름 표시 */}
+              <span>{getRoleDisplayName()}</span>
             </div>
 
             {isDropdownOpen && (
