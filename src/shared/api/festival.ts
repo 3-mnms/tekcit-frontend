@@ -1,21 +1,21 @@
 import type { ProductType } from '@/models/festival';
 import { dummyProducts } from '@/models/dummy/dummyProducts';
 import type { TicketHolderType } from '@/models/User';
+// import axios from 'axios';
 
 // 삐약! 1초의 딜레이를 추가해서 로딩 상태를 테스트해볼 수 있어요!
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export const getProducts = async (searchTerm: string): Promise<ProductType[]> => {
-    await sleep(1000); // 삐약! 1초 대기!
-
-    // 삐약! 검색 로직을 적용합니다!
-    const filtered = dummyProducts.filter(product =>
-        product.fname.includes(searchTerm) ||
-        product.genrenm.includes(searchTerm) ||
-        product.fcltynm.includes(searchTerm)
-    );
-
-    return filtered;
+export const getProducts = async (hostId?: number): Promise<ProductType[]> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // 삐약! 만약 hostId가 존재하면 해당 호스트의 상품만 필터링해서 반환합니다!
+    if (hostId) {
+        return dummyProducts.filter(product => product.hostId === hostId);
+    }
+    
+    // 삐약! hostId가 없으면 (admin 역할) 모든 상품을 반환합니다!
+    return dummyProducts;
 };
 
 export const createProduct = async (newProduct: ProductType): Promise<ProductType> => {

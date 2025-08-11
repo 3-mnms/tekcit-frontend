@@ -10,6 +10,8 @@ import ScheduleDropdown from '@/components/product/ScheduleDropdown';
 import {initialProductData } from '@/models/festival';
 import type {ProductType} from '@/models/festival';
 import CastInput from '@/components/product/CastInput';
+import { useAuth } from '@/models/dummy/useAuth';
+
 import styles from './ProductRegistPage.module.css';
 
 import { createProduct, getProductDetail, updateProduct } from '@/shared/api/festival';
@@ -25,6 +27,7 @@ const ProductRegisterPage: React.FC = () => {
     const [searchParams] = useSearchParams();
     const [isEditMode, setIsEditMode] = useState(false);
     const productId = searchParams.get('id');
+    const { hostId } = useAuth();
 
     const { data: existingProduct } = useQuery({
         queryKey: ['festival', productId],
@@ -143,9 +146,14 @@ const ProductRegisterPage: React.FC = () => {
             return;
         }
 
+        const finalProductData = {
+            ...productData,
+            hostId: hostId,
+        };
+
         setConfirmModal({
             isOpen: true,
-            onConfirm: () => mutate(productData),
+            onConfirm: () => mutate(finalProductData),
         });
     };
 

@@ -10,16 +10,21 @@ import styles from './ProductManagePage.module.css';
 
 import { getProducts } from '@/shared/api/festival';
 import type { ProductType } from '@/models/festival';
+import { UserRole } from '@/models/festival';
+import { useAuth } from '@/models/dummy/useAuth';
 // import { dummyProducts } from '@/models/dummy/dummyProducts';
 
 const ProductManagePage: React.FC = () => {
     const navigate = useNavigate();
+    // const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
+    const { role, hostId } = useAuth();
 
     // 삐약! useQuery를 사용해서 상품 목록을 가져옵니다!
     const { data: products, isLoading, isError, isFetching } = useQuery({
-        queryKey: ['products', searchTerm], // 삐약! searchTerm이 바뀔 때마다 자동으로 refetch 됩니다!
-        queryFn: () => getProducts(searchTerm),
+        queryKey: ['products', hostId, searchTerm],
+        queryFn: () => role === UserRole.HOST ? getProducts(hostId) : getProducts(),
+        enabled: !!hostId,
     });
 
     // 삐약! 이 부분에서 상품 클릭 시 상세 페이지로 이동합니다!

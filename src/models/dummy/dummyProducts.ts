@@ -22,6 +22,7 @@ export const dummyProducts: ProductType[] = [
         festivalSchedules: [{ dayOfWeek: 'FRI', time: '19:00' }],
         posterFile: null,
         contentFile: [],
+        hostId: 112,
     },
     {
         id: 2,
@@ -43,5 +44,6 @@ export const dummyProducts: ProductType[] = [
         festivalSchedules: [{ dayOfWeek: 'SAT', time: '18:00' }],
         posterFile: null,
         contentFile: [],
+        hostId: 111,
     },
 ];

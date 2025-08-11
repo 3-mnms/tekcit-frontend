@@ -23,6 +23,7 @@ export interface ProductType {
     story: string; // 상세정보 
     posterFile: File | null; // 포스터
     contentFile: File[]; // //상세 파일들
+    hostId: number; 
 }
 
 export const initialProductData: ProductType = {
@@ -45,4 +46,13 @@ export const initialProductData: ProductType = {
     story: '',
     posterFile: null,
     contentFile: [],
+    hostId: 0,
 };
+
+export const UserRole = {
+    ADMIN : 'admin',
+    HOST : 'host',
+    USER : 'user'
+} as const;
+
+export type UserRole = typeof UserRole[keyof typeof UserRole];

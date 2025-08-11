@@ -23,7 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({ menuItems, userName, userEmail, ...pr
     };
 
       return (
-    <aside className={styles.sidebar}>
+    <aside className={styles.sidebar}{...props}>
       <div className={styles.userInfoArea}>
         <div className={styles.userName}>{userName}</div>
         <div className={styles.userEmail}>{userEmail}</div>
@@ -43,12 +43,11 @@ const Sidebar: React.FC<SidebarProps> = ({ menuItems, userName, userEmail, ...pr
                     <span
                       className={`${styles.arrow} ${openMenu === item.name ? styles.rotate : ''}`}
                     >
-                    ▼
+                        ▼
                     </span>
                   </div>
                   <ul
-                    className={`${styles.subMenuList} ${
-                      openMenu === item.name ? styles.open : ''
+                    className={`${styles.subMenuList} ${openMenu === item.name ? styles.open : ''
                     }`}
                   >
                     {item.subMenu.map((sub) => (
