@@ -34,7 +34,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ onSelect }) => {
         isOpen={method === 'simple'}
         onToggle={() => setMethod('simple')}
         onSelect={handleSimpleSelect}
-        methods={['네이버페이', '카카오페이']}
+        methods={['네이버페이', '카카오페이', '토스페이']}
       />
 
       <GeneralCardPayment

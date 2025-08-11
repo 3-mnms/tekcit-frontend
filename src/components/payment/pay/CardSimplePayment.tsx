@@ -8,9 +8,11 @@ interface CardSimplePaymentProps {
   onToggle?: () => void
   onSelect: (method: SimpleMethod) => void
   compact?: boolean
-  // 선택 표시가 필요하면 나중에 selected를 넘겨도 됨
   selected?: SimpleMethod | null
+  methods?: SimpleMethod[] // ✅ 추가: 보여줄 간편결제 목록 제어
 }
+
+const ALL_METHODS: SimpleMethod[] = ['네이버페이', '카카오페이', '토스페이']
 
 const CardSimplePayment: React.FC<CardSimplePaymentProps> = ({
   isOpen = false,
@@ -18,52 +20,59 @@ const CardSimplePayment: React.FC<CardSimplePaymentProps> = ({
   onSelect,
   compact = false,
   selected = null,
+  methods = ALL_METHODS,
 }) => {
+  // ✅ compact 모드: 버튼만 보여줌
+  if (compact) {
+    return (
+      <div className={styles['payment-box']}>
+        <div className={styles['payment-buttons-row']}>
+          {methods.map((m) => (
+            <button
+              key={m}
+              type="button"
+              className={styles['payment-btn']}
+              data-variant={m}
+              data-selected={selected === m}
+              onClick={() => onSelect(m)}
+            >
+              <span className={styles['btn-icon']}>
+                {m === '네이버페이' ? 'N' : m === '카카오페이' ? 'K' : 'T'}
+              </span>
+              <span className={styles['btn-text']}>{m}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // ✅ 기본(토글) 모드
   return (
-    // ✅ 라디오 스타일이 이 래퍼에 스코프되어 있음 (.payment-section input[type='radio'])
     <div className={styles['payment-section']}>
-      {/* 헤더/토글 */}
       <label className={styles['simple-payment-option']}>
         <input type="radio" name="payment-method" checked={isOpen} onChange={onToggle} />
         <span className={styles['radio-label']}>간편결제</span>
       </label>
 
-      {/* 본문: 버튼 박스 */}
       {isOpen && (
         <div className={styles['payment-box']}>
           <div className={styles['payment-buttons-row']}>
-            <button
-              type="button"
-              className={styles['payment-btn']}
-              data-variant="네이버페이"
-              data-selected={selected === '네이버페이'}
-              onClick={() => onSelect('네이버페이')}
-            >
-              <span className={styles['btn-icon']}>N</span>
-              <span className={styles['btn-text']}>네이버페이</span>
-            </button>
-
-            <button
-              type="button"
-              className={styles['payment-btn']}
-              data-variant="카카오페이"
-              data-selected={selected === '카카오페이'}
-              onClick={() => onSelect('카카오페이')}
-            >
-              <span className={styles['btn-icon']}>K</span>
-              <span className={styles['btn-text']}>카카오페이</span>
-            </button>
-
-            <button
-              type="button"
-              className={styles['payment-btn']}
-              data-variant="토스페이"
-              data-selected={selected === '토스페이'}
-              onClick={() => onSelect('토스페이')}
-            >
-              <span className={styles['btn-icon']}>T</span>
-              <span className={styles['btn-text']}>토스페이</span>
-            </button>
+            {methods.map((m) => (
+              <button
+                key={m}
+                type="button"
+                className={styles['payment-btn']}
+                data-variant={m}
+                data-selected={selected === m}
+                onClick={() => onSelect(m)}
+              >
+                <span className={styles['btn-icon']}>
+                  {m === '네이버페이' ? 'N' : m === '카카오페이' ? 'K' : 'T'}
+                </span>
+                <span className={styles['btn-text']}>{m}</span>
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -72,3 +81,4 @@ const CardSimplePayment: React.FC<CardSimplePaymentProps> = ({
 }
 
 export default CardSimplePayment
+export type { SimpleMethod } // ← 선택: 재노출 원하면 유지, 아니면 제거하고 사용처를 shared로 통일 멍

@@ -10,7 +10,6 @@ import styles from './WalletPointPage.module.css'
 const WalletPointPage: React.FC = () => {
   const navigate = useNavigate()
 
-  // 충전 버튼 클릭 시 페이지 이동
   const handleChargeClick = () => {
     navigate('/payment/wallet-point/money-charge')
   }
@@ -34,15 +33,17 @@ const WalletPointPage: React.FC = () => {
 
         <div className={styles.moneySection}>
           <div className={styles.moneyGroup}>
-            <div className={styles.moneyBlock}>
+            {/* 상단: 페이 머니 + 금액 */}
+            <div className={styles.moneyInfo}>
               <span className={styles.label}>페이 머니</span>
+              <span className={styles.amount}>{balance.toLocaleString()}원</span>
+            </div>
+
+            {/* 하단: 충전 버튼 */}
+            <div className={styles.moneyActions}>
               <Button className="w-[190px] h-10" onClick={handleChargeClick}>
                 충전
               </Button>
-            </div>
-            <div className={styles.moneyBlock}>
-              <span className={styles.amount}>{balance.toLocaleString()}원</span>
-              <Button className="w-[190px] h-10">환불</Button>
             </div>
           </div>
         </div>
