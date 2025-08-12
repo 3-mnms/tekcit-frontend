@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import styles from './RefundPage.module.css'
@@ -10,6 +10,15 @@ import AlertModal from '@/pages/payment/modal/AlertModal'
 const RefundPage: React.FC = () => {
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false)
   const navigate = useNavigate()
+
+  // ✅ 공통 결과 페이지 이동 헬퍼 멍
+  const routeToResult = useCallback((ok: boolean) => {
+    const q = new URLSearchParams({
+      type: 'refund',
+      status: ok ? 'success' : 'fail',
+    }).toString()
+    navigate(`/payment/result?${q}`)
+  }, [navigate])
 
   // ✅ 모의 환불 API: URL에 ?fail=1이면 실패 처리
   const requestRefund = async () => {
@@ -27,18 +36,14 @@ const RefundPage: React.FC = () => {
     setIsRefundModalOpen(true)
   }
 
-  // ✅ 성공/실패 분기하여 각각 페이지로 이동
+  // ✅ 성공/실패 분기하여 ResultPage로 이동 멍
   const handleRefundConfirm = async () => {
     setIsRefundModalOpen(false)
     try {
       const res = await requestRefund()
-      if (res.ok) {
-        navigate('/payment/refund/refund-success')
-      } else {
-        navigate('/payment/refund/refund-fail')
-      }
+      routeToResult(res.ok)
     } catch {
-      navigate('/payment/refund/refund-fail')
+      routeToResult(false)
     }
   }
 

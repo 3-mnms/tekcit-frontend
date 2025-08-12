@@ -1,9 +1,8 @@
-// components/payment/pay/GeneralCardPayment.tsx
 import { forwardRef, useImperativeHandle } from 'react'
 import PortOne, { Currency, PayMethod } from '@portone/browser-sdk/v2'
-import styles from './GeneralCardPayment.module.css'
+import styles from './TossPayment.module.css'
 
-export interface GeneralCardPaymentProps {
+export interface TossPaymentProps {
   isOpen: boolean
   onToggle: () => void
   amount: number
@@ -11,9 +10,8 @@ export interface GeneralCardPaymentProps {
   redirectUrl?: string
 }
 
-export type GeneralCardPaymentHandle = { requestPay: () => Promise<void> }
+export type TossPaymentHandle = { requestPay: () => Promise<void> }
 
-// 실제에선 .env로 관리 권장
 const STORE_ID = import.meta.env.VITE_PORTONE_STORE_ID?.trim()
 const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY?.trim()
 
@@ -35,8 +33,9 @@ function isPortOneError(v: unknown): v is PortOneError {
   return typeof (v as Record<string, unknown>).code === 'string'
 }
 
-const GeneralCardPayment = forwardRef<GeneralCardPaymentHandle, GeneralCardPaymentProps>(
+const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
   ({ isOpen, onToggle, amount, orderName, redirectUrl }, ref) => {
+    // TossPayment.tsx (일부)
     useImperativeHandle(ref, () => ({
       async requestPay() {
         if (!STORE_ID || !CHANNEL_KEY) {
@@ -46,47 +45,52 @@ const GeneralCardPayment = forwardRef<GeneralCardPaymentHandle, GeneralCardPayme
 
         const paymentId = createPaymentId()
 
-        // enum 사용 → 타입 에러 방지 멍
+        // ✅ 1) 리다이렉트 기본 베이스 (부모가 넘기면 그거 사용, 없으면 booking 결과 페이지)
+        const base = redirectUrl ?? `${window.location.origin}/payment/result?type=booking`
+
+        // ✅ 2) paymentId 쿼리로 추가
+        const finalRedirect = `${base}${base.includes('?') ? '&' : '?'}paymentId=${encodeURIComponent(paymentId)}`
+
+        // ✅ 3) PortOne 호출 시 최종 redirectUrl 주입
         const result: unknown = await PortOne.requestPayment({
           storeId: STORE_ID,
           channelKey: CHANNEL_KEY,
           paymentId,
           orderName,
           totalAmount: amount,
-          currency: Currency.KRW,   // ← Currency도 보통 대문자 키 멍
-          payMethod: PayMethod.CARD, // ← 여기! Card → CARD 로 수정 멍
-          redirectUrl: redirectUrl ?? `${window.location.origin}/payment/portone/success`,
+          currency: Currency.KRW,
+          payMethod: PayMethod.CARD,
+          redirectUrl: finalRedirect,
         })
 
         if (isPortOneError(result)) {
           alert(`결제 실패: ${result.message ?? result.code}`)
         }
-        // 성공/실패 이후 라우팅은 리다이렉트/결과 페이지에서 처리 멍
       },
     }))
 
     return (
-      <div className={styles['general-card-payment-container']}>
+      <div className={styles['toss-payment-container']}>
         <div className={styles['payment-section']}>
           <label className={styles['simple-payment-option']}>
             <input
               type="radio"
-              id="general-payment"
+              id="toss-payment"
               name="payment-method"
               checked={isOpen}
               onChange={onToggle}
             />
-            <span className={styles['radio-label']}>일반 결제 (신용/체크카드)</span>
+            <span className={styles['radio-label']}>토스 페이먼츠 (신용/체크카드/간편결제)</span>
           </label>
 
           <div
-            className={`${styles['general-payment-slide']} ${isOpen ? styles.open : ''}`}
+            className={`${styles['toss-payment-slide']} ${isOpen ? styles.open : ''}`}
             role="region"
-            aria-labelledby="general-payment"
+            aria-labelledby="toss-payment"
           >
-            <div className={styles['general-payment-section']}>
+            <div className={styles['toss-payment-section']}>
               <p className={styles['selectLabel']}>
-                이 결제는 PortOne 결제창에서 처리되며 채널은 토스페이먼츠입니다 멍.
+                이 결제는 토스 페이먼츠로 결제됩니다.
               </p>
             </div>
           </div>
@@ -96,5 +100,5 @@ const GeneralCardPayment = forwardRef<GeneralCardPaymentHandle, GeneralCardPayme
   }
 )
 
-GeneralCardPayment.displayName = 'GeneralCardPayment'
-export default GeneralCardPayment
+TossPayment.displayName = 'TossPayment'
+export default TossPayment

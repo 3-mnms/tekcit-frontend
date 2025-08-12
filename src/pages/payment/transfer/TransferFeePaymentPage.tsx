@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import styles from './TransferFeePaymentPage.module.css'
@@ -6,46 +6,85 @@ import styles from './TransferFeePaymentPage.module.css'
 import Button from '@/components/common/button/Button'
 import TransferTicketInfo from '@/components/payment/refund/RefundTicketInfo'
 import TransferFeeInfo from '@/components/payment/transfer/TransferFeeInfo'
-import PaymentMethod from '@/components/payment/pay/PaymentMethod'
 import ConfirmModal from '@/pages/payment/modal/AlertModal'
 import PasswordInputModal from '@/pages/payment/modal/PasswordInputModal'
 import { bookingTransfer } from '@/models/payment/BookingTransfer'
 import { transferFee } from '@/models/payment/TransferFee'
+import WalletPayment from '@/components/payment/pay/WalletPayment'
+import TossPayment, { type TossPaymentHandle } from '@/components/payment/pay/TossPayment'
+
+type Method = 'wallet' | 'toss'
 
 const TransferFeePaymentPage: React.FC = () => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
-  const [selectedMethod, setSelectedMethod] = useState<string>('')
+  const [selectedMethod, setSelectedMethod] = useState<Method | ''>('')
   const [isAgreed, setIsAgreed] = useState<boolean>(false)
+  const [isPaying, setIsPaying] = useState(false)
 
   const navigate = useNavigate()
+  const tossRef = useRef<TossPaymentHandle>(null)
 
-  const handlePayment = () => {
-    if (!selectedMethod || !isAgreed) return
+  // ✅ 공통 결과 페이지 이동 헬퍼 멍
+  const routeToResult = useCallback(
+    (ok: boolean, extra?: Record<string, string | undefined>) => {
+      const params = new URLSearchParams({
+        type: 'transfer-fee', // 수수료 결제 타입
+        status: ok ? 'success' : 'fail',
+        ...(extra ?? {}),
+      })
+      navigate(`/payment/result?${params.toString()}`)
+    },
+    [navigate],
+  )
 
-    // TODO: 결제 API 요청 → 성공/실패 결과 받기
-    const isFail = false // 예시, 실제로는 API 응답 값
+  // 결제 버튼 클릭
+  const handlePayment = async () => {
+    if (!selectedMethod || !isAgreed || isPaying) return
 
-    if (isFail) {
-      navigate('/payment/transfer/fee-fail')
-    } else {
-      navigate('/payment/transfer/fee-success')
+    if (selectedMethod === 'wallet') {
+      // 킷페이(지갑): 안내 모달 → 비밀번호 모달
+      setIsConfirmModalOpen(true)
+      return
+    }
+
+    if (selectedMethod === 'toss') {
+      // 토스: redirectUrl로 ResultPage로 이동
+      setIsPaying(true)
+      try {
+        await tossRef.current?.requestPay()
+      } catch (e) {
+        console.error(e)
+        routeToResult(false)
+      } finally {
+        setIsPaying(false)
+      }
     }
   }
 
+  // 확인 모달 → 비밀번호 모달
   const handleConfirm = () => {
     setIsConfirmModalOpen(false)
     setIsPasswordModalOpen(true)
   }
+  const handleCancel = () => setIsConfirmModalOpen(false)
 
-  const handlePasswordComplete = (password: string) => {
+  // 킷페이 비밀번호 입력 완료 → 실제 결제 처리 후 결과 페이지 이동
+  const handlePasswordComplete = async (password: string) => {
     console.log('입력된 비밀번호:', password)
     setIsPasswordModalOpen(false)
-    navigate('/payment/transfer/fee-success')
-  }
-
-  const handleCancel = () => {
-    setIsConfirmModalOpen(false)
+    setIsPaying(true)
+    try {
+      // TODO: 실제 API 연동
+      const ok = Math.random() < 0.95 // 예시
+      const txId = Math.random().toString(36).slice(2, 10)
+      routeToResult(ok, { txId })
+    } catch (e) {
+      console.error(e)
+      routeToResult(false)
+    } finally {
+      setIsPaying(false)
+    }
   }
 
   return (
@@ -65,7 +104,25 @@ const TransferFeePaymentPage: React.FC = () => {
         {/* 결제 수단 */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>결제 수단</h2>
-          <PaymentMethod onSelect={setSelectedMethod} />
+
+          <div className={styles.paymentMethodWrapper}>
+            <WalletPayment
+              isOpen={selectedMethod === 'wallet'}
+              onToggle={() =>
+                setSelectedMethod(selectedMethod === 'wallet' ? '' : 'wallet')
+              }
+            />
+            <TossPayment
+              ref={tossRef}
+              isOpen={selectedMethod === 'toss'}
+              onToggle={() =>
+                setSelectedMethod(selectedMethod === 'toss' ? '' : 'toss')
+              }
+              amount={transferFee.totalFee}
+              orderName="양도 수수료 결제"
+              redirectUrl={`${window.location.origin}/payment/result?type=transfer-fee`}
+            />
+          </div>
         </section>
 
         {/* 수수료 정보 */}
@@ -89,16 +146,20 @@ const TransferFeePaymentPage: React.FC = () => {
         <div className={styles.buttonWrapper}>
           <Button
             className="w-full h-12"
-            disabled={!selectedMethod || !isAgreed}
+            disabled={!selectedMethod || !isAgreed || isPaying}
             onClick={handlePayment}
           >
-            수수료 결제하기
+            {isPaying ? '결제 중...' : '수수료 결제하기'}
           </Button>
         </div>
       </div>
 
       {/* 확인 모달 */}
-      {isConfirmModalOpen && <ConfirmModal onConfirm={handleConfirm} onCancel={handleCancel} />}
+      {isConfirmModalOpen && (
+        <ConfirmModal onConfirm={handleConfirm} onCancel={handleCancel}>
+          양도 수수료 결제를 진행하시겠습니까?
+        </ConfirmModal>
+      )}
 
       {/* 비밀번호 입력 모달 */}
       {isPasswordModalOpen && (
