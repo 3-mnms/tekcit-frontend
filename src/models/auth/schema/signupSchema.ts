@@ -1,11 +1,9 @@
-// models/auth/schema/signupStepSchemas.ts
 import { z } from 'zod';
 
-// 1단계: 계정
 export const signupStep1 = z
   .object({
-    loginId: z.string().min(4, '아이디는 4자 이상'),
-    loginPw: z.string().min(8, '비밀번호는 8자 이상'),
+    loginId: z.string().min(4, '아이디는 4자 이상 입력하세요.'),
+    loginPw: z.string().min(8, '비밀번호는 8자 이상 입력하세요.'),
     passwordConfirm: z.string(),
   })
   .superRefine((v, ctx) => {
@@ -18,24 +16,21 @@ export const signupStep1 = z
     }
   });
 
-// 2단계: 기본정보
 export const signupStep2 = z.object({
-  name: z.string().min(2, '이름은 2자 이상'),
+  name: z.string().min(2, '이름은 2자 이상 입력하세요.'),
   phone: z
     .string()
-    .regex(/^01[016789]-?\d{3,4}-?\d{4}$/, '전화번호 형식: 010-1234-5678'),
-  rrnFront: z.string().regex(/^\d{6}$/, '주민번호 앞 6자리'),
-  rrnBackFirst: z.string().regex(/^[1-4]$/, '주민번호 뒤 첫 자리(1~4)'),
+    .regex(/^01[016789]-?\d{3,4}-?\d{4}$/, '전화번호 형식이 올바르지 않습니다. 예: 010-1234-5678'),
+  rrnFront: z.string().regex(/^\d{6}$/, '주민번호 앞 6자리를 입력하세요.'),
+  rrnBackFirst: z.string().min(1, '주민번호를 입력하세요.').regex(/^[1-4]$/, '주민등록번호 뒷자리 첫 글자는 1~4만 가능합니다.'),
 });
 
-// 3단계: 주소
 export const signupStep3 = z.object({
   zipCode: z.string().min(1, '우편번호를 입력하세요'),
   address: z.string().min(1, '주소를 입력하세요'),
   detailAddress: z.string(),
 });
 
-// 4단계: 이메일 인증
 export const signupStep4 = z.object({
   email: z.string().email('이메일 형식이 올바르지 않습니다'),
   emailCode: z.string().min(1, '인증 코드를 입력하세요'),
