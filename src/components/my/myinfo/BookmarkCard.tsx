@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './BookmarkCard.module.css';
-import type { BookmarkCardProps } from '@/models/bookmark/BookmarkdCardProps';
+import type { BookmarkCardProps } from '@/models/bookmark/BookmarkItem';
 
 const BookmarkCard: React.FC<BookmarkCardProps> = ({
   id,

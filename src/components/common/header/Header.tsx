@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
   const [keyword, setKeyword] = React.useState('')
 
   const { isLoggedIn, user } = useAuthStore()
-  console.log('Current user object:', user)
+  // console.log('Current user object:', user)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 

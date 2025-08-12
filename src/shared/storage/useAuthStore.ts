@@ -1,4 +1,3 @@
-// shared/storage/useAuthStore.ts
 import { create } from 'zustand';
 import { tokenStore } from '@/shared/storage/tokenStore';
 import { parseJwt } from './jwt';

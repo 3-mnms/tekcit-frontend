@@ -1,4 +1,3 @@
-// src/components/auth/signup/SignupInputFields.tsx
 import React, { useState, forwardRef } from "react";
 import styles from "./SignupInputFields.module.css";
 import Button from "@/components/common/button/Button";
@@ -62,7 +61,6 @@ const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
             </button>
           )}
         </div>
-
 
         {hasButton && (
           <div className={styles.buttonWrapper}>

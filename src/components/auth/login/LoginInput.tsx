@@ -1,12 +1,13 @@
 import React from 'react';
 import type { InputHTMLAttributes } from 'react';
+import type { UseFormRegisterReturn } from 'react-hook-form';
 import styles from './LoginInput.module.css';
 
 interface Field extends InputHTMLAttributes<HTMLInputElement> {
   name: 'loginId' | 'loginPw';
   label?: string;
   error?: string;
-  register?: ReturnType<any>;
+  register?: UseFormRegisterReturn;
 }
 
 interface LoginInputProps {

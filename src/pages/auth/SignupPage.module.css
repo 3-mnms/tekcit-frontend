@@ -7,7 +7,7 @@
 }
 
 .card {
-  width: 50%;
+  width: 480px;
   background-color: white;
   padding: 2.5rem;
   display: flex;
@@ -15,10 +15,9 @@
   align-items: center;
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08),
-              0 4px 12px rgba(0, 0, 0, 0.04);
+    0 4px 12px rgba(0, 0, 0, 0.04);
   height: 580px;
 }
-
 
 .logo {
   width: 150px;
@@ -32,8 +31,8 @@
 
 .rrnRow {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: stretch;
+  column-gap: 8px;
   width: 100%;
   margin-bottom: 1rem;
 }
@@ -44,9 +43,8 @@
 
 .hyphen {
   font-size: 1.5rem;
-  margin: 0 0.2rem;
   color: #aaa;
-  height: 100%;
+  margin: 0 4px;
 }
 
 .progressWrapper {
@@ -65,7 +63,7 @@
 }
 
 .formContent {
-  flex: 1; 
+  flex: 1;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -78,32 +76,69 @@
   margin-top: auto;
 }
 
-.rrnOneDigit {
-  width: 15%;
-  text-align: center;
-  border: 1px solid #e5e7eb;
-  border-radius: 5px;
-  height: 80%;
-  padding: 0;
-  font-size: 14px;
-  box-sizing: border-box;
-  outline: none;
-  margin-bottom: 14px;
+.rrnBackGroup {
+  display: grid;
+  grid-template-columns: 44px auto;
+  column-gap: 8px;
 }
 
-.rrnOneDigit:focus-within {
+.rrnOneDigit {
+  width: 44px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  height: 45px;
+  font-size: 14px;
+  outline: none;
+}
+
+.rrnOneDigit:focus {
   border-color: #60a5fa;
-  box-shadow: 0 0 0 3px rgba(96,165,250,.25);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, .25);
+}
+
+.inputInvalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, .12);
+}
+
+.inputValid {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, .12);
 }
 
 .dots {
   font-size: 15px;
   color: #9ca3af;
-  margin-bottom: 14px;
+  margin-top: 10px;
+  /* align-self: center; */
 }
 
 .skipButton {
   background-color: transparent;
   color: #3b82f6;
   border: 1px solid #3b82f6;
+}
+
+.errorMsg {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #ef4444;
+}
+
+.rrnBackCol {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex: 0 0 0;
+}
+
+.rrnBackError {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #ef4444;
+  text-align: left;
 }

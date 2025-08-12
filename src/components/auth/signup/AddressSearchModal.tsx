@@ -1,5 +1,5 @@
 import React from 'react'
-import DaumPostcodeEmbed from 'react-daum-postcode'
+import DaumPostcodeEmbed, { type Address } from 'react-daum-postcode'
 import styles from './AddressSearchModal.module.css'
 
 interface AddressSearchModalProps {
@@ -8,7 +8,7 @@ interface AddressSearchModalProps {
 }
 
 const AddressSearchModal: React.FC<AddressSearchModalProps> = ({ onComplete, onClose }) => {
-  const handleComplete = (data: any) => {
+  const handleComplete = (data: Address) => {
     onComplete({
       zipCode: data.zonecode,
       address: data.roadAddress || data.jibunAddress,
