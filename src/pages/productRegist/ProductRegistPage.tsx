@@ -10,7 +10,6 @@ import ScheduleDropdown from '@/components/product/ScheduleDropdown';
 import {initialProductData } from '@/models/festival';
 import type {ProductType} from '@/models/festival';
 import CastInput from '@/components/product/CastInput';
-import { useAuth } from '@/models/dummy/useAuth';
 
 import styles from './ProductRegistPage.module.css';
 
@@ -27,7 +26,6 @@ const ProductRegisterPage: React.FC = () => {
     const [searchParams] = useSearchParams();
     const [isEditMode, setIsEditMode] = useState(false);
     const productId = searchParams.get('id');
-    const { hostId } = useAuth();
 
     const { data: existingProduct } = useQuery({
         queryKey: ['festival', productId],
@@ -148,7 +146,6 @@ const ProductRegisterPage: React.FC = () => {
 
         const finalProductData = {
             ...productData,
-            hostId: hostId,
         };
 
         setConfirmModal({
@@ -378,8 +375,8 @@ const ProductRegisterPage: React.FC = () => {
                         </div>
                     </div>
                 </form>
-                <div className={styles.registerButtonWrapper}>
-                <Button onClick={handleRegisterClick} disabled={isPending}>
+                <div className="flex justify-center">
+                <Button onClick={handleRegisterClick} disabled={isPending} className="w-1/2 h-7" >
                     {isPending ? '처리 중...' : (isEditMode ? '수정하기' : '등록하기')}
                 </Button>
             </div>
