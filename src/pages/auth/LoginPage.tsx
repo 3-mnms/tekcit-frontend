@@ -98,7 +98,7 @@ const LoginPage: React.FC = () => {
         </form>
 
         <div className={styles.findLinks}>
-          <Link to="/find-id">아이디 찾기</Link> | <Link to="/find-password">비번 찾기</Link>
+          <Link to="/find-id">아이디 찾기</Link> | <Link to="/find-password">비밀번호 찾기</Link>
         </div>
 
         <SocialLogin />

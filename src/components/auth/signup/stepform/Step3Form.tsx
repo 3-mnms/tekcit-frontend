@@ -1,5 +1,5 @@
 // features/auth/signup/components/Step3Form.tsx
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { signupStep3, type Step3 } from '@/models/auth/schema/signupSchema'
@@ -21,6 +21,7 @@ const Step3Form: React.FC<Props> = ({ acc, onPrev, onNext, updateAcc, openAddres
     register,
     handleSubmit,
     watch,
+     reset,  
     formState: { errors },
   } = useForm<Step3>({
     resolver: zodResolver(signupStep3),
@@ -32,6 +33,14 @@ const Step3Form: React.FC<Props> = ({ acc, onPrev, onNext, updateAcc, openAddres
       detailAddress: acc.detailAddress ?? '',
     },
   })
+
+  useEffect(() => {
+    reset({
+      zipCode: acc.zipCode ?? '',
+      address: acc.address ?? '',
+      detailAddress: acc.detailAddress ?? '',
+    })
+  }, [acc.zipCode, acc.address, acc.detailAddress, reset])
 
   const submit = (data: Step3) => {
     updateAcc(data)
