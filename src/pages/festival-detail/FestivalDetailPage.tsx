@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import Header from '@components/common/header/Header';
-import Info from '@components/festival/FestivalInfoSection';
-import Scheduler from '@components/festival/FestivalScheduleSection';
-import InfoDetail from '@components/festival/FestivalInfoDetailSection';
-import Statistics from '@components/festival/FestivalStatisticsSection';
+import Info from '@/components/festival/detail/FestivalInfoSection';
+import Scheduler from '@/components/festival/detail/FestivalScheduleSection';
+import InfoDetail from '@/components/festival/detail/FestivalInfoDetailSection';
+import Statistics from '@/components/festival/detail/FestivalStatisticsSection';
 import styles from './FestivalDetailPage.module.css';
 
 const FestivalDetailPage: React.FC = () => {

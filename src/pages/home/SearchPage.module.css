@@ -1,0 +1,42 @@
+html, body, #root {
+  background: #fff !important;
+  min-height: 100%;
+}
+
+.page {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr); /* 오른쪽 칼럼 줄바꿈 방지 */
+  gap: 32px;
+  align-items: start;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 40px;
+}
+
+/* Header는 .page 바깥! → 아래 두 줄만 남기면 됨 */
+.page > :first-child {
+  grid-column: 1;          /* Filter = 왼쪽 칼럼 */
+  position: sticky;        /* 선택사항: 고정하고 싶을 때 */
+  top: 72px;
+  align-self: start;
+}
+
+.page > :last-child {
+  grid-column: 2;          /* Result = 오른쪽 칼럼 */
+  min-width: 0;            /* 내부 그리드가 제대로 줄도록 */
+}
+
+/* 모바일 */
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 12px 20px;
+  }
+  .page > :first-child,
+  .page > :last-child {
+    grid-column: 1;
+    position: static;
+  }
+}
