@@ -39,6 +39,23 @@ const SLUG_TO_GROUP: Record<string, string> = {
   mix: '복합',
 };
 
+/** 🔧 포스터 URL 보정(키 통합 + http→https + 상대경로 보정) */
+const buildPosterUrl = (f: any): string => {
+  const raw =
+    f?.poster ??
+    f?.poster_file ??
+    f?.posterFile ??
+    f?.posterUrl ??
+    '';
+
+  if (!raw) return '';
+  if (raw.startsWith('http://') || raw.startsWith('https://')) {
+    return raw.replace(/^http:\/\//i, 'https://');
+  }
+  const path = raw.startsWith('/') ? raw : `/${raw}`;
+  return `https://www.kopis.or.kr${encodeURI(path)}`;
+};
+
 const CategorySection: React.FC = () => {
   const { slug, name, category } = useParams<{ slug?: string; name?: string; category?: string }>();
   const rawSlug = slug ?? name ?? category ?? null;
@@ -75,7 +92,7 @@ const CategorySection: React.FC = () => {
 
   // 1) 현재 그룹 데이터
   const inGroup = useMemo(
-    () => festivals.filter((f) => normalizeGroup((f as any).genrename) === currentGroup),
+    () => festivals.filter((f) => normalizeGroup((f as any).genrenm) === currentGroup),
     [festivals, currentGroup]
   );
 
@@ -83,7 +100,7 @@ const CategorySection: React.FC = () => {
   const presentChildren = useMemo(() => {
     const set = new Set<string>();
     inGroup.forEach((f) => {
-      const raw = (f as any).genrename as string | undefined;
+      const raw = (f as any).genrenm as string | undefined;
       if (raw) set.add(canon(raw));
     });
     return Array.from(set);
@@ -107,11 +124,11 @@ const CategorySection: React.FC = () => {
     }
   }, [isCategoryPage, showChildButtons, presentChildren, selectedChild]);
 
-  // 5) 최종 리스트 & 6개 제한
+  // 5) 최종 리스트
   const finalList = useMemo(() => {
     const base =
       showChildButtons && selectedChild
-        ? inGroup.filter((f) => canon((f as any).genrename) === canon(selectedChild))
+        ? inGroup.filter((f) => canon((f as any).genrenm) === canon(selectedChild))
         : inGroup;
     return base;
   }, [inGroup, showChildButtons, selectedChild]);
@@ -157,18 +174,30 @@ const CategorySection: React.FC = () => {
       </div>
 
       <div className={styles.cardSlider}>
-        {displayed.map((festival) => (
-          <div key={festival.id} className={styles.card}>
-            <div className={styles.imageWrapper}>
-              <img src={festival.poster} alt={festival.fname} className={styles.image} />
+        {displayed.map((festival, idx) => {
+          const posterSrc = buildPosterUrl(festival);
+          const key = `${(festival as any).fid || festival.id || 'unknown'}-${idx}`;
+          return (
+            <div key={key} className={styles.card}>
+              <div className={styles.imageWrapper}>
+                <img
+                  src={posterSrc || '/assets/placeholder-poster.png'}
+                  alt={festival.fname}
+                  className={styles.image}
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/assets/placeholder-poster.png';
+                  }}
+                />
+              </div>
+              <h3 className={styles.name}>{festival.fname}</h3>
+              <p className={styles.date}>
+                {festival.fdfrom === festival.fdto ? festival.fdfrom : `${festival.fdfrom} ~ ${festival.fdto}`}
+              </p>
+              <p className={styles.location}>{(festival as any).area} · {(festival as any).fcltynm}</p>
             </div>
-            <h3 className={styles.name}>{festival.fname}</h3>
-            <p className={styles.date}>
-              {festival.fdfrom === festival.fdto ? festival.fdfrom : `${festival.fdfrom} ~ ${festival.fdto}`}
-            </p>
-            <p className={styles.location}>{festival.area} · {festival.fcltynm}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
