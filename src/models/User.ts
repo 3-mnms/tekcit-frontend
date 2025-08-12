@@ -11,7 +11,7 @@ export interface Address {
 }
 
 export interface BaseUser {
-    userId: number;
+    id: number;
     loginId: string;
     loginPw: string;
     name: string;
@@ -37,12 +37,12 @@ export interface UserProfile{
 }
 
 export interface HostProfile{
-    genre: Genre[];
+    genre: Genre;
     businessName: string;
     isActive: boolean; 
 }
 
-export type Genre = '뮤지컬' | '대중음악(콘서트)' | '연극' | '한국음악(국악)' | '서양음악(클래식)';
+export type Genre = '뮤지컬' | '대중음악' | '연극' | '한국음악' | '서양음악';
 
 export interface TicketHolderType {
     id: number; 

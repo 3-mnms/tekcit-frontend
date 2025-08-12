@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styles from './Table.module.css';
 
 export interface Column<T> {
-    columnId: keyof T | 'actions' | 'checkbox';
+    columnId: string;
     label: string;
     render?: (item: T) => React.ReactNode;
 }

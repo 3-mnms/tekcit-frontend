@@ -5,7 +5,7 @@ import { USERROLE, type User } from '@/models/User';
 
 interface HostListProps  {
     users: User[];
-    onToggleStatus: (userId: string, currentIsActive: boolean) => void;
+    onToggleStatus: (id: string, currentIsActive: boolean) => void;
 }
 
 const HostList: React.FC<HostListProps > = ({ users, onToggleStatus }) => {
@@ -18,16 +18,16 @@ const HostList: React.FC<HostListProps > = ({ users, onToggleStatus }) => {
         { columnId: 'loginId', label: '아이디' },
         { columnId: 'phone', label: '전화번호' },
         { columnId: 'email', label: '이메일' },
-        { columnId: 'hostProfile', label: '장르', render: (user) => user.hostProfile?.genre },
-        { columnId: 'hostProfile', label: '사업자명', render: (user) => user.hostProfile?.businessName },
+        { columnId: 'hostProfile.genre', label: '장르', render: (user) => user.hostProfile?.genre },
+        { columnId: 'hostProfile.businessName', label: '사업자명', render: (user) => user.hostProfile?.businessName },
         { columnId: 'loginPw', label: '비밀번호', render: (user) => (
             user.loginPw ? `${user.loginPw.substring(0, 3)}****` : '********'
         )},
-        { columnId: 'hostProfile', label: '계정 상태', render: (user) => (
+        { columnId: 'hostProfile.isActive', label: '계정 상태', render: (user) => (
             user.role === USERROLE.HOST ? (
                 <ToggleSwitch 
-                    isActive={user.hostProfile.isActive}
-                    onChange={() => handleToggleStatus(user, user.hostProfile.isActive)}
+                    isActive={user.hostProfile?.isActive}
+                    onChange={() => handleToggleStatus(user, user.hostProfile?.isActive)}
                 />
             ) : (
                 <span>-</span>
@@ -35,7 +35,7 @@ const HostList: React.FC<HostListProps > = ({ users, onToggleStatus }) => {
         )},
     ];
 
-    return <Table columns={columns} data={users} />;
+    return <Table columns={columns} data={users|| []} />;
 };
 
 export default HostList;

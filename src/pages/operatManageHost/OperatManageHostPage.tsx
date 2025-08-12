@@ -7,25 +7,17 @@ import Layout from '@components/layout/Layout';
 import AddModal from '@/components/operatManage/AddModal';
 import type {NewHostData} from '@/components/operatManage/AddModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-// import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/models/dummy/useAuth';
 import { getHosts, registerHost } from '@/shared/api/host';
-import { USERROLE } from '@/models/User';
 
 const OperatManageHostPage: React.FC = () => {
     const queryClient = useQueryClient();
-    // const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const { role, userId } = useAuth();
-
-    const hostId = role === USERROLE.HOST ? userId : undefined;
 
     // 삐약! useQuery 훅을 사용해 호스트 목록을 가져옵니다!
     const { data: hosts, isLoading, isError, isFetching } = useQuery({
-        queryKey: ['hosts', hostId, searchTerm],
-        queryFn: () => getHosts(searchTerm, role, hostId),
-        enabled: !!userId,
+        queryKey: ['hosts', searchTerm],
+        queryFn: () => getHosts(searchTerm),
     });
     
     // 삐약! useMutation 훅을 사용해 호스트를 등록합니다!
@@ -42,13 +34,17 @@ const OperatManageHostPage: React.FC = () => {
         },
     });
 
-    const handleToggleStatus = (userId: string) => {
-        // 삐약! 계정 상태 변경 로직을 여기에 구현합니다!
-        console.log(`계정 상태 변경: ${userId}`);
+    const handleToggleStatus = (userId: string, currentIsActive: boolean) => {
+        const newIsActive = !currentIsActive;
+        console.log(`${userId} 계정을 ${newIsActive ? '활성화' : '정지'}하시겠습니까?`);
+    
+    // 예시: API 호출
+    // useMutation 훅을 이용해 계정 상태 변경 API를 호출하는 로직이 들어갈 수 있어요.
+    // toggleHostStatusMutation.mutate({ userId, newIsActiveStatus });
     };
 
-    const handleSaveHost = (newPartner: NewHostData) => {
-        registerHostMutation(newPartner);
+    const handleSaveHost = (newHost: NewHostData) => {
+        registerHostMutation(newHost);
     };
 
     const totalUsers = hosts ? hosts.length : 0;
@@ -71,7 +67,7 @@ const OperatManageHostPage: React.FC = () => {
                         <Button onClick={() => setIsModalOpen(true)}>파트너 추가</Button>
                     </div>
                 </div>
-                {isFetching && <div className={styles.loadingIndicator}>삐약! 새로운 주최자 목록을 가져오는 중...</div>}
+                {isFetching && <div className={styles.loadingIndicator}>주최자 목록을 가져오는 중...</div>}
                 <div className={styles.tableSection}>
                     <HostList users={hosts || []} onToggleStatus={handleToggleStatus} />
                 </div>

@@ -18,13 +18,13 @@ const ProductManagePage: React.FC = () => {
     const navigate = useNavigate();
     // const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
-    const { role, userId } = useAuth();
+    const { role, id } = useAuth();
 
     // 삐약! useQuery를 사용해서 상품 목록을 가져옵니다!
     const { data: products, isLoading, isError, isFetching } = useQuery({
-        queryKey: ['products', userId, searchTerm],
-        queryFn: () => role === USERROLE.HOST ? getProducts(userId) : getProducts(),
-        enabled: !!userId,
+        queryKey: ['products', id, searchTerm],
+        queryFn: () => role === USERROLE.HOST ? getProducts(id) : getProducts(),
+        enabled: !!id,
     });
 
     // 삐약! 이 부분에서 상품 클릭 시 상세 페이지로 이동합니다!

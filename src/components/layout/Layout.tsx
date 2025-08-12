@@ -24,7 +24,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => {
   const navigate = useNavigate();
-  const {name, email, role, userId } = useAuth();
+  const {name, email, role } = useAuth();
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');

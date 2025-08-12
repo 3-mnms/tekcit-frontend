@@ -3,7 +3,7 @@ import Table from '@/components/shared/Table';
 import type { Column } from '@/components/shared/Table';
 import ToggleSwitch from '@/components/operatManage/ToggleSwitch';
 import AddressDropdown from '@/components/operatManage/AddressDropdown';
-import type { User } from '@/models/User';
+import { USERROLE, type User } from '@/models/User';
 
 interface UserListProps {
     users: User[];
@@ -19,24 +19,24 @@ const UserList: React.FC<UserListProps> = ({ users, onToggleStatus }) => {
         { columnId: 'residentNum', label: '주민번호' },
         { columnId: 'birth', label: '생년월일' },
         { columnId: 'gender', label: '성별' },
-        { columnId: 'address', label: '주소', render: (user: User) => (
-            <AddressDropdown addresses={user.address} /> // 드롭다운
+        { columnId: 'userProfile.address', label: '주소', render: (user) => (
+            <AddressDropdown addresses={user.userProfile?.address || []} />
         )},
-        { columnId: 'pw', label: '비밀번호', render: (user: User) => (
-            user.pw ? `${user.pw.substring(0, 3)}****` : '********'
+        { columnId: 'loginPw', label: '비밀번호', render: (user) => (
+            user.loginPw ? `${user.loginPw.substring(0, 3)}****` : '********'
         )},
-        { columnId: 'isActive', label: '계정 상태', render: (user: User) => (
+        { columnId: 'userProfile.isActive', label: '계정 상태', render: (user) => (
+            user.role === USERROLE.USER ? (
             <ToggleSwitch 
-                isActive={user.isActive}
-                onChange={() => onToggleStatus(user.loginId, user.isActive)}
+                isActive={user.userProfile?.isActive}
+                onChange={() => onToggleStatus(user.loginId, user.userProfile?.isActive)}
             />
+            ) : (
+                <span>-</span>
+            )
         )},
     ];
-    return (
-        <div>
-            <Table columns={columns} data={users} />
-        </div>
-    );
+    return <Table columns={columns} data={users|| []} />;
 };
 
 export default UserList;

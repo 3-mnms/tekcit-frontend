@@ -3,7 +3,7 @@ import { USERROLE, type UserRole} from '@/models/User';
 // 삐약! 가상의 로그인 유저 정보를 반환하는 훅입니다!
 export const useAuth = () => {
     const user = { 
-        userId: 123,
+        id: 123,
         role: USERROLE.ADMIN as UserRole,
         loginId: 'jhy0123',
         name: '정혜영',

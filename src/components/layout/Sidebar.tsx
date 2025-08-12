@@ -15,7 +15,7 @@ interface SidebarProps {
   style?: React.CSSProperties;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ menuItems, userName, userEmail, ...props }) => {
+const Sidebar: React.FC<SidebarProps> = ({ menuItems, userName, userEmail,  ...props }) => {
     const [openMenu, setOpenMenu] = useState<string | null>(null);
 
     const toggleMenu = (menuName: string) => {
