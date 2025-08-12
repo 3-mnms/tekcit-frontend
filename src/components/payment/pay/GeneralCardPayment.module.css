@@ -195,3 +195,13 @@
 .col1of3 {
   grid-column: span 4;
 }
+
+/* GeneralCardPayment.module.css */
+.general-payment-slide {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height .4s ease;
+}
+.open {
+  max-height: 1200px; /* 위젯 높이 커버 */
+}

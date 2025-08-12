@@ -1,234 +1,100 @@
-import { useEffect, useId, useState } from 'react'
-import CardSelectBox from '@/components/payment/pay/CardSelectBox'
-import Input from '@/components/common/input/Input'
+// components/payment/pay/GeneralCardPayment.tsx
+import { forwardRef, useImperativeHandle } from 'react'
+import PortOne, { Currency, PayMethod } from '@portone/browser-sdk/v2'
 import styles from './GeneralCardPayment.module.css'
 
-interface GeneralCardPaymentProps {
+export interface GeneralCardPaymentProps {
   isOpen: boolean
   onToggle: () => void
+  amount: number
+  orderName: string
+  redirectUrl?: string
 }
 
-const GeneralCardPayment: React.FC<GeneralCardPaymentProps> = ({ isOpen, onToggle }) => {
-  const [userType, setUserType] = useState<'personal' | 'corporate'>('personal')
-  const [cardType, setCardType] = useState<'credit' | 'debit'>('credit')
-  const [installment, setInstallment] = useState<string>('일시불')
-  const [selectedCard, setSelectedCard] = useState<string>('')
+export type GeneralCardPaymentHandle = { requestPay: () => Promise<void> }
 
-  const [form, setForm] = useState({
-    cardNumber: '',
-    expiry: '',
-    cvc: '',
-    cardHolder: '',
-    birthOrBiz: '',
-    password2: '',
-  })
+// 실제에선 .env로 관리 권장
+const STORE_ID = import.meta.env.VITE_PORTONE_STORE_ID?.trim()
+const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY?.trim()
 
-  const rgUserId = useId()
-  const rgTypeId = useId()
+// 결제 ID 생성 유틸 (any 없이)
+function createPaymentId(): string {
+  const c = globalThis.crypto
+  if (c && typeof c.randomUUID === 'function') return c.randomUUID()
+  const buf =
+    c && typeof c.getRandomValues === 'function'
+      ? c.getRandomValues(new Uint32Array(2))
+      : new Uint32Array([Date.now() & 0xffffffff, (Math.random() * 1e9) | 0])
+  return `pay_${Array.from(buf).join('')}`
+}
 
-  useEffect(() => {
-    if (cardType === 'debit') setInstallment('일시불')
-  }, [cardType])
+// PortOne 에러 형태 최소 정의
+type PortOneError = { code: string; message?: string }
+function isPortOneError(v: unknown): v is PortOneError {
+  if (typeof v !== 'object' || v === null) return false
+  return typeof (v as Record<string, unknown>).code === 'string'
+}
 
-  // 공용 핸들러 멍
-  const handleInput = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    key: keyof typeof form | 'installment',
-  ) => {
-    let val = e.target.value
+const GeneralCardPayment = forwardRef<GeneralCardPaymentHandle, GeneralCardPaymentProps>(
+  ({ isOpen, onToggle, amount, orderName, redirectUrl }, ref) => {
+    useImperativeHandle(ref, () => ({
+      async requestPay() {
+        if (!STORE_ID || !CHANNEL_KEY) {
+          alert('PortOne storeId/channelKey가 설정되지 않았습니다(.env 확인).')
+          return
+        }
 
-    switch (key) {
-      case 'cardNumber':
-        val = val
-          .replace(/\D/g, '')
-          .slice(0, 16)
-          .replace(/(\d{4})(?=\d)/g, '$1 ')
-        break
-      case 'expiry':
-        val = val.replace(/\D/g, '').slice(0, 4)
-        if (val.length >= 3) val = `${val.slice(0, 2)}/${val.slice(2)}`
-        break
-      case 'cvc':
-        val = val.replace(/\D/g, '').slice(0, 3)
-        break
-      case 'password2':
-        val = val.replace(/\D/g, '').slice(0, 2)
-        break
-      case 'birthOrBiz':
-        val = val.replace(/\D/g, '').slice(0, userType === 'personal' ? 6 : 10)
-        break
-    }
+        const paymentId = createPaymentId()
 
-    if (key === 'installment') setInstallment(val)
-    else setForm((prev) => ({ ...prev, [key]: val }))
-  }
+        // enum 사용 → 타입 에러 방지 멍
+        const result: unknown = await PortOne.requestPayment({
+          storeId: STORE_ID,
+          channelKey: CHANNEL_KEY,
+          paymentId,
+          orderName,
+          totalAmount: amount,
+          currency: Currency.KRW,   // ← Currency도 보통 대문자 키 멍
+          payMethod: PayMethod.CARD, // ← 여기! Card → CARD 로 수정 멍
+          redirectUrl: redirectUrl ?? `${window.location.origin}/payment/portone/success`,
+        })
 
-  return (
-    <div className={styles['general-card-payment-container']}>
-      <div className={styles['payment-section']}>
-        <label className={styles['simple-payment-option']}>
-          <input
-            type="radio"
-            id="general-payment"
-            name="payment-method"
-            checked={isOpen}
-            onChange={onToggle}
-          />
-          <span className={styles['radio-label']}>일반 결제</span>
-        </label>
+        if (isPortOneError(result)) {
+          alert(`결제 실패: ${result.message ?? result.code}`)
+        }
+        // 성공/실패 이후 라우팅은 리다이렉트/결과 페이지에서 처리 멍
+      },
+    }))
 
-        <div
-          id="general-payment-panel"
-          className={`${styles['general-payment-slide']} ${isOpen ? styles.open : ''}`}
-          role="region"
-          aria-labelledby="general-payment"
-        >
-          <div className={styles['general-payment-section']}>
-            {/* 사용자 구분 */}
-            <fieldset className={styles.fieldset}>
-              <legend className={styles.legend}>사용자 구분</legend>
-              <div className={styles['options-grid']} role="radiogroup" aria-labelledby={rgUserId}>
-                <span id={rgUserId} className="sr-only">
-                  사용자 구분
-                </span>
-                <label className={styles.option}>
-                  <input
-                    type="radio"
-                    name="user-type"
-                    value="personal"
-                    checked={userType === 'personal'}
-                    onChange={() => setUserType('personal')}
-                  />
-                  개인
-                </label>
-                <label className={styles.option}>
-                  <input
-                    type="radio"
-                    name="user-type"
-                    value="corporate"
-                    checked={userType === 'corporate'}
-                    onChange={() => setUserType('corporate')}
-                  />
-                  법인
-                </label>
-              </div>
-            </fieldset>
+    return (
+      <div className={styles['general-card-payment-container']}>
+        <div className={styles['payment-section']}>
+          <label className={styles['simple-payment-option']}>
+            <input
+              type="radio"
+              id="general-payment"
+              name="payment-method"
+              checked={isOpen}
+              onChange={onToggle}
+            />
+            <span className={styles['radio-label']}>일반 결제 (신용/체크카드)</span>
+          </label>
 
-            {/* 카드 종류 */}
-            <fieldset className={styles.fieldset}>
-              <legend className={styles.legend}>카드 종류</legend>
-              <div className={styles['options-grid']} role="radiogroup" aria-labelledby={rgTypeId}>
-                <span id={rgTypeId} className="sr-only">
-                  카드 종류
-                </span>
-                <label className={styles.option}>
-                  <input
-                    type="radio"
-                    name="card-type"
-                    value="credit"
-                    checked={cardType === 'credit'}
-                    onChange={() => setCardType('credit')}
-                  />
-                  신용카드
-                </label>
-                <label className={styles.option}>
-                  <input
-                    type="radio"
-                    name="card-type"
-                    value="debit"
-                    checked={cardType === 'debit'}
-                    onChange={() => setCardType('debit')}
-                  />
-                  체크카드
-                </label>
-              </div>
-            </fieldset>
-
-            {/* 카드/할부 선택 라인 */}
-            <div className={styles.grid}>
-              <div className={styles.colFull}>
-                <CardSelectBox selectedCard={selectedCard} onSelect={setSelectedCard} />
-              </div>
-            </div>
-
-            {/* 카드번호 */}
-            <div className={styles.grid}>
-              <div className={styles.colFull}>
-                <Input
-                  label="카드번호"
-                  placeholder="1234 5678 9012 3456"
-                  value={form.cardNumber}
-                  onChange={(e) => handleInput(e, 'cardNumber')}
-                />
-              </div>
-            </div>
-
-            {/* 유효기간 · CVC · 비밀번호 앞 2자리 */}
-            <div className={styles.grid}>
-              <div className={styles.col1of3}>
-                <Input
-                  label="유효기간"
-                  placeholder="MM/YY"
-                  value={form.expiry}
-                  onChange={(e) => handleInput(e, 'expiry')}
-                />
-              </div>
-              <div className={styles.col1of3}>
-                <Input
-                  label="CVC / CVV"
-                  placeholder="3자리"
-                  value={form.cvc}
-                  onChange={(e) => handleInput(e, 'cvc')}
-                />
-              </div>
-              <div className={styles.col1of3}>
-                <Input
-                  label="비밀번호 앞 2자리"
-                  placeholder="**"
-                  value={form.password2}
-                  onChange={(e) => handleInput(e, 'password2')}
-                />
-              </div>
-            </div>
-
-            {/* 카드 소유자 이름 */}
-            <div className={styles.grid}>
-              <div className={styles.colFull}>
-                <Input
-                  label="카드 소유자 이름 (영문)"
-                  placeholder="HONG GILDONG"
-                  value={form.cardHolder}
-                  onChange={(e) => handleInput(e, 'cardHolder')}
-                />
-              </div>
-            </div>
-
-            {/* 생년월일/사업자번호 · 할부 개월 수 */}
-            <div className={styles.grid}>
-              <div className={styles.col1of2}>
-                <Input
-                  label={userType === 'personal' ? '생년월일 (YYMMDD)' : '사업자등록번호 (10자리)'}
-                  placeholder={userType === 'personal' ? '예: 990101' : '예: 1234567890'}
-                  value={form.birthOrBiz}
-                  onChange={(e) => handleInput(e, 'birthOrBiz')}
-                />
-              </div>
-              <div className={styles.col1of2}>
-                <Input
-                  type="select"
-                  label="할부 개월 수"
-                  defaultValue={installment}
-                  options={['일시불', '3개월', '6개월', '12개월']}
-                  disabled={cardType === 'debit'}
-                  onChange={(e) => handleInput(e, 'installment')}
-                />
-              </div>
+          <div
+            className={`${styles['general-payment-slide']} ${isOpen ? styles.open : ''}`}
+            role="region"
+            aria-labelledby="general-payment"
+          >
+            <div className={styles['general-payment-section']}>
+              <p className={styles['selectLabel']}>
+                이 결제는 PortOne 결제창에서 처리되며 채널은 토스페이먼츠입니다 멍.
+              </p>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
+)
 
+GeneralCardPayment.displayName = 'GeneralCardPayment'
 export default GeneralCardPayment
