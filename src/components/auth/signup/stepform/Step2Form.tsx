@@ -69,7 +69,7 @@ const Step2Form: React.FC<Props> = ({ acc, onPrev, onNext, updateAcc }) => {
             },
           })}
           icon={<FaIdCard />}
-          placeholder="주민번호 앞자리 (예: 820701)"
+          placeholder="주민등록번호 앞 7자리"
           error={errors.rrnFront?.message}
           touched={!!touchedFields.rrnFront}
         />
