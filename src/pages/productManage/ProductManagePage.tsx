@@ -3,33 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query'; 
 import Layout from '@/components/layout/Layout';
 import SearchBar from '@/components/common/SearchBox';
-import Table from '@/components/shared/Table';
-import type {Column} from '@/components/shared/Table';
+import Table, {type Column} from '@/components/shared/Table';
 import Button from '@/components/common/Button';
 import styles from './ProductManagePage.module.css';
 
 import { getProducts } from '@/shared/api/festival';
-import type { ProductType } from '@/models/festival';
-import { USERROLE } from '@/models/User';
-import { useAuth } from '@/models/dummy/useAuth';
-// import { dummyProducts } from '@/models/dummy/dummyProducts';
+import type { Festival } from '@/models/festival';
+// import { useAuth } from '@/models/auth/useAuth';
 
 const ProductManagePage: React.FC = () => {
     const navigate = useNavigate();
-    // const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
-    const { role, id } = useAuth();
 
-    // 삐약! useQuery를 사용해서 상품 목록을 가져옵니다!
-    const { data: products, isLoading, isError, isFetching } = useQuery({
-        queryKey: ['products', id, searchTerm],
-        queryFn: () => role === USERROLE.HOST ? getProducts(id) : getProducts(),
-        enabled: !!id,
+    const { 
+        data: products, 
+        isLoading, 
+        isError,
+    } = useQuery({
+        queryKey: ['products'], 
+        queryFn: getProducts,
     });
 
     // 삐약! 이 부분에서 상품 클릭 시 상세 페이지로 이동합니다!
-    const handleRowClick = (product: ProductType) => {
-        navigate(`/product-detail/${product.id}`);
+    const handleRowClick = (product: Festival) => {
+        navigate(`/product-detail/${product.fid}`);
     };
 
     // 삐약! 버튼 클릭 핸들러를 따로 만듭니다!
@@ -43,18 +40,21 @@ const ProductManagePage: React.FC = () => {
         navigate(`/productManage/Statistics/${productId}`);
     };
 
-    const columns: Column<ProductType>[] = [
-        { columnId: 'id', label: 'id' },
+    const columns: Column<Festival>[] = [
+        { columnId: 'fid', label: 'id' },
         { columnId: 'fname', label: '상품명' },
         { columnId: 'genrenm', label: '장르' },
-        { columnId: 'businessName', label: '사업자명' },
+        { columnId: 'detail', 
+          label: '공연상태', 
+          render: (item) => <span>{item.detail.entrpsnmH}</span>
+        },
         {
-            columnId: 'actions' as keyof ProductType,// 삐약! pid를 기준으로 렌더링할게요!
+            columnId: 'actions' as keyof Festival,// 삐약! pid를 기준으로 렌더링할게요!
             label: '액션',
             render: (item) => (
                 <div className={styles.buttons}>
-                    <Button onClick={(e) => handleViewTicketHolderList(e, item.id)}>예매자명단</Button>
-                    <Button onClick={(e) => handleViewStats(e, item.id)}>통계 조회</Button>
+                    <Button onClick={(e) => handleViewTicketHolderList(e, item.fid)}>예매자명단</Button>
+                    <Button onClick={(e) => handleViewStats(e, item.fid)}>통계 조회</Button>
                 </div>
             )
         },
@@ -79,7 +79,6 @@ const ProductManagePage: React.FC = () => {
                         onSearch={setSearchTerm} 
                     />
                 </div>
-                {isFetching && <div className={styles.loadingIndicator}>삐약! 새로운 상품 목록을 가져오는 중...</div>}
                 <Table 
                     columns={columns} 
                     data={products || []}

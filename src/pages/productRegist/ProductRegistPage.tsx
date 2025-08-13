@@ -7,13 +7,11 @@ import DatePicker from '@components/shared/DatePicker';
 import Button from '@components/common/Button';
 import PostcodeSearch from '@/components/product/PostcodeSearch';
 import ScheduleDropdown from '@/components/product/ScheduleDropdown';
-import {initialProductData } from '@/models/festival';
-import type {ProductType} from '@/models/festival';
+import {initialProductData, type Festival} from '@/models/festival';
 import CastInput from '@/components/product/CastInput';
+import { createProduct, getProductDetail, updateProduct } from '@/shared/api/festival';
 
 import styles from './ProductRegistPage.module.css';
-
-import { createProduct, getProductDetail, updateProduct } from '@/shared/api/festival';
 
 interface ConfirmModalState {
     isOpen: boolean;
@@ -25,19 +23,18 @@ const ProductRegisterPage: React.FC = () => {
     const queryClient = useQueryClient();
     const [searchParams] = useSearchParams();
     const [isEditMode, setIsEditMode] = useState(false);
-    const productId = searchParams.get('id');
+    const fid = searchParams.get('id');
 
+    
     const { data: existingProduct } = useQuery({
-        queryKey: ['festival', productId],
-        queryFn: () => getProductDetail(Number(productId)),
-        enabled: !!productId,
+        queryKey: ['festival', fid],
+        queryFn: () => getProductDetail(Number(fid)),
     });
-
-    const [productData, setProductData] = useState<ProductType>(initialProductData);
-    const [confirmModal, setConfirmModal] = useState<ConfirmModalState>({
-        isOpen: false,
-        onConfirm: () => {},
-    });
+    
+    const [productData, setProductData] = useState<Festival>(initialProductData);
+    const [posterFile, setPosterFile] = useState<File | null>(null);
+    const [contentFiles, setContentFiles] = useState<File[]>([]);
+    const [confirmModal, setConfirmModal] = useState<ConfirmModalState>({ isOpen: false, onConfirm: () => {} });
 
     useEffect(() => {
         if (existingProduct) {
@@ -50,9 +47,9 @@ const ProductRegisterPage: React.FC = () => {
     }, [existingProduct]);
 
     const { mutate, isPending } = useMutation({
-        mutationFn: (data: ProductType) => {
+        mutationFn: (data: Festival) => {
             if (isEditMode) {
-                return updateProduct(data);
+                return updateProduct(Number(fid), data);
             }
             return createProduct(data);
         },
@@ -79,17 +76,27 @@ const ProductRegisterPage: React.FC = () => {
     const handleAddCast = (fcast: string) => {
         setProductData(prevData => ({
             ...prevData,
-            fcast: [...prevData.fcast, fcast],
+            detail: {
+            ...prevData.detail,
+            fcast: [...(prevData.detail.fcast as string[]), fcast],
+        }
         }));
     };
 
-    const handleRemoveCast = (fcast: string) => {
-        setProductData(prevData => ({
-            ...prevData,
-            fcast: prevData.fcast.filter(fcastMember => fcastMember !== fcast),
-        }));
+    const handleRemoveCast = (castToRemove: string) => {
+    setProductData(prevData => {
+        const currentFcastArray = prevData.detail.fcast as string[];
+        const newFcastArray = currentFcastArray.filter(member => member !== castToRemove);
+            return {
+                ...prevData,
+                detail: {
+                    ...prevData.detail,
+                    fcast: newFcastArray,
+                }
+            };
+        });
     };
-    
+        
     const handleAddressComplete = (address: string) => {
         setProductData(prevData => ({
             ...prevData,
@@ -98,51 +105,46 @@ const ProductRegisterPage: React.FC = () => {
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, files } = e.target;
-        if (!files) return;
+    const { name, files } = e.target;
+        if (!files || files.length === 0) return;
 
         if (name === 'posterFile') {
-            setProductData(prevData => ({ ...prevData, posterFile: files[0] }));
-        } else if (name === 'contentFile') {
-            const newFiles = Array.from(files);
-            setProductData(prevData => ({ 
-                ...prevData, 
-                contentFile: [...prevData.contentFile, ...newFiles] 
-            }));
+            setPosterFile(files[0]);
+        } 
+        else if (name === 'contentFile') {
+            setContentFiles(prevFiles => [...prevFiles, ...Array.from(files)]);
         }
     };
     
     const handleRemoveDetailImage = (fileNameToRemove: string) => {
-        setProductData(prevData => ({
-            ...prevData,
-            contentFile: prevData.contentFile.filter(file => file.name !== fileNameToRemove),
-        }));
+        setContentFiles(prevFiles => 
+        prevFiles.filter(file => file.name !== fileNameToRemove)
+        );
     };
 
     const handleAddSchedule = (day: string, time: string) => {
-        const isDuplicate = productData.festivalSchedules.some(
+        const isDuplicate = productData.schedules.some(
             (schedule) => schedule.dayOfWeek === day && schedule.time === time
         );
         if (!isDuplicate) {
             setProductData((prevData) => ({
                 ...prevData,
-                festivalSchedules: [...prevData.festivalSchedules, { dayOfWeek: day, time: time }],
+                festivalSchedules: [...prevData.schedules, { dayOfWeek: day, time: time }],
             }));
-        }
+        }else {
+        alert('삐약! 이미 등록된 스케줄이에요!');
+    }
     };
 
     const handleRemoveSchedule = (indexToRemove: number) => {
         setProductData((prevData) => ({
             ...prevData,
-            festivalSchedules: prevData.festivalSchedules.filter((_, index) => index !== indexToRemove),
+            festivalSchedules: prevData.schedules.filter((_, index) => index !== indexToRemove),
         }));
     };
 
     const handleRegisterClick = () => {
-        if (!productData.fname) {
-            alert('삐약! 상품명을 입력해주세요!');
-            return;
-        }
+        if (!productData.fname) return alert('삐약! 상품명을 입력해주세요!');
 
         const finalProductData = {
             ...productData,
@@ -152,6 +154,14 @@ const ProductRegisterPage: React.FC = () => {
             isOpen: true,
             onConfirm: () => mutate(finalProductData),
         });
+
+        const productInfoToSend = {
+            ...productData,
+            detail: {
+                ...productData.detail,
+                fcast: (productData.detail.fcast as string[]).join(','),
+            }
+        };
     };
 
     const handleCloseModal = () => {
@@ -192,7 +202,7 @@ const ProductRegisterPage: React.FC = () => {
                             </div>
                             <div className={styles.formItem}>
                                 <label>3. 관람 등급</label>
-                                <select name="fage" className={styles.select} value={productData.fage} onChange={handleChange}>
+                                <select name="fage" className={styles.select} value={productData.detail.prfage} onChange={handleChange}>
                                     <option value="">선택해주세요</option>
                                     <option value="전체">전체</option>
                                     <option value="12세 이상">12세 이상</option>
@@ -254,7 +264,7 @@ const ProductRegisterPage: React.FC = () => {
                                     type="string" 
                                     name="runningTime" 
                                     placeholder="ex) 120" 
-                                    value={productData.runningTime} 
+                                    value={productData.detail.runningTime} 
                                     onChange={handleChange} 
                                     suffixText="분"
                                 />
@@ -266,7 +276,7 @@ const ProductRegisterPage: React.FC = () => {
                                         type="string"
                                         name="availableNOP"
                                         placeholder="수용인원을 입력해주세요"
-                                        value={productData.availableNOP}
+                                        value={productData.detail.availableNOP}
                                         onChange={handleChange}
                                         suffixText="명"
                                     />
@@ -278,7 +288,7 @@ const ProductRegisterPage: React.FC = () => {
                                     type="string" 
                                     name="ticketPrice" 
                                     placeholder="선택해주세요" 
-                                    value={productData.ticketPrice} 
+                                    value={productData.detail.ticketPrice} 
                                     onChange={handleChange} 
                                     suffixText="원"
                                 />
@@ -288,7 +298,7 @@ const ProductRegisterPage: React.FC = () => {
                             <div className={styles.formItem}>
                                 <label>10. 출연진</label>
                                 <CastInput
-                                    fcasts={Array.isArray(productData.fcast) ? productData.fcast : []}
+                                    fcasts={Array.isArray(productData.detail.fcast) ? productData.detail.fcast : []}
                                     onAddCast={handleAddCast}
                                     onRemoveCast={handleRemoveCast}
                                 />
@@ -319,7 +329,7 @@ const ProductRegisterPage: React.FC = () => {
                                     type="string" 
                                     name="businessName" 
                                     placeholder="상품명을 입력하세요." 
-                                    value={productData.businessName} 
+                                    value={productData.detail.entrpsnmH} 
                                     onChange={handleChange} 
                                 />
                             </div>
@@ -334,7 +344,7 @@ const ProductRegisterPage: React.FC = () => {
                                         name="posterFile"
                                         onChange={handleFileChange}
                                     />
-                                    {productData.posterFile && <span className={styles.fileName}>{productData.posterFile.name}</span>}
+                                    {posterFile && <span className={styles.fileName}>{posterFile.name}</span>}
                                 </div>
                                 {/* 2. 상세 정보 입력 */}
                                 <div className={styles.fileUploadItem}>
@@ -342,7 +352,7 @@ const ProductRegisterPage: React.FC = () => {
                                     <textarea 
                                         name="story" 
                                         className={styles.textarea} 
-                                        value={productData.story} 
+                                        value={productData.detail.story} 
                                         onChange={handleChange} 
                                     />
                                 </div>
@@ -355,9 +365,9 @@ const ProductRegisterPage: React.FC = () => {
                                         onChange={handleFileChange}
                                         multiple // 삐약! 여러 파일을 받을 수 있게 합니다!
                                     />
-                                    {productData.contentFile.length > 0 && (
+                                    {contentFiles.length > 0 && (
                                         <div className={styles.fileNames}>
-                                            {productData.contentFile.map(file => (
+                                             {contentFiles.map(file => (
                                                 <div key={file.name} className={styles.fileNameWrapper}>
                                                     <span className={styles.fileName}>{file.name}</span>
                                                     {/* 삐약! 삭제 버튼을 추가합니다! */}

@@ -49,10 +49,10 @@ export default defineConfig({
       target: 'http://localhost:8080',
       changeOrigin: true,
     },
-    // '/api/mail': {
-    //   target: 'http://localhost:8080',
-    //   changeOrigin: true,
-    // },
+    '/api/festival': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
     },
   },
 })

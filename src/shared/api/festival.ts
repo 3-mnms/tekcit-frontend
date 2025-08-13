@@ -1,59 +1,54 @@
-import type { ProductType } from '@/models/festival';
-import { dummyProducts } from '@/models/dummy/dummyProducts';
+import type { Festival } from '@/models/festival';
+// import { dummyProducts } from '@/models/dummy/dummyProducts';
 import type { TicketHolderType } from '@/models/User';
-// import axios from 'axios';
+import { api } from '@/models/auth/axios'; 
 
-// 삐약! 1초의 딜레이를 추가해서 로딩 상태를 테스트해볼 수 있어요!
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-export const getProducts = async (hostId?: number): Promise<ProductType[]> => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // 삐약! 만약 hostId가 존재하면 해당 호스트의 상품만 필터링해서 반환합니다!
-    if (hostId) {
-        return dummyProducts.filter(product => product.hostId === hostId);
-    }
-    
-    // 삐약! hostId가 없으면 (admin 역할) 모든 상품을 반환합니다!
-    return dummyProducts;
+export const getProducts = async (): Promise<Festival[]> => {
+    console.log('삐약! 공연 목록을 서버에 요청해요!');
+    const response = await api.get<Festival[]>('/api/festival/manage');
+    return response.data;
 };
 
-export const createProduct = async (newProduct: ProductType): Promise<ProductType> => {
-    // 삐약! 백엔드에 요청을 보내는 대신, 임시로 1초를 기다립니다!
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('삐약! 새로운 상품이 등록되었습니다:', newProduct);
-
-    // 삐약! 실제 API는 백엔드에서 ID를 생성해주지만, 지금은 임시로 부여합니다!
-    const newId = Date.now();
-    const productWithId = { ...newProduct, id: newId };
-    
-    // 삐약! 새로운 상품을 더미 데이터 목록에 추가합니다 (실제로는 이렇게 하지 않아요!)
-    dummyProducts.push(productWithId);
-
-    return productWithId;
+export const createProduct = async (newProduct: Omit<Festival, 'fid'>): Promise<Festival> => {
+    console.log('삐약! 새로운 공연을 서버에 등록해요!', newProduct);
+    const response = await api.post<Festival>('/festival/manage', newProduct);
+    return response.data;
+};
+/**
+ * 공연 수정 (PATCH /api/festival/manage/{productId})
+ * @param fid 수정할 공연의 ID
+ * @param updateData 수정할 공연 데이터
+ */
+export const updateProduct = async (
+    fid: number, 
+    updateData: Partial<Festival>
+): Promise<Festival> => {
+    console.log(`삐약! ${fid}번 공연을 서버에 수정 요청해요!`, updateData);
+    const response = await api.patch<Festival>(`/festival/manage/${fid}`, updateData);
+    return response.data;
 };
 
-// 삐약! 상품을 수정하는 mock API 함수를 추가합니다!
-export const updateProduct = async (updatedProduct: ProductType): Promise<ProductType> => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    console.log('삐약! 상품이 수정되었습니다:', updatedProduct);
-    
-    // 삐약! 실제 API에서는 서버에서 데이터를 업데이트합니다.
-    // 지금은 임시로 더미 데이터에서 찾아서 업데이트하는 로직을 추가합니다.
-    const productIndex = dummyProducts.findIndex(p => p.id === updatedProduct.id);
-    if (productIndex !== -1) {
-        dummyProducts[productIndex] = updatedProduct;
-    }
-
-    return updatedProduct;
+/**
+ * 공연 삭제 (DELETE /api/festival/manage/{productId})
+ * @param fid 삭제할 공연의 ID
+ */
+export const deleteProduct = async (fid: number): Promise<void> => {
+    console.log(`삐약! ${fid}번 공연을 서버에 삭제 요청해요!`);
+    await api.delete(`/festival/manage/${fid}`);
 };
 
-export const getProductDetail = async (productId: number): Promise<ProductType | undefined> => {
-    await sleep(500); // 삐약! 0.5초 대기!
-    const product = dummyProducts.find(p => p.id === productId);
-    return product;
+/**
+ * (추측) 공연 상세 정보 조회 (GET /api/festival/{productId})
+ * @param fid 조회할 공연의 ID
+ */
+export const getProductDetail = async (fid: number): Promise<Festival> => {
+    console.log(`삐약! ${fid}번 공연 상세 정보를 서버에 요청해요!`);
+    const response = await api.get<Festival>(`/festival/${fid}`);
+    return response.data;
 };
 
+
+// 목데이터
 const mockAttendees: TicketHolderType[] = [
     { id: 1, userid: 'user123', festival_id: 1, name: '김철수', maxPurchase: 2, delivery_method: 'QR', address: '서울시 강남구', festival_date: '2025-08-20', phone: '010-1234-5678', reservation_number: 'R123456' },
     { id: 2, userid: 'user456', festival_id: 1, name: '이영희', maxPurchase: 1, delivery_method: '티켓', address: '부산시 해운대구', festival_date: '2025-08-21', phone: '010-9876-5432', reservation_number: 'R654321' },
@@ -65,15 +60,4 @@ export const getAttendeesByFestivalId = async (festivalId: number): Promise<Tick
     await new Promise(resolve => setTimeout(resolve, 500)); 
     // 삐약! festivalId에 따라 데이터를 필터링하도록 로직을 추가합니다!
     return mockAttendees.filter(attendee => attendee.festival_id === festivalId);
-};
-
-export const deleteProduct = async (id: number): Promise<void> => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    console.log(`삐약! ${id}번 상품이 삭제되었습니다.`);
-    
-    // 삐약! 임시로 더미 데이터에서 해당 상품을 삭제합니다!
-    const index = dummyProducts.findIndex(p => p.id === id);
-    if (index > -1) {
-        dummyProducts.splice(index, 1);
-    }
 };

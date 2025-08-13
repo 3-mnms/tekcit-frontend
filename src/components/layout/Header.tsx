@@ -9,7 +9,7 @@ type JwtPayload = {
   name: string;
   userId: number;
   role: JwtRole;
-  exp?: number;
+  exp?: number; // seconds
   iat?: number;
 };
 

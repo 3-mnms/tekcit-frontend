@@ -7,7 +7,7 @@ export const dummyProducts: ProductType[] = [
         fname: '뮤지컬 갈라 콘서트',
         fcast: ["카이", "조규현", "최재림"],
         businessName: 'yg',
-        genrenm: '뮤지컬',
+        genrenm: '뮤지컬/연극',
         fage: '전체',
         fcltynm: '세종문화회관',
         faddress: '서울시 종로구',
