@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import styles from "./Header.module.css";
 import logo from "@shared/assets/logo.png";
 import { IoLogOutOutline } from "react-icons/io5";
@@ -10,7 +9,7 @@ type JwtPayload = {
   name: string;
   userId: number;
   role: JwtRole;
-  exp?: number; // seconds
+  exp?: number;
   iat?: number;
 };
 
@@ -79,7 +78,6 @@ const Header: React.FC<HeaderProps> = ({ userName, onLogout, ...props }) => {
   const initialLeft = useMemo(() => getUiRemaining(), []);
 
   const [timeLeft, setTimeLeft] = useState(initialLeft);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -121,8 +119,7 @@ const Header: React.FC<HeaderProps> = ({ userName, onLogout, ...props }) => {
       const current = readCookie("accessToken");
       if (!current) throw new Error("no token");
       setCookie("accessToken", decodeURIComponent(current), { maxAgeSec: 60 * 60 });
-      const left = remainingSecondsFromToken(current);
-      setTimeLeft(left ?? 3600);
+      setTimeLeft(MAX_UI_SEC);
     } catch {
       alert("세션 연장에 실패했습니다. 다시 로그인 해주세요.");
       handleLogout();

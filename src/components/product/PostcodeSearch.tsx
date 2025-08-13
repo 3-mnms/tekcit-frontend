@@ -3,6 +3,7 @@ import { useDaumPostcodePopup } from 'react-daum-postcode';
 import styles from './PostcodeSearch.module.css';
 import Button from '@components/common/Button';
 
+
 // 삐약! Daum Postcode API의 Address 타입을 직접 정의합니다!
 interface DaumAddress {
     address: string;
@@ -13,11 +14,10 @@ interface DaumAddress {
 }
 
 interface PostcodeSearchProps {
-    label: string;
     onComplete: (address: string) => void;
 }
 
-const PostcodeSearch: React.FC<PostcodeSearchProps> = ({ label, onComplete }) => {
+const PostcodeSearch: React.FC<PostcodeSearchProps> = ({ onComplete }) => {
     const scriptUrl = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
     const open = useDaumPostcodePopup(scriptUrl);
     const [address, setAddress] = useState('');
@@ -47,8 +47,7 @@ const PostcodeSearch: React.FC<PostcodeSearchProps> = ({ label, onComplete }) =>
 
     return (
         <div className={styles.postcodeSearchGroup}>
-            <label className={styles.label}>{label}</label>
-            <div className={styles.inputWrapper}>
+            <div className={styles.inputGroup}>
                 <input
                     className={styles.input}
                     type="text"
@@ -56,7 +55,7 @@ const PostcodeSearch: React.FC<PostcodeSearchProps> = ({ label, onComplete }) =>
                     readOnly
                     placeholder="주소를 검색해주세요"
                 />
-                <Button onClick={handleClick} className={styles.searchButton}> 주소 검색</Button>
+                <Button variant="secondary" onClick={handleClick} className="whitespace-nowrap"> 주소 검색</Button>
             </div>
         </div>
     );

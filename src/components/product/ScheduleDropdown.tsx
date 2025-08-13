@@ -55,7 +55,7 @@ const ScheduleDropdown: React.FC<ScheduleDropdownProps> = ({ schedules, onAddSch
                         </option>
                     ))}
                 </select>
-                <Button type="button" onClick={handleAdd} className={styles.addButton}>추가</Button>
+                <Button variant="secondary" onClick={handleAdd} className="whitespace-nowrap">추가</Button>
             </div>
 
             {schedules.length > 0 && (

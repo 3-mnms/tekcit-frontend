@@ -51,7 +51,7 @@ const TicketHolderListPage: React.FC = () => {
     }
 
     return (
-        <Layout subTitle={`예매자 명단 (${festivalId ? festivalId : '...'})`}>
+        <Layout subTitle={`예매자 명단`}>
             <div className={styles.container}>
                 <Table<TicketHolderType> columns={columns} data={attendees} />
                 <div className={styles.buttonWrapper}>

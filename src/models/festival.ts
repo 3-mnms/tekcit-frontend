@@ -3,12 +3,13 @@ export interface FestivalScheduleDTO {
     time: string;
 }
 
+export type Genrenm =  '대중음악' | '무용' | '뮤지컬/연극' | '클래식/국악' | '서커스/마술' | '복합'
 export interface ProductType {
     id: number;
     fname: string; // 페스티벌 이름
     fcast: string[]; // 출연진
     businessName: string; // 사업자명
-    genrenm: string; // 장르
+    genrenm: Genrenm; // 장르
     fage: string; // 관람 연령
     fcltynm: string; // 공연장
     faddress: string; // 공연장 주소

@@ -7,7 +7,7 @@ const StatisticsPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   return (
-    <Layout subTitle="공지사항 목록"> 
+    <Layout subTitle="통계 조회"> 
       <div className={styles.container}>
         <h1 className={styles.title}>삐약! 통계 조회</h1>
         <p>상품 ID: {id}에 대한 통계 정보가 여기에 표시될 예정입니다.</p>

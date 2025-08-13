@@ -168,8 +168,8 @@ const ProductRegisterPage: React.FC = () => {
                     <div className={styles.formSection}>
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
+                                <label>1. 상품명</label>
                                 <Input 
-                                    label="1. 상품명" 
                                     type="string" 
                                     name="fname" 
                                     placeholder="상품명을 입력하세요." 
@@ -203,8 +203,8 @@ const ProductRegisterPage: React.FC = () => {
                         </div>
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
+                                <label>4. 공연장</label>
                                 <Input 
-                                    label="4. 공연장" 
                                     type="string" 
                                     name="fcltynm" 
                                     placeholder="공연장을 작성해주세요" 
@@ -213,28 +213,28 @@ const ProductRegisterPage: React.FC = () => {
                                 />
                             </div>
                             <div className={styles.formItem}>
+                                <label>공연장 주소</label>
                                 <PostcodeSearch 
-                                    label="공연장 주소"
                                     onComplete={handleAddressComplete}
                                 />
                             </div>
                         </div>
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
+                                <label>5. 공연 시작일</label>
                                 <DatePicker 
-                                    label="5. 공연 시작일" 
                                     name="fdto" 
                                     value={productData.fdto} 
                                     onChange={handleChange} 
                                 />
                             </div>
                             <div className={styles.formItem}>
-                                    <DatePicker 
-                                        label="종료일" 
-                                        name="fdfrom" 
-                                        value={productData.fdfrom} 
-                                        onChange={handleChange} 
-                                    />
+                                <label>종료일</label>
+                                <DatePicker 
+                                    name="fdfrom" 
+                                    value={productData.fdfrom} 
+                                    onChange={handleChange} 
+                                />
                             </div>
                         </div>
                         <div className={styles.formRow}>
@@ -249,40 +249,42 @@ const ProductRegisterPage: React.FC = () => {
                         </div>
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
+                                <label>7. 러닝 타임</label>
                                 <Input 
-                                    label="7. 러닝 타임" 
                                     type="string" 
                                     name="runningTime" 
-                                    placeholder="ex) 120분" 
+                                    placeholder="ex) 120" 
                                     value={productData.runningTime} 
                                     onChange={handleChange} 
+                                    suffixText="분"
                                 />
                             </div>
                             <div className={styles.formItem}>
                                 <div className={styles.formItem}>
+                                    <label>8. 수용인원</label>
                                     <Input
-                                        label="8. 수용인원"
                                         type="string"
                                         name="availableNOP"
                                         placeholder="수용인원을 입력해주세요"
                                         value={productData.availableNOP}
                                         onChange={handleChange}
+                                        suffixText="명"
                                     />
-                                    <p className={styles.unit}>명</p>
                                 </div>
                             </div>
-                        </div>
-                        <div className={styles.formRow}>
                             <div className={styles.formItem}>
+                                <label>9. 가격</label>
                                 <Input 
-                                    label="9. 가격" 
                                     type="string" 
                                     name="ticketPrice" 
                                     placeholder="선택해주세요" 
                                     value={productData.ticketPrice} 
                                     onChange={handleChange} 
-                                /><p className={styles.unit}>원</p>
+                                    suffixText="원"
+                                />
                             </div>
+                        </div>
+                        <div className={styles.formRow}>
                             <div className={styles.formItem}>
                                 <label>10. 출연진</label>
                                 <CastInput
@@ -311,10 +313,9 @@ const ProductRegisterPage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className={styles.formRow}>
                             <div className={styles.formItem}>
+                                <label>13. 사업자명</label>
                                 <Input 
-                                    label="13. 사업자명" 
                                     type="string" 
                                     name="businessName" 
                                     placeholder="상품명을 입력하세요." 
@@ -322,6 +323,7 @@ const ProductRegisterPage: React.FC = () => {
                                     onChange={handleChange} 
                                 />
                             </div>
+                        <div className={styles.formRow}>
                         </div>
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>

@@ -1,7 +1,6 @@
 // src/components/product/CastInput.tsx
 
 import React, { useState } from 'react';
-import Button from '@/components/common/Button';
 import styles from './CastInput.module.css';
 
 interface CastInputProps {
@@ -42,7 +41,6 @@ const CastInput: React.FC<CastInputProps> = ({ fcasts, onAddCast, onRemoveCast }
                     onKeyDown={handleKeyDown}
                     placeholder="출연진 이름을 입력하고 Enter를 누르세요."
                 />
-                <Button onClick={handleAddCast}>추가</Button>
             </div>
             <div className={styles.castTagsContainer}>
                 {fcasts.map((castMember, index) => (

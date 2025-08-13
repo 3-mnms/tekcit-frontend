@@ -1,9 +1,6 @@
-.label {
-    display: block;
-    font-weight: bold;
-    font-size: 0.8rem;
-    color: #555;
-    margin-bottom: 0.5rem;
+.inputGroup{
+    display: flex;
+    align-items: center;
 }
 
 .input {
@@ -18,4 +15,11 @@
 .input:focus {
     border-color: #4d9afd;
     outline: none;
+}
+
+.suffix {
+    margin-left: 0.5rem;
+    font-size: 0.7rem;
+    color: #555;
+    white-space: nowrap;
 }

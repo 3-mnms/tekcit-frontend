@@ -37,12 +37,10 @@ export interface UserProfile{
 }
 
 export interface HostProfile{
-    genre: Genre;
     businessName: string;
     isActive: boolean; 
 }
 
-export type Genre = '뮤지컬' | '대중음악' | '연극' | '한국음악' | '서양음악';
 
 export interface TicketHolderType {
     id: number; 

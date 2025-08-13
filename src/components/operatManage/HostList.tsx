@@ -18,7 +18,6 @@ const HostList: React.FC<HostListProps > = ({ users, onToggleStatus }) => {
         { columnId: 'loginId', label: '아이디' },
         { columnId: 'phone', label: '전화번호' },
         { columnId: 'email', label: '이메일' },
-        { columnId: 'hostProfile.genre', label: '장르', render: (user) => user.hostProfile?.genre },
         { columnId: 'hostProfile.businessName', label: '사업자명', render: (user) => user.hostProfile?.businessName },
         { columnId: 'loginPw', label: '비밀번호', render: (user) => (
             user.loginPw ? `${user.loginPw.substring(0, 3)}****` : '********'
