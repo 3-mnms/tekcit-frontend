@@ -69,6 +69,7 @@
   flex: 0 0 calc(100% / 5 - 1rem);
   max-width: 180px;
   text-align: center;
+  cursor: pointer;
 }
 
 @media (max-width: 1280px) {

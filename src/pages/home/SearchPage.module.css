@@ -3,6 +3,11 @@ html, body, #root {
   min-height: 100%;
 }
 
+:root {
+  --header-height: 72px; /* 헤더가 fixed/sticky면 72px, 아니면 0으로 */
+}
+
+/* 컨테이너 */
 .page {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr); /* 오른쪽 칼럼 줄바꿈 방지 */
@@ -14,29 +19,33 @@ html, body, #root {
   padding: 24px 40px;
 }
 
-/* Header는 .page 바깥! → 아래 두 줄만 남기면 됨 */
-.page > :first-child {
-  grid-column: 1;          /* Filter = 왼쪽 칼럼 */
-  position: sticky;        /* 선택사항: 고정하고 싶을 때 */
-  top: 72px;
+/* 왼쪽: 필터 컬럼 (데스크톱에서만 보임) */
+.filterCol {
+  grid-column: 1;
+  position: sticky;
+  top: var(--header-height);
   align-self: start;
 }
 
-.page > :last-child {
-  grid-column: 2;          /* Result = 오른쪽 칼럼 */
-  min-width: 0;            /* 내부 그리드가 제대로 줄도록 */
+/* 오른쪽: 결과 컬럼 */
+.resultsCol {
+  grid-column: 2;
+  min-width: 0; /* 내부 그리드가 제대로 줄도록 */
 }
 
-/* 모바일 */
-@media (max-width: 900px) {
+/* 모바일: 필터 숨기고 결과만 1열 */
+@media (max-width: 1010px) {
   .page {
     grid-template-columns: 1fr;
     gap: 16px;
     padding: 12px 20px;
   }
-  .page > :first-child,
-  .page > :last-child {
+
+  .filterCol {
+    display: none;      /* ✅ 필터 숨김 */
+  }
+
+  .resultsCol {
     grid-column: 1;
-    position: static;
   }
 }

@@ -9,28 +9,23 @@ import { useAuthStore } from '@shared/storage/useAuthStore'
 import UserDropdown from '@/pages/my/dropdown/UserDropdown'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 
-interface HeaderProps {
-  onSearch: (keyword: string) => void
-}
+const CATEGORY_ORDER = ['무용', '대중음악', '뮤지컬/연극', '복합', '클래식/국악', '서커스/마술']
 
-const CATEGORY_ORDER = ['무용', '대중음악', '뮤지컬/연극', '복합', '클래식/국악', '서커스/미술']
-
-// ✅ 한글 ↔ 영어 매핑
+// ✅ 한글 ↔ 영어 매핑 (라우트용)
 const categoryMap: Record<string, string> = {
   무용: 'dance',
   대중음악: 'pop',
   '뮤지컬/연극': 'theater',
   복합: 'mix',
   '클래식/국악': 'classic',
-  '서커스/미술': 'art',
+  '서커스/마술': 'magic',
 }
 
-const Header: React.FC<HeaderProps> = ({ onSearch }) => {
+const Header: React.FC = () => {
   const navigate = useNavigate()
   const [keyword, setKeyword] = React.useState('')
 
   const { isLoggedIn, user } = useAuthStore()
-  console.log('Current user object:', user)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -44,10 +39,11 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // ✅ 헤더가 직접 라우팅
   const handleSearch = () => {
-    if (keyword.trim()) {
-      onSearch(keyword.trim())
-    }
+    const q = keyword.trim()
+    if (!q) return
+    navigate(`/search?keyword=${encodeURIComponent(q)}&page=1`)
   }
 
   const { data: categories } = useQuery({
@@ -66,9 +62,11 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
       } else if (['뮤지컬', '연극'].includes(category)) {
         grouped.add('뮤지컬/연극')
       } else if (['서양음악(클래식)', '한국음악(국악)'].includes(category)) {
-        grouped.add('클래식/전통음악')
-      } else {
-        grouped.add(category)
+        grouped.add('클래식/국악')
+      } else if (['서커스/마술', '미술'].includes(category)) {
+        grouped.add('서커스/마술')
+      } else if (category === '복합') {
+        grouped.add('복합')
       }
     })
 
@@ -78,9 +76,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
   const groupedCategories = categories ? groupCategories(categories) : []
 
   const getRoleDisplayName = () => {
-    if (!user) {
-      return '사용자'
-    }
+    if (!user) return '사용자'
     switch (user.role) {
       case 'USER':
         return `${user.name} 님`
@@ -128,11 +124,10 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
               if (e.key === 'Enter') handleSearch()
             }}
           />
-          <i
-            className="fa-solid fa-magnifying-glass"
-            onClick={handleSearch}
-            style={{ cursor: 'pointer' }}
-          />
+          {/* 클릭 영역/접근성 위해 button 사용 */}
+          <button type="button" onClick={handleSearch} className={styles.searchButton}>
+            <i className="fa-solid fa-magnifying-glass" />
+          </button>
         </div>
       </div>
 

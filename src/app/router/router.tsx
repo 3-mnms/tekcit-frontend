@@ -49,10 +49,14 @@ import ChargeFailPage from '@/pages/payment/pay/ChargeFailPage'
 import SearchPage from '@/pages/home/SearchPage';
 
 export const router = createBrowserRouter([
-  { path: '/', element: <SearchPage /> },
+  { path: '/', element: <HomePage /> },
   {
     path: '/category/:name',
     element: <CategoryPage />,
+  },
+  {
+    path: '/search',
+    element: <SearchPage />,
   },
   { path: '/login', element: <LoginPage /> },
   { path: '/signup', element: <SignupPage /> },

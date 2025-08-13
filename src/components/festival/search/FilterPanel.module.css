@@ -5,10 +5,13 @@
   --chip-bg: #f4f7ff;
   --chip-border: #d6e2ff;
   --chip-active-bg: #e6efff;
-  --brand: #3b82f6;
+  --brand: #4d9afd;
+  --header-height: 72px;
 }
 
+/* === 필터 카드: 화면 상단 고정 === */
 .wrap {
+  position: sticky;
   width: 100%;
   background: #fff;
   border: 1px solid var(--border);
@@ -17,25 +20,13 @@
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
-.title {
-  font-weight: 700;
-  font-size: 16px;
-  margin-bottom: 8px;
-  color: var(--text);
-}
-
+/* 기본 UI */
+.title { font-weight: 700; font-size: 16px; margin-bottom: 8px; color: var(--text); }
 .section { padding: 12px 0; }
 .divider { height: 1px; background: var(--border); margin: 8px 0; }
-
-.labelRow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-}
+.labelRow { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
 .label { font-weight: 600; color: var(--text); }
 .helper { font-size: 12px; color: var(--muted); }
-
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .chip {
@@ -47,115 +38,86 @@
   color: var(--text);
   cursor: pointer;
 }
-.chipActive {
-  background: var(--chip-active-bg);
-  border-color: var(--brand);
-  color: var(--brand);
-}
+.chipActive { background: var(--chip-active-bg); border-color: var(--brand); color: var(--brand); }
 
 /* 캘린더 카드 */
-.calendarCard {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 12px;
-}
+.calendarCard { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
 .calHeader {
   display: grid;
-  grid-template-columns: 32px 1fr 32px; /* 좌 화살표 | 제목 | 우 화살표 */
+  grid-template-columns: 32px 1fr 32px;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
 }
-.calHeader strong {
-  justify-self: center;   /* 그리드 셀 안에서 가운데 */
-  text-align: center;     /* 텍스트 가운데 */
-}
-.navBtn {
-  width: 32px; height: 32px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: #fff;
-  cursor: pointer;
-}
-.weekRow {
-  display: grid; grid-template-columns: repeat(7, 1fr);
-  font-size: 12px; color: var(--muted);
-  text-align: center; padding: 6px 0;
-}
-.daysGrid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-}
+.calHeader strong { justify-self: center; text-align: center; }
+.navBtn { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px; background: #fff; cursor: pointer; }
+.weekRow { display: grid; grid-template-columns: repeat(7, 1fr); font-size: 12px; color: var(--muted); text-align: center; padding: 6px 0; }
+.daysGrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
 
+/* 날짜 버튼 기본 */
 .dayBtn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
   height: 36px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;          /* ← 수정 */
-  font-size: 12px;
-  cursor: pointer;
+  border: 1px solid transparent; border-radius: 8px;
+  background: transparent;
+  font-size: 12px; cursor: pointer;
 }
-
 .dayBtn:hover { background: #f8fafc; border-color: var(--border); }
-
 .dayNum { line-height: 1; }
+.todayTag { font-size: 9px; line-height: 1; color: var(--brand); display: block; }
 
-.todayTag {
-  font-size: 9px;
-  line-height: 1;
-  color: var(--brand);
-  display: block;
-}
-
-/* 과거 날짜: 글자만 회색, 배경/테두리 없음 + 클릭 불가 */
+/* 과거 날짜 비활성 */
 .dayBtn:disabled,
 .dayBtnDisabled {
-  color: #cbd5e1 !important;        /* 연회색 글자 */
-  background: transparent !important; /* ← pill 제거 */
+  color: #cbd5e1 !important;
+  background: transparent !important;
   border-color: transparent !important;
   cursor: default;
-  pointer-events: none;             /* hover도 막기 */
+  pointer-events: none;
 }
 
-/* 선택된 날짜 강조(유지) */
-.daySelected {
+/* === 기간 선택 하이라이트 === */
+.dayInRange {
+  background: #f0f6ff;               /* 사이 구간 연한 배경 */
+  border-color: var(--chip-border);
+}
+
+.dayStart,
+.dayEnd {
+  background: var(--chip-active-bg);  /* 시작/끝 포인트 강조 */
   border-color: var(--brand);
-  background: transparent;          /* 테두리만 보이게 */
   color: var(--brand);
   font-weight: 700;
 }
 
-/* 액션 버튼 */
+/* (이전 단일 선택 잔재 – 안 써도 무방) */
+.daySelected {
+  border-color: var(--brand);
+  background: transparent;
+  color: var(--brand);
+  font-weight: 700;
+}
+
+/* 하단 액션바(항상 보이게) */
 .actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background: #fff;
+  padding: 12px 16px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: 12px;
 }
-.btnGhost {
-  height: 40px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: #fff;
-  font-weight: 600;
-}
-.btnPrimary {
-  height: 40px;
-  border-radius: 10px;
-  border: 1px solid #316eea;
-  background: #316eea;
-  color: #fff;
-  font-weight: 700;
-}
 
-/* 반응형 */
+.btnGhost { height: 40px; border-radius: 10px; border: 1px solid var(--border); background: #fff; font-weight: 600; }
+.btnPrimary { height: 40px; border-radius: 10px; border: 1px solid #4D9AFD; background: #4D9AFD; color: #fff; font-weight: 700; }
+
+/* 모바일 */
 @media (max-width: 900px) {
-  .wrap { border-radius: 12px; }
+  .wrap { 
+    top: 0;
+    border-radius: 12px; 
+  }
 }

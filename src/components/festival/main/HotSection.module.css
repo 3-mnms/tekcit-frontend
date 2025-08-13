@@ -30,6 +30,7 @@
   max-width: 220px; /* 카드의 최대 너비 */
   min-width: 160px; /* 카드의 최소 너비 */
   flex: 1 1 auto;
+  cursor: pointer;
 }
 
 .imageWrapper {
@@ -41,7 +42,6 @@
   overflow: hidden;
   background-color: #eee;
   margin: 0 auto; /* 가운데 정렬 */
-  cursor: pointer;
 }
 
 .image {
