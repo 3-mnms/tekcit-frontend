@@ -2,7 +2,7 @@ import { createBrowserRouter } from 'react-router-dom'
 
 // mainpage
 import HomePage from '@pages/home/MainPage'
-import CategoryPage from '@pages/home/CategoryPage';
+import CategoryPage from '@pages/home/CategoryPage'
 import FestivalDetailPage from '@pages/festival-detail/FestivalDetailPage'
 
 //auth
@@ -11,6 +11,8 @@ import SignupPage from '@/pages/auth/SignupPage'
 import FindIdPage from '@/pages/auth/find/FindIdPage'
 import FindPasswordPage from '@/pages/auth/find/FindPasswordPage'
 import ResetPasswordPage from '@/pages/auth/find/ResetPasswordPage'
+import KakaoSignupPage from '@/pages/auth/KakaoSignupPage'
+import KakaoAuthorizeGate from '@/components/auth/signup/KakaoAuthorizeGate'
 
 // mypage
 import MyPage from '@/pages/my/MyPage'
@@ -54,7 +56,12 @@ export const router = createBrowserRouter([
     element: <CategoryPage />,
   },
   { path: '/login', element: <LoginPage /> },
-  { path: '/signup', element: <SignupPage /> },
+  { path: '/auth/signup', element: <SignupPage /> },
+  {
+    path: '/auth/signup/kakao',
+    element: <KakaoAuthorizeGate />, // provider 검사 + 가드
+    children: [{ index: true, element: <KakaoSignupPage /> }],
+  },
   { path: '/find-id', element: <FindIdPage /> },
   { path: '/find-password', element: <FindPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
