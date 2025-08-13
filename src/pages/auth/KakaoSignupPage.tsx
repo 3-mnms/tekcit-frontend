@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import Logo from '@assets/logo.png'
-import styles from './SignupPage.module.css'         
+import styles from './SignupPage.module.css'
 import ProgressBar from '@/components/auth/signup/ProgressBar'
 import AddressSearchModal from '@/components/auth/signup/AddressSearchModal'
 
@@ -12,16 +12,7 @@ import KakaoPopupBridge from '@/components/auth/login/KakaoPopupBridge'
 
 import type { Step2, Step3 } from '@/models/auth/schema/signupSchema'
 import { useKakaoSignupMutation } from '@/models/auth/tanstack-query/useKakaoSignup'
-
-type KakaoSignupDTO = {
-  name: string
-  phone: string
-  userProfile?: {
-    zipcode?: string
-    address1?: string
-    address2?: string
-  }
-}
+import type { KakaoSignupDTO } from '@/models/auth/schema/kakaoSignupSchema';
 
 const KakaoSignupPage: React.FC = () => {
   const navigate = useNavigate()
@@ -38,17 +29,14 @@ const KakaoSignupPage: React.FC = () => {
   const [acc3, setAcc3] = useState<Partial<Step3>>({})
 
   const [step, setStep] = useState<2 | 3>(2)
-  const progress = step === 2 ? 0 : 100                  
+  const progress = step === 2 ? 50 : 100
 
   const [showModal, setShowModal] = useState(false)
   const openAddress = useCallback(() => setShowModal(true), [])
-  const handleAddressComplete = useCallback(
-    (payload: { zipCode: string; address: string }) => {
-      setAcc3((s) => ({ ...s, zipCode: payload.zipCode, address: payload.address }))
-      setShowModal(false)
-    },
-    []
-  )
+  const handleAddressComplete = useCallback((payload: { zipCode: string; address: string }) => {
+    setAcc3((s) => ({ ...s, zipCode: payload.zipCode, address: payload.address }))
+    setShowModal(false)
+  }, [])
 
   const signupMut = useKakaoSignupMutation()
 
@@ -57,17 +45,39 @@ const KakaoSignupPage: React.FC = () => {
   const goPrevFromStep3 = useCallback(() => setStep(2), [])
 
   const handleStep3Next = useCallback(() => {
+    const rrnFront = acc2.rrnFront || ''
+    const rrnBackFirst = acc2.rrnBackFirst || ''
+    const residentNum = `${rrnFront}-${rrnBackFirst}`
+
+    // 프론트 1차 검증 (서버도 검증)
+    if (!/^\d{6}-[1-4]$/.test(residentNum)) {
+      alert('주민번호 형식이 올바르지 않습니다. 예: 990101-1')
+      return
+    }
+
+    const mergedAddress = [acc3.address || '', acc3.detailAddress || '']
+      .filter(Boolean)
+      .join(' ')
+      .trim()
+
     const body: KakaoSignupDTO = {
       name: acc2.name ?? '',
       phone: acc2.phone ?? '',
       userProfile: {
-        zipcode: acc3.zipCode || undefined,
-        address1: acc3.address || undefined,
-        address2: acc3.detailAddress || undefined,
+        residentNum,
+        address: mergedAddress,
+        zipCode: acc3.zipCode || '',
       },
     }
+
     signupMut.mutate(body, {
-      onSuccess: () => navigate('/login', { replace: true }),
+      onSuccess: () => {
+        alert('카카오 회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.')
+        navigate('/login', { replace: true })
+      },
+      onError: (err) => {
+        alert((err as Error)?.message || '회원가입에 실패했어요.')
+      },
     })
   }, [acc2, acc3, signupMut, navigate])
 
@@ -97,7 +107,7 @@ const KakaoSignupPage: React.FC = () => {
               onPrev={goPrevFromStep3}
               onNext={handleStep3Next}
               updateAcc={(p) => setAcc3((s) => ({ ...s, ...p }))}
-              openAddress={openAddress}            
+              openAddress={openAddress}
             />
 
             {signupMut.isError && (

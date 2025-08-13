@@ -22,11 +22,9 @@ export type KakaoStep3 = z.infer<typeof kakaoStep3Schema>;
 export interface KakaoSignupDTO {
   name: string;
   phone: string;
-  userProfile?: {
-    birthDate?: string;
-    gender?: 'MALE' | 'FEMALE' | 'OTHER';
-    zipcode?: string;
-    address1?: string;
-    address2?: string;
+  userProfile: {
+    residentNum: string; 
+    address: string;   
+    zipCode: string;
   };
 }

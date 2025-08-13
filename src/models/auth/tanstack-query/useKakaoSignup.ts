@@ -15,9 +15,18 @@ interface KakaoErrorResponse {
 export function useKakaoSignupMutation():
   UseMutationResult<unknown, AxiosError<KakaoErrorResponse>, KakaoSignupDTO> {
   return useMutation<unknown, AxiosError<KakaoErrorResponse>, KakaoSignupDTO>({
-    mutationFn: async (body) => {
-      const res = await kakaoApi.post<unknown>('/api/auth/kakao/signupUser', body);
-      return res.data;
+    mutationFn: async (body: KakaoSignupDTO) => {
+      const res = await fetch('http://localhost:8080/api/auth/kakao/signupUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const msg = await res.text().catch(() => '');
+        throw new Error(msg || `HTTP ${res.status}`);
+      }
+      return res.json(); // UserResponseDTO
     },
     onError: (err) => {
       const data = err.response?.data;
