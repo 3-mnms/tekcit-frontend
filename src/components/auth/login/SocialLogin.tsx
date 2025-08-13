@@ -1,4 +1,3 @@
-// SocialLogin.tsx
 import React, { useEffect, useRef } from "react";
 import styles from "./SocialLogin.module.css";
 import KaKao from "@assets/kakao.png";
@@ -13,20 +12,37 @@ const SocialLogin: React.FC = () => {
 
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
-      // 보안: 동일 오리진만 처리
       if (e.origin !== window.location.origin) return;
-      if (!e.data || e.data.type !== "kakao-auth") return;
+      if (!e.data) return;
 
-      // 결과에 따라 라우팅
-      if (e.data.status === "existing") {
-        navigate("/login", { replace: true });
-      } else if (e.data.status === "new") {
-        navigate("/auth/signup/kakao?provider=kakao", { replace: true });
+      if (e.data.type === "kakao-auth") {
+        const { status, ready } = e.data as { status: "existing" | "new"; ready?: boolean };
+
+        if (status === "existing" && ready) {
+          navigate("/login", { replace: true });
+          try { popupRef.current?.close(); } catch {}
+          if (pollTimer.current) window.clearInterval(pollTimer.current);
+          return;
+        }
+
+        if (status === "new" && ready) {
+          navigate("/auth/signup/kakao?provider=kakao", { replace: true });
+          try { popupRef.current?.close(); } catch {}
+          if (pollTimer.current) window.clearInterval(pollTimer.current);
+          return;
+        }
       }
 
-      // 팝업 정리
-      if (popupRef.current && !popupRef.current.closed) popupRef.current.close();
-      if (pollTimer.current) window.clearInterval(pollTimer.current);
+      if (e.data.type === "kakao-signup-result") {
+        const { ok, error } = e.data as { ok: boolean; error?: string };
+        if (ok) {
+          navigate("/login", { replace: true });
+        } else {
+          alert(error || "카카오 회원가입 실패");
+        }
+        try { popupRef.current?.close(); } catch {}
+        if (pollTimer.current) window.clearInterval(pollTimer.current);
+      }
     };
 
     window.addEventListener("message", onMessage);
@@ -45,13 +61,11 @@ const SocialLogin: React.FC = () => {
       `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`
     );
 
-    // 팝업이 차단되면 새창 이동으로 폴백
     if (!popupRef.current) {
       window.location.href = "/api/auth/kakao/authorize";
       return;
     }
 
-    // 사용자가 팝업 닫았는지 감시 (메시지 못받고 종료될 때 대비)
     pollTimer.current = window.setInterval(() => {
       if (!popupRef.current || popupRef.current.closed) {
         window.clearInterval(pollTimer.current!);

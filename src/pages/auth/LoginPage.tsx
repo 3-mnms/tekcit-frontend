@@ -109,7 +109,7 @@ const LoginPage: React.FC = () => {
         <div className={styles.divider} />
         <p className={styles.notMemberText}>아직 회원이 아니신가요?</p>
 
-        <Link to="/signup" className="w-full">
+        <Link to="/auth/signup" className="w-full">
           <Button className="w-full h-12">회원가입 하기</Button>
         </Link>
       </div>

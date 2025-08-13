@@ -1,15 +1,34 @@
 // src/models/auth/tanstack-query/useKakaoSignup.ts
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, type UseMutationResult } from '@tanstack/react-query';
 import type { KakaoSignupDTO } from '@/models/auth/schema/kakaoSignupSchema';
-import { api } from '@/shared/api/axios'; // axios 인스턴스(쿠키 포함 설정)
+import { kakaoApi } from '@/shared/api/axios';
+import type { AxiosError } from 'axios';
 
-export function useKakaoSignupMutation() {
-  return useMutation({
-    mutationFn: async (body: KakaoSignupDTO) => {
-      const res = await api.post('/api/auth/kakao/signupUser', body, {
-        // HttpOnly 쿠키 자동 첨부되도록 axios에 withCredentials:true 사전 설정 필수!
-      });
-      return res.data; // UserResponseDTO
+interface KakaoErrorResponse {
+  errorCode?: string;
+  errorMessage?: string;
+  message?: string;
+  error?: string;
+  success?: boolean;
+}
+
+export function useKakaoSignupMutation():
+  UseMutationResult<unknown, AxiosError<KakaoErrorResponse>, KakaoSignupDTO> {
+  return useMutation<unknown, AxiosError<KakaoErrorResponse>, KakaoSignupDTO>({
+    mutationFn: async (body) => {
+      const res = await kakaoApi.post<unknown>('/api/auth/kakao/signupUser', body);
+      return res.data;
+    },
+    onError: (err) => {
+      const data = err.response?.data;
+      const msg =
+        data?.errorMessage ??
+        data?.message ??
+        data?.error ??
+        err.message ??
+        '요청이 올바르지 않아요';
+      console.error('[KakaoSignup] error:', err.response ?? err);
+      alert(msg);
     },
   });
 }
