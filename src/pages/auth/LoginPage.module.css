@@ -7,9 +7,8 @@
   padding: 1rem;
 }
 
-
 .card {
-  width: 50%;
+  width: 480px;
   background-color: white;
   padding: 2.5rem;
   display: flex;

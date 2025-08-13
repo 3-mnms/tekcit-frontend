@@ -1,6 +1,8 @@
+// AddressForm.tsx
 import React, { useState } from 'react'
 import Button from '@/components/common/button/Button'
 import FormInput from '@/components/common/input/Input'
+import AddressSearchModal from '@/components/auth/signup/AddressSearchModal'
 import styles from './AddressForm.module.css'
 
 const AddressForm: React.FC = () => {
@@ -10,22 +12,9 @@ const AddressForm: React.FC = () => {
   const [addressDetail, setAddressDetail] = useState('')
   const [phone, setPhone] = useState('')
   const [isDefault, setIsDefault] = useState(false)
+  const [openPostcode, setOpenPostcode] = useState(false)
 
-  const handleSearchAddress = () => {
-    new window.daum.Postcode({
-      oncomplete: function (data: {
-        address: string
-        addressType?: string
-        bname?: string
-        buildingName?: string
-        zonecode?: string
-        [key: string]: unknown
-      }) {
-        setZonecode(data.zonecode || '')
-        setAddress(data.address || '')
-      },
-    }).open()
-  }
+  const handleSearchAddress = () => setOpenPostcode(true)
 
   return (
     <div className={styles.form}>
@@ -35,19 +24,13 @@ const AddressForm: React.FC = () => {
         <label className={styles.label}>배송지</label>
 
         <div className={styles.addressRow}>
-          <FormInput
-            placeholder="우편번호"
-            value={zonecode}
-            disabled
-            className={styles.zonecodeInput}
-          />
+          <FormInput placeholder="우편번호" value={zonecode} disabled className={styles.zonecodeInput} />
           <div className={styles.searchButtonWrapper}>
             <Button onClick={handleSearchAddress}>주소 검색</Button>
           </div>
         </div>
 
         <FormInput placeholder="주소" value={address} disabled className={styles.addressInput} />
-
         <FormInput
           placeholder="상세주소"
           value={addressDetail}
@@ -71,6 +54,16 @@ const AddressForm: React.FC = () => {
       </div>
 
       <Button className={styles.submitButton}>저장</Button>
+
+      {openPostcode && (
+        <AddressSearchModal
+          onComplete={({ zipCode, address }) => {
+            setZonecode(zipCode)
+            setAddress(address)
+          }}
+          onClose={() => setOpenPostcode(false)}
+        />
+      )}
     </div>
   )
 }
