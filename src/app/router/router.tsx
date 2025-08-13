@@ -46,12 +46,17 @@ import WalletPointPage from '@/pages/payment/pay/WalletPointPage'
 import WalletChargePage from '@/pages/payment/pay/WalletChargePage'
 import ChargeSuccessPage from '@/pages/payment/pay/ChargeSuccessPage'
 import ChargeFailPage from '@/pages/payment/pay/ChargeFailPage'
+import SearchPage from '@/pages/home/SearchPage';
 
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
   {
     path: '/category/:name',
     element: <CategoryPage />,
+  },
+  {
+    path: '/search',
+    element: <SearchPage />,
   },
   { path: '/login', element: <LoginPage /> },
   { path: '/signup', element: <SignupPage /> },

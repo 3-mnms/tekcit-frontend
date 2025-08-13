@@ -7,8 +7,8 @@ export const getFestivals = async (): Promise<Festival[]> => {
   return res.data.data.content;
 };
 
-export const getFestivalViews = async (id: string): Promise<number> => {
-  const res = await axios.get(`/api/festival/views/${id}`);
+export const getFestivalViews = async (fid: string): Promise<number> => {
+  const res = await axios.get(`/api/festival/views/${fid}`);
   return res.data.data;
 };
 

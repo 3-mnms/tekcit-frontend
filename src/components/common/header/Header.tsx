@@ -11,24 +11,22 @@ import '@fortawesome/fontawesome-free/css/all.min.css'
 import { tokenStore } from '@/shared/storage/tokenStore'
 import { setCookie } from '@/models/auth/cookie'
 
-interface HeaderProps {
-  onSearch: (keyword: string) => void
-}
+const CATEGORY_ORDER = ['무용', '대중음악', '뮤지컬/연극', '복합', '클래식/국악', '서커스/마술']
 
-const CATEGORY_ORDER = ['무용', '대중음악', '뮤지컬/연극', '복합', '클래식/국악', '서커스/미술'] as const
-
-// ✅ 한글 ↔ 영어 매핑
+// ✅ 한글 ↔ 영어 매핑 (라우트용)
 const categoryMap: Record<string, string> = {
   무용: 'dance',
   대중음악: 'pop',
   '뮤지컬/연극': 'theater',
   복합: 'mix',
   '클래식/국악': 'classic',
-  '서커스/미술': 'art',
+  '서커스/마술': 'magic',
 }
 
-const ADMIN_ORIGIN = import.meta.env.VITE_ADMIN_ORIGIN as string | undefined
-const goAdmin = (path = '') => {
+const Header: React.FC = () => {
+
+  const ADMIN_ORIGIN = import.meta.env.VITE_ADMIN_ORIGIN as string | undefined
+  const goAdmin = (path = '') => {
   const token = tokenStore.get()
   if (token) {
     // 옵션: 30분만 유효하게 하고 싶으면 maxAgeSec: 1800
@@ -37,8 +35,6 @@ const goAdmin = (path = '') => {
   const url = ADMIN_ORIGIN ? `${ADMIN_ORIGIN}/admin${path}` : `/admin${path}`
   window.location.assign(url) // 다른 포트/오리진도 OK
 }
-
-const Header: React.FC<HeaderProps> = ({ onSearch }) => {
   const navigate = useNavigate()
   const [keyword, setKeyword] = useState('')
 
@@ -56,8 +52,11 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // ✅ 헤더가 직접 라우팅
   const handleSearch = () => {
-    if (keyword.trim()) onSearch(keyword.trim())
+    const q = keyword.trim()
+    if (!q) return
+    navigate(`/search?keyword=${encodeURIComponent(q)}&page=1`)
   }
 
   const { data: categories } = useQuery({
@@ -75,9 +74,11 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
       } else if (['뮤지컬', '연극'].includes(category)) {
         grouped.add('뮤지컬/연극')
       } else if (['서양음악(클래식)', '한국음악(국악)'].includes(category)) {
-        grouped.add('클래식/국악') // CATEGORY_ORDER와 키 일치
-      } else {
-        grouped.add(category)
+        grouped.add('클래식/국악')
+      } else if (['서커스/마술', '미술'].includes(category)) {
+        grouped.add('서커스/마술')
+      } else if (category === '복합') {
+        grouped.add('복합')
       }
     })
     return CATEGORY_ORDER.filter((cat) => grouped.has(cat))
@@ -136,11 +137,10 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
               if (e.key === 'Enter') handleSearch()
             }}
           />
-          <i
-            className="fa-solid fa-magnifying-glass"
-            onClick={handleSearch}
-            style={{ cursor: 'pointer' }}
-          />
+          {/* 클릭 영역/접근성 위해 button 사용 */}
+          <button type="button" onClick={handleSearch} className={styles.searchButton}>
+            <i className="fa-solid fa-magnifying-glass" />
+          </button>
         </div>
       </div>
 

@@ -7,6 +7,7 @@ export interface Festival {
   fcltynm: string;
   area: string;
   genrename: string; 
+  fid: string;
 }
 
 export interface FestivalWithViews extends Festival {
