@@ -1,7 +1,8 @@
 export interface FestivalScheduleDTO {
-    dayOfWeek: string;
+    dayOfWeek: DayOfWeek;
     time: string;
 }
+export type DayOfWeek = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
 
 export type Genrenm =  '대중음악' | '무용' | '뮤지컬' | '연극' | '클래식' | '국악' | '복합'
 
@@ -26,7 +27,7 @@ export interface Festival {
     fname: string;
     fdfrom: string; // 공연 시작일
     fdto: string; // 공연 종료일
-    posterFile: string; // 포스터가 이제 File 객체가 아닌 URL 주소(string)야!
+    posterFile: string; // 포스터
     fcltynm: string; // 공연장 이름
     genrenm: Genrenm; // 장르
     detail: FestivalDetail; //

@@ -107,6 +107,7 @@ const Header: React.FC<HeaderProps> = ({ userName, onLogout, ...props }) => {
     return `${m}:${s}`;
   };
   const USER_ORIGIN = import.meta.env.VITE_USER_ORIGIN as string | undefined;
+  
   const handleLogout = () => {
     deleteCookie("accessToken"); 
     onLogout();   
