@@ -1,14 +1,18 @@
 export interface Festival {
-  id: string;
-  fname: string;
-  fdfrom: string;
-  fdto: string;
-  poster: string;
   fcltynm: string;
-  area: string;
-  genrename: string; 
+  fid: string;
+  genrenm: string; 
+  poster: string;
+  prfnm: string;
+  prfpdfrom: string;
+  prfpdto: string;
 }
 
 export interface FestivalWithViews extends Festival {
   views: number;
+}
+
+export interface FestivalDetail extends Festival {
+  runtime?: string;
+  age?: string;
 }

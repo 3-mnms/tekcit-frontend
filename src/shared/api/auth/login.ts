@@ -1,22 +1,29 @@
-import { api } from '@/shared/api/axios';
+import { api } from '@/shared/api/axios'
 
 export interface LoginPayload {
-  loginId: string;
-  loginPw: string;
+  loginId: string
+  loginPw: string
 }
 
-export interface LoginResponseDTO { accessToken?: string; }
+export interface LoginResponseDTO {
+  accessToken: string 
+}
 
-export const login = async (payload: LoginPayload) => {
-  const { data } = await api.post('/users/login', payload);
-  return data; // LoginResponseDTO
-};
+export interface ReissueResponseDTO {
+  accessToken: string
+  refreshToken?: string
+}
 
-export const logout = async () => {
-  await api.post('/users/logout');
-};
+export const login = async (payload: LoginPayload): Promise<LoginResponseDTO> => {
+  const { data } = await api.post<LoginResponseDTO>('/users/login', payload)
+  return data
+}
 
-export const reissue = async () => {
-  const { data } = await api.post('/users/reissue');
-  return data;
-};
+export const logout = async (): Promise<void> => {
+  await api.post('/users/logout')
+}
+
+export const reissue = async (): Promise<ReissueResponseDTO> => {
+  const { data } = await api.post<ReissueResponseDTO>('/users/reissue')
+  return data
+}

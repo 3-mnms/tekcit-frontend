@@ -32,6 +32,9 @@
   flex: 1 1 auto;
 }
 
+.cardLink { display: block; text-decoration: none; color: inherit; }
+.cardLink:hover { cursor: pointer; }
+
 .imageWrapper {
   position: relative;
   aspect-ratio: 2 / 3; /* 포스터 비율 고정 */

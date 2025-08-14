@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router-dom'
 
 // mainpage
 import HomePage from '@pages/home/MainPage'
+import CategoryPage from '@pages/home/CategoryPage';
+import FestivalDetailPage from '@pages/festival-detail/FestivalDetailPage'
 
 //auth
 import LoginPage from '@/pages/auth/LoginPage'
@@ -35,9 +37,13 @@ import RefundPage from '@/pages/payment/refund/RefundPage'
 import WalletPointPage from '@/pages/payment/pay/WalletPointPage'
 import WalletChargePage from '@/pages/payment/pay/WalletChargePage'
 import ResultPage from '@/pages/payment/result/ResultPage' 
+import SearchPage from '@/pages/home/SearchPage';
 
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
+  { path: '/category/:name', element: <CategoryPage /> },
+  { path: '/search', element: <SearchPage /> },
+  { path: "/festival/:id", element: <FestivalDetailPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/signup', element: <SignupPage /> },
   { path: '/find-id', element: <FindIdPage /> },

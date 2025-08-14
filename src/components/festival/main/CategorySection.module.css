@@ -71,6 +71,9 @@
   text-align: center;
 }
 
+.cardLink { display: block; text-decoration: none; color: inherit; }
+.cardLink:hover { cursor: pointer; }
+
 @media (max-width: 1280px) {
   .card {
     flex: 0 0 calc(100% / 4 - 1rem);

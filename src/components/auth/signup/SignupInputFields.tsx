@@ -1,37 +1,55 @@
-// src/components/auth/signup/SignupInputFields.tsx
-import React, { useState, forwardRef } from "react";
-import styles from "./SignupInputFields.module.css";
-import Button from "@/components/common/button/Button";
-import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import React, { useState, forwardRef } from 'react'
+import styles from './SignupInputFields.module.css'
+import Button from '@/components/common/button/Button'
+import { FaEye, FaEyeSlash } from 'react-icons/fa6'
 
 interface BaseProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  icon: React.ReactNode;
-  hasButton?: boolean;
-  buttonText?: string;
-  onButtonClick?: () => void;
-  error?: string;
-  touched?: boolean;
+  icon: React.ReactNode
+  hasButton?: boolean
+  buttonText?: string
+  onButtonClick?: () => void
+  buttonDisabled?: boolean
+  error?: string
+  touched?: boolean
 }
 
 const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
-  ({ icon, placeholder, hasButton = false, buttonText, onButtonClick, type = "text", error, touched, ...inputProps }, ref) => {
-    const [showPassword, setShowPassword] = useState(false);
-    const isPassword = type === "password";
-    const inputType = isPassword ? (showPassword ? "text" : "password") : type;
+  (
+    {
+      icon,
+      placeholder,
+      hasButton = false,
+      buttonText,
+      onButtonClick,
+      buttonDisabled = false,
+      type = 'text',
+      error,
+      touched,
+      readOnly,
+      ...inputProps
+    },
+    ref,
+  ) => {
+    const [showPassword, setShowPassword] = useState(false)
+    const isPassword = type === 'password'
+    const inputType = isPassword ? (showPassword ? 'text' : 'password') : type
 
-    const showError = !!error && !!touched;
-    const showSuccess = !!touched && !error;
+    const showError = !!error && !!touched
+    const showSuccess = !!touched && !error
 
     return (
-      <div className={`${styles.row} ${hasButton ? styles.hasButtonRow : ""}`}>
+      <div className={`${styles.row} ${hasButton ? styles.hasButtonRow : ''}`}>
         <div
           className={[
             styles.inputWrapper,
-            showError ? styles.invalid : "",
-            showSuccess ? styles.valid : "",
-          ].join(" ")}
+            showError ? styles.invalid : '',
+            showSuccess ? styles.valid : '',
+            readOnly 
+              ? '!bg-gray-100 rounded-md cursor-not-allowed border border-gray-100'
+              : '',
+          ].join(' ')}
         >
-          <div className={styles.left}>
+          <div className={`${styles.left}`}>
             {icon}
             <span className={styles.bar}>&nbsp;|</span>
           </div>
@@ -40,7 +58,8 @@ const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
             ref={ref}
             type={inputType}
             placeholder={placeholder}
-            className={styles.input}
+            readOnly={readOnly}
+            className={`${styles.input} ${readOnly  ? 'bg-gray-100 border-none text-gray-600' : ''}`}
             aria-invalid={showError}
             aria-describedby={showError ? `${inputProps.name}-error` : undefined}
             {...inputProps}
@@ -51,16 +70,25 @@ const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
               type="button"
               className={styles.eyeIcon}
               onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+              aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
             >
-              {showPassword ? <FaEye className={styles.iconToggle} /> : <FaEyeSlash className={styles.iconToggle} />}
+              {showPassword ? (
+                <FaEye className={styles.iconToggle} />
+              ) : (
+                <FaEyeSlash className={styles.iconToggle} />
+              )}
             </button>
           )}
         </div>
 
         {hasButton && (
           <div className={styles.buttonWrapper}>
-            <Button onClick={onButtonClick} className="w-[95px] h-[44px] text-sm">
+            <Button
+              type="button"
+              onClick={onButtonClick}
+              disabled={buttonDisabled}
+              className="w-[95px] h-[44px] text-sm"
+            >
               {buttonText}
             </Button>
           </div>
@@ -72,8 +100,8 @@ const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
           </p>
         )}
       </div>
-    );
-  }
-);
+    )
+  },
+)
 
-export default SignupInputField;
+export default SignupInputField

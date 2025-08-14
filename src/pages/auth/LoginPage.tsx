@@ -1,3 +1,4 @@
+// pages/auth/LoginPage.tsx
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Logo from '@assets/logo.png'
@@ -10,10 +11,19 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, type LoginForm } from '@/models/auth/schema/loginSchema'
 import { useLoginMutation } from '@/models/auth/tanstack-query/useLogin'
-import { tokenStore } from '@/shared/storage/tokenStore'
+
+import { useAuthStore } from '@/shared/storage/useAuthStore'
+import { parseJwt, type JwtRole, type JwtPayloadBase } from '@/shared/storage/jwt'
+
+type JwtPayload = JwtPayloadBase & {
+  userId: number
+  role: JwtRole
+  name: string
+}
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate()
+  const { setUser } = useAuthStore()
 
   const {
     register,
@@ -27,17 +37,26 @@ const LoginPage: React.FC = () => {
   const loginMut = useLoginMutation()
 
   const onSubmit = (form: LoginForm) => {
-    tokenStore.clear() // ✅ 이전 accessToken 제거(선택)
     loginMut.mutate(form, {
-      onSuccess: (data: any) => {
-        if (data?.accessToken) tokenStore.set(data.accessToken)
+      onSuccess: (data) => {
+        if (data.accessToken) {
+          const decoded = parseJwt<JwtPayload>(data.accessToken)
+          if (decoded) {
+            setUser({
+              userId: decoded.userId,
+              role: decoded.role,
+              name: decoded.name,
+              loginId: decoded.sub,
+            })
+          }
+        }
         alert('로그인이 완료되었습니다!')
         navigate('/')
       },
-      onError: (e: any) => {
+      onError: (e) => {
         const msg =
-          e?.response?.data?.errorMessage ||
-          e?.response?.data?.message ||
+          e.response?.data?.errorMessage ??
+          e.response?.data?.message ??
           '아이디 또는 비밀번호를 확인하세요.'
         alert(msg)
       },
@@ -79,7 +98,7 @@ const LoginPage: React.FC = () => {
         </form>
 
         <div className={styles.findLinks}>
-          <Link to="/find-id">아이디 찾기</Link> | <Link to="/find-password">비번 찾기</Link>
+          <Link to="/find-id">아이디 찾기</Link> | <Link to="/find-password">비밀번호 찾기</Link>
         </div>
 
         <SocialLogin />
