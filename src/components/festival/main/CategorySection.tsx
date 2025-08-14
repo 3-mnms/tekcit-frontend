@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styles from './CategorySection.module.css';
 import { getFestivals } from '@/shared/api/festival/FestivalApi';
 import type { Festival } from '@/models/festival/FestivalType';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 
 // 문자열 정규화
 const canon = (s?: string) =>
@@ -35,19 +35,13 @@ const SLUG_TO_GROUP: Record<string, string> = {
   dance: '무용',
   theater: '뮤지컬/연극',
   classic: '클래식/국악',
-  art: '서커스/마술',
+  magic: '서커스/마술',
   mix: '복합',
 };
 
 /** 🔧 포스터 URL 보정(키 통합 + http→https + 상대경로 보정) */
 const buildPosterUrl = (f: any): string => {
-  const raw =
-    f?.poster ??
-    f?.poster_file ??
-    f?.posterFile ??
-    f?.posterUrl ??
-    '';
-
+  const raw = f?.poster ?? f?.poster_file ?? f?.posterFile ?? f?.posterUrl ?? '';
   if (!raw) return '';
   if (raw.startsWith('http://') || raw.startsWith('https://')) {
     return raw.replace(/^http:\/\//i, 'https://');
@@ -176,30 +170,72 @@ const CategorySection: React.FC = () => {
       <div className={styles.cardSlider}>
         {displayed.map((festival, idx) => {
           const posterSrc = buildPosterUrl(festival);
-          const key = `${(festival as any).fid || (festival as any).id || 'unknown'}-${idx}`;
+
+          // ✅ fid 후보 통합 (kopis mt20id 포함)
+          const fid =
+            (festival as any).fid ??
+            (festival as any).mt20id ??
+            (festival as any).id ??
+            null;
+
+          const key = `${fid ?? 'unknown'}-${idx}`;
+          const title = festival.prfnm;
+          const poster = posterSrc || '/assets/placeholder-poster.png';
+
           return (
             <div key={key} className={styles.card}>
-              <div className={styles.imageWrapper}>
-                <img
-                  src={posterSrc || '/assets/placeholder-poster.png'}
-                  alt={festival.prfnm}
-                  className={styles.image}
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = '/assets/placeholder-poster.png';
+              {fid ? (
+                <Link
+                  to={`/festival/${fid}`}           // ✅ 디테일에서 받는 1개(라우트 파라미터)
+                  state={{                          // ✅ 카드에서 넘기는 3개
+                    fid,                            // ① fid (state에도 백업)
+                    title,                          // ② 공연명
+                    poster,                         // ③ 포스터
                   }}
-                />
-              </div>
-              <h3 className={styles.name}>{festival.prfnm}</h3>
-              <p className={styles.date}>
-                {/* ✅ 날짜 필드 교체: fdfrom/fdto → prfpdfrom/prfpdto */}
-                {festival.prfpdfrom === festival.prfpdto
-                  ? festival.prfpdfrom
-                  : `${festival.prfpdfrom} ~ ${festival.prfpdto}`}
-              </p>
-              <p className={styles.location}>
-                {(festival as any).area} · {(festival as any).fcltynm}
-              </p>
+                  className={styles.cardLink}
+                  aria-label={`${title} 상세보기`}
+                >
+                  <div className={styles.imageWrapper}>
+                    <img
+                      src={poster}
+                      alt={title}
+                      className={styles.image}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/assets/placeholder-poster.png';
+                      }}
+                    />
+                  </div>
+                  <h3 className={styles.name}>{title}</h3>
+                  <p className={styles.date}>
+                    {festival.prfpdfrom === festival.prfpdto
+                      ? festival.prfpdfrom
+                      : `${festival.prfpdfrom} ~ ${festival.prfpdto}`}
+                  </p>
+                  <p className={styles.location}>{(festival as any).fcltynm}</p>
+                </Link>
+              ) : (
+                <div className={styles.cardStatic} title="상세 이동 불가: 식별자 없음">
+                  <div className={styles.imageWrapper}>
+                    <img
+                      src={poster}
+                      alt={title}
+                      className={styles.image}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/assets/placeholder-poster.png';
+                      }}
+                    />
+                  </div>
+                  <h3 className={styles.name}>{title}</h3>
+                  <p className={styles.date}>
+                    {festival.prfpdfrom === festival.prfpdto
+                      ? festival.prfpdfrom
+                      : `${festival.prfpdfrom} ~ ${festival.prfpdto}`}
+                  </p>
+                  <p className={styles.location}>{(festival as any).fcltynm}</p>
+                </div>
+              )}
             </div>
           );
         })}

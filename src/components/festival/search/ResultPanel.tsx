@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { searchFestivals } from '@shared/api/festival/SearchApi';
 import type { FestivalItem } from '@/models/festival/FestivalSearchTypes';
@@ -25,79 +25,20 @@ const computeSale = (start?: string, end?: string, now = new Date()): Sale => {
   return '공연중';
 };
 
-type Normalized = FestivalItem & {
-  startRaw?: string;
-  endRaw?: string;
-  genreName?: string;
-  sale?: Sale;
-};
-
-const normalize = (raw: any, idx: number): Normalized => {
-  const id = raw?.fid ?? raw?.id ?? raw?.festivalId ?? raw?.uuid ?? `${raw?.code ?? 'no-id'}-${idx}`;
-  const title =
-    raw?.prfnm ??
-    raw?.title ??
-    raw?.name ??
-    raw?.festivalName ??
-    raw?.fname ??
-    raw?.festivalDetail?.fname ??
-    '(제목 없음)';
-
-  const poster =
-    raw?.poster ?? raw?.posterUrl ?? raw?.imageUrl ?? raw?.thumbnailUrl ?? raw?.posterFile;
-
-  const venue =
-    raw?.fcltynm ??
-    raw?.venue ??
-    raw?.place ??
-    raw?.location?.name ??
-    raw?.hallName ??
-    raw?.fcltynm ??
-    raw?.festivalDetail?.fcltynm;
-
-  const start =
-    raw?.prfpdfrom ??
-    raw?.startDate ??
-    raw?.start_time ??
-    raw?.start ??
-    raw?.beginDate ??
-    raw?.fdfrom ??
-    raw?.festivalDetail?.fdfrom;
-
-  const end =
-    raw?.prfpdto ??
-    raw?.endDate ??
-    raw?.end_time ??
-    raw?.end ??
-    raw?.finishDate ??
-    raw?.fdto ??
-    raw?.festivalDetail?.fdto;
-
-  const sameDay = (a?: string, b?: string) => !!a && !!b && a.slice(0, 10) === b.slice(0, 10);
-  const dateRange =
-    raw?.dateRange ?? (start ? (end && !sameDay(start, end) ? `${start} ~ ${end}` : start) : undefined);
-
-  const genreName = raw?.genrenm ?? raw?.genre ?? raw?.category ?? raw?.festivalDetail?.genreName;
-  const sale = ((): Sale => {
-    const s = parseDate(start);
-    const e = parseDate(end) ?? s;
-    if (!s) return undefined;
-    const today = new Date();
-    const today0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    if (today0 < s) return '공연예정';
-    if (e && today0 > e) return '공연종료';
-    return '공연중';
-  })();
-
-  return { id, title, poster, venue, dateRange, startRaw: start, endRaw: end, genreName, sale };
+// (옵션) 포스터 URL 보정이 필요하다면 사용
+const fixPoster = (raw?: string) => {
+  if (!raw) return '';
+  if (raw.startsWith('http://') || raw.startsWith('https://')) {
+    return raw.replace(/^http:\/\//i, 'https://');
+  }
+  const path = raw.startsWith('/') ? raw : `/${raw}`;
+  return `https://www.kopis.or.kr${encodeURI(path)}`;
 };
 
 const ResultPanel: React.FC = () => {
   const [params] = useSearchParams();
-
   const keyword = (params.get('keyword') || '').trim();
 
-  // ✅ status가 없으면 기본값 자동 적용 (가드 없이 첫 렌더부터 필터링)
   const selectedGenres = (params.get('genres') || '')
     .split(',').map((s) => s.trim()).filter(Boolean);
 
@@ -110,7 +51,7 @@ const ResultPanel: React.FC = () => {
 
   const genreForBackend = selectedGenres.length === 1 ? selectedGenres[0] : undefined;
 
-  const { data, isLoading, isError } = useQuery<any[]>({
+  const { data, isLoading, isError } = useQuery<FestivalItem[]>({
     queryKey: ['searchResults', { keyword, genreForBackend }],
     queryFn: () => searchFestivals({ keyword: keyword || undefined, genre: genreForBackend }),
     enabled: !!keyword || !!selectedGenres.length,
@@ -118,25 +59,25 @@ const ResultPanel: React.FC = () => {
     keepPreviousData: true,
   });
 
-  const normalized: Normalized[] = useMemo(() => {
+  const filtered = useMemo(() => {
     const list = Array.isArray(data) ? data : [];
-    return list.map((r, i) => normalize(r, i));
-  }, [data]);
-
-  const filtered: Normalized[] = useMemo(() => {
     const fromD = parseDate(fromParam);
     const toD = parseDate(toParam) ?? fromD;
 
-    return normalized.filter((item) => {
-      if (selectedGenres.length) {
-        if (!item.genreName || !selectedGenres.includes(item.genreName)) return false;
+    return list.filter((item) => {
+      // 장르 필터
+      if (selectedGenres.length && (!item.genrenm || !selectedGenres.includes(item.genrenm))) {
+        return false;
       }
-      if (selectedStatus.length) {
-        if (!item.sale || !selectedStatus.includes(item.sale)) return false;
+      // 상태 필터
+      const sale = computeSale(item.prfpdfrom, item.prfpdto);
+      if (selectedStatus.length && (!sale || !selectedStatus.includes(sale))) {
+        return false;
       }
+      // 날짜 범위 필터
       if (fromD) {
-        const s = parseDate(item.startRaw);
-        const e = parseDate(item.endRaw) ?? s;
+        const s = parseDate(item.prfpdfrom);
+        const e = parseDate(item.prfpdto) ?? s;
         if (!s) return false;
         const rangeTo = toD ?? fromD;
         const overlap = (e ?? s) >= fromD && s <= (rangeTo ?? fromD);
@@ -144,7 +85,7 @@ const ResultPanel: React.FC = () => {
       }
       return true;
     });
-  }, [normalized, selectedGenres, selectedStatus, fromParam, toParam]);
+  }, [data, selectedGenres, selectedStatus, fromParam, toParam]);
 
   const [visibleCount, setVisibleCount] = useState(CHUNK);
   useEffect(() => {
@@ -170,14 +111,63 @@ const ResultPanel: React.FC = () => {
       {itemsToShow.length ? (
         <>
           <div className={styles.grid}>
-            {itemsToShow.map((f, i) => (
-              <article key={String(f.id ?? i)} className={styles.card}>
-                {f.poster && <img src={f.poster} alt={f.title} className={styles.poster} />}
-                <h3 className={styles.cardTitle} title={f.title}>{f.title}</h3>
-                {f.venue && <p className={styles.venue}>{f.venue}</p>}
-                {f.dateRange && <p className={styles.date}>{f.dateRange}</p>}
-              </article>
-            ))}
+            {itemsToShow.map((f) => {
+              const poster = fixPoster(f.poster);
+              const to = f.fid ? `/festival/${f.fid}` : undefined;
+
+              const dateRange =
+                f.prfpdfrom
+                  ? (f.prfpdto && f.prfpdto.slice(0, 10) !== f.prfpdfrom.slice(0, 10)
+                      ? `${f.prfpdfrom} ~ ${f.prfpdto}`
+                      : f.prfpdfrom)
+                  : undefined;
+
+              const CardInner = (
+                <>
+                  {poster && (
+                    <img
+                      src={poster}
+                      alt={f.prfnm}
+                      className={styles.poster}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/assets/placeholder-poster.png';
+                      }}
+                    />
+                  )}
+                  <h3 className={styles.cardTitle} title={f.prfnm}>{f.prfnm}</h3>
+                  {f.fcltynm && <p className={styles.venue}>{f.fcltynm}</p>}
+                  {dateRange && <p className={styles.date}>{dateRange}</p>}
+                </>
+              );
+
+              return (
+                <article key={f.fid} className={styles.card}>
+                  {to ? (
+                    <Link
+                      to={to}
+                      state={{
+                        fid: f.fid,            // ① fid(백업)
+                        title: f.prfnm,        // ② 제목
+                        poster,                // ③ 포스터
+                        // 프리뷰 보너스
+                        prfpdfrom: f.prfpdfrom,
+                        prfpdto: f.prfpdto,
+                        fcltynm: f.fcltynm,
+                      }}
+                      className={styles.cardLink}
+                      aria-label={`${f.prfnm} 상세보기`}
+                    >
+                      {CardInner}
+                    </Link>
+                  ) : (
+                    <div className={styles.cardStatic} title="상세 이동 불가: 식별자 없음">
+                      {CardInner}
+                    </div>
+                  )}
+                </article>
+              );
+            })}
           </div>
 
           {canLoadMore && (

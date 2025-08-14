@@ -30,8 +30,10 @@
   max-width: 220px; /* 카드의 최대 너비 */
   min-width: 160px; /* 카드의 최소 너비 */
   flex: 1 1 auto;
-  cursor: pointer;
 }
+
+.cardLink { display: block; text-decoration: none; color: inherit; }
+.cardLink:hover { cursor: pointer; }
 
 .imageWrapper {
   position: relative;

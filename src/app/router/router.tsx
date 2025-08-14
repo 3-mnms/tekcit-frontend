@@ -50,14 +50,9 @@ import SearchPage from '@/pages/home/SearchPage';
 
 export const router = createBrowserRouter([
   { path: '/', element: <HomePage /> },
-  {
-    path: '/category/:name',
-    element: <CategoryPage />,
-  },
-  {
-    path: '/search',
-    element: <SearchPage />,
-  },
+  { path: '/category/:name', element: <CategoryPage /> },
+  { path: '/search', element: <SearchPage /> },
+  { path: "/festival/:id", element: <FestivalDetailPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/signup', element: <SignupPage /> },
   { path: '/find-id', element: <FindIdPage /> },
