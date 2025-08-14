@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styles from './HotSection.module.css';
 import type { Festival, FestivalWithViews } from '@models/festival/FestivalType';
 import { getFestivals, getFestivalViews } from '@/shared/api/festival/FestivalApi';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom'; // ✅ 추가!
 
 // ✅ 라우트 슬러그 -> 그룹 카테고리
 const slugToCategory: Record<string, string> = {
@@ -10,7 +10,7 @@ const slugToCategory: Record<string, string> = {
   dance: '무용',
   theater: '뮤지컬/연극',
   classic: '클래식/국악',
-  art: '서커스/마술',
+  magic: '서커스/마술',
   mix: '복합',
 };
 
@@ -32,12 +32,12 @@ const normalizeCategory = (original?: string): string => {
 };
 
 // ✅ 포스터 URL 보정(절대경로/https 강제)
-const buildPosterUrl = (f: any): string => {
+const buildPosterUrl = (f: Partial<Festival>): string => {
   const raw =
-    f?.poster ??
-    f?.poster_file ??
-    f?.posterFile ??
-    f?.posterUrl ??
+    (f as any)?.poster ??
+    (f as any)?.poster_file ??
+    (f as any)?.posterFile ??
+    (f as any)?.posterUrl ??
     '';
 
   if (!raw) return '';
@@ -78,9 +78,9 @@ const HotSection: React.FC = () => {
       try {
         const festivals: Festival[] = await getFestivals();
 
-        // ✅ 백엔드 카테고리 필드 흡수
+        // ✅ 백엔드 카테고리 필드 (이제 genrenm이 표준)
         const getOriginalCategory = (f: Festival): string =>
-          (f as any).genrenm ??
+          f.genrenm ??
           (f as any).category ??
           (f as any).genre ??
           (f as any).fcategory ??
@@ -93,16 +93,16 @@ const HotSection: React.FC = () => {
 
         // ✅ 조회수 가져와 랭킹 정렬 (상위 20개만 계산)
         const withViewsPromises = filtered.slice(0, 20).map(async (festival) => {
-          const fid = (festival as any).fid as string | undefined;
+          const fid = festival.fid;
           let views = 0;
           if (fid) {
             try {
-              views = await getFestivalViews(fid); // ★ fid 사용
+              views = await getFestivalViews(fid);
             } catch {
               views = 0;
             }
           }
-          return { ...(festival as any), views } as FestivalWithViews;
+          return { ...festival, views } as FestivalWithViews;
         });
 
         const withViews = await Promise.all(withViewsPromises);
@@ -125,15 +125,17 @@ const HotSection: React.FC = () => {
 
       <div className={styles.cardList}>
         {hotFestivals.slice(0, visibleCount).map((festival, index) => {
-          const key = `${(festival as any).fid || festival.id || 'unknown'}-${index}`;
+          const key = `${festival.fid || (festival as any).id || 'unknown'}-${index}`;
           const posterSrc = buildPosterUrl(festival);
 
-          return (
-            <div key={key} className={styles.card}>
+          const to = festival.fid ? `/festival/${festival.fid}` : undefined;
+
+          const CardInner = (
+            <>
               <div className={styles.imageWrapper}>
                 <img
                   src={posterSrc || '/assets/placeholder-poster.png'}
-                  alt={festival.fname}
+                  alt={festival.prfnm}
                   className={styles.image}
                   referrerPolicy="no-referrer"
                   onError={(e) => {
@@ -143,14 +145,43 @@ const HotSection: React.FC = () => {
                 <span className={styles.rank}>{index + 1}</span>
               </div>
               <div className={styles.content}>
-                <h3 className={styles.name}>{festival.fname}</h3>
-                <p className={styles.location}>{(festival as any).fcltynm}</p>
+                <h3 className={styles.name}>{festival.prfnm}</h3>
+                <p className={styles.location}>{festival.fcltynm}</p>
                 <p className={styles.date}>
-                  {festival.fdfrom === festival.fdto
-                    ? festival.fdfrom
-                    : `${festival.fdfrom} ~ ${festival.fdto}`}
+                  {festival.prfpdfrom === festival.prfpdto
+                    ? festival.prfpdfrom
+                    : `${festival.prfpdfrom} ~ ${festival.prfpdto}`}
                 </p>
               </div>
+            </>
+          );
+
+          return (
+            <div key={key} className={styles.card}>
+              {to ? (
+                // ✅ 링크로 전체 카드 클릭 가능 + state로 3개(+) 전달
+                <Link
+                  to={to}
+                  state={{
+                    fid: festival.fid,            // ① fid (백업)
+                    title: festival.prfnm,        // ② 공연명
+                    poster: posterSrc || '/assets/placeholder-poster.png', // ③ 포스터
+                    // (보너스 프리뷰) UX 부드럽게
+                    prfpdfrom: festival.prfpdfrom,
+                    prfpdto: festival.prfpdto,
+                    fcltynm: festival.fcltynm,
+                  }}
+                  className={styles.cardLink}
+                  aria-label={`${festival.prfnm} 상세보기`}
+                >
+                  {CardInner}
+                </Link>
+              ) : (
+                // fid 없으면 정적 카드
+                <div className={styles.cardStatic} title="상세 이동 불가: 식별자 없음">
+                  {CardInner}
+                </div>
+              )}
             </div>
           );
         })}

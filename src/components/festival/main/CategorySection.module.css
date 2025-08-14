@@ -69,8 +69,10 @@
   flex: 0 0 calc(100% / 5 - 1rem);
   max-width: 180px;
   text-align: center;
-  cursor: pointer;
 }
+
+.cardLink { display: block; text-decoration: none; color: inherit; }
+.cardLink:hover { cursor: pointer; }
 
 @media (max-width: 1280px) {
   .card {

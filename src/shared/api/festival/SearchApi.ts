@@ -9,6 +9,7 @@ export const searchFestivals = async (p: FestivalSearchParams): Promise<Festival
 
   const res = await axios.get<ApiSuccessResponse<FestivalItem[]>>('/api/festival/search', { params });
 
+  console.log("검색 결과", res.data.data);
   // 래퍼에서 실제 리스트 꺼내기
   return res.data.data; // ← SuccessResponse<T>의 실제 필드명 확인 필요
 };
