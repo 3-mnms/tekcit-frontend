@@ -9,12 +9,12 @@ import styles from './WalletPointPage.module.css'
 
 const WalletPointPage: React.FC = () => {
   const navigate = useNavigate()
+  const [balance, setBalance] = useState<number | null>(null)
+  const [month, setMonth] = useState<string>(() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  })
 
-  const handleChargeClick = () => {
-    navigate('/payment/wallet-point/money-charge')
-  }
-
-  const [balance, setBalance] = useState(0)
   useEffect(() => {
     const sync = async () => setBalance(await getWalletBalance())
     sync()
@@ -26,31 +26,65 @@ const WalletPointPage: React.FC = () => {
     }
   }, [])
 
+  const handleChargeClick = () => navigate('/payment/wallet-point/money-charge')
+
+  const fmt = (n: number) => n.toLocaleString('ko-KR')
+
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>페이 포인트 충전</h1>
-
-        <div className={styles.moneySection}>
-          <div className={styles.moneyGroup}>
-            {/* 상단: 페이 머니 + 금액 */}
-            <div className={styles.moneyInfo}>
-              <span className={styles.label}>페이 머니</span>
-              <span className={styles.amount}>{balance.toLocaleString()}원</span>
-            </div>
-
-            {/* 하단: 충전 버튼 */}
-            <div className={styles.moneyActions}>
-              <Button className="w-[190px] h-10" onClick={handleChargeClick}>
-                충전
-              </Button>
-            </div>
-          </div>
-        </div>
+      {/* 상단 타이틀 바 */}
+      <div className={styles.topbar}>
+        <h1 className={styles.pageTitle}>킷페이 내역</h1>
       </div>
 
-      <h2 className={styles.subtitle}>이용내역</h2>
-      <WalletHistory />
+      {/* 요약 카드 */}
+      <section className={styles.summaryCard}>
+        <div className={styles.summaryLeft}>
+          <div className={styles.summaryLabel}>현재 잔액</div>
+          <div className={styles.summaryValue}>
+            {balance === null ? <span className={styles.skeleton} /> : `${fmt(balance)}원`}
+          </div>
+        </div>
+
+        <div className={styles.summaryRight}>
+          <Button className={styles.chargeBtn} onClick={handleChargeClick}>충전</Button>
+        </div>
+      </section>
+
+      {/* 월 선택 필터 */}
+      <div className={styles.filterBar}>
+        <select
+          className={styles.monthSelect}
+          value={month}
+          onChange={(e) => setMonth(e.target.value)}
+        >
+          {/* 최근 6개월 정도 */}
+          {Array.from({ length: 6 }).map((_, i) => {
+            const d = new Date(); d.setMonth(d.getMonth() - i)
+            const v = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+            const label = `${d.getMonth() + 1}월`
+            return <option key={v} value={v}>{label}</option>
+          })}
+        </select>
+      </div>
+
+      {/* 이용내역: 컴포넌트가 비어 있을 때의 빈 상태를 보완용으로 아래 블럭 노출 */}
+      <section className={styles.historySection}>
+        <WalletHistory month={month} />
+        {/* 필요 시 WalletHistory가 비었을 때만 보여주도록 조건 처리 가능 */}
+          <div className={styles.emptyAction}>
+            <Button
+              onClick={() => {
+                const d = new Date(`${month}-01`)
+                d.setMonth(d.getMonth() - 1)
+                const v = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+                setMonth(v)
+              }}
+            >
+              지난달 내역 보기
+            </Button>
+          </div>
+      </section>
     </div>
   )
 }

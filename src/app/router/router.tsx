@@ -31,21 +31,12 @@ import TicketDetailPage from '@/pages/my/ticket/TicketDetailPage'
 
 // payment
 import BookingPaymentPage from '@/pages/payment/BookingPaymentPage'
-import PaymentSuccessPage from '@/pages/payment/pay/PaymentSuccessPage'
-import PaymentFailPage from '@/pages/payment/pay/PaymentFailPage'
 import TransferPaymentPage from '@/pages/payment/transfer/TransferPaymentPage'
-import TransferSuccessPage from '@/pages/payment/transfer/TransferSuccessPage'
-import TransferPaymentFailPage from '@/pages/payment/transfer/TransferPaymentFailPage'
 import TransferFeePaymentPage from '@/pages/payment/transfer/TransferFeePaymentPage'
-import FeeSuccessPage from '@/pages/payment/transfer/FeeSuccessPage'
-import FeeFailPage from '@/pages/payment/transfer/FeeFailPage'
 import RefundPage from '@/pages/payment/refund/RefundPage'
-import RefundSuccessPage from '@/pages/payment/refund/RefundSuccessPage'
-import RefundFailPage from '@/pages/payment/refund/RefundFailPage'
 import WalletPointPage from '@/pages/payment/pay/WalletPointPage'
 import WalletChargePage from '@/pages/payment/pay/WalletChargePage'
-import ChargeSuccessPage from '@/pages/payment/pay/ChargeSuccessPage'
-import ChargeFailPage from '@/pages/payment/pay/ChargeFailPage'
+import ResultPage from '@/pages/payment/result/ResultPage' 
 import SearchPage from '@/pages/home/SearchPage';
 
 export const router = createBrowserRouter([
@@ -105,26 +96,19 @@ export const router = createBrowserRouter([
   {
     path: '/payment',
     children: [
-      { path: '', element: <BookingPaymentPage /> },
-      { path: 'payment-success', element: <PaymentSuccessPage /> },
-      { path: 'payment-fail', element: <PaymentFailPage /> },
+      { path: '', element: <BookingPaymentPage /> }, 
+      { path: 'result', element: <ResultPage /> },
       {
         path: 'transfer',
         children: [
           { path: '', element: <TransferPaymentPage /> },
-          { path: 'transfer-success', element: <TransferSuccessPage /> },
-          { path: 'transfer-fail', element: <TransferPaymentFailPage /> },
-          { path: 'transfer-fee', element: <TransferFeePaymentPage /> },
-          { path: 'fee-success', element: <FeeSuccessPage /> },
-          { path: 'fee-fail', element: <FeeFailPage /> },
+          { path: 'transfer-fee', element: <TransferFeePaymentPage /> },  
         ],
       },
       {
         path: 'refund',
         children: [
           { path: '', element: <RefundPage /> },
-          { path: 'refund-success', element: <RefundSuccessPage /> },
-          { path: 'refund-fail', element: <RefundFailPage /> },
         ],
       },
       {
@@ -132,8 +116,6 @@ export const router = createBrowserRouter([
         children: [
           { path: '', element: <WalletPointPage /> },
           { path: 'money-charge', element: <WalletChargePage /> },
-          { path: 'charge-success', element: <ChargeSuccessPage /> },
-          { path: 'charge-fail', element: <ChargeFailPage /> },
         ],
       },
     ],
