@@ -1,195 +1,48 @@
-/* TossPayment.module.css 멍 */
-
-/* 레이아웃 */
-.toss-payment-container {
-  width: 100%;
+.card{
+  border:1px solid #e9eef5;
+  border-radius:12px;
+  background:#fff;
 }
 
-.toss-payment-container .payment-section {
-  width: 100%;
-  margin: 0;
-  border-radius: 12px;
-  box-sizing: border-box;
+.header{
+  width:100%;
+  display:flex; justify-content:space-between; align-items:center;
+  gap:12px; padding:14px 16px; background:transparent; border:0; cursor:pointer;
+  border-radius:12px;
+}
+.header:focus:not(:focus-visible){outline:none;}
+.header:focus-visible{outline:3px solid #94c6ff; outline-offset:2px;}
+
+.left{display:flex; align-items:center; gap:10px; min-width:0;}
+.logo{width:22px; height:22px; object-fit:contain; flex-shrink:0;}
+.titles{display:flex; flex-direction:column; min-width:0;}
+.title{font-weight:700; color:#0f172a;}
+.sub{font-size:.9rem; color:#94a3b8;}
+
+.right{display:flex; align-items:center; gap:10px;}
+.radio{
+  width:10px; height:10px; border-radius:50%;
+  background:#4d9afd; box-shadow:0 0 0 3px rgba(77,154,253,.2);
+}
+.chevron{color:#9aa6b2; transition:transform .2s ease;}
+.header[aria-pressed="true"] .chevron,
+.header[aria-expanded="true"] .chevron{transform:rotate(180deg);}
+
+.body{
+  overflow:hidden; max-height:0; padding:0 16px; transition:max-height .25s ease;
+}
+.open{max-height:220px; padding-bottom:14px;}
+
+.note{margin:10px 0 6px; color:#475569;}
+.note strong{color:#0f172a;}
+
+.badges{
+  display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 0; padding:0; list-style:none;
+  color:#64748b; font-size:.9rem;
+}
+.badges .brand{
+  background:#eef6ff; color:#1e5bbf; padding:4px 8px; border-radius:999px; font-weight:700;
 }
 
-/* 헤더 라디오(ON/OFF) */
-.toss-payment-container .simple-payment-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  padding: 10px 4px;
-  min-height: 24px;
-}
-
-/* 공통 라디오 버튼 */
-.toss-payment-container input[type='radio'] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  border: 2px solid #ccc;
-  border-radius: 50%;
-  background: #fff;
-  cursor: pointer;
-  position: relative;
-  transition: 0.2s;
-  vertical-align: middle;
-}
-
-.toss-payment-container input[type='radio']:checked {
-  border-color: #4d9afd;
-  background: #4d9afd;
-}
-
-.toss-payment-container input[type='radio']:checked::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  background: #fff;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.toss-payment-container input[type='radio']:hover {
-  border-color: #4d9afd;
-}
-
-.toss-payment-container input[type='radio']:focus-visible {
-  outline: 2px solid #275cb3;
-  outline-offset: 2px;
-}
-
-.toss-payment-container label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-}
-
-.toss-payment-container .radio-label {
-  font-size: 14px;
-  color: #222;
-  font-weight: 600;
-}
-
-/* 슬라이드 */
-.toss-payment-container .toss-payment-slide {
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.4s ease;
-}
-
-/* 컴포넌트에서 styles.open을 함께 붙이므로 별도 전역 클래스 제공 */
-.open {
-  max-height: 1200px; /* 위젯 높이 커버 */
-}
-
-/* 슬라이드 내부 섹션 */
-.toss-payment-container .toss-payment-section {
-  border: 2px solid #4d9afd;
-  border-radius: 10px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-/* 그룹 */
-.toss-payment-container .fieldset {
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-
-.toss-payment-container .legend {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1f3b66;
-  margin-bottom: 8px;
-}
-
-/* 옵션 그리드 */
-.toss-payment-container .options-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px 20px;
-  align-items: center;
-}
-
-/* 개별 옵션 라벨 */
-.toss-payment-container .option {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-
-/* 행/셀 */
-.toss-payment-container .row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.toss-payment-container .selectLabel {
-  font-size: 12px;
-  color: #4a5b78;
-  font-weight: 600;
-}
-
-/* 드롭다운 */
-.toss-payment-container .dropdown-select {
-  width: 100%;
-  height: 40px;
-  border: 1px solid #cfd9ea;
-  border-radius: 8px;
-  padding: 0 12px;
-  font-size: 14px;
-  color: #1f2a44;
-  background: #fff;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.toss-payment-container .dropdown-select:focus {
-  outline: none;
-  border-color: #4d9afd;
-  box-shadow: 0 0 0 3px rgba(77, 154, 253, 0.2);
-}
-
-.toss-payment-container .dropdown-select:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  background: #f3f6fb;
-}
-
-/* SR 전용 */
-.toss-payment-container .sr-only {
-  position: absolute !important;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Compact grid layout */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.colFull { grid-column: 1 / -1; }
-.col1of2 { grid-column: span 6; }
-.col1of3 { grid-column: span 4; }
+/* 클릭 시 네모 제거 + 모바일 탭 하이라이트 제거 */
+.header{-webkit-tap-highlight-color:transparent;}

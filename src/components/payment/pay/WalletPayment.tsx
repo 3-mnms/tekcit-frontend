@@ -1,34 +1,35 @@
 // src/components/payment/pay/WalletPayment.tsx
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
 import Button from '@components/common/button/Button'
 import styles from './WalletPayment.module.css'
-import { getWalletBalance } from '@/shared/api/payment/wallet' // ✅ 추가 멍
+import { getWalletBalance } from '@/shared/api/payment/wallet'
 
 interface WalletPaymentProps {
   isOpen: boolean
   onToggle: () => void
+  dueAmount?: number
 }
 
-const WalletPayment: React.FC<WalletPaymentProps> = ({ isOpen, onToggle }) => {
+const WalletPayment: React.FC<WalletPaymentProps> = ({ isOpen, dueAmount = 0 }) => {
   const navigate = useNavigate()
+  const [balance, setBalance] = useState<number | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  // ✅ 잔액 상태 멍
-  const [balance, setBalance] = useState(0)
-
-  // ✅ 공통 동기화 함수 멍
   const sync = async () => {
-    const v = await getWalletBalance()
-    setBalance(v)
+    try {
+      setError(null)
+      const v = await getWalletBalance()
+      setBalance(v)
+    } catch {
+      setError('잔액을 불러오지 못했어요')
+    }
   }
 
-  // ✅ 최초 마운트 + 포커스/가시성 변경 시 갱신 멍
   useEffect(() => {
     sync()
     const onFocus = () => sync()
     const onVisible = () => document.visibilityState === 'visible' && sync()
-
     window.addEventListener('focus', onFocus)
     document.addEventListener('visibilitychange', onVisible)
     return () => {
@@ -37,51 +38,41 @@ const WalletPayment: React.FC<WalletPaymentProps> = ({ isOpen, onToggle }) => {
     }
   }, [])
 
-  // ✅ 열릴 때마다 한 번 더 동기화(충전 후 돌아왔을 때 대비) 멍
-  useEffect(() => {
-    if (isOpen) sync()
-  }, [isOpen])
+  useEffect(() => { if (isOpen) sync() }, [isOpen])
 
-  const handleChargeClick = () => {
-    navigate('/payment/wallet-point/money-charge')
-  }
+  const shortage = useMemo(() => Math.max(0, dueAmount - (balance ?? 0)), [dueAmount, balance])
 
   return (
-    <div className={styles['wallet-payment-container']}>
-      <div className={styles['main-content']}>
-        <div className={styles['payment-section']}>
-          {/* 헤더 멍 */}
-          <div className={styles['payment-header']}>
-            <label className={styles['simple-payment-option']}>
-              <input
-                type="radio"
-                name="payment-method"
-                checked={isOpen}
-                onChange={onToggle}
-                aria-label="킷페이 결제 선택"
-              />
-              <span className={styles['radio-label']}>킷페이</span>
-            </label>
+    <div className={styles.card}>
 
-            {isOpen && <Button onClick={handleChargeClick}>충전하기</Button>}
-          </div>
+      {/* 바디: 여백 넓게 + 3줄만 */}
+      <div className={`${styles.body} ${isOpen ? styles.open : ''}`}>
+        {error && <p className={styles.error}>{error}</p>}
+        {balance === null && !error && <p className={styles.muted}>잔액을 불러오는 중…</p>}
 
-          {/* 슬라이드 영역 멍 */}
-          <div className={`${styles['slide-toggle']} ${isOpen ? styles['open'] : ''}`}>
-            <div className={styles['charge-section']}>
-              <div className={styles['charge-input-group']}>
-                <label className={styles['charge-label']}>충전</label>
-                <div className={styles['charge-options']}>
-                  <div className={styles['amount-selector']}>
-                    {/* ✅ 지갑 잔액 표시 멍 */}
-                    <span className={styles['amount']}>{balance.toLocaleString()}원</span>
-                  </div>
-                </div>
-              </div>
+        {balance !== null && (
+          <>
+            <div className={styles.row}>
+              <span className={styles.label}>잔액</span>
+              <span className={styles.value}>{balance.toLocaleString()}원</span>
             </div>
-          </div>
-          {/* // 슬라이드 영역 */}
-        </div>
+
+            {shortage > 0 && (
+              <div className={styles.shortageWarning}>
+                <span className={styles.warningIcon}>⚠</span>
+                결제를 진행하려면 <strong>{shortage.toLocaleString()}원</strong>이 더 필요합니다.
+              </div>
+            )}
+
+            {shortage > 0 && (
+              <div className={styles.actions}>
+                <Button className={styles.chargeBtn} onClick={() => navigate('/payment/wallet-point/money-charge')}>
+                  충전하기
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   )

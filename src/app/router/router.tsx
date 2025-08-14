@@ -90,7 +90,7 @@ export const router = createBrowserRouter([
   {
     path: '/payment',
     children: [
-      { path: '', element: <BookingPaymentPage /> },
+      { path: '', element: <BookingPaymentPage /> }, 
       { path: 'result', element: <ResultPage /> },
       {
         path: 'transfer',

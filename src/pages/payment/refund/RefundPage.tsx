@@ -20,23 +20,17 @@ const RefundPage: React.FC = () => {
     navigate(`/payment/result?${q}`)
   }, [navigate])
 
-  // ✅ 모의 환불 API: URL에 ?fail=1이면 실패 처리
+  // ✅ 모의 환불 API: URL에 ?fail=1이면 실패 처리 멍
   const requestRefund = async () => {
-    await new Promise((r) => setTimeout(r, 400)) // 로딩 흉내
+    await new Promise((r) => setTimeout(r, 400))
     const params = new URLSearchParams(window.location.search)
     const forceFail = params.get('fail') === '1'
     return { ok: !forceFail }
   }
 
-  const handleCancel = () => {
-    navigate('/mypage/ticket')
-  }
+  const handleCancel = () => navigate('/mypage/ticket')
+  const handleRefundClick = () => setIsRefundModalOpen(true)
 
-  const handleRefundClick = () => {
-    setIsRefundModalOpen(true)
-  }
-
-  // ✅ 성공/실패 분기하여 ResultPage로 이동 멍
   const handleRefundConfirm = async () => {
     setIsRefundModalOpen(false)
     try {
@@ -47,14 +41,18 @@ const RefundPage: React.FC = () => {
     }
   }
 
-  const handleRefundModalCancel = () => {
-    setIsRefundModalOpen(false)
-  }
+  const handleRefundModalCancel = () => setIsRefundModalOpen(false)
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>취소 요청</h1>
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>취소 요청</h1>
+        <p className={styles.subtitle}>
+          환불 내용을 확인한 뒤 진행해 주세요.
+        </p>
+      </header>
 
+      {/* 예매 정보 카드 멍 */}
       <TransferTicketInfo
         title="하울의 움직이는 성"
         date="2025.09.21 (일) 오후 3시"
@@ -63,26 +61,42 @@ const RefundPage: React.FC = () => {
         receiver="김민정"
       />
 
-      <div className={styles.refundBox}>
-        <div className={styles.row}>
-          <span className={styles.label}>최종 환불 예정 금액</span>
-          <span className={styles.value}>100,000원</span>
+      {/* 금액 요약 멍 */}
+      <section className={styles.summary} aria-label="환불 금액 요약">
+        <div className={styles.summaryHead}>
+          <span className={styles.badge}>요약</span>
+          <span className={styles.tip}>수수료 제외 후 환불됩니다.</span>
         </div>
-        <div className={styles.row}>
-          <span className={styles.label}>환불 수수료</span>
-          <span className={styles.value}>2,000원</span>
-        </div>
-        <div className={styles.rowTotal}>
-          <span className={styles.totalLabel}>결제 금액</span>
-          <span className={styles.totalValue}>102,000원</span>
-        </div>
-      </div>
 
-      <div className={styles.buttonGroup}>
-        <Button className="w-36 h-12" onClick={handleCancel}>
+        <dl className={styles.list}>
+          <div className={styles.row}>
+            <dt className={styles.label}>최종 환불 예정 금액</dt>
+            <dd className={styles.value}>100,000원</dd>
+          </div>
+          <div className={styles.row}>
+            <dt className={styles.label}>환불 수수료</dt>
+            <dd className={styles.value}>2,000원</dd>
+          </div>
+
+          <div role="separator" className={styles.divider} />
+
+          <div className={styles.rowTotal}>
+            <dt className={styles.totalLabel}>결제 금액</dt>
+            <dd className={styles.totalValue}>102,000원</dd>
+          </div>
+        </dl>
+
+        <p className={styles.notice}>
+          환불은 결제 수단에 따라 영업일 기준 3~5일 소요될 수 있습니다.
+        </p>
+      </section>
+
+      {/* 하단 고정 액션 영역 멍 */}
+      <div className={styles.actions} role="group" aria-label="환불 진행">
+        <Button className={`${styles.btn} ${styles.btnGhost}`} onClick={handleCancel}>
           환불 취소
         </Button>
-        <Button className="w-36 h-12" onClick={handleRefundClick}>
+        <Button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleRefundClick}>
           환불
         </Button>
       </div>
