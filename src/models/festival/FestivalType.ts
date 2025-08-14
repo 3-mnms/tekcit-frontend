@@ -1,6 +1,6 @@
 export interface Festival {
   id: string;
-  fname: string;
+  prfnm: string;
   fdfrom: string;
   fdto: string;
   poster: string;

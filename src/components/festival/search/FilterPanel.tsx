@@ -5,6 +5,7 @@ import { getFestivalCategories } from '@shared/api/festival/FestivalApi';
 import styles from './FilterPanel.module.css';
 
 const WEEK_LABELS = ['일','월','화','수','목','금','토'];
+const DEFAULT_STATUSES = ['공연중', '공연예정'] as const;
 
 const fmt = (d: Date) => {
   const y = d.getFullYear();
@@ -16,10 +17,10 @@ const fmt = (d: Date) => {
 export default function FilterPanel() {
   const [params, setParams] = useSearchParams();
 
-  // ✅ 초기값을 URL에서 읽고, 없으면 기본 ['공연중','공연예정']
+  // ✅ URL → 상태 복원 (없으면 기본값)
   const [saleStatus, setSaleStatus] = useState<string[]>(() => {
     const p = params.get('status');
-    return p ? p.split(',').filter(Boolean) : ['공연중','공연예정'];
+    return p ? p.split(',').filter(Boolean) : [...DEFAULT_STATUSES];
   });
   const [genres, setGenres] = useState<string[]>(() => {
     const p = params.get('genres');
@@ -27,7 +28,7 @@ export default function FilterPanel() {
   });
   const [regions, setRegions] = useState<string[]>([]); // (보류)
 
-  // 카테고리 가져오기 (전부 노출)
+  // 카테고리
   const { data: categories } = useQuery({
     queryKey: ['festivalCategories'],
     queryFn: getFestivalCategories,
@@ -43,20 +44,17 @@ export default function FilterPanel() {
     new Date(today.getFullYear(), today.getMonth(), 1)
   );
 
-  // 기간 선택 (from/to를 URL에서 복원)
+  // 기간 (URL → 복원)
   const [range, setRange] = useState<{ start: Date | null; end: Date | null }>(() => {
     const from = params.get('from');
     const to = params.get('to');
-    return {
-      start: from ? new Date(from) : null,
-      end: to ? new Date(to) : null,
-    };
+    return { start: from ? new Date(from) : null, end: to ? new Date(to) : null };
   });
 
-  // 🔄 URL 변경(뒤로가기 등) 시 로컬 상태 동기화
+  // 🔄 URL 변동 시 로컬 상태 동기화
   useEffect(() => {
     const pStatus = params.get('status');
-    setSaleStatus(pStatus ? pStatus.split(',').filter(Boolean) : ['공연중','공연예정']);
+    setSaleStatus(pStatus ? pStatus.split(',').filter(Boolean) : [...DEFAULT_STATUSES]);
 
     const pGenres = params.get('genres');
     setGenres(pGenres ? pGenres.split(',').filter(Boolean) : []);
@@ -70,9 +68,7 @@ export default function FilterPanel() {
   const m = viewDate.getMonth();
   const daysInMonth = new Date(y, m + 1, 0).getDate();
   const firstDayIdx = new Date(y, m, 1).getDay();
-
-  const padMonth = (n: number) => String(n).padStart(2, '0');
-  const title = `${y}.${padMonth(m + 1)}`;
+  const title = `${y}.${String(m + 1).padStart(2, '0')}`;
 
   const toggle = (list: string[], value: string, setter: (v: string[]) => void) => {
     setter(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -81,12 +77,10 @@ export default function FilterPanel() {
   const prevMonth = () => setViewDate(new Date(y, m - 1, 1));
   const nextMonth = () => setViewDate(new Date(y, m + 1, 1));
 
-  // 날짜 유틸
   const strip = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const sameDay = (a: Date, b: Date) =>
     a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
-  // 시작 → 종료 → 다시 시작
   const handleDayClick = (dateObj: Date) => {
     const d = strip(dateObj);
     if (!range.start || (range.start && range.end)) {
@@ -97,23 +91,20 @@ export default function FilterPanel() {
     }
   };
 
-  // ✅ 필터 적용 → URL 쿼리 갱신 (status 사용!)
+  // ✅ 필터 적용 → URL 갱신 (status 사용)
   const applyFilters = () => {
     const next = new URLSearchParams(params);
 
-    // 장르(여러 개 가능) → 'genres'에 콤마로
     if (genres.length) next.set('genres', genres.join(','));
     else next.delete('genres');
 
-    // 공연상태 → 'status'
     if (saleStatus.length) next.set('status', saleStatus.join(','));
-    else next.delete('status');
+    else next.set('status', DEFAULT_STATUSES.join(',')); // 비우면 기본값 강제
 
-    // 기간 → from/to (YYYY-MM-DD)
     if (range.start) next.set('from', fmt(range.start)); else next.delete('from');
     if (range.end)   next.set('to', fmt(range.end));     else next.delete('to');
 
-    // 페이지 유지 필요 없으면 리셋 가능: next.delete('page');
+    // 새 검색이면 page 리셋하고 싶다면: next.set('page', '1');
     setParams(next, { replace: false });
   };
 
@@ -123,7 +114,7 @@ export default function FilterPanel() {
         <div className={styles.body}>
           <h3 className={styles.title}>필터</h3>
 
-          {/* 장르 (API에서 전체 카테고리) */}
+          {/* 장르 */}
           <section className={styles.section}>
             <div className={styles.labelRow}>
               <span className={styles.label}>장르</span>
@@ -234,13 +225,13 @@ export default function FilterPanel() {
             onClick={() => {
               setGenres([]);
               setRegions([]);
-              setSaleStatus(['공연중','공연예정']);
+              setSaleStatus([...DEFAULT_STATUSES]);
               setRange({ start: null, end: null });
               setViewDate(new Date(today.getFullYear(), today.getMonth(), 1));
 
               const next = new URLSearchParams(params);
               next.delete('genres');
-              next.delete('status'); // ✅ sale → status
+              next.set('status', DEFAULT_STATUSES.join(',')); // ✅ 초기화해도 기본 상태 유지
               next.delete('from');
               next.delete('to');
               setParams(next, { replace: false });

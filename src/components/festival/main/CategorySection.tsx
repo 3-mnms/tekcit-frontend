@@ -176,13 +176,13 @@ const CategorySection: React.FC = () => {
       <div className={styles.cardSlider}>
         {displayed.map((festival, idx) => {
           const posterSrc = buildPosterUrl(festival);
-          const key = `${(festival as any).fid || festival.id || 'unknown'}-${idx}`;
+          const key = `${(festival as any).fid || (festival as any).id || 'unknown'}-${idx}`;
           return (
             <div key={key} className={styles.card}>
               <div className={styles.imageWrapper}>
                 <img
                   src={posterSrc || '/assets/placeholder-poster.png'}
-                  alt={festival.fname}
+                  alt={festival.prfnm}
                   className={styles.image}
                   referrerPolicy="no-referrer"
                   onError={(e) => {
@@ -190,11 +190,16 @@ const CategorySection: React.FC = () => {
                   }}
                 />
               </div>
-              <h3 className={styles.name}>{festival.fname}</h3>
+              <h3 className={styles.name}>{festival.prfnm}</h3>
               <p className={styles.date}>
-                {festival.fdfrom === festival.fdto ? festival.fdfrom : `${festival.fdfrom} ~ ${festival.fdto}`}
+                {/* ✅ 날짜 필드 교체: fdfrom/fdto → prfpdfrom/prfpdto */}
+                {festival.prfpdfrom === festival.prfpdto
+                  ? festival.prfpdfrom
+                  : `${festival.prfpdfrom} ~ ${festival.prfpdto}`}
               </p>
-              <p className={styles.location}>{(festival as any).area} · {(festival as any).fcltynm}</p>
+              <p className={styles.location}>
+                {(festival as any).area} · {(festival as any).fcltynm}
+              </p>
             </div>
           );
         })}
