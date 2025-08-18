@@ -1,0 +1,72 @@
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 3rem;   /* 약 48px */
+  height: 1.2rem; /* 약 18px */
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  border-radius: 999px;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 1rem;   /* 약 16px */
+  width: 1rem;
+  left: 0.1rem;
+  bottom: 0.1rem;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(1.8rem); /* 슬라이더 이동 거리 */
+}
+
+.onText, .offText {
+  position: absolute;
+  color: white;
+  font-size: 0.5rem;
+  line-height: 1.2rem;
+  font-weight: 600;
+  top: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.onText {
+  left: 0.4rem;
+  opacity: 0;
+}
+
+.offText {
+  right: 0.4rem;
+  opacity: 1;
+}
+
+input:checked + .slider .onText {
+  opacity: 1;
+}
+
+input:checked + .slider .offText {
+  opacity: 0;
+}

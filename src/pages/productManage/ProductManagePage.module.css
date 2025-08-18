@@ -1,0 +1,22 @@
+.container {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.searchBar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1rem;
+
+}
+
+.searchBar > div {
+    width: 100%; /* 삐약! 검색바의 너비를 적당하게 조절합니다! */
+}
+
+.buttons{
+    gap: 1rem;
+    display: flex;
+}

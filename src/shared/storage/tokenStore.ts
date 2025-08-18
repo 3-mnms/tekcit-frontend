@@ -1,18 +1,13 @@
-let accessToken: string | null = null;
-
-const KEY = 'accessToken';
-
 export const tokenStore = {
-  get() {
-    return accessToken ?? localStorage.getItem(KEY);
+  get(): string | null {
+    return localStorage.getItem('accessToken') 
   },
-  set(token: string | null) {
-    accessToken = token;
-    if (token) localStorage.setItem(KEY, token);
-    else localStorage.removeItem(KEY);
+  set(token: string) {
+    localStorage.setItem('accessToken', token)
+    window.dispatchEvent(new Event('auth:token'))
   },
   clear() {
-    accessToken = null;
-    localStorage.removeItem(KEY);
+    localStorage.removeItem('accessToken')
+    window.dispatchEvent(new Event('auth:token'))
   },
-};
+}
