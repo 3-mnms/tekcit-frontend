@@ -1,77 +1,108 @@
-import React, { useEffect, useRef } from "react";
-import styles from "./SocialLogin.module.css";
-import KaKao from "@assets/kakao.png";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useRef } from 'react'
+import styles from './SocialLogin.module.css'
+import KaKao from '@assets/kakao.png'
+import { reissue, type ReissueResponseDTO } from '@/shared/api/auth/login'
+import { tokenStore } from '@/shared/storage/tokenStore'
 
-const POPUP_NAME = "kakaoPopup";
+const POPUP_NAME = 'kakaoPopup'
 
 const SocialLogin: React.FC = () => {
-  const navigate = useNavigate();
-  const popupRef = useRef<Window | null>(null);
-  const pollTimer = useRef<number | null>(null);
+  const popupRef = useRef<Window | null>(null)
+  const pollTimer = useRef<number | null>(null)
+  const storagePollTimer = useRef<number | null>(null)
+  const processedRef = useRef(false)
+
+  const finishAndGo = async (status: 'existing' | 'new') => {
+    if (processedRef.current) return
+    processedRef.current = true
+
+    try {
+      const data = await reissue()
+      const access = (data as ReissueResponseDTO)?.accessToken
+      if (access) {
+        tokenStore.set(access)
+        console.log('[Kakao] accessToken (raw):', access)
+      }
+    } catch (e) {
+      console.error('[kakao] reissue failed', e)
+    }
+
+    if (pollTimer.current) window.clearInterval(pollTimer.current)
+    if (storagePollTimer.current) window.clearInterval(storagePollTimer.current)
+    try { popupRef.current?.close() } catch {}
+    try { localStorage.removeItem('kakao_auth_done') } catch {}
+
+    if (status === 'existing') {
+      window.location.replace('/')
+    } else {
+      window.location.replace('/auth/signup/kakao?provider=kakao')
+    }
+  }
 
   useEffect(() => {
-    const onMessage = (e: MessageEvent) => {
-      if (e.origin !== window.location.origin) return;
-      if (!e.data) return;
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== 'kakao_auth_done' || !e.newValue) return
+      try {
+        const payload = JSON.parse(e.newValue) as { status: 'existing' | 'new'; ts: number }
+        void finishAndGo(payload.status)
+      } catch {}
+    }
+    window.addEventListener('storage', onStorage)
 
-      if (e.data.type === "kakao-auth") {
-        const { status, ready } = e.data as { status: "existing" | "new"; ready?: boolean };
+    storagePollTimer.current = window.setInterval(() => {
+      const v = localStorage.getItem('kakao_auth_done')
+      if (!v) return
+      try {
+        const payload = JSON.parse(v) as { status: 'existing' | 'new'; ts: number }
+        void finishAndGo(payload.status)
+      } catch {}
+    }, 400)
 
-        if (status === "existing" && ready) {
-          navigate("/login", { replace: true });
-          try { popupRef.current?.close(); } catch {}
-          if (pollTimer.current) window.clearInterval(pollTimer.current);
-          return;
-        }
+    const onFocus = () => {
+      const v = localStorage.getItem('kakao_auth_done')
+      if (!v) return
+      try {
+        const payload = JSON.parse(v) as { status: 'existing' | 'new'; ts: number }
+        void finishAndGo(payload.status)
+      } catch {}
+    }
+    window.addEventListener('visibilitychange', onFocus)
+    window.addEventListener('focus', onFocus)
 
-        if (status === "new" && ready) {
-          navigate("/auth/signup/kakao?provider=kakao", { replace: true });
-          try { popupRef.current?.close(); } catch {}
-          if (pollTimer.current) window.clearInterval(pollTimer.current);
-          return;
-        }
-      }
-
-      if (e.data.type === "kakao-signup-result") {
-        const { ok, error } = e.data as { ok: boolean; error?: string };
-        if (ok) {
-          navigate("/login", { replace: true });
-        } else {
-          alert(error || "카카오 회원가입 실패");
-        }
-        try { popupRef.current?.close(); } catch {}
-        if (pollTimer.current) window.clearInterval(pollTimer.current);
-      }
-    };
-
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, [navigate]);
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('visibilitychange', onFocus)
+      window.removeEventListener('focus', onFocus)
+      if (storagePollTimer.current) window.clearInterval(storagePollTimer.current)
+    }
+  }, [])
 
   const handleKakaoLogin = () => {
-    const w = 520;
-    const h = 680;
-    const left = window.screenX + (window.outerWidth - w) / 2;
-    const top = window.screenY + (window.outerHeight - h) / 2;
+    const w = 520
+    const h = 680
+    const left = window.screenX + (window.outerWidth - w) / 2
+    const top = window.screenY + (window.outerHeight - h) / 2
+
+    processedRef.current = false
 
     popupRef.current = window.open(
-      "/api/auth/kakao/authorize",
+      '/api/auth/kakao/authorize',
       POPUP_NAME,
-      `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`
-    );
+      `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`,
+    )
 
     if (!popupRef.current) {
-      window.location.href = "/api/auth/kakao/authorize";
-      return;
+      window.location.href = '/api/auth/kakao/authorize'
+      return
     }
 
     pollTimer.current = window.setInterval(() => {
       if (!popupRef.current || popupRef.current.closed) {
-        window.clearInterval(pollTimer.current!);
+        window.clearInterval(pollTimer.current!)
+        pollTimer.current = null
       }
-    }, 500);
-  };
+    }, 500)
+  }
 
   return (
     <div className={styles.container}>
@@ -80,7 +111,7 @@ const SocialLogin: React.FC = () => {
         카카오로 시작하기
       </button>
     </div>
-  );
-};
+  )
+}
 
-export default SocialLogin;
+export default SocialLogin

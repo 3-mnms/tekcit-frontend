@@ -1,6 +1,6 @@
 export const tokenStore = {
   get(): string | null {
-    return localStorage.getItem('accessToken') 
+    return localStorage.getItem('accessToken')
   },
   set(token: string) {
     localStorage.setItem('accessToken', token)

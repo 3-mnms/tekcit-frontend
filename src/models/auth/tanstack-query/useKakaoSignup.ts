@@ -1,33 +1,13 @@
 // src/models/auth/tanstack-query/useKakaoSignup.ts
 import { useMutation, type UseMutationResult } from '@tanstack/react-query';
-import type { KakaoSignupDTO } from '@/models/auth/schema/kakaoSignupSchema';
-import { kakaoApi } from '@/shared/api/axios';
 import type { AxiosError } from 'axios';
-
-interface KakaoErrorResponse {
-  errorCode?: string;
-  errorMessage?: string;
-  message?: string;
-  error?: string;
-  success?: boolean;
-}
+import { postKakaoSignup, type ApiErrorPayload } from '@/shared/api/auth/kakao';
+import type { KakaoSignupDTO } from '@/models/auth/schema/kakaoSignupSchema';
 
 export function useKakaoSignupMutation():
-  UseMutationResult<unknown, AxiosError<KakaoErrorResponse>, KakaoSignupDTO> {
-  return useMutation<unknown, AxiosError<KakaoErrorResponse>, KakaoSignupDTO>({
-    mutationFn: async (body: KakaoSignupDTO) => {
-      const res = await fetch('http://localhost:8080/api/auth/kakao/signupUser', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const msg = await res.text().catch(() => '');
-        throw new Error(msg || `HTTP ${res.status}`);
-      }
-      return res.json(); // UserResponseDTO
-    },
+  UseMutationResult<unknown, AxiosError<ApiErrorPayload>, KakaoSignupDTO> {
+  return useMutation({
+    mutationFn: postKakaoSignup,
     onError: (err) => {
       const data = err.response?.data;
       const msg =

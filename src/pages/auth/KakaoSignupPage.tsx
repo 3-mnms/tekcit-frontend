@@ -1,3 +1,4 @@
+// src/pages/auth/signup/KakaoSignupPage.tsx
 import React, { useCallback, useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -10,9 +11,12 @@ import Step2Form from '@/components/auth/signup/stepform/Step2Form'
 import Step3Form from '@/components/auth/signup/stepform/Step3Form'
 import KakaoPopupBridge from '@/components/auth/login/KakaoPopupBridge'
 
-import type { Step2, Step3 } from '@/models/auth/schema/signupSchema'
+import {
+  type KakaoStep2 as Step2,
+  type KakaoStep3 as Step3,
+  buildKakaoSignupDTO,
+} from '@/models/auth/schema/kakaoSignupSchema'
 import { useKakaoSignupMutation } from '@/models/auth/tanstack-query/useKakaoSignup'
-import type { KakaoSignupDTO } from '@/models/auth/schema/kakaoSignupSchema';
 
 const KakaoSignupPage: React.FC = () => {
   const navigate = useNavigate()
@@ -45,30 +49,14 @@ const KakaoSignupPage: React.FC = () => {
   const goPrevFromStep3 = useCallback(() => setStep(2), [])
 
   const handleStep3Next = useCallback(() => {
-    const rrnFront = acc2.rrnFront || ''
-    const rrnBackFirst = acc2.rrnBackFirst || ''
-    const residentNum = `${rrnFront}-${rrnBackFirst}`
-
-    // 프론트 1차 검증 (서버도 검증)
+    // 1차 프론트 검증
+    const residentNum = `${acc2.rrnFront ?? ''}-${acc2.rrnBackFirst ?? ''}`
     if (!/^\d{6}-[1-4]$/.test(residentNum)) {
       alert('주민번호 형식이 올바르지 않습니다. 예: 990101-1')
       return
     }
 
-    const mergedAddress = [acc3.address || '', acc3.detailAddress || '']
-      .filter(Boolean)
-      .join(' ')
-      .trim()
-
-    const body: KakaoSignupDTO = {
-      name: acc2.name ?? '',
-      phone: acc2.phone ?? '',
-      userProfile: {
-        residentNum,
-        address: mergedAddress,
-        zipCode: acc3.zipCode || '',
-      },
-    }
+    const body = buildKakaoSignupDTO(acc2, acc3)
 
     signupMut.mutate(body, {
       onSuccess: () => {
@@ -84,7 +72,7 @@ const KakaoSignupPage: React.FC = () => {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        {!!window.opener && <KakaoPopupBridge result="new" />}
+        {!!window.opener && <KakaoPopupBridge status="new" />}
 
         <img src={Logo} alt="tekcit logo" className={styles.logo} />
         <h2 className={styles.title}>회원가입</h2>
@@ -97,6 +85,7 @@ const KakaoSignupPage: React.FC = () => {
             onPrev={goPrevFromStep2}
             onNext={handleStep2Next}
             updateAcc={(p) => setAcc2((s) => ({ ...s, ...p }))}
+            // Step2Form 내부에서도 kakaoStep2Schema를 사용해 validate 해줘!
           />
         )}
 
@@ -108,6 +97,7 @@ const KakaoSignupPage: React.FC = () => {
               onNext={handleStep3Next}
               updateAcc={(p) => setAcc3((s) => ({ ...s, ...p }))}
               openAddress={openAddress}
+              // Step3Form도 kakaoStep3Schema 사용
             />
 
             {signupMut.isError && (

@@ -5,7 +5,7 @@ import logo from '@shared/assets/logo.png'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getFestivalCategories } from '@shared/api/festival/FestivalApi'
-import { useAuthStore } from '@shared/storage/useAuthStore'
+import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
 import UserDropdown from '@/pages/my/dropdown/UserDropdown'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 
@@ -23,9 +23,12 @@ const categoryMap: Record<string, string> = {
 const Header: React.FC = () => {
   const navigate = useNavigate()
   const [keyword, setKeyword] = useState('')
-  const { isLoggedIn, user } = useAuthStore()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const { data: tokenInfo, isLoading } = useTokenInfoQuery()
+  const isStaff = tokenInfo?.role === 'ADMIN' || tokenInfo?.role === 'HOST'
+  const displayName = tokenInfo?.name ?? '' // ← DB에서 온 이름 (토큰 클레임)
 
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
@@ -62,18 +65,6 @@ const Header: React.FC = () => {
   }
 
   const groupedCategories = groupCategories(categories)
-
-  const getRoleDisplayName = () => {
-    if (!user) return '사용자'
-    switch (user.role) {
-      case 'USER':  return `${user.name} 님`
-      case 'HOST':  return '호스트 님'
-      case 'ADMIN': return '관리자 님'
-      default:      return '사용자 님'
-    }
-  }
-
-  const isStaff = user?.role === 'ADMIN' || user?.role === 'HOST'
 
   return (
     <header className={styles.header}>
@@ -115,18 +106,24 @@ const Header: React.FC = () => {
       </div>
 
       <div className={styles.right} ref={dropdownRef}>
-        {isLoggedIn ? (
+        {isLoading ? (
+          <div className={styles.rightButton} aria-hidden="true" />
+        ) : tokenInfo ? (
           isStaff ? (
-            // ✅ 같은 SPA 라우트로 이동
             <div className={styles.rightButton} onClick={() => navigate('/admin')}>
               <i className="fa-regular fa-user" />
               <span>관리자 페이지</span>
             </div>
           ) : (
             <>
-              <div className={styles.rightButton} onClick={() => setIsDropdownOpen((p) => !p)}>
+              <div
+                className={styles.rightButton}
+                onClick={() => setIsDropdownOpen((p) => !p)}
+                aria-expanded={isDropdownOpen}
+                aria-haspopup="menu"
+              >
                 <i className="fa-regular fa-user" />
-                <span>{getRoleDisplayName()}</span>
+                <span>{displayName} 님</span>
               </div>
               {isDropdownOpen && (
                 <div className={styles.dropdownWrapper}>
