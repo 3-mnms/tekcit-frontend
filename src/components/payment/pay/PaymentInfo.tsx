@@ -3,11 +3,25 @@ import styles from './PaymentInfo.module.css'
 const deliveryType = 'QR'
 
 const PaymentInfo = () => {
+  const posterUrl = '/images/festival-poster.jpg' // public/images에 저장
+
   return (
     <div className={styles.container}>
       <div className={styles.contentWrapper}>
         <div className={styles.header}>
-          <div className={styles.posterPlaceholder}></div>
+          {/* 🔹 포스터 이미지 + 네모 placeholder 멍 */}
+          <div className={styles.posterWrapper}>
+            {posterUrl ? (
+              <img
+                src={posterUrl}
+                alt="페스티벌 포스터"
+                className={styles.posterImage}
+              />
+            ) : (
+              <div className={styles.posterPlaceholder}></div>
+            )}
+          </div>
+
           <div className={styles.title}>페스티벌 제목</div>
         </div>
 
@@ -32,8 +46,6 @@ const PaymentInfo = () => {
                   {deliveryType === 'QR' ? 'QR 티켓' : '지류 티켓'}
                 </td>
               </tr>
-
-              {/* 배송료는 여전히 조건부 렌더링 */}
               {deliveryType === 'QR' ? (
                 <tr>
                   <td className={styles.label}>배송료</td>
@@ -45,7 +57,6 @@ const PaymentInfo = () => {
                   <td className={styles.value}>3,000원</td>
                 </tr>
               )}
-
               <tr className={styles.totalRow}>
                 <td className={styles.totalLabel}>총 결제 금액</td>
                 <td className={styles.totalValue}>157,000원</td>

@@ -57,11 +57,6 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // '/api': {
-      //   target: 'http://localhost:8080',
-      //   changeOrigin: true,
-      //   rewrite: path => path.replace(/^\/api/, ''),
-      // },
       '/api/users': {
         target: 'http://localhost:8080',
         changeOrigin: true,
@@ -72,6 +67,9 @@ export default defineConfig({
       },
       '/api/auth/kakao': {
         target: 'http://localhost:8080',
+      },
+      '/api/festival': {
+        target: 'http://localhost:8083',
         changeOrigin: true,
       },
     },

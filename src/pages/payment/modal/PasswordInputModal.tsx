@@ -26,7 +26,7 @@ const PasswordInputPage: React.FC<PasswordInputModalProps> = ({ onComplete, onCl
 
       if (newPassword.length === 6) {
         // ✅ 여기서 비밀번호 검사
-        const isCorrect = newPassword === '123456' // ← 임시 정답
+        const isCorrect = newPassword === '123456' // ← 임시
 
         if (isCorrect) {
           setTimeout(() => {
