@@ -1,0 +1,25 @@
+.inputGroup{
+    display: flex;
+    align-items: center;
+}
+
+.input {
+    width: 100%;
+    padding: 0.5% 0.5rem;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.7rem;
+}
+
+.input:focus {
+    border-color: #4d9afd;
+    outline: none;
+}
+
+.suffix {
+    margin-left: 0.5rem;
+    font-size: 0.7rem;
+    color: #555;
+    white-space: nowrap;
+}

@@ -1,0 +1,53 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  
+}
+
+th {
+  border: 1px solid #ddd;
+  padding: 8px 10px;
+  text-align: center;
+  font-size: 14px;
+}
+
+td {
+  border: 1px solid #ddd;
+  padding: 5px 10px;
+  text-align: center;
+  font-size: 14px;
+}
+
+thead {
+  background-color: #f9f9f9;
+  font-weight: 600;
+}
+
+.actionColumn {
+  width: 15%;
+  min-width: 100px;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  border-left: none;
+  border-top: none;
+}
+
+.edit {
+  background-color: white;
+  border: 1px solid;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete {
+  background-color: white;
+  border: 1px solid;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}

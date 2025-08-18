@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 
 // mainpage
-import HomePage from '@pages/home/MainPage'
+import MainPage from '@pages/home/MainPage'
 import CategoryPage from '@pages/home/CategoryPage';
 import FestivalDetailPage from '@pages/festival-detail/FestivalDetailPage'
 
@@ -39,8 +39,20 @@ import WalletChargePage from '@/pages/payment/pay/WalletChargePage'
 import ResultPage from '@/pages/payment/result/ResultPage' 
 import SearchPage from '@/pages/home/SearchPage';
 
+// admin & host
+import HomePage from '@/pages/home/HomePage'
+import Layout from '@/pages/home/LayoutTestPage'
+import AnnouncementListPage from '@/pages/announcement/AnnouncementListPage'
+import ProductManagePage from '@/pages/productManage/ProductManagePage'
+import ProductRegisterPage from '@/pages/productRegist/ProductRegistPage'
+import OperatManageHostPage from '@/pages/operatManageHost/OperatManageHostPage'
+import OperatManageUserPage from '@/pages/operatManageUser/OperatManageUserPage'
+import ProductDetailPage from '@/pages/productManage/ProductDetailPage'
+import TicketHolderListPage from '@/pages/productManage/TicketHolderListPage'
+import StatisticsPage from '@/pages/productManage/StatisticsPage'
+
 export const router = createBrowserRouter([
-  { path: '/', element: <HomePage /> },
+  { path: '/', element: <MainPage /> },
   { path: '/category/:name', element: <CategoryPage /> },
   { path: '/search', element: <SearchPage /> },
   { path: "/festival/:id", element: <FestivalDetailPage /> },
@@ -49,6 +61,7 @@ export const router = createBrowserRouter([
   { path: '/find-id', element: <FindIdPage /> },
   { path: '/find-password', element: <FindPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
+  
 
   {
     path: '/mypage',
@@ -118,6 +131,24 @@ export const router = createBrowserRouter([
           { path: 'money-charge', element: <WalletChargePage /> },
         ],
       },
+    ],
+  },
+
+  {
+    path: '/admin',
+    children: [
+      { path: '', element: <ProductRegisterPage /> }, 
+      { path: 'operatManage/user', element: <OperatManageUserPage /> },
+      { path: 'operatManage/host', element: <OperatManageHostPage /> },
+      { path: 'productRegist', element: <ProductRegisterPage /> },
+      { path: 'announcement', element: <AnnouncementListPage /> },
+      { path: 'productManage', element: <ProductManagePage /> },
+      { path: 'product-detail/:id', element: <ProductDetailPage /> },
+      { path: 'productManage/:id/TicketHolderList', element: <TicketHolderListPage /> },
+      { path: 'productManage/Statistics/:id', element: <StatisticsPage /> },
+
+      { path: 'button', element: <HomePage /> },
+      { path: 'layout', element: <Layout /> },
     ],
   },
 ])
