@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import Button from '@/components/common/Button';
-import { getProductDetail, deleteProduct } from '@/shared/api/festival';
+import { getProductDetail, deleteProduct } from '@/shared/api/admin/host/festival';
 import styles from './ProductDetailPage.module.css';
-import type { FestivalScheduleDTO} from '@/models/festival';
+import type { FestivalScheduleDTO} from '@/models/admin/host/festival';
 
 const ProductDetailPage: React.FC = () => {
     const navigate = useNavigate();

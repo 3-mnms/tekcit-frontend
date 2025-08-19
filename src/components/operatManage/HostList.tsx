@@ -1,7 +1,7 @@
 import React from 'react';
 import Table, {type Column} from '@/components/shared/Table';
 import ToggleSwitch from '@/components/operatManage/ToggleSwitch';
-import { USERROLE, type User } from '@/models/User';
+import { USERROLE, type User } from '@/models/admin/host/User';
 
 interface HostListProps  {
     users: User[];

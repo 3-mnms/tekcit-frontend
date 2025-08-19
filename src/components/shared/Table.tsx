@@ -9,17 +9,20 @@ export interface Column<T> {
 
 interface TableProps<T extends object> {
     columns: Column<T>[];
-    data: T[];
+    data: T[] | undefined | null; 
     onRowClick?: (item: T) => void;
     isSelectable?: boolean; 
+    getUniqueKey: (item: T) => string | number;
 }
 
-const Table = <T extends object>({ columns, data, onRowClick, isSelectable = false }: TableProps<T>) => {
+const Table = <T extends object>({ columns, data, onRowClick, getUniqueKey, isSelectable = false }: TableProps<T>) => {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+    const safeData = Array.isArray(data) ? data : [];
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
-            const allIds = data.map(item => (item as { id: number }).id as number);
+            const allIds = safeData.map(item => (item as { id: number }).id as number);
             setSelectedIds(allIds);
         } else {
             setSelectedIds([]);
@@ -34,7 +37,7 @@ const Table = <T extends object>({ columns, data, onRowClick, isSelectable = fal
         }
     };
 
-    const isAllSelected = data.length > 0 && selectedIds.length === data.length;
+    const isAllSelected = safeData.length > 0 && selectedIds.length === safeData.length;
 
     return (
         <div className={styles.tableContainer}>
@@ -51,7 +54,7 @@ const Table = <T extends object>({ columns, data, onRowClick, isSelectable = fal
                         </th>
                         )}
                         {columns.map(column => (
-                            // 삐약! 모든 <th>에 고유한 key를 부여합니다.
+
                             <th key={column.columnId as string} className={styles.th}>
                                 {column.label}
                             </th>
@@ -59,8 +62,8 @@ const Table = <T extends object>({ columns, data, onRowClick, isSelectable = fal
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map(item => (
-                        <tr key={(item as { id: string | number }).id} onClick={() => onRowClick?.(item)}
+                    {safeData.map(item => (
+                        <tr key={getUniqueKey(item)} onClick={() => onRowClick?.(item)}
                         className={onRowClick ? styles.clickableRow : ''}
                     >   {isSelectable && (
                             <td key={`${(item as { id: string | number }).id}-checkbox`} className={styles.td}>
@@ -72,7 +75,7 @@ const Table = <T extends object>({ columns, data, onRowClick, isSelectable = fal
                             </td>
                         )}
                         {columns.map(column => (
-                            <td key={`${(item as { id: string | number }).id}-${String(column.columnId)}`}> 
+                            <td key={`${getUniqueKey(item)}-${String(column.columnId)}`}> 
                                 {column.render ? column.render(item) : (item[column.columnId as keyof T] as React.ReactNode)}
                             </td>
                         ))}

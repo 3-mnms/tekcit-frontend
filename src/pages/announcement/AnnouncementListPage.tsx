@@ -4,7 +4,7 @@ import SearchBar from '@/components/common/SearchBox';
 import AnnouncementList from '@/components/announcement/AnnouncementList';
 import AnnouncementModal from '@/components/announcement/AnnouncementModal';
 import styles from './AnnouncementListPage.module.css';
-import type { Announcement } from '@/models/Announcement';
+import type { Announcement } from '@/models/admin/host/Announcement';
 
 const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
   {

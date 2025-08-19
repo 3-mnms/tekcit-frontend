@@ -3,7 +3,7 @@ import Table from '@/components/shared/Table';
 import type { Column } from '@/components/shared/Table';
 import ToggleSwitch from '@/components/operatManage/ToggleSwitch';
 import AddressDropdown from '@/components/operatManage/AddressDropdown';
-import { USERROLE, type User } from '@/models/User';
+import { USERROLE, type User } from '@/models/admin/host/User';
 
 interface UserListProps {
     users: User[];

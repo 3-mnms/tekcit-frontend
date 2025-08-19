@@ -1,6 +1,6 @@
 // src/shared/data/mockHosts.ts
 
-import { USERROLE, type User } from '@/models/User';
+import { USERROLE, type User } from '@/models/admin/host/User';
 
 export const MOCK_HOSTS: User[] = [
     {

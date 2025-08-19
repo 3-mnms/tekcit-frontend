@@ -7,9 +7,9 @@ import DatePicker from '@components/shared/DatePicker';
 import Button from '@components/common/Button';
 import PostcodeSearch from '@/components/product/PostcodeSearch';
 import ScheduleDropdown from '@/components/product/ScheduleDropdown';
-import {initialProductData, type Festival, type DayOfWeek} from '@/models/festival';
+import {initialProductData, type Festival, type DayOfWeek} from '@/models/admin/host/festival';
 import CastInput from '@/components/product/CastInput';
-import { createProduct, getProductDetail, updateProduct } from '@/shared/api/festival';
+import { createProduct, getProductDetail, updateProduct } from '@/shared/api/admin/host/festival';
 
 import styles from './ProductRegistPage.module.css';
 

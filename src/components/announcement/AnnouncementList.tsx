@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './AnnouncementList.module.css';
-import type { Announcement } from '@/models/Announcement';
+import type { Announcement } from '@/models/admin/host/Announcement';
 
 interface Props {
   announcements: Announcement[];
