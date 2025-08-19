@@ -41,20 +41,12 @@ jobs:
           test -d dist || { echo "❌ dist not found"; exit 1; }
           ls -al dist | head -n 50
 
-      # 🧩 CI 전용 Dockerfile을 동적으로 생성 (heredoc 대신 printf 사용)
-      - name: Create runtime Dockerfile (CI-only)
+      # 🧩 빌드 산출물 전용 컨텍스트 생성 (.dockerignore 영향 회피)
+      - name: Create CI build context (Dockerfile + default.conf + dist)
         run: |
           set -euo pipefail
 
-          # 1) Dockerfile.ci 생성
-          printf '%s\n' \
-            'FROM nginx:1.27-alpine' \
-            'COPY default.conf /etc/nginx/conf.d/default.conf' \
-            'COPY dist /usr/share/nginx/html' \
-            'EXPOSE 80' \
-            'CMD ["nginx","-g","daemon off;"]' > Dockerfile.ci
-
-          # 2) Nginx 설정: repo에 deploy/nginx.conf 있으면 사용, 없으면 SPA 기본 생성
+          # 1) default.conf 준비: repo에 있으면 사용, 없으면 SPA 기본 생성
           if [ -f deploy/nginx.conf ]; then
             cp deploy/nginx.conf default.conf
           else
@@ -82,8 +74,25 @@ jobs:
               '}' > default.conf
           fi
 
-          echo "== Dockerfile.ci =="; cat Dockerfile.ci
-          echo "== default.conf ==";  sed -n '1,120p' default.conf
+          # 2) ci-context 생성 및 파일 복사
+          rm -rf ci-context
+          mkdir -p ci-context
+          cp -r dist ci-context/dist
+          cp default.conf ci-context/default.conf
+
+          # 3) 컨텍스트용 Dockerfile 생성
+          cat > ci-context/Dockerfile <<'DOCKER'
+          FROM nginx:1.27-alpine
+          COPY default.conf /etc/nginx/conf.d/default.conf
+          COPY dist /usr/share/nginx/html
+          EXPOSE 80
+          CMD ["nginx","-g","daemon off;"]
+          DOCKER
+
+          echo "== ci-context =="
+          ls -al ci-context
+          echo "== ci-context/dist (head) =="
+          ls -al ci-context/dist | head -n 30
 
       - name: ⏱️ Tag & Env
         run: |
@@ -108,8 +117,8 @@ jobs:
 
       - uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./Dockerfile.ci          # ← 방금 만든 CI 전용 Dockerfile 사용
+          context: ./ci-context              # ← dist 포함된 전용 컨텍스트
+          file: ./ci-context/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
