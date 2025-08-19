@@ -36,7 +36,7 @@ const SignupPage: React.FC = () => {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <img src={Logo} alt="tekcit logo" className={styles.logo} />
+        <img src={Logo} alt="tekcit logo" className={styles.logo} onClick={() => nav('/')}/>
         <h2 className={styles.title}>회원가입</h2>
 
         <ProgressBar percent={progress} />

@@ -67,9 +67,9 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className={styles.page}>
-      {isPopup && <KakaoPopupBridge result="existing" />}
+      {isPopup && <KakaoPopupBridge status="existing" />}
       <div className={styles.card}>
-        <img src={Logo} alt="tekcit logo" className={styles.logo} />
+        <img src={Logo} alt="tekcit logo" className={styles.logo} onClick={() => navigate('/')}/>
 
         <form onSubmit={handleSubmit(onSubmit)} className="w-full">
           <LoginInput
