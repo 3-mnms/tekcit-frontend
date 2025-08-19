@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router-dom'
 // mainpage
 import MainPage from '@pages/home/MainPage'
 import CategoryPage from '@pages/home/CategoryPage';
+import SearchPage from '@/pages/home/SearchPage';
 import FestivalDetailPage from '@pages/festival-detail/FestivalDetailPage'
 
 //auth
@@ -41,7 +42,6 @@ import RefundPage from '@/pages/payment/refund/RefundPage'
 import WalletPointPage from '@/pages/payment/pay/WalletPointPage'
 import WalletChargePage from '@/pages/payment/pay/WalletChargePage'
 import ResultPage from '@/pages/payment/result/ResultPage' 
-import SearchPage from '@/pages/home/SearchPage';
 
 // admin & host
 import HomePage from '@/pages/home/HomePage'
@@ -59,7 +59,7 @@ export const router = createBrowserRouter([
   { path: '/', element: <MainPage /> },
   { path: '/category/:name', element: <CategoryPage /> },
   { path: '/search', element: <SearchPage /> },
-  { path: "/festival/:id", element: <FestivalDetailPage /> },
+  { path: "/festival/:fid", element: <FestivalDetailPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/auth/signup', element: <SignupPage /> },
   {

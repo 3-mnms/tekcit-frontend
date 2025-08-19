@@ -3,7 +3,7 @@
   padding: 1.5rem 2%;
   background-color: white;
   border-radius: 1rem;
-  border: 1px solid #ddd;
+  border: none;
   margin-bottom: 2rem;
 }
 
@@ -24,4 +24,5 @@
 .description {
   font-size: 0.95rem;
   color: #555;
+  white-space: pre-line;
 }
