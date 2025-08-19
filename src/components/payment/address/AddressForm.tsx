@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import Button from '@components/common/button/Button'
 import { defaultAddress } from '@/models/payment/defaultAddress'
-import DeliveryManagePage from '@/pages/payment/modal/DeliveryManageModal'
+import DeliveryManagePage from '@/components/payment/modal/DeliveryManageModal'
 
 import styles from './AddressForm.module.css'
 

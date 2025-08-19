@@ -1,132 +1,276 @@
-/* 🎨 테마 변수 멍 */
 :root {
-  --bg: #f2f4f8;        /* 페이지 배경 멍 */
-  --panel: #ffffff;     /* 카드/패널 배경 멍 */
-  --card: #f8f9fb;      /* 서브 카드 배경 멍 */
-  --text: #0f172a;      /* 본문 텍스트 색 멍 */
-  --muted: #64748b;     /* 보조 텍스트 색 멍 */
-  --brand: #1976d2;     /* 브랜드 메인 컬러 멍 */
-  --brand-2: #4d9afd;   /* 브랜드 그라데이션 보조 멍 */
-  --danger: #ef4444;    /* 경고/오류 색 멍 */
-  --ring: #94c6ff;      /* 포커스/하이라이트 멍 */
-  --radius: 12px;       /* 공통 라운드 멍 */
-  --shadow: 0 12px 32px rgba(0,0,0,.08); /* 공통 그림자 멍 */
+  --bg: #f2f4f8;
+  --panel: #ffffff;
+  --card: #f8f9fb;
+  --text: #0f172a;
+  --muted: #64748b;
+  --brand: #1976d2;
+  --brand-2: #4d9afd;
+  --danger: #ef4444;
+  --ring: #94c6ff;
+  --radius: 12px;
+  --shadow: 0 12px 32px rgba(0, 0, 0, .08);
 }
 
-/* 🧱 페이지 컨테이너 멍 */
 .page {
-  min-height: 100vh;       /* 뷰포트 채우기 멍 */
-  background: var(--bg);   /* 배경색 적용 멍 */
-  padding-bottom: 0;       /* 모바일 paybar 제거로 여백 0 멍 */
+  min-height: 100vh;
+  background: #f3f3f3;
+  padding-bottom: 0;
 }
 
-/* ⛳ 상단 고정 바 멍 */
 .topbar {
-  position: sticky; top: 0; z-index: 5;                 /* 스크롤 고정 멍 */
-  display: flex; justify-content: space-between; align-items: center; /* 정렬 멍 */
-  padding: 14px 24px; background: var(--panel);         /* 배경/여백 멍 */
-  box-shadow: 0 4px 12px rgba(0,0,0,.06);               /* 하단 그림자 멍 */
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: var(--panel);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .06);
 }
-.topbarTitle { font-weight: 700; color: var(--text); display: flex; gap: 8px; align-items: center; } /* 타이틀 섹션 멍 */
-.topbarRight { display: flex; gap: 8px; align-items: center; }                                       /* 우측 배지/타이머 멍 */
+
+.topbarTitle {
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.topbarRight {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .badge {
-  background: var(--card); color: var(--muted); border-radius: 999px; /* 칩 형태 배지 멍 */
-  padding: 6px 10px; font-size: .8rem;
+  background: var(--card);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: .8rem;
 }
-.timer { color: var(--brand); font-weight: 600; } /* 남은 시간 표시 강조 멍 */
 
-/* 🧭 메인 레이아웃 그리드 (좌: 결제수단 / 우: 요약) 멍 */
+.timer {
+  color: var(--brand);
+  font-weight: 600;
+}
+
 .booking-container {
-  display: grid; grid-template-columns: minmax(0, 1fr) 320px; /* 좌측 유동, 우측 고정 멍 */
-  gap: 32px; padding: 32px 20px; max-width: 1120px; margin: 0 auto; /* 중앙 정렬 멍 */
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 32px;
+  padding: 32px 20px;
+  max-width: 1120px;
+  margin: 0 auto;
+  align-items: start;            
 }
 
-/* 📦 좌우 패널 멍 */
-.left-panel { min-width: 0; display: flex; flex-direction: column; gap: 16px; } /* 좌측 스택 멍 */
+.booking-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(100% - 320px - 16px); 
+  width: 1px;
+  background-color: #e2e8f0; 
+}
+
+.left-panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #ffffff;
+}
+
 .right-panel {
-  position: sticky; top: 84px; align-self: start;       /* 스크롤 고정 카드 멍 */
-  background: var(--card); border-radius: var(--radius);/* 카드 스타일 멍 */
-  padding: 20px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px; /* 간격 멍 */
+  position: sticky;              
+  top: 32px;                     
+  align-self: start;             /* grid 내부 높이 계산 안정화 */
+  height: calc(100vh - 32px - 32px); /* 뷰포트 높이 - 상/하 패딩(32+32) */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;/* 위: 요약, 아래: 버튼 */
+  gap: 16px;                     /* 내부 섹션 간격 */
+  padding: 20px;
+  background: #ffffff;
+  border-radius: var(--radius);
 }
 
-/* 🧾 주문 요약/결제 버튼 섹션 멍 */
-.payment-summary-wrapper { overflow: hidden; } /* 내부 스크롤/넘침 방지 멍 */
-.pay-button-wrapper { margin-top: 4px; }       /* 버튼 위 여백 멍 */
+.payment-summary-wrapper {
+  flex: 1 1 auto;    /* 가용 높이 채우기 */
+  min-height: 0;     /* flex 컨테이너에서 overflow 동작을 위해 필요 */
+  overflow: auto;    /* 내용이 많으면 내부 스크롤 */
+}
+
+.pay-button-wrapper {
+  flex: 0 0 auto;    /* 버튼은 고정 높이 */
+  margin-top: 12px;
+}
 
 .pay-button {
-  width: 100%; padding: 14px; font-size: 1.05rem; font-weight: 700; /* CTA 버튼 기본 멍 */
-  color: #fff; background: linear-gradient(90deg, var(--brand-2), var(--brand)); /* 그라데이션 멍 */
-  border: 0; border-radius: 10px; cursor: pointer;                      /* 버튼 모양/커서 멍 */
-  transition: transform .08s ease, box-shadow .12s ease;                /* 인터랙션 멍 */
-  box-shadow: 0 8px 20px rgba(25,118,210,.25);                          /* 그림자 멍 */
+  width: 100%;
+  padding: 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, var(--brand-2), var(--brand));
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .12s ease;
+  box-shadow: 0 8px 20px rgba(25, 118, 210, .25);
 }
-.pay-button:hover:not(:disabled) { transform: translateY(-1px); }       /* 호버 상승 멍 */
-.pay-button:active:not(:disabled) { transform: translateY(0); }         /* 클릭 복귀 멍 */
-.pay-button:disabled { opacity: .65; cursor: not-allowed; box-shadow: none; } /* 비활성화 멍 */
 
-.terms { margin-top: 8px; font-size: .85rem; color: var(--muted); } /* 약관 텍스트 멍 */
-.terms a { color: var(--brand); text-decoration: underline; }       /* 링크 강조 멍 */
+.pay-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
 
-/* 🗂️ 공통 섹션 카드 멍 */
+.pay-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pay-button:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.terms {
+  margin-top: 8px;
+  font-size: .85rem;
+  color: var(--muted);
+}
+
+.terms a {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
 .section {
-  background: var(--panel); padding: 20px; border-radius: var(--radius); /* 카드 기본 멍 */
+  background: var(--panel);
+  padding: 20px;
+  border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
-.section-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; color: var(--text); } /* 섹션 제목 멍 */
 
-/* 🪗 결제수단 아코디언 멍 */
-.methodCard {
-  background: var(--panel); border: 1px solid transparent; border-radius: 14px; /* 카드 테두리/라운드 멍 */
-  transition: border-color .15s ease, box-shadow .15s ease; margin-bottom: 12px; /* 인터랙션/간격 멍 */
+.sectionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
 }
+
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #111827;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #111827;
+  margin-bottom: 16px;
+}
+
+.methodCard {
+  background: var(--panel);
+  border: 1px solid transparent;
+  border-radius: 14px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+  margin-bottom: 12px;
+}
+
 .methodCard[data-state="open"] {
-  border-color: var(--ring); /* 오픈 시 강조 테두리 멍 */
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent); /* 포커스 링 느낌 멍 */
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent);
 }
 
 .methodHeader {
-  width: 100%; background: transparent; border: 0; padding: 16px; /* 버튼 리셋 + 여백 멍 */
-  display: flex; justify-content: space-between; align-items: center; cursor: pointer; /* 정렬/커서 멍 */
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
 }
+
 .methodHeader:focus-visible {
   outline: 0;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 40%, transparent); /* 키보드 포커스 멍 */
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 40%, transparent);
   border-radius: 12px;
 }
 
-.methodMeta { display: flex; gap: 12px; align-items: center; text-align: left; } /* 아이콘/타이틀 라인 멍 */
-.methodIcon { width: 35px; height: 35px; object-fit: contain; }                  /* 결제 아이콘 멍 */
-.methodTitle { font-weight: 700; color: var(--text); }                            /* 결제수단 제목 멍 */
-.methodSub { color: var(--muted); font-size: .9rem; margin-left: 6px; }          /* 보조 설명 멍 */
+.methodMeta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+}
 
-.chevron { transition: transform .2s ease; }                      /* 화살표 회전 트랜지션 멍 */
-.methodCard[data-state="open"] .chevron { transform: rotate(180deg); } /* 오픈 시 화살표 반전 멍 */
+.methodIcon {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
 
-.methodBody { padding: 0 16px 16px; animation: expand .18s ease; } /* 열릴 때 페이드/슬라이드 멍 */
+.methodTitle {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.methodSub {
+  color: var(--muted);
+  font-size: .9rem;
+  margin-left: 6px;
+}
+
+.chevron {
+  transition: transform .2s ease;
+}
+
+.methodCard[data-state="open"] .chevron {
+  transform: rotate(180deg);
+}
+
+.methodBody {
+  padding: 0 16px 16px;
+  animation: expand .18s ease;
+}
+
 @keyframes expand {
-  from { opacity: .2; transform: translateY(-2px); }
-  to   { opacity: 1;  transform: none; }
+  from {
+    opacity: .2;
+    transform: translateY(-2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-/* ⚠️ 오류 메시지 멍 */
 .errorMsg {
-  margin-top: 8px; padding: 10px 12px; border-radius: 10px;        /* 박스형 알럿 멍 */
-  background: color-mix(in srgb, var(--danger) 12%, transparent);   /* 연한 배경 멍 */
-  color: var(--danger); border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent); /* 테두리 멍 */
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
 }
 
-/* 🔘 라디오 인디케이터(커스텀) 멍 */
 .radio {
-  width: 18px; height: 18px; flex-shrink: 0;           /* 원형 크기 고정 멍 */
-  border-radius: 999px; border: 2px solid #cbd5e1;     /* 외곽선 멍 */
-  background: #fff;                                    /* 내부 흰색 멍 */
-}
-.radioOn {
-  border-color: var(--text);                           /* 선택 시 외곽 강조 멍 */
-  box-shadow: inset 0 0 0 4px var(--text);             /* 내부 채움 효과 멍 */
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 2px solid #cbd5e1;
+  background: #fff;
 }
 
-/* 🧘 모션 최소화 접근성 멍 */
-@media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; }    /* 사용자의 설정 존중 멍 */
+.radioOn {
+  border-color: var(--text);
+  box-shadow: inset 0 0 0 4px var(--text);
 }

@@ -35,7 +35,6 @@
     padding: 10px 12px;
   }
 
-  /* 핵심 3줄: 라인 + 타이포만 */
   .row {
     display: flex;
     justify-content: space-between;

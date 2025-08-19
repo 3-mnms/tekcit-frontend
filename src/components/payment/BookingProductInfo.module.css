@@ -17,11 +17,6 @@
   border-radius: 16px;
   /* 둥근 모서리 멍 */
   padding: 16px 20px;
-  /* 안쪽 여백 멍 */
-  background: #fff;
-  /* 흰 배경 멍 */
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-  /* 미세 그림자 멍 */
 }
 
 /* ✅ 좌측 칼럼 멍 */

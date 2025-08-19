@@ -1,4 +1,3 @@
-// src/components/payment/pay/WalletPayment.tsx
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '@components/common/button/Button'

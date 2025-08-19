@@ -1,35 +1,31 @@
 .container {
   width: 100%;
-  height: 100%;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
+  gap: 24px;
 }
 
 .contentWrapper {
-  flex: 1;            
   display: flex;
   flex-direction: column;
-  justify-content: space-between; 
+  gap: 16px;
 }
 
 .header {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
-  margin-bottom: 20px;
-  flex: 0 0 auto;
 }
 
 .posterWrapper {
-  width: 80px;
-  height: 110px;
-  border-radius: 6px;
+  width: 84px;
+  height: 118px;
   overflow: hidden;
-  flex-shrink: 0;
-  background-color: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background-color: #f3f4f6;
 }
 
 .posterImage {
@@ -38,58 +34,59 @@
   object-fit: cover;
 }
 
-.posterPlaceholder {
-  width: 100%;
-  height: 100%;
-  background-color: #ddd;
-}
-
 .title {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #333;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.4;
 }
 
 .tableWrapper {
-  flex: 1;
-  overflow: visible;   
-  height: auto;        
+  width: 100%;
 }
 
 .infoTable {
   width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
+  background: #f9fafb;
+  overflow: hidden;
+}
+
+.infoTable tr:not(:last-child) {
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
-  padding: 6px 0;
+  color: #4b5563;
+  padding: 10px 12px;
 }
 
 .value {
   font-size: 14px;
-  font-weight: 400;
-  color: #111;
+  font-weight: 500;
+  color: #1f2937;
   text-align: right;
-  padding: 6px 0;
+  padding: 10px 12px;
 }
 
 .totalRow {
-  background-color: #f6f6f6;
+  background-color: #fff5f5;
 }
 
 .totalLabel {
-  font-weight: bold;
-  color: #000;
-  padding-top: 12px;
+  font-weight: 700;
+  color: #b91c1c;
+  padding: 14px 12px;
+  font-size: 15px;
 }
 
 .totalValue {
-  font-weight: bold;
-  color: red;
-  padding-top: 12px;
+  font-weight: 700;
+  color: #b91c1c;
   text-align: right;
+  font-size: 17px;
+  padding: 14px 12px;
 }

@@ -5,7 +5,7 @@ import styles from './RefundPage.module.css'
 
 import TransferTicketInfo from '@/components/payment/refund/RefundTicketInfo'
 import Button from '@/components/common/button/Button'
-import AlertModal from '@/pages/payment/modal/AlertModal'
+import AlertModal from '@/components/common/modal/AlertModal'
 
 const RefundPage: React.FC = () => {
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false)

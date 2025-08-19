@@ -9,7 +9,7 @@ const PaymentInfo = () => {
     <div className={styles.container}>
       <div className={styles.contentWrapper}>
         <div className={styles.header}>
-          {/* 🔹 포스터 이미지 + 네모 placeholder 멍 */}
+          {/* 🔹 포스터 이미지 + 네모 placeholder */}
           <div className={styles.posterWrapper}>
             {posterUrl ? (
               <img
@@ -22,7 +22,9 @@ const PaymentInfo = () => {
             )}
           </div>
 
-          <div className={styles.title}>페스티벌 제목</div>
+          <div className={styles.title}>
+            <span>페스티벌 제목</span>
+          </div>
         </div>
 
         <div className={styles.tableWrapper}>
@@ -39,12 +41,6 @@ const PaymentInfo = () => {
               <tr>
                 <td className={styles.label}>티켓 금액</td>
                 <td className={styles.value}>77,000원</td>
-              </tr>
-              <tr>
-                <td className={styles.label}>수령 방법</td>
-                <td className={styles.value}>
-                  {deliveryType === 'QR' ? 'QR 티켓' : '지류 티켓'}
-                </td>
               </tr>
               {deliveryType === 'QR' ? (
                 <tr>
