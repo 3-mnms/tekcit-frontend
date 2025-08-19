@@ -31,6 +31,9 @@ import TicketHistoryPage from '@/pages/my/ticket/TicketHistoryPage'
 import MyTicketPage from '@/pages/my/ticket/MyTicketPage'
 import TicketDetailPage from '@/pages/my/ticket/TicketDetailPage'
 
+// reservation
+import OrderPage from '@pages/reservation/TicketOrderPage'
+
 // payment
 import BookingPaymentPage from '@/pages/payment/BookingPaymentPage'
 import TransferPaymentPage from '@/pages/payment/transfer/TransferPaymentPage'
