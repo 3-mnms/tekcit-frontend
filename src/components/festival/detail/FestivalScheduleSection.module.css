@@ -2,12 +2,14 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 300px;
+  width: 100%;        /* ✅ 고정폭 없애고 부모 기준으로 늘어나게 */
+  max-width: 300px;   /* ✅ 원하면 최대 크기 제한 */
   background: white;
   border-radius: 1rem;
   padding: 1rem;
   border: 1px solid #ddd;
-  align-items: center; /* 요것도 가능 */
+  /* ✅ 자식들을 가로로 꽉 채우도록 */
+  align-items: stretch;
 }
 
 .title {
@@ -26,12 +28,8 @@
   border-radius: 60%;
   transition: 0.2s;
 }
-.active {
-  color: #2563eb;
-}
-.inactive {
-  color: #ccc;
-}
+.active { color: #2563eb; }
+.inactive { color: #ccc; }
 .selected {
   background-color: #2563eb;
   color: white;
@@ -42,6 +40,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  /* ✅ 섹션 안의 내용 왼쪽 정렬 */
+  align-items: flex-start;
+  width: 100%;
 }
 
 .label {
@@ -53,6 +54,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  /* ✅ 왼쪽 붙이기 */
+  justify-content: flex-start;
+  width: 100%;
 }
 
 .timeBtn {
@@ -62,24 +66,22 @@
   background-color: #f8f8f8;
   cursor: pointer;
 }
-.timeBtn:hover {
-  background-color: #e0eaff;
-}
+.timeBtn:hover { background-color: #e0eaff; }
 .selectedBtn {
   background-color: #4D9AFD;
   color: white;
   border: none;
 }
 
-.priceRow {
-  display:block;
-  justify-content: space-between;
-  align-items: center;
+/* 버튼 전용 영역 */
+.actionsRow {
+  margin-top: 1rem;
+  width: 100%;
+  display: flex;
+  /* ✅ 가로 꽉 채운 버튼 하나 */
+  justify-content: center;
 }
-.price {
-  font-weight: bold;
-  font-size: 1rem;
-}
+
 .confirmBtn {
   background-color: #4D9AFD;
   color: white;
@@ -88,7 +90,8 @@
   padding: 0.5rem 1rem;
   cursor: pointer;
   font-weight: 600;
-  width: 300px;
+  /* ✅ 컨테이너 내부 너비 100% */
+  width: 100%;
 }
 .confirmBtn:disabled {
   background-color: #ccc;
@@ -98,5 +101,6 @@
 .datepickerWrapper {
   width: 100%;
   display: flex;
+  /* 달력은 가운데 */
   justify-content: center;
 }
