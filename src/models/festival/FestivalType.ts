@@ -13,6 +13,15 @@ export interface FestivalWithViews extends Festival {
 }
 
 export interface FestivalDetail extends Festival {
-  runtime?: string;
-  age?: string;
+  fcast: string;
+  prfage: string;
+  story: string;
+  ticketPrice: number;
+  availableNOP: number;
+  prfstate: string;
+  faddress: string;
+  maxPurchase: number;
+  entrpsnmH: string;
+  runningTime: string;    // 백 JSON은 runningtime → API에서 매핑
+  contentFiles: string[];
 }
