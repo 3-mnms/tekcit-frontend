@@ -5,32 +5,35 @@
   box-sizing: border-box;
 }
 
-.contentWrapper {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 2rem;
+/* ✅ 페이지 본문 전체를 감싸는 2컬럼 그리드 */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr clamp(320px, 26vw, 420px);
+  column-gap: 2rem;
+  align-items: start;
   padding: 2rem 5%;
-  padding-left: 5%;
-  padding-right: 28%;
 }
 
+/* 좌측 컬럼: 내용이 길어져도 OK */
+.mainColumn {
+  min-width: 0;
+}
+
+/* ✅ sticky를 컬럼 자체에 적용 */
+.sideColumn {
+  position: sticky;
+  top: 80px;          /* 헤더 바로 아래서 고정되게 */
+  height: fit-content;/* 콘텐츠 높이만큼만 차지 */
+  align-self: start;  /* 그리드 아이템 상단에 고정 */
+  z-index: 2;         /* 필요시 위로 */
+}
+
+/* 내부 래퍼는 폭만 관리 */
 .schedulerSticky {
-  position: fixed;
-  top: 120px; /* 헤더 아래에 띄우고 싶으면 조정 */
-  right: 5%;
-  width: 20%; /* 적절히 조정 */
-  z-index: 10;
-  padding-right: 5%;
+  width: 100%;
 }
 
-/* 탭 메뉴 아래도 똑같이 수정해줘야 정렬 맞음 */
-.tabWrapper {
-  padding: 0 5%;
-  margin-top: 3rem;
-  padding-right: 28%;
-}
-
+/* 탭 */
 .tabWrapper {
   margin-top: 2rem;
   width: 100%;
@@ -57,7 +60,7 @@
 }
 
 .active {
-  color: black;
+  color: #000;
   font-weight: 700;
   border-bottom: 2px solid #000;
 }
@@ -67,4 +70,23 @@
   padding: 2rem;
   border: 1px solid #ddd;
   border-radius: 0.75rem;
+}
+
+/* 단일 컬럼 안내용 */
+.singleColumn {
+  padding: 2rem 5%;
+}
+
+/* 📱 반응형: 좁으면 한 컬럼으로 스택, sticky 해제 */
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .sideColumn {
+    order: 2;          /* 필요하면 아래로 */
+  }
+  .schedulerSticky {
+    position: static;  /* 모바일에서는 자연 흐름 */
+    margin-top: 1rem;
+  }
 }

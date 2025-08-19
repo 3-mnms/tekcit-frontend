@@ -18,8 +18,19 @@
 
 .poster {
   width: 100%;
-  aspect-ratio: 3 / 4; /* 120x160 비율 유지 */
+  aspect-ratio: 3 / 4;
   object-fit: cover;
+  border-radius: 0.5rem;
+  margin-bottom: 5%;
+}
+
+.posterPlaceholder {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  display: grid;
+  place-items: center;
+  background: #f3f4f6;
+  color: #9ca3af;
   border-radius: 0.5rem;
   margin-bottom: 5%;
 }
@@ -37,17 +48,50 @@
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 4%;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 6%;
+  color: #111;
 }
 
-.description {
-  margin-bottom: 3%;
-  line-height: 1.4;
+/* 라벨:값 한 줄 */
+.infoRows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
-.performers {
-  font-size: 0.9rem;
-  color: #666;
+.infoRow {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.label {
+  font-weight: 600;
+  color: #444;
+  margin-right: 0.5rem;
+  min-width: 80px;
+}
+
+.value {
+  color: #222;
+  flex: 1;
+}
+
+/* 출연 등 긴 텍스트 */
+.fullRow .value {
+  line-height: 1.5;
+}
+
+@media (max-width: 920px) {
+  .container {
+    flex-direction: column;
+  }
+  .left {
+    width: 100%;
+  }
+  .title {
+    margin-top: 1rem;
+  }
 }
