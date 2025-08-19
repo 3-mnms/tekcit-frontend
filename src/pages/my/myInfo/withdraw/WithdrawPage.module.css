@@ -2,6 +2,7 @@
   padding: 1.5rem;
   background-color: white;
   text-align: left;
+  max-width: 730px;
 }
 
 .title {

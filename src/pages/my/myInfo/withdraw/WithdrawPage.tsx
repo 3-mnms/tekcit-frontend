@@ -7,7 +7,6 @@ const WithdrawPage: React.FC = () => {
 
   const handleWithdraw = () => {
     if (!checked) return
-    // 여기에 실제 탈퇴 로직 추가
     alert('회원 탈퇴 처리되었습니다.')
   }
 
