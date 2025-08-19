@@ -15,18 +15,18 @@ const ProductDetailPage: React.FC = () => {
 
     // 삐약! useQuery를 사용해서 특정 상품의 상세 정보를 가져옵니다!
     const { data: product, isLoading, isError } = useQuery({
-        queryKey: ['product', productId], // 삐약! 쿼리 키에 ID를 포함해서, ID가 바뀌면 다시 불러오도록 합니다.
+        queryKey: ['product', id], // 삐약! 쿼리 키에 ID를 포함해서, ID가 바뀌면 다시 불러오도록 합니다.
         queryFn: () => {
             if (!productId) {
                 throw new Error('상품 ID가 없습니다.');
             }
-            return getProductDetail(productId);
+            return getProductDetail(id);
         },
         enabled: !!productId,
     });
 
     const { mutate, isPending } = useMutation({
-        mutationFn: (productId: number) => deleteProduct(productId),
+        mutationFn: (id: string) => deleteProduct(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] }); // 삐약! 'products' 쿼리 캐시를 무효화합니다!
             alert('상품이 성공적으로 삭제되었습니다!');

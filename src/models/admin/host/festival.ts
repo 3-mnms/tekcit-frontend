@@ -5,7 +5,7 @@ export interface FestivalScheduleDTO {
 export type DayOfWeek = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
 
 export interface Festival {
-    fid: string;
+    id: string;
     fname: string;
     fdfrom: string; // 공연 시작일
     fdto: string; // 공연 종료일
@@ -29,7 +29,7 @@ export interface Festival {
 }
 
 export const initialProductData: Festival = {
-    fid: '',
+    id: '',
     fname: '',
     fdfrom: '',
     fdto: '',
@@ -51,9 +51,3 @@ export const initialProductData: Festival = {
     updatedate: '',
     schedules: [],
 };
-
-export interface ApiResponse<T> {
-    data: T;
-    success: boolean;
-    message: string;
-}

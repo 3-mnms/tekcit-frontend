@@ -32,18 +32,18 @@ const ProductManagePage: React.FC = () => {
 
     // 삐약! 이 부분에서 상품 클릭 시 상세 페이지로 이동합니다!
     const handleRowClick = (item: Festival) => {
-        navigate(`/product-detail/${item.fid}`);
+        navigate(`/admin/product-detail/${item.id}`);
     };
 
     // 삐약! 버튼 클릭 핸들러를 따로 만듭니다!
     const handleViewTicketHolderList = (e: React.MouseEvent, fid: string) => {
         e.stopPropagation(); // 삐약! 행 클릭 이벤트가 발생하는 것을 막아줍니다!
-        navigate(`/productManage/${fid}/TicketHolderList`);
+        navigate(`/admin/productManage/${fid}/TicketHolderList`);
     };
 
     const handleViewStats = (e: React.MouseEvent, fid: string) => {
         e.stopPropagation(); // 삐약! 행 클릭 이벤트가 발생하는 것을 막아줍니다!
-        navigate(`/productManage/Statistics/${fid}`);
+        navigate(`/admin/productManage/Statistics/${fid}`);
     };
 
     const columns: Column<Festival>[] = [
@@ -56,8 +56,8 @@ const ProductManagePage: React.FC = () => {
             label: '액션',
             render: (item) => (
                 <div className={styles.buttons}>
-                    <Button onClick={(e) => handleViewTicketHolderList(e, item.fid)}>예매자명단</Button>
-                    <Button onClick={(e) => handleViewStats(e, item.fid)}>통계 조회</Button>
+                    <Button onClick={(e) => handleViewTicketHolderList(e, item.id)}>예매자명단</Button>
+                    <Button onClick={(e) => handleViewStats(e, item.id)}>통계 조회</Button>
                 </div>
             )
         },

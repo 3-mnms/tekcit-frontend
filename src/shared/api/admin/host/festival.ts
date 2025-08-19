@@ -1,4 +1,4 @@
-import type { Festival, ApiResponse } from '@/models/admin/host/festival';
+import type { Festival } from '@/models/admin/host/festival';
 // import { dummyProducts } from '@/models/dummy/dummyProducts';
 import type { TicketHolderType } from '@/models/admin/host/User';
 import { api } from '@/shared/api/axios';
@@ -7,7 +7,7 @@ import { api } from '@/shared/api/axios';
 // 공연 조회
 export const getProducts = async (): Promise<Festival[]> => {
     console.log('삐약! 공연 목록을 서버에 요청해요!');
-    const response = await api.get<ApiResponse<Festival[]>>('/festival/manage');
+    const response = await api.get<Festival[]>('/festival/manage');
     return response.data;
 };
 
@@ -61,7 +61,7 @@ export const createProduct = async (formData: FormData): Promise<Festival> => {
  * @param fid 수정할 공연의 ID
  * @param formData 수정할 내용이 담긴 FormData (JSON + 파일)
  */
-export const updateProduct = async (fid: number, formData: FormData): Promise<Festival> => {
+export const updateProduct = async (fid: string, formData: FormData): Promise<Festival> => {
     // const response = await api.patch<Festival>(`/festival/manage/${fid}`, formData, {
     //     headers: {
     //         'Content-Type': 'multipart/form-data',
@@ -93,16 +93,16 @@ export const updateProduct = async (fid: number, formData: FormData): Promise<Fe
  * 공연 삭제 (DELETE /api/festival/manage/{productId})
  * @param id 삭제할 공연의 ID
  */
-export const deleteProduct = async (fid: number): Promise<void> => {
+export const deleteProduct = async (fid: string): Promise<void> => {
     console.log(`삐약! ${fid}번 공연을 서버에 삭제 요청해요!`);
     await api.delete(`/festival/manage/${fid}`);
 };
 
 /**
  * 공연 상세 정보 조회 (GET /api/festival/{id})
- * @param id 조회할 공연의 ID
+ * @param fid 조회할 공연의 ID
  */
-export const getProductDetail = async (fid: number): Promise<Festival> => {
+export const getProductDetail = async (fid: string): Promise<Festival> => {
     console.log(`삐약! ${fid}번 공연 상세 정보를 서버에 요청해요!`);
     const response = await api.get<Festival>(`/festival/${fid}`);
     return response.data;
