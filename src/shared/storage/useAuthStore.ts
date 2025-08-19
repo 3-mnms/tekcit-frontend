@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>((set) => {
   const token = tokenStore.get()
   let user: User | null = null
 
-  if (token) {
+  if (token) { 
     const decoded = parseJwt<AuthPayload>(token)
     if (decoded) {
       user = {

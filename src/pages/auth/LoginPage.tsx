@@ -6,6 +6,7 @@ import LoginInput from '@/components/auth/login/LoginInput'
 import SocialLogin from '@/components/auth/login/SocialLogin'
 import Button from '@/components/common/button/Button'
 import styles from './LoginPage.module.css'
+import KakaoPopupBridge from '@/components/auth/login/KakaoPopupBridge'
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -24,6 +25,7 @@ type JwtPayload = JwtPayloadBase & {
 const LoginPage: React.FC = () => {
   const navigate = useNavigate()
   const { setUser } = useAuthStore()
+  const isPopup = !!window.opener;
 
   const {
     register,
@@ -65,8 +67,9 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className={styles.page}>
+      {isPopup && <KakaoPopupBridge status="existing" />}
       <div className={styles.card}>
-        <img src={Logo} alt="tekcit logo" className={styles.logo} />
+        <img src={Logo} alt="tekcit logo" className={styles.logo} onClick={() => navigate('/')}/>
 
         <form onSubmit={handleSubmit(onSubmit)} className="w-full">
           <LoginInput
@@ -106,7 +109,7 @@ const LoginPage: React.FC = () => {
         <div className={styles.divider} />
         <p className={styles.notMemberText}>아직 회원이 아니신가요?</p>
 
-        <Link to="/signup" className="w-full">
+        <Link to="/auth/signup" className="w-full">
           <Button className="w-full h-12">회원가입 하기</Button>
         </Link>
       </div>

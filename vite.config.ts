@@ -65,6 +65,9 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
+      '/api/auth/kakao': {
+        target: 'http://localhost:8080',
+      },
       '/api/festival': {
         target: 'http://localhost:8083',
         changeOrigin: true,
