@@ -1,11 +1,11 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import styles from './Sidebar.module.css';
+import React from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import styles from './Sidebar.module.css'
 
 interface SidebarItem {
-  label: string;
-  path: string;
-  children?: SidebarItem[];
+  label: string
+  path: string
+  children?: SidebarItem[]
 }
 
 const sidebarItems: SidebarItem[] = [
@@ -29,39 +29,40 @@ const sidebarItems: SidebarItem[] = [
       { label: '입장 인원 수 조회', path: '/mypage/ticket/entrancecheck' },
     ],
   },
-  {
-    label: '북마크',
-    path: '/mypage/bookmark',
-    // children: [{ label: '관심 공연 목록', path: '/mypage/bookmark' }],
-  },
-];
+  { label: '북마크', path: '/mypage/bookmark' },
+]
 
 const Sidebar: React.FC = () => {
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
 
-  const isActive = (path: string) => pathname === path;
-  const isParentActive = (parent: string) => pathname.startsWith(parent);
+  const isActive = (path: string) => pathname === path
+  const isParentActive = (parentPath: string) => pathname === parentPath
 
   return (
     <aside className={styles.sidebar}>
       {sidebarItems.map((item) => (
-        <div key={item.label}>
+        <div key={item.label} className={styles.section}>
           <div
-            className={`${styles.parent} ${
-              isParentActive(item.path) ? styles.active : ''
-            }`}
+            className={`${styles.parent} ${isParentActive(item.path) ? styles.active : ''}`}
             onClick={() => navigate(item.path)}
+            tabIndex={0}
+            role="link"
+            aria-current={isParentActive(item.path) ? 'page' : undefined}
+            onKeyDown={(e) => e.key === 'Enter' && navigate(item.path)}
           >
             {item.label}
           </div>
+
           {item.children?.map((child) => (
             <div
               key={child.label}
-              className={`${styles.child} ${
-                isActive(child.path) ? styles.active : ''
-              }`}
+              className={`${styles.child} ${isActive(child.path) ? styles.active : ''}`}
               onClick={() => navigate(child.path)}
+              tabIndex={0}
+              role="link"
+              aria-current={isActive(child.path) ? 'page' : undefined}
+              onKeyDown={(e) => e.key === 'Enter' && navigate(child.path)}
             >
               {child.label}
             </div>
@@ -69,7 +70,7 @@ const Sidebar: React.FC = () => {
         </div>
       ))}
     </aside>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar
