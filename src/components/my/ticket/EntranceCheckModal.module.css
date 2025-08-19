@@ -1,0 +1,121 @@
+/* === 기본 모달 === */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 400px;
+  max-width: 90%;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #aaa;
+  cursor: pointer;
+}
+
+/* === 블록 스타일 === */
+.block {
+  margin-top: 2rem;
+}
+
+.block h3 {
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+/* === 스타일 1+3. 카드형 Progress Bar === */
+.highlightCard {
+  background: linear-gradient(135deg, #e0f0ff, #f4faff);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.cardLabel {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 0.3rem;
+}
+
+.cardCount {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #4D9AFD;
+  margin-bottom: 0.8rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 12px;
+  background-color: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background-color: #4D9AFD;
+  transition: width 0.3s ease-in-out;
+}
+
+.percentLabel {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #4D9AFD;
+  font-weight: 500;
+}
+
+/* === 스타일 2. 원형 차트 === */
+.circleWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.circularChart {
+  width: 100px;
+  height: 100px;
+  transform: rotate(-90deg);
+}
+
+.circleBg {
+  fill: none;
+  stroke: #eee;
+  stroke-width: 4;
+}
+
+.circleProgress {
+  fill: none;
+  stroke: #4D9AFD;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.3s;
+}
+
+.percentage {
+  font-size: 0.5re
+}

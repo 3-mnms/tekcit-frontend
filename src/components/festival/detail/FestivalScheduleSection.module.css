@@ -1,13 +1,15 @@
+/* ====== 컨테이너 기본 레이아웃 ====== */
 .container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 300px;
-  background: white;
+  width: 100%;
+  max-width: 300px;
+  background: #fff;
   border-radius: 1rem;
   padding: 1rem;
   border: 1px solid #ddd;
-  align-items: center; /* 요것도 가능 */
+  align-items: stretch;
 }
 
 .title {
@@ -16,32 +18,13 @@
   font-size: 0.95rem;
 }
 
-/* 날짜 셀 커스텀 */
-.day {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 60%;
-  transition: 0.2s;
-}
-.active {
-  color: #2563eb;
-}
-.inactive {
-  color: #ccc;
-}
-.selected {
-  background-color: #2563eb;
-  color: white;
-  font-weight: bold;
-}
-
+/* ====== 섹션/라벨 ====== */
 .section {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  align-items: flex-start;
+  width: 100%;
 }
 
 .label {
@@ -49,10 +32,13 @@
   font-size: 0.9rem;
 }
 
+/* ====== 시간 버튼 그룹 ====== */
 .timeGroup {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  justify-content: flex-start;
+  width: 100%;
 }
 
 .timeBtn {
@@ -61,42 +47,85 @@
   border-radius: 0.5rem;
   background-color: #f8f8f8;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
-.timeBtn:hover {
-  background-color: #e0eaff;
-}
+.timeBtn:hover { background-color: #e0eaff; }
 .selectedBtn {
   background-color: #4D9AFD;
-  color: white;
+  color: #fff;
   border: none;
 }
 
-.priceRow {
-  display:block;
-  justify-content: space-between;
-  align-items: center;
+/* ====== 액션 버튼 ====== */
+.actionsRow {
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  justify-content: center;
 }
-.price {
-  font-weight: bold;
-  font-size: 1rem;
-}
+
 .confirmBtn {
   background-color: #4D9AFD;
-  color: white;
+  color: #fff;
   border: none;
   border-radius: 0.5rem;
   padding: 0.5rem 1rem;
   cursor: pointer;
   font-weight: 600;
-  width: 300px;
+  width: 100%;
+  transition: opacity 0.2s ease;
 }
 .confirmBtn:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
 
+/* ====== 데이트피커 래퍼 ====== */
 .datepickerWrapper {
   width: 100%;
   display: flex;
+  justify-content: center; /* 달력을 가운데 정렬 */
+}
+
+/* ====== 날짜 셀 커스텀 (기본 버튼 유지) ====== */
+/* 공통: 날짜 버튼 크기 / 정렬 */
+.custom-day,
+.react-datepicker__day {
+  display: flex;
+  align-items: center;
   justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 60%;
+  transition: 0.2s;
+}
+
+/* 선택 가능/불가 시각화 */
+.day-active { color: #2563eb; }
+.day-inactive { color: #ccc; }
+
+/* 선택 상태 (커스텀 + 기본 클래스 모두 커버) */
+.day-selected,
+.react-datepicker__day--selected {
+  background-color: #2563eb !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+
+/* 기본 disabled도 통일감 있게 */
+.react-datepicker__day--disabled {
+  color: #ccc !important;
+  pointer-events: none;   /* ← 이게 전부에 적용되면 안 됨 */
+}
+
+/* 호버 느낌 (비활성 제외) */
+.react-datepicker__day:not(.react-datepicker__day--disabled):hover {
+  background-color: #e0eaff;
+}
+
+/* ====== 안내 문구 ====== */
+.notice {
+  font-size: 0.9rem;
+  color: #374151;
 }

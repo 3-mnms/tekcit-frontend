@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router-dom'
 // mainpage
 import MainPage from '@pages/home/MainPage'
 import CategoryPage from '@pages/home/CategoryPage';
+import SearchPage from '@/pages/home/SearchPage';
 import FestivalDetailPage from '@pages/festival-detail/FestivalDetailPage'
 
 //auth
@@ -30,6 +31,8 @@ import BookmarkPage from '@/pages/my/myInfo/bookmark/BookmarkPage'
 import TicketHistoryPage from '@/pages/my/ticket/TicketHistoryPage'
 import MyTicketPage from '@/pages/my/ticket/MyTicketPage'
 import TicketDetailPage from '@/pages/my/ticket/TicketDetailPage'
+import TransferTicketPage from '@/pages/my/ticket/TransferTicketPage'
+import EntranceCheckPage from '@/pages/my/ticket/EntranceCheckPage'
 
 // reservation
 import OrderPage from '@pages/reservation/TicketOrderPage'
@@ -42,7 +45,6 @@ import RefundPage from '@/pages/payment/refund/RefundPage'
 import WalletPointPage from '@/pages/payment/pay/WalletPointPage'
 import WalletChargePage from '@/pages/payment/pay/WalletChargePage'
 import ResultPage from '@/pages/payment/result/ResultPage' 
-import SearchPage from '@/pages/home/SearchPage';
 
 // admin & host
 import HomePage from '@/pages/home/HomePage'
@@ -60,7 +62,7 @@ export const router = createBrowserRouter([
   { path: '/', element: <MainPage /> },
   { path: '/category/:name', element: <CategoryPage /> },
   { path: '/search', element: <SearchPage /> },
-  { path: "/festival/:id", element: <FestivalDetailPage /> },
+  { path: "/festival/:fid", element: <FestivalDetailPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/auth/signup', element: <SignupPage /> },
   {
@@ -103,6 +105,8 @@ export const router = createBrowserRouter([
           { path: '', element: <MyTicketPage /> },
           { path: 'history', element: <TicketHistoryPage /> },
           { path: 'detail/:id', element: <TicketDetailPage /> },
+          { path: 'transfer', element: <TransferTicketPage /> },
+          { path: 'entrancecheck', element: <EntranceCheckPage /> },
           // {
           //   path: 'address',
           //   children: [

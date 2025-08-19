@@ -1,25 +1,52 @@
 .sidebar {
-  padding: 1rem;
-  width: 200px;
-  background-color: #f9f9f9;
-  flex-shrink: 0;
+  width: 240px;
+  padding: 2rem 1.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background-color: #ffffff;
+  position: sticky;
+  top: 2rem;
+  height: fit-content;
+}
+
+.section {
+  margin-bottom: 2rem;
 }
 
 .parent {
-  font-weight: bold;
-  margin-top: 1rem;
+  font-weight: 600;
+  color: #333;
+  padding: 0.6rem 0.75rem;
+  font-size: 1.05rem;
+  border-radius: 8px;
+  transition: background 0.2s ease;
   cursor: pointer;
 }
 
 .child {
-  margin-left: 1rem;
-  margin-top: 0.5rem;
+  margin-left: 0.75rem;
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.94rem;
+  color: #555;
+  border-radius: 6px;
+  transition: background 0.2s ease;
   cursor: pointer;
-  font-size: 0.95rem;
 }
 
 .active {
-  background-color: #f0f0f0;
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.5rem;
+  background-color: #edf2ff;
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.parent:hover,
+.child:hover {
+  background-color: #f3f4f6;
+}
+
+.parent:focus-visible,
+.child:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
