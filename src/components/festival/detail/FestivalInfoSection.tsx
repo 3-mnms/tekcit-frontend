@@ -1,55 +1,66 @@
-// components/festival/detail/FestivalInfoSection.tsx
 import React from 'react';
 import styles from './FestivalInfoSection.module.css';
-import { useParams } from 'react-router-dom';
-import { useFestivalDetail } from '@/models/festival/tanstack-query/useFestivalDetail';
+import type { FestivalDetail } from '@models/festival/FestivalType';
 
-const formatPrice = (n?: number) => (typeof n === 'number' ? n.toLocaleString() + '원' : '');
+type Props = {
+  detail?: FestivalDetail;
+  loading?: boolean;
+};
 
-const FestivalInfoSection: React.FC = () => {
-  const { fid } = useParams<{ fid: string }>();
-  const { data: detail, isLoading, isError, status } = useFestivalDetail(fid ?? '');
+const formatDate = (iso?: string) => {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${y}.${m}.${d}`;
+};
+const formatPrice = (n?: number) =>
+  typeof n === 'number' ? n.toLocaleString() + '원' : '';
 
-  // 화면은 항상 렌더하되 내용만 상태에 따라 바꿈 (훅 순서 고정)
-  if (!fid) {
-    return <section className={styles.container}>잘못된 경로입니다.</section>;
-  }
-
-  if (isLoading || status === 'idle') {
+const FestivalInfoSection: React.FC<Props> = ({ detail, loading }) => {
+  if (loading && !detail) {
     return (
       <section className={styles.container}>
-        <h1 className={styles.title}>로딩 중…</h1>
+        <div className={styles.left}>
+          <div className={styles.posterPlaceholder}>Loading…</div>
+          <button className={styles.likeBtn}><i className="fa-heart fa-regular" /> 0</button>
+        </div>
+        <div className={styles.right}>
+          <h1 className={styles.title}>로딩 중…</h1>
+        </div>
       </section>
     );
   }
 
-  if (isError || !detail) {
+  if (!detail) {
     return (
       <section className={styles.container}>
-        <h1 className={styles.title}>공연 정보를 불러오지 못했어요 ㅠㅠ</h1>
+        <div className={styles.right}>
+          <h1 className={styles.title}>공연 정보를 불러오지 못했어요</h1>
+        </div>
       </section>
     );
   }
 
-  // detail이 이제 확실히 존재
+  const performers =
+    detail.fcast ? detail.fcast.split(',').map(s => s.trim()).filter(Boolean) : [];
+
   return (
     <section className={styles.container}>
+      {/* 왼쪽: 포스터 + 찜 */}
       <div className={styles.left}>
         {detail.poster ? (
           <img src={detail.poster} alt={`${detail.prfnm} 포스터`} className={styles.poster} />
         ) : (
           <div className={styles.posterPlaceholder}>No Image</div>
         )}
-        {/* 찜 기능은 나중에 연결 */}
         <button className={styles.likeBtn} type="button">
           <i className="fa-heart fa-regular" /> 0
         </button>
       </div>
 
+      {/* 오른쪽: DTO 그대로 표기 */}
       <div className={styles.right}>
-        <h2 className={styles.title}>{detail.prfnm}</h2>
+        <h1 className={styles.title}>{detail.prfnm}</h1>
 
-        {/* 한 줄 라벨:값 */}
         <div className={styles.infoRows}>
           <div className={styles.infoRow}>
             <span className={styles.label}>공연장소</span>
@@ -58,7 +69,7 @@ const FestivalInfoSection: React.FC = () => {
           <div className={styles.infoRow}>
             <span className={styles.label}>공연기간</span>
             <span className={styles.value}>
-              {detail.prfpdfrom} ~ {detail.prfpdto}
+              {formatDate(detail.prfpdfrom)} ~ {formatDate(detail.prfpdto)}
             </span>
           </div>
           {detail.runningTime && (
@@ -77,10 +88,10 @@ const FestivalInfoSection: React.FC = () => {
             <span className={styles.label}>가격</span>
             <span className={styles.value}>{formatPrice(detail.ticketPrice)}</span>
           </div>
-          {detail.fcast && (
+          {performers.length > 0 && (
             <div className={`${styles.infoRow} ${styles.fullRow}`}>
               <span className={styles.label}>출연</span>
-              <span className={styles.value}>{detail.fcast}</span>
+              <span className={styles.value}>{performers.join(', ')}</span>
             </div>
           )}
         </div>
