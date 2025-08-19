@@ -41,47 +41,49 @@ jobs:
           test -d dist || { echo "❌ dist not found"; exit 1; }
           ls -al dist | head -n 50
 
-      # 🧩 CI 전용 Dockerfile을 동적으로 생성 (repo Dockerfile 미사용)
+      # 🧩 CI 전용 Dockerfile을 동적으로 생성 (heredoc 대신 printf 사용)
       - name: Create runtime Dockerfile (CI-only)
         run: |
-          cat > Dockerfile.ci <<'DOCKER'
-          FROM nginx:1.27-alpine
-          # 기본값: SPA 라우팅 설정이 있으면 사용, 없으면 나중 스텝이 생성한 파일 사용
-          # (아래 스텝에서 default.conf를 항상 준비함)
-          COPY default.conf /etc/nginx/conf.d/default.conf
-          COPY dist /usr/share/nginx/html
-          EXPOSE 80
-          CMD ["nginx","-g","daemon off;"]
-          DOCKER
+          set -euo pipefail
 
-          # deploy/nginx.conf가 있으면 그걸 사용, 없으면 SPA 기본 설정 생성
+          # 1) Dockerfile.ci 생성
+          printf '%s\n' \
+            'FROM nginx:1.27-alpine' \
+            'COPY default.conf /etc/nginx/conf.d/default.conf' \
+            'COPY dist /usr/share/nginx/html' \
+            'EXPOSE 80' \
+            'CMD ["nginx","-g","daemon off;"]' > Dockerfile.ci
+
+          # 2) Nginx 설정: repo에 deploy/nginx.conf 있으면 사용, 없으면 SPA 기본 생성
           if [ -f deploy/nginx.conf ]; then
             cp deploy/nginx.conf default.conf
           else
-            cat > default.conf <<'NGINX'
-            server {
-              listen 80;
-              server_name _;
-              root /usr/share/nginx/html;
-              index index.html;
-
-              location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico)$ {
-                try_files $uri =404;
-                expires 7d;
-                add_header Cache-Control "public, max-age=604800, immutable";
-              }
-
-              location / {
-                try_files $uri /index.html;
-              }
-
-              location = /healthz {
-                add_header Content-Type text/plain;
-                return 200 "ok";
-              }
-            }
-            NGINX
+            printf '%s\n' \
+              'server {' \
+              '  listen 80;' \
+              '  server_name _;' \
+              '  root /usr/share/nginx/html;' \
+              '  index index.html;' \
+              '' \
+              '  location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico)$ {' \
+              '    try_files $uri =404;' \
+              '    expires 7d;' \
+              '    add_header Cache-Control "public, max-age=604800, immutable";' \
+              '  }' \
+              '' \
+              '  location / {' \
+              '    try_files $uri /index.html;' \
+              '  }' \
+              '' \
+              '  location = /healthz {' \
+              '    add_header Content-Type text/plain;' \
+              '    return 200 "ok";' \
+              '  }' \
+              '}' > default.conf
           fi
+
+          echo "== Dockerfile.ci =="; cat Dockerfile.ci
+          echo "== default.conf ==";  sed -n '1,120p' default.conf
 
       - name: ⏱️ Tag & Env
         run: |
