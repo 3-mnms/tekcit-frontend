@@ -5,14 +5,9 @@ import Header from '@/components/common/header/Header';
 import styles from './MyPage.module.css';
 
 const MyPage: React.FC = () => {
-  const isLoggedIn = false; 
-  const handleSearch = (keyword: string) => {
-    console.log('검색어:', keyword);
-  };
-
   return (
     <div className={styles.pageWrapper}>
-      <Header isLoggedIn={isLoggedIn} onSearch={handleSearch} /> 
+      <Header /> 
       <div className={styles.wrapper}>
         <Sidebar />
         <main className={styles.content}>

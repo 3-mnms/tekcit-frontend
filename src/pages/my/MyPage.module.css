@@ -1,17 +1,24 @@
 .pageWrapper {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .wrapper {
   display: flex;
-  flex: 1;
-  overflow: hidden;
+  align-items: flex-start; 
+  padding: 2.5rem 2.5rem;
+  gap: 2rem;
+  padding-left: 10rem;
+  
 }
 
 .content {
   flex: 1;
+  min-width: 0; 
   padding: 2rem;
-  overflow-y: auto;
+  background-color: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  margin-right: 10rem;
 }
