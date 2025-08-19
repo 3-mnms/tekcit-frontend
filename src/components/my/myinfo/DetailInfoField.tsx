@@ -1,6 +1,5 @@
 import React from 'react';
 import styles from './DetailInfoField.module.css';
-
 interface InfoFieldProps {
   label: string;
   value: string;
@@ -9,7 +8,9 @@ interface InfoFieldProps {
 const DetailInfoField: React.FC<InfoFieldProps> = ({ label, value }) => {
   return (
     <div className={styles.field}>
-      <span className={styles.label}>{label}</span>
+      <div className={styles.labelArea}>
+        <span className={styles.label}>{label}</span>
+      </div>
       <span className={styles.value}>{value}</span>
     </div>
   );

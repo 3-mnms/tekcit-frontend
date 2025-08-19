@@ -1,31 +1,37 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom';
 import Button from '@/components/common/button/Button'
-import DetailInfoField from '@/components/my/myinfo/DetailInfoField';
+import DetailInfoField from '@/components/my/myinfo/DetailInfoField'
 import styles from './DetailPage.module.css'
 
 const DetailPage: React.FC = () => {
-  const navigate = useNavigate();
-
-  const userInfo = {
+  const user = {
+    id: 'example123',
     name: '홍길동',
     birth: '2025.07.28',
     gender: '여성',
+    phone: '010-1234-5678',
     email: 'a@example.com',
   }
+
+  // DetailPage.tsx 중 일부 구조 예시
 
   return (
     <section className={styles.container}>
       <h2 className={styles.title}>기본정보</h2>
       <div className={styles.card}>
-        <DetailInfoField label="이름" value={userInfo.name} />
-        <DetailInfoField label="생년월일" value={userInfo.birth} />
-        <DetailInfoField label="성별" value={userInfo.gender} />
-        <DetailInfoField label="이메일" value={userInfo.email} />
-
+        <DetailInfoField label="이름" value={user.name} />
+        <DetailInfoField label="생년월일" value={user.birth} />
+        <DetailInfoField label="성별" value={user.gender} />
+        <DetailInfoField label="전화번호" value={user.phone} />
         <div className={styles.buttonWrapper}>
-          <Button className={styles.button} onClick={() => navigate('../verifypassword')}>정보 수정</Button>
+          <Button className={styles.button}>정보 수정</Button>
         </div>
+      </div>
+
+      <div className={styles.card}>
+      <h2 className={styles.title2}>계정정보</h2>
+        <DetailInfoField label="아이디" value={user.id} />
+        <DetailInfoField label="이메일" value={user.email} />
       </div>
     </section>
   )
