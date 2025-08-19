@@ -1,4 +1,4 @@
-name: "🟢 tekcit-frontend – Docker Build & GitOps Dispatch (nginx-client only)"
+name: "🟢 nginx-client – Docker Build & GitOps Dispatch"
 
 on:
   push:
@@ -9,12 +9,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: tekcit-frontend-${{ github.ref_name }}
+  group: nginx-client-${{ github.ref_name }}
   cancel-in-progress: true
 
 env:
-  SERVICE: fe-user                                      # GitOps가 인식하는 서비스명
-  IMAGE:   ${{ secrets.DOCKER_USERNAME }}/nginx-client  # 레지스트리 이미지명
+  SERVICE: nginx-client                                # 🔵 GitOps 서비스명 (기존 fe-user → nginx-client)
+  IMAGE:   ${{ secrets.DOCKER_USERNAME }}/nginx-client
   DEVOPS_REPO: 3-mnms/gitops-repo
 
 jobs:
@@ -29,7 +29,6 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
-      # ⛳️ 타입체크 없이 번들만 생성 (tsc 미실행)
       - name: Install deps
         run: npm ci --prefer-offline --no-audit --no-fund
 
@@ -41,12 +40,9 @@ jobs:
           test -d dist || { echo "❌ dist not found"; exit 1; }
           ls -al dist | head -n 50
 
-      # 🧩 빌드 산출물 전용 컨텍스트 생성 (.dockerignore 영향 회피)
       - name: Create CI build context (Dockerfile + default.conf + dist)
         run: |
           set -euo pipefail
-
-          # 1) default.conf 준비: repo에 있으면 사용, 없으면 SPA 기본 생성
           if [ -f deploy/nginx.conf ]; then
             cp deploy/nginx.conf default.conf
           else
@@ -74,13 +70,11 @@ jobs:
               '}' > default.conf
           fi
 
-          # 2) ci-context 생성 및 파일 복사
           rm -rf ci-context
           mkdir -p ci-context
           cp -r dist ci-context/dist
           cp default.conf ci-context/default.conf
 
-          # 3) 컨텍스트용 Dockerfile 생성
           cat > ci-context/Dockerfile <<'DOCKER'
           FROM nginx:1.27-alpine
           COPY default.conf /etc/nginx/conf.d/default.conf
@@ -117,7 +111,7 @@ jobs:
 
       - uses: docker/build-push-action@v5
         with:
-          context: ./ci-context              # ← dist 포함된 전용 컨텍스트
+          context: ./ci-context
           file: ./ci-context/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
