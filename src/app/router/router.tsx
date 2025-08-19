@@ -119,6 +119,14 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // reservation
+  {
+    path: '/reservation',
+    children: [
+      { path: ':fid', element: <OrderPage /> },
+    ]
+  },
+
   // payment
   {
     path: '/payment',

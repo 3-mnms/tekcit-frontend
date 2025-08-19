@@ -1,0 +1,50 @@
+.section {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* 버튼이 항상 아래에 붙도록 */
+}
+
+.header {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700;
+  color: #111827; /* gray-900 */
+  margin-bottom: 1rem;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto; /* 버튼 제외한 내용만 스크롤 */
+  padding-right: 4px; /* 스크롤바 여백 */
+}
+
+.footer {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nextButton {
+  width: 100%;
+  height: 64px; /* 더 크게 */
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 600;
+  border-radius: 1rem;
+  background-color: #4d9afd;
+  color: white;
+  transition: background 0.2s ease-in-out;
+}
+
+.nextButton:hover:not(:disabled) {
+  background-color: #3585ea;
+}
+
+.nextButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

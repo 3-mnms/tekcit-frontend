@@ -33,8 +33,21 @@ const toJsDow = (raw?: string): number | undefined => {
   const s = String(raw).trim().toUpperCase();
   if (/^[0-6]$/.test(s)) return Number(s);
   const three = s.replace(/[^A-Z]/g, '').slice(0, 3);
-  const map: Record<string, number> = { SUN:0, MON:1, TUE:2, WED:3, THU:4, FRI:5, SAT:6 };
+  const map: Record<string, number> = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
   return map[three];
+};
+
+const openReservationPopup = (fid: number, date: Date, time?: string | null) => {
+  const width = 1000;
+  const height = 600;
+
+  // 브라우저 화면 중앙 계산
+  const left = window.screenX + (window.outerWidth - width) / 2;
+  const top = window.screenY + (window.outerHeight - height) / 2;
+
+  const url = `/reservation/${fid}?date=${ymd(date)}&time=${encodeURIComponent(time ?? '')}`;
+
+  window.open(url, '_blank', `width=${width},height=${height},left=${left},top=${top},noopener,noreferrer`);
 };
 
 const FestivalScheduleSection: React.FC = () => {
@@ -53,7 +66,7 @@ const FestivalScheduleSection: React.FC = () => {
 
   /** 기간 파싱 */
   const startDate = useMemo(() => parseYMD((detail as any)?.prfpdfrom as any), [detail?.prfpdfrom]);
-  const endDate   = useMemo(() => parseYMD((detail as any)?.prfpdto   as any), [detail?.prfpdto]);
+  const endDate = useMemo(() => parseYMD((detail as any)?.prfpdto as any), [detail?.prfpdto]);
   const isSingleDay = !!startDate && !!endDate && isSameDay(startDate, endDate);
 
   /** 과거 비활성: 시작일 vs 오늘 중 늦은 날 */
@@ -114,7 +127,7 @@ const FestivalScheduleSection: React.FC = () => {
     }
 
     const minD = first ?? (effectiveMinDate ?? startDate ?? today);
-    const maxD = last  ?? (endDate ?? minD);
+    const maxD = last ?? (endDate ?? minD);
     return [minD, maxD];
   }, [effectiveMinDate, endDate, startDate, today, isSingleDay]);
 
@@ -258,8 +271,7 @@ const FestivalScheduleSection: React.FC = () => {
               disabled={confirmDisabled}
               onClick={() => {
                 if (!selectedDate) return;
-                const payload = { date: ymd(selectedDate), time: selectedTime ?? '' };
-                alert(`${payload.date} ${payload.time || ''} 예매 시작!`);
+                openReservationPopup(fid, selectedDate, selectedTime);
               }}
             >
               예매하기

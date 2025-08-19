@@ -1,0 +1,46 @@
+/* src/pages/reservation/TicketOrderPage.module.css */
+.page {
+  width: 100%;
+  height: 100vh;              /* 팝업 높이 꽉 채움 */
+  display: grid;
+  grid-template-columns: 55% 45%;
+  gap: 2rem;
+  padding: 1.5rem 2rem;
+  box-sizing: border-box;
+}
+
+.posterWrap {
+  width: 100%;
+  height: 100%;               /* 세로도 꽉 채움 */
+  display: flex;
+  align-items: stretch;       /* 이미지가 래퍼 높이까지 */
+  justify-content: center;
+}
+
+.poster {
+  width: 100%;
+  height: 100%;
+  max-width: 620px;           /* 1000폭 기준 자연스런 한계치 */
+  object-fit: cover;          /* 빈 공간 없이 꽉 채움 */
+  border-radius: 16px;
+  box-shadow: 0 12px 26px rgba(0,0,0,0.15);
+}
+
+.orderWrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+}
+
+.orderCard {
+  width: 100%;
+  height: 100%;               /* 카드 자체가 꽉 채움 */
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #fff;
+  padding: 20px 24px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  box-sizing: border-box;
+  overflow: auto;             /* 내용이 많아져도 내부 스크롤 */
+}

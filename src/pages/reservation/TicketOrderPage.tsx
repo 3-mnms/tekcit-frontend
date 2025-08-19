@@ -1,31 +1,52 @@
-// src/pages/booking/TicketOrderPage.tsx
-import React, { useState } from 'react';
-import TicketOrderSection from '@/components/booking/TicketOrderSection';
+// src/pages/reservation/TicketOrderPage.tsx
+import React from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
+import styles from './TicketOrderPage.module.css';
+import TicketOrderSection from '@/components/reservation/TicketOrderSection';
+
+const parseDate = (s?: string | null) => {
+  if (!s) return null;
+  const [y, m, d] = s.split('-').map(Number);
+  const dt = new Date(y!, (m! - 1), d!);
+  return isNaN(dt.getTime()) ? null : dt;
+};
 
 const TicketOrderPage: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const { fid } = useParams<{ fid: string }>();
+  const [sp] = useSearchParams();
+
+  const selectedDate = React.useMemo(() => parseDate(sp.get('date')), [sp]);
+  const selectedTime = React.useMemo(() => {
+    const t = sp.get('time');
+    return t && t.trim() !== '' ? t : null;
+  }, [sp]);
 
   return (
-    <div className="w-full min-h-screen flex flex-col md:flex-row gap-[4%] p-[5%]">
-      {/* 왼쪽: 티켓 주문 섹션 */}
-      <TicketOrderSection
-        selectedDate={selectedDate}
-        selectedTime={selectedTime}
-        pricePerTicket={88000}
-        maxQuantity={4}
-        onNext={({ date, time, quantity, totalPrice }) => {
-          console.log('선택한 값:', { date, time, quantity, totalPrice });
-          // ✅ 다음 단계로 이동 (좌석 선택 / 결제 등)
-        }}
-        className="flex-1"
-      />
+    <div className={styles.page}>
+      {/* 왼쪽: 포스터 꽉 채우기 */}
+      <section className={styles.posterWrap}>
+        <img
+          className={styles.poster}
+          src="https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=1200&auto=format&fit=crop"
+          alt="공연 포스터"
+        />
+      </section>
 
-      {/* 오른쪽: 좌석 선택, 공연 상세, 스케줄 등 */}
-      <div className="flex-1 border border-gray-200 rounded-2xl p-[3%]">
-        <h2 className="text-lg font-bold mb-[2%]">좌석 선택 or 공연 정보</h2>
-        {/* 👉 여기에 스케줄/좌석 컴포넌트 추가 */}
-      </div>
+      {/* 오른쪽: 주문 카드가 세로로 꽉 차도록 */}
+      <section className={styles.orderWrap}>
+        <div className={styles.orderCard}>
+          <TicketOrderSection
+            selectedDate={selectedDate}
+            selectedTime={selectedTime}
+            pricePerTicket={50000}
+            maxQuantity={4}
+            onNext={({ date, time, quantity, totalPrice }) => {
+              console.log('fid:', fid, { date, time, quantity, totalPrice });
+              // 다음 단계는 이후에 연결
+            }}
+          />
+        </div>
+      </section>
     </div>
   );
 };
