@@ -24,4 +24,6 @@ export interface FestivalDetail extends Festival {
   entrpsnmH: string;
   runningTime: string;    // 백 JSON은 runningtime → API에서 매핑
   contentFiles: string[];
+  times: string[];
+  daysOfWeek: string[];
 }
