@@ -45,6 +45,18 @@ export async function postResetPasswordWithEmail(body: FindPwResetDTO) {
   await api.post<ApiSuccess<void>>('/users/resetPasswordWithEmail', body);
 }
 
+export type VerificationType = 'SIGNUP' | 'EMAIL_UPDATE' | 'PASSWORD_FIND';
+
+export async function sendEmailCode(email: string, type: VerificationType) {
+  const { data } = await api.post('/mail/sendCode', { email, type });
+  return data; 
+}
+
+export async function verifyEmailCode(email: string, code: string, type: VerificationType) {
+  const { data } = await api.post('/mail/verifyCode', { email, code, type });
+  return data;
+}
+
 /** 마이페이지 유저 정보: GET /users/myPage/userInfo (서버에서 사용자 식별) */
 export async function getMyPageUserInfo<T = unknown>() {
   const { data } = await api.get<ApiSuccess<T>>('/users/myPage/userInfo');

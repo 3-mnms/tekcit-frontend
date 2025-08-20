@@ -6,3 +6,10 @@ export const findIdSchema = z.object({
 });
 
 export type FindIdForm = z.infer<typeof findIdSchema>;
+
+export const findPwEmailSchema = z.object({
+  loginId: z.string().min(1, '아이디를 입력하세요.'),
+  name: z.string().min(1, '이름을 입력하세요.'),
+});
+
+export type FindPwEmailForm = z.infer<typeof findPwEmailSchema>;

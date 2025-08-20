@@ -6,8 +6,8 @@ import Button from '@/components/common/button/Button'
 import styles from './FindIdPage.module.css'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { findIdSchema, type FindIdForm } from '@/models/auth/schema/findIdSchema'
-import { useFindLoginIdMutation } from '@/models/auth/tanstack-query/useFindLoginId'
+import { findIdSchema, type FindIdForm } from '@/models/auth/schema/findSchema'
+import { useFindLoginIdMutation } from '@/models/auth/tanstack-query/useFindLoginInfo'
 
 const FindIdPage: React.FC = () => {
   const [copied, setCopied] = useState(false)
