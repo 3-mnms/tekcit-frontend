@@ -1,0 +1,83 @@
+.input {
+    width: 100%;
+    height: 50px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 1rem;
+    background: #fff;
+    margin-bottom: 12px;
+}
+
+.input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(77, 154, 253, .25);
+}
+
+.error {
+    color: #ef4444;
+  font-size: 12px;
+  margin-left: 10px;
+  margin-top: -5px;
+  margin-bottom: 5px;
+}
+
+.emailRow {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    gap: 8px;
+    align-items: stretch;
+    margin-top: 10px;
+}
+
+.btnControl {
+    height: 50px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+}
+
+.resultRow {
+    display: grid;
+    grid-template-columns: 1fr 44px;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.resultInput {
+    width: 100%;
+    height: 50px;
+    padding: 0 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
+}
+
+.copyButton {
+    display: grid;
+    place-items: center;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.readonly {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.copied {
+    margin-top: 8px;
+    color: #111827;
+    font-size: .9rem;
+    margin-left: 5px;
+}
+
+.actions {
+    position: absolute;
+    left: 2rem;
+    right: 2rem;
+    bottom: 2rem;
+}
