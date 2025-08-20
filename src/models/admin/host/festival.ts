@@ -13,7 +13,7 @@ export interface Festival {
     fcltynm: string; // 공연장 이름
     genrenm: string; // 장르
     schedules: FestivalScheduleDTO[]; // 스케줄 정보
-    fcast: string; // 출연진
+    fcast: string[]; // 출연진
     ticketPrice: number; // 티켓 가격
     faddress: string; // 공연장 주소
     ticketPick: number; // 티켓수령방법
@@ -36,7 +36,7 @@ export const initialProductData: Festival = {
     posterFile: '',
     fcltynm: '',
     genrenm: '',
-    fcast: '',
+    fcast: [],
     story: '',
     ticketPrice: 0,
     faddress: '',

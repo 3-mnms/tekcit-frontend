@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams  } from 'react-router-dom';
+import { useNavigate, useParams  } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useMutation, useQueryClient, useQuery} from '@tanstack/react-query';
 import Input from '@/components/shared/Input';
@@ -21,182 +21,124 @@ interface ConfirmModalState {
 const ProductRegisterPage: React.FC = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const [searchParams] = useSearchParams();
-    const [isEditMode, setIsEditMode] = useState(false);
-    const fid = searchParams.get('id');
-
+    const { id: fid } = useParams<{ id: string }>();
+    const isEditMode = !!fid;
     
-    const { data: existingProduct } = useQuery({
-        queryKey: ['festival', fid],
-        queryFn: () => getProductDetail(string(fid)),
-        enabled: !!fid, 
-        select: (data) => {
-            const fcastValue = data.fcast as any;
-            
-            const fcastAsArray = typeof fcastValue === 'string'
-                ? fcastValue.split(',').map((s: string) => s.trim())
-                : Array.isArray(fcastValue) ? fcastValue : []; 
+    console.log('Step 1: ID from URL:', fid);
 
-            return {
-                ...data,
-                fcast: fcastAsArray, 
-                }
-        }
-    });
-    
     const [productData, setProductData] = useState<Festival>(initialProductData);
     const [posterFile, setPosterFile] = useState<File | null>(null);
     const [contentFiles, setContentFiles] = useState<File[]>([]);
     const [confirmModal, setConfirmModal] = useState<ConfirmModalState>({ isOpen: false, onConfirm: () => {} });
+    
+    const { data: existingProduct } = useQuery({
+        queryKey: ['festival', fid],
+        queryFn: () => getProductDetail(fid!),
+        enabled: isEditMode,
+        select: (response) => {
+            const product = response.data; // API 응답에서 실제 데이터 객체 꺼내기
+            return {
+                ...product,
+                // fcast가 문자열이면 쉼표로 나눠서 배열로 변환!
+                fcast: typeof product.fcast === 'string'
+                    ? product.fcast.split(',').map(s => s.trim())
+                    : [],
+            };
+        }
+    });
+    console.log('Step 2: Data from useQuery:', existingProduct);
 
     useEffect(() => {
-        if (existingProduct) {
+         console.log('Step 3: useEffect is running. existingProduct is:', existingProduct);
+        if (isEditMode && existingProduct) {
             setProductData(existingProduct);
-            setIsEditMode(true); // 삐약! 수정 모드로 전환합니다!
         } else {
-            setIsEditMode(false);
-            setProductData(initialProductData); // 삐약! 수정 모드가 아니면 초기화합니다!
+            setProductData(initialProductData);
         }
-    }, [existingProduct]);
+    }, [isEditMode, existingProduct]);
 
     const { mutate, isPending } = useMutation({
-        mutationFn: (formData: FormData) => {
-        if (isEditMode && fid) {
-            return updateProduct(String(fid), formData);
-        }
-        // createProduct도 마찬가지!
-        return createProduct(formData);
-    },
+        mutationFn: (formData: FormData) => isEditMode ? updateProduct(fid!, formData) : createProduct(formData),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['products'] });
-            setConfirmModal({ ...confirmModal, isOpen: false });
+            queryClient.invalidateQueries({ queryKey: ['festival'] });
             alert(`상품이 성공적으로 ${isEditMode ? '수정' : '등록'}되었습니다!`);
-            navigate('/productManage');
+            navigate('/admin/productManage');
         },
         onError: (error) => {
             console.error('상품 등록/수정 실패:', error);
-            alert(`상품 ${isEditMode ? '수정' : '등록'}에 실패했습니다. 다시 시도해 주세요.`);
+            alert(`상품 ${isEditMode ? '수정' : '등록'}에 실패했습니다.`);
         },
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setProductData(prevData => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
-
-    const handleDetailChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
         const isNumeric = ['ticketPrice', 'maxPurchase', 'availableNOP', 'ticketPick'].includes(name);
-        setProductData(p => ({ 
-            ...p, 
-            detail: { 
-                ...p, 
-                [name]: isNumeric ? (value === '' ? '' : Number(value)) : value 
-            } 
-        }));
+        setProductData(p => ({ ...p, [name]: isNumeric ? (value === '' ? '' : Number(value)) : value }));
     };
 
-    const handleAddCast = (fcast: string) => {
-        setProductData(prevData => ({
-            ...prevData,
-            detail: {
-            ...prevData,
-            fcast: [...(prevData.fcast as string[]), fcast],
-        }
-        }));
+    const handleAddCast = (cast: string) => {
+        setProductData(p => ({ ...p, fcast: [...(p.fcast as string[]), cast] }));
     };
 
     const handleRemoveCast = (castToRemove: string) => {
-    setProductData(prevData => {
-        const currentFcastArray = prevData.fcast as string[];
-        const newFcastArray = currentFcastArray.filter(member => member !== castToRemove);
-            return {
-                ...prevData,
-                detail: {
-                    ...prevData,
-                    fcast: newFcastArray,
-                }
-            };
-        });
+        setProductData(p => ({ ...p, fcast: (p.fcast as string[]).filter(c => c !== castToRemove) }));
     };
         
     const handleAddressComplete = (address: string) => {
-        setProductData(prevData => ({
-            ...prevData,
-            detail: {
-                ...prevData,
-                faddress: address,
-            }
-        }));
+        setProductData(p => ({ ...p, faddress: address }));
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, files } = e.target;
-        if (!files || files.length === 0) return;
-
-        if (name === 'posterFile') {
-            setPosterFile(files[0]);
-        } 
-        else if (name === 'contentFile') {
-            setContentFiles(prevFiles => [...prevFiles, ...Array.from(files)]);
-        }
+        const { name, files } = e.target;
+        if (!files) return;
+        if (name === 'posterFile') setPosterFile(files[0] || null);
+        else if (name === 'contentFiles') setContentFiles(prev => [...prev, ...Array.from(files)]);
     };
     
     const handleRemoveDetailImage = (fileNameToRemove: string) => {
-        setContentFiles(prevFiles => 
-        prevFiles.filter(file => file.name !== fileNameToRemove)
-        );
+        setContentFiles(prevFiles => prevFiles.filter(file => file.name !== fileNameToRemove));
     };
 
-    const handleAddSchedule = (day: string, time: string) => {
-        const isDuplicate = productData.schedules.some(
-            (schedule) => schedule.dayOfWeek === day && schedule.time === time
-        );
-        if (!isDuplicate) {
-            setProductData((prevData) => ({
-                ...prevData,
-                schedules: [...prevData.schedules, { dayOfWeek: day as DayOfWeek, time: time }],
-            }));
-        }else {alert('삐약! 이미 등록된 스케줄이에요!');}
-    };
+    const handleAddSchedule = (day: DayOfWeek, time: string) => {
+        const newSchedule = { dayOfWeek: day, time };
+        if (!productData.schedules.some(s => s.dayOfWeek === day && s.time === time)) {
+            setProductData(p => ({ ...p, schedules: [...p.schedules, newSchedule] }));
+        }
+    }
 
     const handleRemoveSchedule = (indexToRemove: number) => {
-        setProductData((prevData) => ({
-            ...prevData,
-            schedules: prevData.schedules.filter((_, index) => index !== indexToRemove),
-        }));
+        setProductData(p => ({ ...p, schedules: p.schedules.filter((_, i) => i !== indexToRemove) }));
     };
 
-   const handleRegisterClick = () => {
-    if (!productData.fname) return alert('삐약! 상품명을 입력해주세요!');
+    const handleRegisterClick = () => {
+        if (!productData.fname) return alert('삐약! 상품명을 입력해주세요!');
 
-    setConfirmModal({
-        isOpen: true,
-        onConfirm: () => {
-            const formData = new FormData();
-            const productInfoToSend = {
-                ...productData,
-                detail: {
+        setConfirmModal({
+            isOpen: true,
+            onConfirm: () => {
+                const formData = new FormData();
+
+                const productInfoToSend = {
                     ...productData,
-                    fcast: (productData.fcast as string[]).join(','),
-                },
-            };
-            formData.append('requestDTO', new Blob([JSON.stringify(productInfoToSend)], { type: "application/json" }));
+                    fcast: Array.isArray(productData.fcast) 
+                        ? productData.fcast.join(',') 
+                        : productData.fcast,
+                };
+                
+                formData.append('requestDTO', new Blob([JSON.stringify(productInfoToSend)], { type: "application/json" }));
+                
+                if (posterFile) {
+                    formData.append('posterFile', posterFile);
+                }
+                contentFiles.forEach(file => {
+                    formData.append('contentFiles', file);
+                });
 
-            if (posterFile) {
-                formData.append('posterFile', posterFile);
-            }
-            contentFiles.forEach(file => {
-                formData.append('contentFiles', file);
-            });
-
-            mutate(formData);
-        },
-    });
-};
+                mutate(formData);
+                handleCloseModal();
+            },
+        });
+    };
 
     const handleCloseModal = () => {
         setConfirmModal({ ...confirmModal, isOpen: false });
@@ -236,7 +178,7 @@ const ProductRegisterPage: React.FC = () => {
                             </div>
                             <div className={styles.formItem}>
                                 <label>3. 관람 등급</label>
-                                <select name="prfage" className={styles.select} value={productData.prfage} onChange={handleDetailChange}>
+                                <select name="prfage" className={styles.select} value={productData.prfage} onChange={handleChange}>
                                     <option value="">선택해주세요</option>
                                     <option value="전체">전체</option>
                                     <option value="12세 이상">12세 이상</option>
@@ -299,7 +241,7 @@ const ProductRegisterPage: React.FC = () => {
                                     name="runningTime" 
                                     placeholder="ex) 120" 
                                     value={productData.runningTime} 
-                                    onChange={handleDetailChange} 
+                                    onChange={handleChange} 
                                     suffixText="분"
                                 />
                             </div>
@@ -311,7 +253,7 @@ const ProductRegisterPage: React.FC = () => {
                                         name="availableNOP"
                                         placeholder="수용인원을 입력해주세요"
                                         value={productData.availableNOP}
-                                        onChange={handleDetailChange}
+                                        onChange={handleChange}
                                         suffixText="명"
                                     />
                                 </div>
@@ -323,7 +265,7 @@ const ProductRegisterPage: React.FC = () => {
                                     name="ticketPrice" 
                                     placeholder="선택해주세요" 
                                     value={productData.ticketPrice} 
-                                    onChange={handleDetailChange} 
+                                    onChange={handleChange} 
                                     suffixText="원"
                                 />
                             </div>
@@ -342,18 +284,18 @@ const ProductRegisterPage: React.FC = () => {
                             <div className={styles.formItem}>
                                 <label>11. 구매 매수 제한</label>
                                 <div className={styles.radioGroup}>
-                                    <label><input type="radio" name="maxPurchase" value={1} checked={productData.maxPurchase === 1} onChange={handleDetailChange} /> 1장</label>
-                                    <label><input type="radio" name="maxPurchase" value={2} checked={productData.maxPurchase === 2} onChange={handleDetailChange} /> 2장</label>
-                                    <label><input type="radio" name="maxPurchase" value={3} checked={productData.maxPurchase === 3} onChange={handleDetailChange} /> 3장</label>
-                                    <label><input type="radio" name="maxPurchase" value={4} checked={productData.maxPurchase === 4} onChange={handleDetailChange} /> 4장</label>
+                                    <label><input type="radio" name="maxPurchase" value={1} checked={productData.maxPurchase === 1} onChange={handleChange} /> 1장</label>
+                                    <label><input type="radio" name="maxPurchase" value={2} checked={productData.maxPurchase === 2} onChange={handleChange} /> 2장</label>
+                                    <label><input type="radio" name="maxPurchase" value={3} checked={productData.maxPurchase === 3} onChange={handleChange} /> 3장</label>
+                                    <label><input type="radio" name="maxPurchase" value={4} checked={productData.maxPurchase === 4} onChange={handleChange} /> 4장</label>
                                 </div>
                             </div>
                             <div className={styles.formItem}>
                                 <label>12. 고객 티켓 수령 방법</label>
                                 <div className={styles.radioGroup}>
-                                    <label><input type="radio" name="fticketPick" value={1} checked={productData.ticketPick === 1} onChange={handleDetailChange} /> 일괄 배송</label>
-                                    <label><input type="radio" name="fticketPick" value={2} checked={productData.ticketPick === 2} onChange={handleDetailChange} /> 현장 수령(QR)</label>
-                                    <label><input type="radio" name="fticketPick" value={3} checked={productData.ticketPick === 3} onChange={handleDetailChange} /> 배송&현장 수령(QR)</label>
+                                    <label><input type="radio" name="fticketPick" value={1} checked={productData.ticketPick === 1} onChange={handleChange} /> 일괄 배송</label>
+                                    <label><input type="radio" name="fticketPick" value={2} checked={productData.ticketPick === 2} onChange={handleChange} /> 현장 수령(QR)</label>
+                                    <label><input type="radio" name="fticketPick" value={3} checked={productData.ticketPick === 3} onChange={handleChange} /> 배송&현장 수령(QR)</label>
                                 </div>
                             </div>
                         </div>
@@ -364,7 +306,7 @@ const ProductRegisterPage: React.FC = () => {
                                     name="entrpsnmH" 
                                     placeholder="상품명을 입력하세요." 
                                     value={productData.entrpsnmH} 
-                                    onChange={handleDetailChange} 
+                                    onChange={handleChange} 
                                 />
                             </div>
                         <div className={styles.formRow}>
@@ -387,7 +329,7 @@ const ProductRegisterPage: React.FC = () => {
                                         name="story" 
                                         className={styles.textarea} 
                                         value={productData.story} 
-                                        onChange={handleDetailChange} 
+                                        onChange={handleChange} 
                                     />
                                 </div>
                                 {/* 3. 상세 정보 이미지 업로드 */}

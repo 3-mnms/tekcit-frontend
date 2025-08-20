@@ -141,6 +141,7 @@ export const router = createBrowserRouter([
       { path: 'operatManage/user', element: <OperatManageUserPage /> },
       { path: 'operatManage/host', element: <OperatManageHostPage /> },
       { path: 'productRegist', element: <ProductRegisterPage /> },
+      { path: 'productRegist/:id', element: <ProductRegisterPage />},
       { path: 'announcement', element: <AnnouncementListPage /> },
       { path: 'productManage', element: <ProductManagePage /> },
       { path: 'product-detail/:id', element: <ProductDetailPage /> },
