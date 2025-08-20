@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom'
 
-// mainpage
+// main
 import MainPage from '@pages/home/MainPage'
 import CategoryPage from '@pages/home/CategoryPage';
 import SearchPage from '@/pages/home/SearchPage';
@@ -33,6 +33,9 @@ import MyTicketPage from '@/pages/my/ticket/MyTicketPage'
 import TicketDetailPage from '@/pages/my/ticket/TicketDetailPage'
 import TransferTicketPage from '@/pages/my/ticket/TransferTicketPage'
 import EntranceCheckPage from '@/pages/my/ticket/EntranceCheckPage'
+
+// transfer
+import TransferPage from '@/pages/transfer/TransferPage'
 
 // reservation
 import OrderPage from '@pages/reservation/TicketOrderPage'
@@ -106,7 +109,13 @@ export const router = createBrowserRouter([
           { path: '', element: <MyTicketPage /> },
           { path: 'history', element: <TicketHistoryPage /> },
           { path: 'detail/:id', element: <TicketDetailPage /> },
-          { path: 'transfer', element: <TransferTicketPage /> },
+          { 
+            path: 'transfer', 
+            children: [
+                { path: '', element: <TransferTicketPage /> },
+                { path: 'test', element: <TransferPage /> },
+            ],
+          },
           { path: 'entrancecheck', element: <EntranceCheckPage /> },
           // {
           //   path: 'address',

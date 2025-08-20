@@ -1,4 +1,3 @@
-// shared/api/festival/FestivalApi.ts
 import axios from 'axios';
 import type { Festival, FestivalDetail } from '@models/festival/FestivalType';
 

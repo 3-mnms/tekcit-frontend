@@ -1,0 +1,62 @@
+.label { display: grid; gap: 0.35rem; font-weight: 500; }
+
+/* 메인 라인 */
+.row { display: flex; align-items: stretch; width: 100%; }
+.input {
+  width: 60%;
+  height: 44px;
+  border: 1px solid #d1d5db;
+  border-radius: 0.6rem;
+  padding: 0 0.8rem;
+  background: #fff;
+}
+.inputAttached { border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: 0; }
+.actionBtn {
+  height: 44px !important;
+  display: inline-flex; align-items: center;
+  border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important;
+}
+
+/* ── 모달 레이어 ── */
+.backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: grid; place-items: center;
+  z-index: 10000;
+}
+.card {
+  width: 92%; max-width: 420px;
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 0.9rem;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 20px 50px rgba(0,0,0,.25);
+}
+.title { font-weight: 700; margin-bottom: 0.75rem; }
+.modalLabel { display: grid; gap: 0.35rem; font-weight: 500; margin-bottom: 0.6rem; }
+
+/* 검색 행: 버튼을 인풋에 '붙이기' */
+.searchRow { display: flex; align-items: stretch; gap: 0; }       /* ★ gap 0 */
+.searchBtn {
+  height: 44px !important;
+  display: inline-flex; align-items: center;
+  border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important;
+}
+
+.resultBox {
+  border: 1px dashed #d1d5db; border-radius: 0.6rem;
+  padding: 0.75rem; background: #f9fafb; margin-top: 0.6rem;
+}
+.resultList { list-style: none; margin: 0; padding: 0; }
+.resultItem {
+  padding: 0.5rem 0.6rem; border-radius: 0.5rem; cursor: pointer;
+}
+.resultItem:hover { background: #eef2ff; }
+.resultItemSel { background: #e0e7ff; }
+
+.resultHint { color: #6b7280; }
+
+.actions { display: flex; justify-content: flex-end; margin-top: 0.9rem; }
+.confirmBtn { height: 44px !important; font-weight: 600; }
+
+@media (max-width: 520px) {
+  .card { width: 95%; }
+}
