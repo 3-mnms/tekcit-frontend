@@ -91,6 +91,7 @@
 
 .copied {
   margin-top: 8px;
-  color: #10b981;
+  color: #000000;
   font-size: .9rem;
+  margin-left: 5px;
 }
