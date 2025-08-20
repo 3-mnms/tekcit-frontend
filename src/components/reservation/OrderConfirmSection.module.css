@@ -1,0 +1,57 @@
+/* src/components/reservation/OrderConfirmSection.module.css */
+
+.section {
+  width: 100%;
+  border: 1px solid #e5e7eb;      /* tailwind gray-200 */
+  border-radius: 16px;             /* rounded-2xl */
+  padding: 20px;                   /* p-5 */
+  background: #ffffff;
+}
+
+.title {
+  margin-bottom: 12px;             /* mb-3 */
+  font-size: 18px;                 /* text-lg */
+  line-height: 28px;               /* 대략 lg 라인하이트 */
+  font-weight: 600;                /* font-semibold */
+  color: #111827;                  /* zinc-900 계열 */
+}
+
+.priceBox {
+  margin-bottom: 16px;             /* mb-4 */
+  display: grid;                   /* grid */
+  gap: 8px;                        /* gap-2 */
+  font-size: 14px;                 /* text-sm */
+  line-height: 20px;
+  color: #111827;
+}
+
+.row {
+  display: flex;                   /* flex */
+  align-items: center;             /* items-center */
+  justify-content: space-between;  /* justify-between */
+}
+
+.label {
+  opacity: 0.8;                    /* opacity-80 */
+}
+
+.value {
+  font-weight: 500;                /* font-medium */
+}
+
+.totalRow {
+  font-size: 16px;                 /* text-base */
+  line-height: 24px;
+}
+
+.total {
+  font-weight: 600;                /* font-semibold */
+}
+
+/* 공통 버튼 위에 추가 스타일(공통 Button.module.css와 충돌 없음) */
+.payButton {
+  width: 100%;                     /* w-full */
+  padding-top: 12px;               /* py-3 */
+  padding-bottom: 12px;
+  border-radius: 16px;             /* rounded-2xl */
+}

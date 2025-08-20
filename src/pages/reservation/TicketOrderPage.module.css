@@ -1,0 +1,38 @@
+.page {
+  display: grid;
+   grid-template-columns: minmax(0, 55%) minmax(360px, 45%);
+  width: 100vw;
+  height: 100vh;   /* 꽉 채우기 */
+  overflow: hidden; /* 페이지 스크롤 금지 */
+}
+.leftWrap{
+  position: relative;
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+.poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 0 !important;
+  margin: 0;
+  box-shadow: none !important;
+}
+.leftTitleBar{
+  position:absolute; top:0; left:0; right:0;
+  padding: 20px 24px;
+  background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,0));
+  color:#fff;
+  font-size: 28px; font-weight: 800; line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+.right {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}

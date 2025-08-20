@@ -1,0 +1,47 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  /* 상위 레이아웃 여백이 만들어내는 스크롤 방지 */
+  padding: 0;
+}
+
+.page {
+  width: 1000px;
+  height: 600px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 620px 350px; /* 좌/우 */
+  gap: 20px;
+  padding: 12px;
+  overflow: hidden;  /* 내부 스크롤 금지 */
+  background: #fff;
+  border-radius: 12px;
+}
+
+/* 좌/우 컬럼은 위쪽에만 붙고, 내부 스크롤 없음 */
+.leftCol {
+  display: grid;
+  gap: 10px;        /* 🔽 간격 줄여서 전체 높이 절약 */
+  align-content: start;
+  min-height: 0;
+}
+
+.rightCol {
+  display: grid;
+  gap: 10px;        /* 🔽 간격 줄여서 전체 높이 절약 */
+  margin-right: 10px;
+  align-content: start;
+  min-height: 0;
+}
+
+/* QR일 때 보이는 플레이스홀더 */
+.placeholder {
+  border: 1px solid #e5e7eb;
+  background: #f8f9fb;
+  border-radius: 14px;
+  padding: 12px;    /* 🔽 줄이기 */
+  color: #6b7280;
+}
+
+/* 카드 내부에서 overflow:auto가 있어도 무시 */
+.noScroll { overflow: visible !important; max-height: none !important; }

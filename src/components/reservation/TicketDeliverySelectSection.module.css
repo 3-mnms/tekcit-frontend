@@ -1,0 +1,68 @@
+.section {
+  width: 100%;
+  border: 1px solid #e5e7eb;  /* gray-200 */
+  border-radius: 16px;         /* rounded-2xl */
+  padding: 20px;               /* p-5 */
+  background: #ffffff;
+}
+
+.title {
+  margin-bottom: 12px;         /* mb-3 */
+  font-size: 18px;             /* text-lg */
+  line-height: 28px;
+  font-weight: 600;            /* semibold */
+  color: #111827;              /* gray-900 */
+}
+
+.group {
+  display: grid;
+  gap: 2px;                    /* gap-2 */
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 3px;                    /* gap-2 */
+  border: 1px solid #d1d5db;   /* gray-300 */
+  border-radius: 12px;         /* rounded-xl */
+  padding: 12px;               /* p-3 */
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 120ms ease;
+}
+
+.item:hover {
+  border-color: #9ca3af;       /* gray-400 */
+}
+
+.itemActive {
+  border-color: #3b82f6;       /* blue-500 */
+  /* ring-2 효과 */
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+.itemDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.labelText {
+  font-size: 14px;             /* text-sm */
+  line-height: 20px;
+  font-weight: 500;            /* medium */
+  color: #111827;
+}
+
+/* 스크린리더 전용 (Tailwind의 sr-only 동등) */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+}

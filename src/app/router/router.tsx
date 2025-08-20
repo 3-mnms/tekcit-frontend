@@ -34,6 +34,10 @@ import TicketDetailPage from '@/pages/my/ticket/TicketDetailPage'
 import TransferTicketPage from '@/pages/my/ticket/TransferTicketPage'
 import EntranceCheckPage from '@/pages/my/ticket/EntranceCheckPage'
 
+// reservation
+import OrderPage from '@pages/reservation/TicketOrderPage'
+import OrderInfoPage from '@pages/reservation/TicketOrderInfoPage'
+
 // payment
 import BookingPaymentPage from '@/pages/payment/BookingPaymentPage'
 import TransferPaymentPage from '@/pages/payment/transfer/TransferPaymentPage'
@@ -114,6 +118,15 @@ export const router = createBrowserRouter([
         ],
       },
     ],
+  },
+
+  // reservation
+  {
+    path: '/reservation',
+    children: [
+      { path: ':fid', element: <OrderPage /> },
+      { path: ':fid/order-info', element: <OrderInfoPage /> },
+    ]
   },
 
   // payment
