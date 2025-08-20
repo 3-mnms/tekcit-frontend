@@ -1,42 +1,51 @@
 .container {
-  padding: 1.5rem;
+  padding: 1rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 640px;
 }
 
 .title {
   font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 1.25rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 0.5rem;
+}
+
+.title2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 0.5rem;
 }
 
 .card {
-  border: 1px solid #ddd;
+  background-color: #fff;
+  border: 1px solid #eee;
   border-radius: 0.75rem;
-  padding: 1.25rem;
-  background-color: white;
-  width: 100%;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.field {
-  margin-bottom: 1rem;
-}
-
-.label {
-  display: block;
+.notice {
   font-size: 0.85rem;
-  color: #aaa;
-  margin-bottom: 0.25rem;
-}
-
-.value {
-  font-size: 1rem;
-  font-weight: 500;
+  color: #6b7280;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+  white-space: pre-line;
 }
 
 .buttonWrapper {
-  margin-top: 1.5rem;
-  text-align: center;
+  margin-top: 1.25rem;
 }
 
 .button {
   width: 100%;
+  padding: 0.75rem;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 0.5rem;
 }

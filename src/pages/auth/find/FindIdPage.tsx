@@ -1,92 +1,96 @@
 import React, { useState } from 'react'
 import { FaRegCopy } from 'react-icons/fa6'
-import Logo from '@assets/logo.png'
 import Button from '@/components/common/button/Button'
-import styles from './FindIdPage.module.css'
+import AuthCard from '@/components/auth/find/AuthCard'
+import styles from '@/components/auth/find/AuthForm.module.css'
+
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { findIdSchema, type FindIdForm } from '@/models/auth/schema/findSchema'
+import { useFindLoginIdMutation } from '@/models/auth/tanstack-query/useFindLoginInfo'
 
 const FindIdPage: React.FC = () => {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [foundId, setFoundId] = useState<string | null>(null)
-  const [notFound, setNotFound] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [foundId, setFoundId] = useState<string | null>(null)
 
-  const handleFindId = () => {
-    if (email === 'test@example.com' && name === 'test') {
-      setFoundId('tekcit_user01')
-      setNotFound(false)
-    } else {
-      setFoundId(null)
-      setNotFound(true)
-    }
-    setCopied(false) 
-  }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<FindIdForm>({
+    resolver: zodResolver(findIdSchema),
+    mode: 'onChange',
+  })
 
-  const handleGoToLogin = () => {
-    window.location.href = '/login'
-  }
+  const mut = useFindLoginIdMutation()
 
-  const handleCopy = async () => {
-    if (foundId) {
-      await navigator.clipboard.writeText(foundId)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000) // 2초 후 복사 상태 초기화
-    }
+  const onSubmit = (f: FindIdForm) => {
+    setCopied(false)
+    setFoundId(null)
+    mut.mutate(
+      { name: f.name, email: f.email },
+      {
+        onSuccess: (loginId) =>
+          loginId ? setFoundId(loginId) : alert('일치하는 정보가 없습니다.'),
+        onError: () => alert('일치하는 정보가 없습니다.'),
+      },
+    )
   }
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
-        <img src={Logo} alt="tekcit logo" className={styles.logo} />
-        <h2 className={styles.title}>아이디 찾기</h2>
+    <AuthCard title="아이디 찾기">
+      {!foundId ? (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <input
+            type="text"
+            placeholder="이름"
+            aria-invalid={!!errors.name}
+            {...register('name')}
+            className={styles.input}
+          />
+          {errors.name && <p className={styles.error}>{errors.name.message}</p>}
 
-        <input
-          type="text"
-          placeholder="이름"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className={styles.input}
-        />
+          <input
+            type="email"
+            placeholder="이메일"
+            aria-invalid={!!errors.email}
+            {...register('email')}
+            className={styles.input}
+          />
+          {errors.email && <p className={styles.error}>{errors.email.message}</p>}
 
-        <input
-          type="email"
-          placeholder="이메일"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className={styles.input}
-        />
-
-        <Button onClick={handleFindId} className="w-full h-11 mt-2">
-          아이디 찾기
-        </Button>
-
-        {/* 아이디 찾음 */}
-        {foundId && (
-          <>
-            <div className={styles.resultRow}>
-              <input
-                type="text"
-                className={styles.resultInput}
-                value={foundId}
-                readOnly
-              />
-              <button onClick={handleCopy} className={styles.copyButton}>
-                <FaRegCopy />
-              </button>
-            </div>
-            {copied && <p className={styles.copied}>아이디가 복사되었어요!</p>}
-            <Button onClick={handleGoToLogin} className="w-full h-11 mt-2">
-              로그인 하기
+          <div className={styles.actions}>
+            <Button type="submit" className="w-full h-11" disabled={!isValid || mut.isPending}>
+              {mut.isPending ? '조회 중…' : '아이디 찾기'}
             </Button>
-          </>
-        )}
-
-        {/* 못 찾음 */}
-        {notFound && (
-          <p className={styles.error}>일치하는 정보가 없습니다.</p>
-        )}
-      </div>
-    </div>
+          </div>
+        </form>
+      ) : (
+        <>
+          <div className={styles.resultRow}>
+            <input
+              type="text"
+              className={styles.resultInput}
+              value={foundId}
+              readOnly
+              aria-label="찾은 아이디"
+            />
+            <button
+              onClick={async () => {
+                await navigator.clipboard.writeText(foundId)
+                setCopied(true)
+                setTimeout(() => setCopied(false), 1800)
+              }}
+              className={styles.copyButton}
+              aria-label="아이디 복사"
+            >
+              <FaRegCopy />
+            </button>
+          </div>
+          {copied && <p className={styles.copied}>아이디가 복사되었습니다.</p>}
+        </>
+      )}
+    </AuthCard>
   )
 }
 

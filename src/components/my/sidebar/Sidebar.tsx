@@ -15,7 +15,7 @@ const sidebarItems: SidebarItem[] = [
     children: [
       { label: '기본정보', path: '/mypage/myinfo/detail' },
       { label: '비밀번호 변경', path: '/mypage/myinfo/changepassword' },
-      { label: '연결된 계정', path: '/mypage/myinfo/linkedaccount' },
+      // { label: '연결된 계정', path: '/mypage/myinfo/linkedaccount' },
       { label: '배송지 관리', path: '/mypage/myinfo/address' },
       { label: '회원 탈퇴', path: '/mypage/myinfo/withdraw' },
     ],
