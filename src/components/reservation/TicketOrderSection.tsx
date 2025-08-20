@@ -6,6 +6,8 @@ import Button from '@/components/common/Button';
 import styles from './TicketOrderSection.module.css';
 
 type Props = {
+  fid?: string; // ✅ 상위에서 내려주면 그대로 onNext에 포함
+
   selectedDate?: Date | null;
   selectedTime?: string | null;
 
@@ -18,11 +20,12 @@ type Props = {
   maxQuantity?: number;
   initialQuantity?: number;
 
+  // ✅ 최소 데이터만 전달
   onNext?: (payload: {
+    fid?: string;
     date: Date;
     time: string;
     quantity: number;
-    totalPrice: number;
   }) => void;
 
   /** 개발 중엔 true 유지 → 데이터 없으면 데모로 자동 대체 */
@@ -32,14 +35,11 @@ type Props = {
 
 const ymd = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 const formatPrice = (n: number) =>
   new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(n);
+
 const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
-const timeToMinutes = (t: string) => {
-  const [h, m] = t.split(':').map(Number);
-  return h * 60 + (m || 0);
-};
-const isValidDate = (d: Date) => !isNaN(d.getTime());
 
 function makeDemo() {
   const base = new Date();
@@ -54,6 +54,7 @@ function makeDemo() {
 }
 
 const TicketOrderSection: React.FC<Props> = ({
+  fid,
   selectedDate, selectedTime,
   availableDates = [], timesByDate = {},
   pricePerTicket, maxQuantity, initialQuantity = 1,
@@ -69,8 +70,8 @@ const TicketOrderSection: React.FC<Props> = ({
   const demo = useDemoIfEmpty && normalizedDates.length === 0 ? makeDemo() : null;
   const dates = demo ? demo.dates : normalizedDates;
   const tbd = demo ? demo.times : (timesByDate ?? {});
-  const unitPrice = demo ? demo.price : (pricePerTicket ?? 88000);  // ✅ 기본값
-  const maxQty = demo ? demo.maxQty : (maxQuantity ?? 4);     // ✅ 기본값
+  const unitPrice = demo ? demo.price : (pricePerTicket ?? 88000);  // 기본값
+  const maxQty = demo ? demo.maxQty : (maxQuantity ?? 4);           // 기본값
   const isSoldOut = maxQty <= 0;
 
   const sortedDates = React.useMemo(() => [...dates].sort((a, b) => a.getTime() - b.getTime()), [dates]);
@@ -101,9 +102,16 @@ const TicketOrderSection: React.FC<Props> = ({
 
   const includeDate = (d: Date) => sortedDates.some(ad => ymd(ad) === ymd(d));
 
+  // ✅ 다음 클릭 → 상위 onNext로 최소 데이터만 전달
+  const handleNext = () => {
+    if (!isReady || !date || !time) return;
+    onNext?.({ fid, date, time, quantity });
+  };
+
   return (
     <aside className={`${styles.section} ${className || ''}`} aria-label="예매 선택 패널">
       <h2 className={styles.header}>예매 정보</h2>
+
       {/* ====== 상단 컨텐츠(스크롤 대상) ====== */}
       <div className={styles.content}>
         {/* 달력(왼쪽) + 시간(오른쪽) */}
@@ -188,6 +196,7 @@ const TicketOrderSection: React.FC<Props> = ({
           type="button"
           disabled={!isReady}
           className={styles.nextButton}
+          onClick={handleNext}  // ✅ 연결
         >
           다음
         </Button>
