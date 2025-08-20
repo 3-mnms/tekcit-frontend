@@ -25,10 +25,20 @@ function setBearer(cfg: InternalAxiosRequestConfig, token: string) {
   cfg.headers = headers
 }
 
+function unsetBearer(cfg: InternalAxiosRequestConfig) {
+  const headers = ensureAxiosHeaders(cfg.headers);
+  // AxiosHeaders면 delete 지원
+  // 아닐 경우 delete 연산자로 제거
+  try { (headers as AxiosHeaders).delete?.('Authorization'); } catch { }
+  delete (headers as any).Authorization;
+  cfg.headers = headers;
+}
+
 // 요청 인터셉터: localStorage 토큰을 Bearer로 주입
 api.interceptors.request.use((cfg) => {
   const at = tokenStore.get()
   if (at) setBearer(cfg, at)
+  else unsetBearer(cfg);
   return cfg
 })
 
@@ -56,7 +66,6 @@ api.interceptors.response.use(
           const newAccess = (data as ReissueResponseDTO).accessToken ?? null
           if (newAccess) {
             tokenStore.set(newAccess)
-            api.defaults.headers.common['Authorization'] = `Bearer ${newAccess}`
             return newAccess
           }
           return null

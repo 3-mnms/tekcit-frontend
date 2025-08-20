@@ -56,18 +56,3 @@ export async function verifyEmailCode(email: string, code: string, type: Verific
   const { data } = await api.post('/mail/verifyCode', { email, code, type });
   return data;
 }
-
-/** 마이페이지 유저 정보: GET /users/myPage/userInfo (서버에서 사용자 식별) */
-export async function getMyPageUserInfo<T = unknown>() {
-  const { data } = await api.get<ApiSuccess<T>>('/users/myPage/userInfo');
-  return data.data;
-}
-
-/** 마이페이지 회원 정보 수정: POST /users/updateUser */
-export async function postUpdateUser<TReq extends object>(body: TReq) {
-  await api.post<ApiSuccess<void>>('/users/updateUser', body);
-}
-/** 회원 탈퇴: DELETE /users (리프레시 쿠키 삭제됨) */
-export async function deleteUserAccount() {
-  await api.delete('/users');
-}
