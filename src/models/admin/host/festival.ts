@@ -4,15 +4,7 @@ export interface FestivalScheduleDTO {
 }
 export type DayOfWeek = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
 
-export interface Festival {
-    id: string;
-    fname: string;
-    fdfrom: string; // 공연 시작일
-    fdto: string; // 공연 종료일
-    posterFile: string; // 포스터
-    fcltynm: string; // 공연장 이름
-    genrenm: string; // 장르
-    schedules: FestivalScheduleDTO[]; // 스케줄 정보
+export interface FestivalDetail {
     fcast: string[]; // 출연진
     ticketPrice: number; // 티켓 가격
     faddress: string; // 공연장 주소
@@ -28,26 +20,47 @@ export interface Festival {
     runningTime: string; 
 }
 
+export interface Festival {
+    fid: string;
+    fname: string;
+    fdfrom: string; // 공연 시작일
+    fdto: string; // 공연 종료일
+    posterFile: string; // 포스터
+    fcltynm: string; // 공연장 이름
+    genrenm: string; // 장르
+    detail: FestivalDetail; //
+    schedules: FestivalScheduleDTO[]; // 스케줄 정보
+}
+
+
 export const initialProductData: Festival = {
-    id: '',
+    fid: '',
     fname: '',
     fdfrom: '',
     fdto: '',
     posterFile: '',
     fcltynm: '',
     genrenm: '',
-    fcast: [],
-    story: '',
-    ticketPrice: 0,
-    faddress: '',
-    ticketPick: 1,
-    maxPurchase: 4,
-    prfage: '',
-    prfstate: '',
-    availableNOP: 0,
-    entrpsnmH: '',
-    runningTime: '',
-    contentFile: [],
-    updatedate: '',
+    detail: {
+        fcast: [],
+        story: '',
+        ticketPrice: 0,
+        faddress: '',
+        ticketPick: 1,
+        maxPurchase: 4,
+        prfage: '',
+        prfstate: '',
+        availableNOP: 0,
+        entrpsnmH: '',
+        runningTime: '',
+        contentFile: [],
+        updatedate: '',
+    },
     schedules: [],
 };
+
+export interface ApiResponse<T> {
+    data: T;
+    success: boolean;
+    message: string;
+}

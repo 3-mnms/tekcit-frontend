@@ -25,14 +25,19 @@ const ProductManagePage: React.FC = () => {
             const festivalList = response.data;
             return festivalList.map(festival => ({
                 ...festival,
-                fcast: typeof festival.fcast === 'string' ? festival.fcast.split(',').map(s => s.trim()) : [],
+                detail: {
+                    ...festival.detail,
+                    fcast: typeof festival.detail.fcast === 'string' 
+                        ? festival.detail.fcast.split(',').map(s => s.trim()) 
+                        : [],
+                }
             }));
         }
     });
 
     // 삐약! 이 부분에서 상품 클릭 시 상세 페이지로 이동합니다!
     const handleRowClick = (item: Festival) => {
-        navigate(`/admin/product-detail/${item.id}`);
+        navigate(`/admin/product-detail/${item.fid}`);
     };
 
     // 삐약! 버튼 클릭 핸들러를 따로 만듭니다!
@@ -47,17 +52,21 @@ const ProductManagePage: React.FC = () => {
     };
 
     const columns: Column<Festival>[] = [
-        { columnId: 'id', label: 'id' },
+        { columnId: 'fid', label: 'id' },
         { columnId: 'fname', label: '상품명' },
         { columnId: 'genrenm', label: '장르' },
-        { columnId: 'entrpsnmH', label: '주최자명'},
+        {
+          columnId: 'entrpsnmH',
+          label: '주최자명',
+          render: (item) => <span>{item.detail?.entrpsnmH}</span>
+        },
         {
             columnId: 'actions' as keyof Festival,// 삐약! pid를 기준으로 렌더링할게요!
             label: '액션',
             render: (item) => (
                 <div className={styles.buttons}>
-                    <Button onClick={(e) => handleViewTicketHolderList(e, item.id)}>예매자명단</Button>
-                    <Button onClick={(e) => handleViewStats(e, item.id)}>통계 조회</Button>
+                    <Button onClick={(e) => handleViewTicketHolderList(e, item.fid)}>예매자명단</Button>
+                    <Button onClick={(e) => handleViewStats(e, item.fid)}>통계 조회</Button>
                 </div>
             )
         },
@@ -74,7 +83,7 @@ const ProductManagePage: React.FC = () => {
 
 
     return (
-        <Layout subTitle="상품 관리">
+        <Layout subTitle="상품 관리 ">
             <div className={styles.container}>
                 <div className={styles.searchBar}>
                     <SearchBar
@@ -86,7 +95,7 @@ const ProductManagePage: React.FC = () => {
                     columns={columns} 
                     data={products || []}
                     onRowClick={handleRowClick}
-                    getUniqueKey={(item) => item.id}
+                    getUniqueKey={(item) => item.fid}
                 />
             </div>
         </Layout>
