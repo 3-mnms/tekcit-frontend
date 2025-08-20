@@ -36,6 +36,7 @@ import EntranceCheckPage from '@/pages/my/ticket/EntranceCheckPage'
 
 // reservation
 import OrderPage from '@pages/reservation/TicketOrderPage'
+import OrderInfoPage from '@pages/reservation/TicketOrderInfoPage'
 
 // payment
 import BookingPaymentPage from '@/pages/payment/BookingPaymentPage'
@@ -124,6 +125,7 @@ export const router = createBrowserRouter([
     path: '/reservation',
     children: [
       { path: ':fid', element: <OrderPage /> },
+      { path: ':fid/order-info', element: <OrderInfoPage /> },
     ]
   },
 

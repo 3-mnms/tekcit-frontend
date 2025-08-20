@@ -1,46 +1,38 @@
-/* src/pages/reservation/TicketOrderPage.module.css */
 .page {
-  width: 100%;
-  height: 100vh;              /* 팝업 높이 꽉 채움 */
   display: grid;
-  grid-template-columns: 55% 45%;
-  gap: 2rem;
-  padding: 1.5rem 2rem;
-  box-sizing: border-box;
+   grid-template-columns: minmax(0, 55%) minmax(360px, 45%);
+  width: 100vw;
+  height: 100vh;   /* 꽉 채우기 */
+  overflow: hidden; /* 페이지 스크롤 금지 */
 }
-
-.posterWrap {
-  width: 100%;
-  height: 100%;               /* 세로도 꽉 채움 */
-  display: flex;
-  align-items: stretch;       /* 이미지가 래퍼 높이까지 */
-  justify-content: center;
+.leftWrap{
+  position: relative;
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
 }
 
 .poster {
   width: 100%;
   height: 100%;
-  max-width: 620px;           /* 1000폭 기준 자연스런 한계치 */
-  object-fit: cover;          /* 빈 공간 없이 꽉 채움 */
-  border-radius: 16px;
-  box-shadow: 0 12px 26px rgba(0,0,0,0.15);
+  object-fit: cover;
+  display: block;
+  border-radius: 0 !important;
+  margin: 0;
+  box-shadow: none !important;
 }
-
-.orderWrap {
+.leftTitleBar{
+  position:absolute; top:0; left:0; right:0;
+  padding: 20px 24px;
+  background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,0));
+  color:#fff;
+  font-size: 28px; font-weight: 800; line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+.right {
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: flex-start;
-}
-
-.orderCard {
-  width: 100%;
-  height: 100%;               /* 카드 자체가 꽉 채움 */
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
   background: #fff;
-  padding: 20px 24px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-  box-sizing: border-box;
-  overflow: auto;             /* 내용이 많아져도 내부 스크롤 */
+  display: flex;
+  flex-direction: column;
 }
