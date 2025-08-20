@@ -28,7 +28,7 @@ export interface FindPwEmailDTO {
 export interface FindPwResetDTO {
   loginId: string;
   email: string;
-  newPassword: string;
+  loginPw: string;
 }
 
 export async function postFindLoginId(body: FindLoginIdDTO) {
@@ -41,8 +41,8 @@ export async function postFindRegisteredEmail(body: FindPwEmailDTO) {
   return data.data; 
 }
 
-export async function postResetPasswordWithEmail(body: FindPwResetDTO) {
-  await api.post<ApiSuccess<void>>('/users/resetPasswordWithEmail', body);
+export async function patchResetPasswordWithEmail(body: FindPwResetDTO) {
+  await api.patch<ApiSuccess<void>>('/users/resetPasswordWithEmail', body);
 }
 
 export type VerificationType = 'SIGNUP' | 'EMAIL_UPDATE' | 'PASSWORD_FIND';
