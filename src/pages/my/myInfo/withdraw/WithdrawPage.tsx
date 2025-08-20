@@ -1,14 +1,32 @@
 import React, { useState } from 'react'
 import Button from '@/components/common/button/Button'
 import styles from './WithdrawPage.module.css'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
+import { useDeleteAccountMutation } from '@/models/auth/tanstack-query/useDeleteAccount'
 
 const WithdrawPage: React.FC = () => {
   const [checked, setChecked] = useState(false)
+  const navigate = useNavigate();
+  const delMut = useDeleteAccountMutation();
 
   const handleWithdraw = () => {
-    if (!checked) return
-    alert('회원 탈퇴 처리되었습니다.')
-  }
+    if (!checked || delMut.isPending) return;
+    if (!window.confirm('정말 탈퇴하시겠어요? 이 작업은 되돌릴 수 없습니다.')) return;
+
+    delMut.mutate(undefined, {
+      onSuccess: () => {
+        alert('회원 탈퇴 처리되었습니다.');
+        navigate('/'); 
+      },
+      onError: (err) => {
+        const msg = axios.isAxiosError(err)
+          ? (err.response?.data as any)?.message || (err.response?.data as any)?.errorMessage
+          : null;
+        alert(`❌ ${msg || '탈퇴 처리에 실패했어요. 다시 시도해주세요.'}`);
+      },
+    });
+  };
 
   return (
     <section className={styles.container}>
@@ -34,9 +52,9 @@ const WithdrawPage: React.FC = () => {
       <Button
         className={styles.withdrawButton}
         onClick={handleWithdraw}
-        disabled={!checked}
+        disabled={!checked || delMut.isPending}
       >
-        탈퇴하기
+        {delMut.isPending ? '탈퇴 처리 중…' : '탈퇴하기'}
       </Button>
     </section>
   )

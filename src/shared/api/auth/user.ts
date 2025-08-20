@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { api } from '@/shared/api/axios';
 
 export const signupUser = async (data: any) => {
   const res = await axios.post('/api/users/signupUser', data);
@@ -31,3 +32,8 @@ export const verifyEmailCode = async (
   const { data } = await axios.post('/api/mail/verifyCode', { email, code, type }); // 이미 OK
   return data;
 };
+
+export async function deleteMyAccount() {
+  const res = await api.delete('/users');
+  return res.status;
+}
