@@ -1,0 +1,141 @@
+name: "🔄 Helm 이미지 태그 자동 반영"
+run-name: >
+  🔄 ${{ github.event.client_payload.service || inputs.service }}
+  – ${{ github.event.client_payload.tag || inputs.tag }}
+  (env: ${{ github.event.client_payload.env || inputs.env || 'develop-gke' }})
+
+on:
+  repository_dispatch:
+    types: [ image-updated ]
+  workflow_dispatch:
+    inputs:
+      service:
+        required: false
+        description: "booking|festival|payment|gateway|user|nginx-client|fe-admin"
+      image:
+        required: false
+        description: "ex) rookiesdogun/api-booking"
+      tag:
+        required: false
+        description: "ex) v20250812010101"
+      env:
+        required: false
+        description: "develop-gke|develop-aws|prod"
+        default: "develop-gke"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "patch-${{ github.event.client_payload.service || inputs.service }}-${{ github.event.client_payload.env || inputs.env || 'develop-gke' }}"
+  cancel-in-progress: true
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve env → file suffix & target branch
+        id: cfg
+        run: |
+          ENV_IN="${{ github.event.client_payload.env || inputs.env || 'develop-gke' }}"
+          case "$ENV_IN" in
+            prod)
+              ENV_EFF="prod"; BR="main" ;;
+            develop-gke)
+              ENV_EFF="develop-gke"; BR="develop" ;;
+            develop-aws)
+              ENV_EFF="develop-aws"; BR="develop" ;;
+            *)
+              echo "❌ invalid env: $ENV_IN (expected: develop-gke|develop-aws|prod)"; exit 1 ;;
+          esac
+          echo "env_in=$ENV_IN"   >> $GITHUB_OUTPUT
+          echo "env=$ENV_EFF"     >> $GITHUB_OUTPUT
+          echo "branch=$BR"       >> $GITHUB_OUTPUT
+          echo "Resolved: input=$ENV_IN -> effective=$ENV_EFF, branch=$BR"
+
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.cfg.outputs.branch }}
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Map service → values file & root key
+        id: map
+        env:
+          IN_SVC:  ${{ github.event.client_payload.service || inputs.service }}
+          ENV_EFF: ${{ steps.cfg.outputs.env }}
+        run: |
+          set -euo pipefail
+          svc="${IN_SVC:-}"
+          env="${ENV_EFF}"
+
+          case "$svc" in
+            booking|festival|payment|gateway|user)
+              file="values/api/${svc}/values-${env}.yaml"
+              root="api$(echo "$svc" | sed 's/^\(.\)/\U\1/')"
+              ;;
+            nginx-client)
+              file="values/nginx-client/values-${env}.yaml"
+              root="nginxClient"
+              ;;
+            fe-admin)
+              file="values/nginx-admin/values-${env}.yaml"
+              root="nginxAdmin"
+              ;;
+            "")
+              echo "❌ service is empty"; exit 1 ;;
+            *)
+              echo "❌ Unknown service: $svc"; exit 1 ;;
+          esac
+
+          echo "svc_eff=$svc" >> $GITHUB_OUTPUT
+          echo "file=$file"   >> $GITHUB_OUTPUT
+          echo "root=$root"   >> $GITHUB_OUTPUT
+          echo "Mapped $svc → $file (root=$root)"
+
+      - name: Ensure file exists
+        run: |
+          if [ ! -f "${{ steps.map.outputs.file }}" ]; then
+            echo "❌ Not found: ${{ steps.map.outputs.file }}"
+            exit 1
+          fi
+
+      - name: Patch values (repository/tag)
+        env:
+          IMG:  ${{ github.event.client_payload.image || inputs.image }}
+          TAG:  ${{ github.event.client_payload.tag || inputs.tag }}
+          FILE: ${{ steps.map.outputs.file }}
+          ROOT: ${{ steps.map.outputs.root }}
+        run: |
+          set -euo pipefail
+          [ -n "$IMG" ] || { echo "❌ image is empty"; exit 1; }
+          [ -n "$TAG" ] || { echo "❌ tag is empty"; exit 1; }
+
+          REPO_ONLY="${IMG##*/}"
+          if [ -z "$ROOT" ]; then BPATH='.image'; else BPATH=".[\"${ROOT}\"].image"; fi
+
+          if yq -e "${BPATH} | has(\"registry\")" "$FILE" >/dev/null 2>&1; then
+            yq -i "
+              ${BPATH}.repository = \"${REPO_ONLY}\" |
+              ${BPATH}.tag        = \"${TAG}\"
+            " "$FILE"
+          else
+            yq -i "
+              ${BPATH}.repository = \"${IMG}\" |
+              ${BPATH}.tag        = \"${TAG}\"
+            " "$FILE"
+          fi
+
+          echo "✅ Patched:" && yq -r "${BPATH}" "$FILE"
+
+      - name: Commit & push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          branch: ${{ steps.cfg.outputs.branch }}
+          commit_message: "chore(values): ${{ steps.map.outputs.svc_eff }} tag → ${{ github.event.client_payload.tag || inputs.tag }} [env:${{ steps.cfg.outputs.env }}]"
+          file_pattern: ${{ steps.map.outputs.file }}
