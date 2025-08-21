@@ -1,66 +1,94 @@
+/* ✅ 카드 전체: 여백·그림자·라운드 정리 멍 */
 .addressItem {
-  padding: 16px;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  background-color: #ffffff;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   width: 100%;
-  box-sizing: border-box;
-  transition:
-    background-color 0.2s ease,
-    border 0.2s ease;
+  text-align: left;
+  padding: 14px 16px;                /* 넉넉한 내부 여백 멍 */
+  border-radius: 12px;               /* 둥근 모서리 멍 */
+  background: #fff;                  /* 흰 배경 멍 */
+  border: 1px solid #e5e7eb;         /* 기본 테두리 멍 */
+  transition: box-shadow .2s ease, border-color .2s ease, transform .05s ease;
 }
 
+/* ✅ 호버 시: 살짝 떠오르는 느낌 + 테두리 강조 멍 */
 .addressItem:hover {
-  background-color: #4d9afd;
+  box-shadow: 0 8px 22px rgba(0,0,0,.06);
+  border-color: #cbd5e1;
 }
 
-.addressItem:hover .addressText {
-  color: #fff;
-}
-
-/* ✅ 선택된 상태일 때 유지되는 스타일 */
+/* ✅ 선택됨: 브랜드 컬러 테두리 + 은은한 배경 멍 */
 .selected {
-  background-color: #4d9afd;
-  border: 2px solid #000;
+  border-color: #4d9afd;
+  box-shadow: 0 10px 26px rgba(77,154,253,.18);
+  background: linear-gradient(180deg, #ffffff, #f9fbff);
 }
 
-.selected .addressText {
-  color: #fff;
-  font-weight: bold;
-}
-
+/* ✅ 카드 내부 레이아웃 멍 */
 .addressInfo {
-  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr auto;   /* 왼쪽 정보, 오른쪽 부가 UI(휴대폰/뱃지) 멍 */
+  gap: 8px 12px;
+  align-items: center;
 }
 
-.addressRow {
+/* ✅ 1행: 이름(왼쪽) + 전화번호(오른쪽) 멍 */
+.userRow {
+  grid-column: 1 / span 2;           /* 모바일에서 한 줄로 보이도록 기본 2칸 점유 멍 */
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: baseline;
+}
+
+.userName {
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: .2px;
+}
+
+.userPhone {
+  font-size: .92rem;
+  color: #64748b;
+}
+
+/* ✅ 2행: 주소와 기본배송지 뱃지 멍 */
+.addressRow {
+  grid-column: 1 / span 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
 .addressText {
-  margin: 0;
-  font-size: 1rem;
-  flex: 1;
-  color: #000;
-  transition:
-    color 0.2s ease,
-    font-weight 0.2s ease;
+  font-weight: 600;                  /* 주소는 약간 더 강조 멍 */
+  color: #111827;
+  line-height: 1.35;
 }
 
+/* ✅ 기본 배송지 뱃지 멍 */
 .defaultLabel {
-  display: inline-block;
-  padding: 4px 8px;
-  background-color: #4d9afd;
-  color: white;
-  font-size: 0.75rem;
-  border-radius: 4px;
-  white-space: nowrap;
-  min-width: 80px;
-  text-align: right;
+  flex: 0 0 auto;
+  font-size: .78rem;
+  font-weight: 700;
+  color: #fff;
+  background: #4d9afd;
+  padding: 4px 10px;
+  border-radius: 999px;              /* 완전 동글 멍 */
+}
+
+/* ✅ 접근성 포커스 스타일 멍 */
+.addressItem:focus-visible {
+  outline: 3px solid #94c6ff;
+  outline-offset: 2px;
+}
+
+/* ✅ 좁은 화면에서 타이포/줄바꿈 최적화 멍 */
+@media (max-width: 480px) {
+  .userRow, .addressRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .defaultLabel {
+    margin-top: 4px;
+  }
 }

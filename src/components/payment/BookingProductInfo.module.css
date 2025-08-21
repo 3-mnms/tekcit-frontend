@@ -11,17 +11,6 @@
   grid-template-columns: 1fr auto;
   /* 좌:정보 우:가격 요약 멍 */
   gap: 20px;
-  /* 열 간격 멍 */
-  border: 1px solid #e9ecef;
-  /* 옅은 테두리 멍 */
-  border-radius: 16px;
-  /* 둥근 모서리 멍 */
-  padding: 16px 20px;
-  /* 안쪽 여백 멍 */
-  background: #fff;
-  /* 흰 배경 멍 */
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-  /* 미세 그림자 멍 */
 }
 
 /* ✅ 좌측 칼럼 멍 */
@@ -101,7 +90,6 @@
 /* ✅ 구분 점 멍 */
 .dot {
   color: #b0b5bb;
-  /* 옅은 점 색 멍 */
 }
 
 /* ✅ 라벨-값 2열 그리드 멍 */

@@ -33,7 +33,7 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
     useImperativeHandle(ref, () => ({
       async requestPay() {
         if (!STORE_ID || !CHANNEL_KEY) {
-          alert('PortOne storeId/channelKey가 설정되지 않았어요(.env 확인) 멍')
+          alert('PortOne storeId/channelKey가 설정되지 않았어요.')
           return
         }
         const paymentId = createPaymentId()
@@ -50,27 +50,22 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           payMethod: PayMethod.CARD,
           redirectUrl: finalRedirect,
         })
-        if (isPortOneError(result)) alert(`결제 실패: ${result.message ?? result.code} 멍`)
+        if (isPortOneError(result)) alert(`결제 실패: ${result.message ?? result.code}`)
       },
     }))
 
     return (
-      <div className={styles.card}>
-        {/* 헤더: 로고 + 타이틀 + 서브카피 + 라디오 멍 */}
+      <div className={styles.wrapper}>
         <button
           type="button"
           className={styles.header}
           onClick={onToggle}
           aria-expanded={isOpen}
-          aria-pressed={isOpen}
         >
-          <div className={styles.left}>
-            <div className={styles.titles}>
-              <span className={styles.title}>토스 페이먼츠</span>
-              <span className={styles.sub}>신용/체크/간편결제</span>
-            </div>
-          </div>
-          <div className={styles.right}>
+          <span className={styles.radio + (isOpen ? ` ${styles.radioOn}` : '')} />
+          <div className={styles.info}>
+            <span className={styles.title}>토스 페이먼츠</span>
+            <span className={styles.sub}>신용/체크카드 / 간편결제</span>
           </div>
         </button>
       </div>

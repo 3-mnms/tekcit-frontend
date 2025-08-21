@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import styles from '@pages/payment/modal/MoneyChargeModal.module.css'
+import styles from '@components/payment/modal/MoneyChargeModal.module.css'
 import Input from '@/components/common/input/Input'
 import TossPayment, { type TossPaymentHandle } from '@/components/payment/pay/TossPayment'
 

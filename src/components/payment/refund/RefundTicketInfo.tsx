@@ -4,8 +4,7 @@ interface TransferTicketInfoProps {
   title: string
   date: string
   ticket: number
-  sender: string
-  receiver: string
+  price: number
   posterUrl?: string
 }
 
@@ -13,8 +12,7 @@ const TransferTicketInfo: React.FC<TransferTicketInfoProps> = ({
   title,
   date,
   ticket,
-  sender,
-  receiver,
+  price,
   posterUrl,
 }) => {
   return (
@@ -41,12 +39,8 @@ const TransferTicketInfo: React.FC<TransferTicketInfoProps> = ({
           <span className={styles.value}>{ticket}</span>
         </div>
         <div className={styles.infoRow}>
-          <span className={styles.label}>양도자</span>
-          <span className={styles.value}>{sender}</span>
-        </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>양수자</span>
-          <span className={styles.value}>{receiver}</span>
+          <span className={styles.label}>티켓 가격</span>
+          <span className={styles.value}>{price}</span>
         </div>
       </div>
     </div>

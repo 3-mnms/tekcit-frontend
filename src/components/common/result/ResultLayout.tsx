@@ -1,4 +1,3 @@
-// src/pages/result/ResultLayout.tsx
 import { useNavigate } from 'react-router-dom'
 
 export default function ResultLayout({

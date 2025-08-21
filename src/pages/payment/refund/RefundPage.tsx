@@ -1,64 +1,66 @@
-import { useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-
+import { useState, useCallback, useMemo } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import styles from './RefundPage.module.css'
 
 import TransferTicketInfo from '@/components/payment/refund/RefundTicketInfo'
 import Button from '@/components/common/button/Button'
-import AlertModal from '@/pages/payment/modal/AlertModal'
+import AlertModal from '@/components/common/modal/AlertModal'
+import { requestFullRefund } from '@/shared/api/payment/payment' // ✅ 분리한 API 사용
 
 const RefundPage: React.FC = () => {
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false)
+  const [loadingRefund, setLoadingRefund] = useState(false)
+  const [setRefundError] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  // ✅ 공통 결과 페이지 이동 헬퍼 멍
+  // ✅ path(:paymentId) > query(?paymentId=) > state 순으로 처리
+  const { paymentId: paymentIdFromPath } = useParams<{ paymentId: string }>()
+  const location = useLocation()
+  const qs = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const paymentId =
+    paymentIdFromPath || qs.get('paymentId') || (location.state as any)?.paymentId || ''
+
   const routeToResult = useCallback((ok: boolean) => {
-    const q = new URLSearchParams({
-      type: 'refund',
-      status: ok ? 'success' : 'fail',
-    }).toString()
+    const q = new URLSearchParams({ type: 'refund', status: ok ? 'success' : 'fail' }).toString()
     navigate(`/payment/result?${q}`)
   }, [navigate])
-
-  // ✅ 모의 환불 API: URL에 ?fail=1이면 실패 처리 멍
-  const requestRefund = async () => {
-    await new Promise((r) => setTimeout(r, 400))
-    const params = new URLSearchParams(window.location.search)
-    const forceFail = params.get('fail') === '1'
-    return { ok: !forceFail }
-  }
 
   const handleCancel = () => navigate('/mypage/ticket')
   const handleRefundClick = () => setIsRefundModalOpen(true)
 
+  /** ✅ 환불 확정 → 분리된 API 호출 */
   const handleRefundConfirm = async () => {
     setIsRefundModalOpen(false)
+    setRefundError(null)
+    setLoadingRefund(true)
     try {
-      const res = await requestRefund()
-      routeToResult(res.ok)
-    } catch {
+      if (!paymentId) throw new Error('잘못된 접근입니다. (paymentId 누락)')
+      await requestFullRefund(paymentId) // 🔥 여기만 호출하면 끝
+      routeToResult(true)
+    } catch (e: any) {
+      const serverMsg = e?.response?.data?.message
+      setRefundError(serverMsg || e?.message || '환불 요청 중 오류가 발생했습니다.')
       routeToResult(false)
+    } finally {
+      setLoadingRefund(false)
     }
   }
 
   const handleRefundModalCancel = () => setIsRefundModalOpen(false)
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} aria-busy={loadingRefund}>
       <header className={styles.header}>
         <h1 className={styles.title}>취소 요청</h1>
-        <p className={styles.subtitle}>
-          환불 내용을 확인한 뒤 진행해 주세요.
-        </p>
+        <p className={styles.subtitle}>환불 내용을 확인한 뒤 진행해 주세요.</p>
       </header>
 
-      {/* 예매 정보 카드 멍 */}
+      {/* 마이페이지 예매 취소에서 넘겨주는 데이터 넣을 예정 */}
       <TransferTicketInfo
         title="하울의 움직이는 성"
         date="2025.09.21 (일) 오후 3시"
         ticket={2}
-        sender="정혜영"
-        receiver="김민정"
+        price={150000}
       />
 
       {/* 금액 요약 멍 */}
@@ -91,13 +93,16 @@ const RefundPage: React.FC = () => {
         </p>
       </section>
 
-      {/* 하단 고정 액션 영역 멍 */}
       <div className={styles.actions} role="group" aria-label="환불 진행">
-        <Button className={`${styles.btn} ${styles.btnGhost}`} onClick={handleCancel}>
+        <Button className={`${styles.btn} ${styles.btnGhost}`} onClick={handleCancel} disabled={loadingRefund}>
           환불 취소
         </Button>
-        <Button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleRefundClick}>
-          환불
+        <Button
+          className={`${styles.btn} ${styles.btnPrimary}`}
+          onClick={handleRefundClick}
+          disabled={loadingRefund || !paymentId} // 🔒 paymentId 없으면 비활성화
+        >
+          {loadingRefund ? '처리 중…' : '환불'}
         </Button>
       </div>
 
