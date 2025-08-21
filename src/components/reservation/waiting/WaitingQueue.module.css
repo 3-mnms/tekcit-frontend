@@ -1,0 +1,55 @@
+.card {
+  width: 90%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 1rem 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.poster {
+  width: 100%;
+  aspect-ratio: 3 / 4;        /* 세로 포스터 비율 */
+  background: #d9d9d9 center/cover no-repeat;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.info {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.date {
+  font-size: 0.95rem;
+  color: #666;
+  margin-top: 0.2rem;
+}
+
+.waiting {
+  font-size: 1.05rem;
+  margin-top: 0.45rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 16px;
+  background: #eee;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background: #4d9afd;
+  transition: width 0.4s ease-in-out;
+}
