@@ -92,6 +92,12 @@ const BookingPaymentPage: React.FC = () => {
     setErr(null)
   }
 
+  function randomId() {
+    return [...crypto.getRandomValues(new Uint32Array(2))]
+      .map((word) => word.toString(16).padStart(8, '0'))
+      .join('')
+  }
+
   // ✅ 결제 실행 멍
   const handlePayment = async () => {
     if (!openedMethod) {
@@ -130,7 +136,7 @@ const BookingPaymentPage: React.FC = () => {
   // ✅ 결제 버튼 활성 조건/타이머 표시 멍
   const canPay = !!openedMethod && !isPaying && remainingSeconds > 0
   const timeString = `${String(Math.floor(remainingSeconds / 60)).padStart(2, '0')}:${String(
-    remainingSeconds % 60
+    remainingSeconds % 60,
   ).padStart(2, '0')}`
 
   return (
@@ -166,14 +172,20 @@ const BookingPaymentPage: React.FC = () => {
                     type="button"
                   >
                     <span
-                      className={styles.radio + (openedMethod === 'wallet' ? ` ${styles.radioOn}` : '')}
+                      className={
+                        styles.radio + (openedMethod === 'wallet' ? ` ${styles.radioOn}` : '')
+                      }
                     />
                     <span className={styles.methodText}>킷페이 (포인트 결제)</span>
                   </button>
 
                   {openedMethod === 'wallet' && (
                     <div className={styles.methodBody}>
-                      <WalletPayment isOpen onToggle={() => toggleMethod('wallet')} dueAmount={amount} />
+                      <WalletPayment
+                        isOpen
+                        onToggle={() => toggleMethod('wallet')}
+                        dueAmount={amount}
+                      />
                     </div>
                   )}
                 </div>
@@ -187,7 +199,9 @@ const BookingPaymentPage: React.FC = () => {
                     type="button"
                   >
                     <span
-                      className={styles.radio + (openedMethod === 'Toss' ? ` ${styles.radioOn}` : '')}
+                      className={
+                        styles.radio + (openedMethod === 'Toss' ? ` ${styles.radioOn}` : '')
+                      }
                     />
                     <span className={styles.methodText}>토스페이먼츠 (신용/체크)</span>
                   </button>
