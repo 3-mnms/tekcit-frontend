@@ -36,7 +36,7 @@ const UserList: React.FC<UserListProps> = ({ users, onToggleStatus }) => {
             )
         )},
     ];
-    return <Table columns={columns} data={users|| []} />;
+    return <Table columns={columns} data={users|| []} getUniqueKey={(item) => item.id} />;
 };
 
 export default UserList;

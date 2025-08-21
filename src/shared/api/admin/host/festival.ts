@@ -27,12 +27,12 @@ export const createProduct = async (formData: FormData): Promise<Festival> => {
 };
 
 /**
- * 공연 수정 (PATCH /api/festival/manage/{fid})
+ * 공연 수정 (put /api/festival/manage/{fid})
  * @param fid 수정할 공연의 ID
  * @param formData 수정할 내용이 담긴 FormData (JSON + 파일)
  */
 export const updateProduct = async (fid: string, formData: FormData): Promise<Festival> => {
-    const response = await api.patch<Festival>(`/festival/manage/${fid}`, formData, {
+    const response = await api.put<Festival>(`/festival/manage/${fid}`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
@@ -50,7 +50,7 @@ export const deleteProduct = async (fid: string): Promise<void> => {
 };
 
 /**
- * 공연 상세 정보 조회 (GET /api/festival/{id})
+ * 공연 상세 정보 조회 (GET /api/festival/{fid})
  * @param fid 조회할 공연의 ID
  */
 export const getProductDetail = async (fid: string): Promise<Festival> => {
