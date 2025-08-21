@@ -1,141 +1,156 @@
-name: "🔄 Helm 이미지 태그 자동 반영"
-run-name: >
-  🔄 ${{ github.event.client_payload.service || inputs.service }}
-  – ${{ github.event.client_payload.tag || inputs.tag }}
-  (env: ${{ github.event.client_payload.env || inputs.env || 'develop-gke' }})
+name: "💚 nginx-client – Docker Build & GitOps Dispatch"
 
 on:
-  repository_dispatch:
-    types: [ image-updated ]
-  workflow_dispatch:
-    inputs:
-      service:
-        required: false
-        description: "booking|festival|payment|gateway|user|nginx-client|fe-admin"
-      image:
-        required: false
-        description: "ex) rookiesdogun/api-booking"
-      tag:
-        required: false
-        description: "ex) v20250812010101"
-      env:
-        required: false
-        description: "develop-gke|develop-aws|prod"
-        default: "develop-gke"
+  push:
+    branches: [ main, develop ]
+  workflow_dispatch: {}
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: "patch-${{ github.event.client_payload.service || inputs.service }}-${{ github.event.client_payload.env || inputs.env || 'develop-gke' }}"
+  group: nginx-client-${{ github.ref_name }}
   cancel-in-progress: true
 
+env:
+  SERVICE: nginx-client
+  IMAGE:   ${{ secrets.DOCKER_USERNAME }}/nginx-client
+  DEVOPS_REPO: 3-mnms/gitops-repo
+
 jobs:
-  patch:
+  build-push:
     runs-on: ubuntu-latest
     steps:
-      - name: Resolve env → file suffix & target branch
-        id: cfg
-        run: |
-          ENV_IN="${{ github.event.client_payload.env || inputs.env || 'develop-gke' }}"
-          case "$ENV_IN" in
-            prod)
-              ENV_EFF="prod"; BR="main" ;;
-            develop-gke)
-              ENV_EFF="develop-gke"; BR="develop" ;;
-            develop-aws)
-              ENV_EFF="develop-aws"; BR="develop" ;;
-            *)
-              echo "❌ invalid env: $ENV_IN (expected: develop-gke|develop-aws|prod)"; exit 1 ;;
-          esac
-          echo "env_in=$ENV_IN"   >> $GITHUB_OUTPUT
-          echo "env=$ENV_EFF"     >> $GITHUB_OUTPUT
-          echo "branch=$BR"       >> $GITHUB_OUTPUT
-          echo "Resolved: input=$ENV_IN -> effective=$ENV_EFF, branch=$BR"
+      - uses: actions/checkout@v4
 
-      - name: Checkout target branch
-        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          ref: ${{ steps.cfg.outputs.branch }}
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
 
-      - name: Install yq
+      # 타입체크 없이 번들만 생성 (tsc 미실행)
+      - name: Install deps
+        run: npm ci --prefer-offline --no-audit --no-fund
+
+      - name: Build (vite only, no typecheck)
+        run: npx vite build
+
+      - name: Verify dist exists
         run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-          yq --version
+          test -d dist || { echo "❌ dist not found"; exit 1; }
+          ls -al dist | head -n 50
 
-      - name: Map service → values file & root key
-        id: map
-        env:
-          IN_SVC:  ${{ github.event.client_payload.service || inputs.service }}
-          ENV_EFF: ${{ steps.cfg.outputs.env }}
-        run: |
-          set -euo pipefail
-          svc="${IN_SVC:-}"
-          env="${ENV_EFF}"
-
-          case "$svc" in
-            booking|festival|payment|gateway|user)
-              file="values/api/${svc}/values-${env}.yaml"
-              root="api$(echo "$svc" | sed 's/^\(.\)/\U\1/')"
-              ;;
-            nginx-client)
-              file="values/nginx-client/values-${env}.yaml"
-              root="nginxClient"
-              ;;
-            fe-admin)
-              file="values/nginx-admin/values-${env}.yaml"
-              root="nginxAdmin"
-              ;;
-            "")
-              echo "❌ service is empty"; exit 1 ;;
-            *)
-              echo "❌ Unknown service: $svc"; exit 1 ;;
-          esac
-
-          echo "svc_eff=$svc" >> $GITHUB_OUTPUT
-          echo "file=$file"   >> $GITHUB_OUTPUT
-          echo "root=$root"   >> $GITHUB_OUTPUT
-          echo "Mapped $svc → $file (root=$root)"
-
-      - name: Ensure file exists
-        run: |
-          if [ ! -f "${{ steps.map.outputs.file }}" ]; then
-            echo "❌ Not found: ${{ steps.map.outputs.file }}"
-            exit 1
-          fi
-
-      - name: Patch values (repository/tag)
-        env:
-          IMG:  ${{ github.event.client_payload.image || inputs.image }}
-          TAG:  ${{ github.event.client_payload.tag || inputs.tag }}
-          FILE: ${{ steps.map.outputs.file }}
-          ROOT: ${{ steps.map.outputs.root }}
+      # 빌드 산출물 전용 컨텍스트 생성 (.dockerignore, 루트 Dockerfile 영향 회피)
+      - name: Create CI build context (Dockerfile + default.conf + dist)
         run: |
           set -euo pipefail
-          [ -n "$IMG" ] || { echo "❌ image is empty"; exit 1; }
-          [ -n "$TAG" ] || { echo "❌ tag is empty"; exit 1; }
 
-          REPO_ONLY="${IMG##*/}"
-          if [ -z "$ROOT" ]; then BPATH='.image'; else BPATH=".[\"${ROOT}\"].image"; fi
-
-          if yq -e "${BPATH} | has(\"registry\")" "$FILE" >/dev/null 2>&1; then
-            yq -i "
-              ${BPATH}.repository = \"${REPO_ONLY}\" |
-              ${BPATH}.tag        = \"${TAG}\"
-            " "$FILE"
+          # 1) default.conf 준비: repo에 있으면 사용, 없으면 SPA 기본 생성
+          if [ -f deploy/nginx.conf ]; then
+            cp deploy/nginx.conf default.conf
           else
-            yq -i "
-              ${BPATH}.repository = \"${IMG}\" |
-              ${BPATH}.tag        = \"${TAG}\"
-            " "$FILE"
+            printf '%s\n' \
+              'server {' \
+              '  listen 80;' \
+              '  server_name _;' \
+              '  root /usr/share/nginx/html;' \
+              '  index index.html;' \
+              '' \
+              '  location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico)$ {' \
+              '    try_files $uri =404;' \
+              '    expires 7d;' \
+              '    add_header Cache-Control "public, max-age=604800, immutable";' \
+              '  }' \
+              '' \
+              '  location / {' \
+              '    try_files $uri /index.html;' \
+              '  }' \
+              '' \
+              '  location = /healthz {' \
+              '    add_header Content-Type text/plain;' \
+              '    return 200 "ok";' \
+              '  }' \
+              '}' > default.conf
           fi
 
-          echo "✅ Patched:" && yq -r "${BPATH}" "$FILE"
+          # 2) ci-context 생성 및 파일 복사
+          rm -rf ci-context
+          mkdir -p ci-context
+          cp -r dist ci-context/dist
+          cp default.conf ci-context/default.conf
 
-      - name: Commit & push
-        uses: stefanzweifel/git-auto-commit-action@v5
+          # 3) 컨텍스트용 Dockerfile 생성
+          cat > ci-context/Dockerfile <<'DOCKER'
+          FROM nginx:1.27-alpine
+          COPY default.conf /etc/nginx/conf.d/default.conf
+          COPY dist /usr/share/nginx/html
+          EXPOSE 80
+          CMD ["nginx","-g","daemon off;"]
+          DOCKER
+
+          echo "== ci-context =="
+          ls -al ci-context
+          echo "== ci-context/dist (head) =="
+          ls -al ci-context/dist | head -n 30
+
+      - name: ⏱️ Tag
+        run: echo "TAG=v$(date -u +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
         with:
-          branch: ${{ steps.cfg.outputs.branch }}
-          commit_message: "chore(values): ${{ steps.map.outputs.svc_eff }} tag → ${{ github.event.client_payload.tag || inputs.tag }} [env:${{ steps.cfg.outputs.env }}]"
-          file_pattern: ${{ steps.map.outputs.file }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=${{ env.TAG }}
+            type=sha
+            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: ./ci-context
+          file: ./ci-context/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # develop → gitops-repo에 develop-gke,develop-aws 동시 반영(한 번의 디스패치)
+      - name: Dispatch to GitOps (develop-gke + develop-aws)
+        if: ${{ github.ref_name == 'develop' }}
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token:  ${{ secrets.GH_PAT }}
+          repository: ${{ env.DEVOPS_REPO }}
+          event-type: image-updated
+          client-payload: |
+            {
+              "service": "nginx-client",
+              "image":   "${{ env.IMAGE }}",
+              "tag":     "${{ env.TAG }}",
+              "targets": "develop-gke,develop-aws"
+            }
+
+      # main → gitops-repo에 prod 반영
+      - name: Dispatch to GitOps (prod)
+        if: ${{ github.ref_name == 'main' }}
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token:  ${{ secrets.GH_PAT }}
+          repository: ${{ env.DEVOPS_REPO }}
+          event-type: image-updated
+          client-payload: |
+            {
+              "service": "nginx-client",
+              "image":   "${{ env.IMAGE }}",
+              "tag":     "${{ env.TAG }}",
+              "env":     "prod"
+            }
