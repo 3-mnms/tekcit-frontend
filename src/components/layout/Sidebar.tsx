@@ -11,7 +11,7 @@ interface MenuItem {
 interface SidebarProps {
   menuItems: MenuItem[];
   userName: string; 
-  userEmail: string; 
+  userEmail?: string; 
   style?: React.CSSProperties;
 }
 

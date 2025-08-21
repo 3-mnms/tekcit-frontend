@@ -174,10 +174,11 @@ export const router = createBrowserRouter([
       { path: 'operatManage/user', element: <OperatManageUserPage /> },
       { path: 'operatManage/host', element: <OperatManageHostPage /> },
       { path: 'productRegist', element: <ProductRegisterPage /> },
+      { path: 'productRegist/:fid', element: <ProductRegisterPage />},
       { path: 'announcement', element: <AnnouncementListPage /> },
       { path: 'productManage', element: <ProductManagePage /> },
-      { path: 'product-detail/:id', element: <ProductDetailPage /> },
-      { path: 'productManage/:id/TicketHolderList', element: <TicketHolderListPage /> },
+      { path: 'product-detail/:fid', element: <ProductDetailPage /> },
+      { path: 'productManage/:fid/TicketHolderList', element: <TicketHolderListPage /> },
       { path: 'productManage/Statistics/:id', element: <StatisticsPage /> },
 
       { path: 'button', element: <HomePage /> },

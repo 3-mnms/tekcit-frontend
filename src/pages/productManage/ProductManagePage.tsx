@@ -7,9 +7,8 @@ import Table, {type Column} from '@/components/shared/Table';
 import Button from '@/components/common/Button';
 import styles from './ProductManagePage.module.css';
 
-import { getProducts } from '@/shared/api/festival';
-import type { Festival } from '@/models/festival';
-// import { useAuth } from '@/models/auth/useAuth';
+import { getProducts } from '@/shared/api/admin/host/festival';
+import type { Festival } from '@/models/admin/host/festival';
 
 const ProductManagePage: React.FC = () => {
     const navigate = useNavigate();
@@ -21,32 +20,45 @@ const ProductManagePage: React.FC = () => {
         isError,
     } = useQuery({
         queryKey: ['products'], 
-        queryFn: getProducts,
+        queryFn: getProducts, 
+        select: (response) => {
+            const festivalList = response.data;
+            return festivalList.map(festival => ({
+                ...festival,
+                detail: {
+                    ...festival.detail,
+                    fcast: typeof festival.detail.fcast === 'string' 
+                        ? festival.detail.fcast.split(',').map(s => s.trim()) 
+                        : [],
+                }
+            }));
+        }
     });
 
     // 삐약! 이 부분에서 상품 클릭 시 상세 페이지로 이동합니다!
-    const handleRowClick = (product: Festival) => {
-        navigate(`/product-detail/${product.fid}`);
+    const handleRowClick = (item: Festival) => {
+        navigate(`/admin/product-detail/${item.fid}`);
     };
 
     // 삐약! 버튼 클릭 핸들러를 따로 만듭니다!
-    const handleViewTicketHolderList = (e: React.MouseEvent, productId: number) => {
+    const handleViewTicketHolderList = (e: React.MouseEvent, fid: string) => {
         e.stopPropagation(); // 삐약! 행 클릭 이벤트가 발생하는 것을 막아줍니다!
-        navigate(`/productManage/${productId}/TicketHolderList`);
+        navigate(`/admin/productManage/${fid}/TicketHolderList`);
     };
 
-    const handleViewStats = (e: React.MouseEvent, productId: number) => {
+    const handleViewStats = (e: React.MouseEvent, fid: string) => {
         e.stopPropagation(); // 삐약! 행 클릭 이벤트가 발생하는 것을 막아줍니다!
-        navigate(`/productManage/Statistics/${productId}`);
+        navigate(`/admin/productManage/Statistics/${fid}`);
     };
 
     const columns: Column<Festival>[] = [
         { columnId: 'fid', label: 'id' },
         { columnId: 'fname', label: '상품명' },
         { columnId: 'genrenm', label: '장르' },
-        { columnId: 'detail', 
-          label: '공연상태', 
-          render: (item) => <span>{item.detail.entrpsnmH}</span>
+        {
+          columnId: 'entrpsnmH',
+          label: '주최자명',
+          render: (item) => <span>{item.detail?.entrpsnmH}</span>
         },
         {
             columnId: 'actions' as keyof Festival,// 삐약! pid를 기준으로 렌더링할게요!
@@ -71,7 +83,7 @@ const ProductManagePage: React.FC = () => {
 
 
     return (
-        <Layout subTitle="상품 관리">
+        <Layout subTitle="상품 관리 ">
             <div className={styles.container}>
                 <div className={styles.searchBar}>
                     <SearchBar
@@ -83,6 +95,7 @@ const ProductManagePage: React.FC = () => {
                     columns={columns} 
                     data={products || []}
                     onRowClick={handleRowClick}
+                    getUniqueKey={(item) => item.fid}
                 />
             </div>
         </Layout>

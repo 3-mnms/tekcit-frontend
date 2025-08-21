@@ -1,7 +1,7 @@
 import React from 'react';
 import Table, {type Column} from '@/components/shared/Table';
 import ToggleSwitch from '@/components/operatManage/ToggleSwitch';
-import { USERROLE, type User } from '@/models/User';
+import { USERROLE, type User } from '@/models/admin/host/User';
 
 interface HostListProps  {
     users: User[];
@@ -34,7 +34,7 @@ const HostList: React.FC<HostListProps > = ({ users, onToggleStatus }) => {
         )},
     ];
 
-    return <Table columns={columns} data={users|| []} />;
+    return <Table columns={columns} data={users|| []}  getUniqueKey={(item) => item.id} />;
 };
 
 export default HostList;

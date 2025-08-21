@@ -1,12 +1,13 @@
-import type { Festival } from '@/models/festival';
+import type { Festival } from '@/models/admin/host/festival';
 // import { dummyProducts } from '@/models/dummy/dummyProducts';
-import type { TicketHolderType } from '@/models/User';
-import axios from 'axios';
-// import { useAuth } from '@/models/auth/useAuth';
+import type { TicketHolderType } from '@/models/admin/host/User';
+import { api } from '@/shared/api/axios';
 
+
+// 공연 조회
 export const getProducts = async (): Promise<Festival[]> => {
     console.log('삐약! 공연 목록을 서버에 요청해요!');
-    const response = await axios.get<Festival[]>('/api/festival/manage');
+    const response = await api.get<Festival[]>('/festival/manage');
     return response.data;
 };
 
@@ -16,21 +17,22 @@ export const getProducts = async (): Promise<Festival[]> => {
  */
 export const createProduct = async (formData: FormData): Promise<Festival> => {
     
-    const response = await axios.post<Festival>('/api/festival/manage', formData, {
+    const response = await api.post<Festival>('/festival/manage', formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
     });
     return response.data;
+
 };
 
 /**
- * 공연 수정 (PATCH /api/festival/manage/{productId})
+ * 공연 수정 (put /api/festival/manage/{fid})
  * @param fid 수정할 공연의 ID
  * @param formData 수정할 내용이 담긴 FormData (JSON + 파일)
  */
-export const updateProduct = async (productId: number, formData: FormData): Promise<Festival> => {
-    const response = await axios.patch<Festival>(`/api/festival/manage/${productId}`, formData, {
+export const updateProduct = async (fid: string, formData: FormData): Promise<Festival> => {
+    const response = await api.put<Festival>(`/festival/manage/${fid}`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
@@ -40,20 +42,20 @@ export const updateProduct = async (productId: number, formData: FormData): Prom
 
 /**
  * 공연 삭제 (DELETE /api/festival/manage/{productId})
- * @param fid 삭제할 공연의 ID
+ * @param id 삭제할 공연의 ID
  */
-export const deleteProduct = async (fid: number): Promise<void> => {
+export const deleteProduct = async (fid: string): Promise<void> => {
     console.log(`삐약! ${fid}번 공연을 서버에 삭제 요청해요!`);
-    await axios.delete(`/api/festival/manage/${fid}`);
+    await api.delete(`/festival/manage/${fid}`);
 };
 
 /**
- * (추측) 공연 상세 정보 조회 (GET /api/festival/{productId})
+ * 공연 상세 정보 조회 (GET /api/festival/{fid})
  * @param fid 조회할 공연의 ID
  */
-export const getProductDetail = async (fid: number): Promise<Festival> => {
+export const getProductDetail = async (fid: string): Promise<Festival> => {
     console.log(`삐약! ${fid}번 공연 상세 정보를 서버에 요청해요!`);
-    const response = await axios.get<Festival>(`/api/festival/${fid}`);
+    const response = await api.get<Festival>(`/festival/manage/${fid}`);
     return response.data;
 };
 

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { USERROLE, type User} from '@/models/User';
+import { USERROLE, type User} from '@/models/admin/host/User';
 import type { NewHostData } from '@/components/operatManage/AddModal';
 import { MOCK_HOSTS } from '@/models/dummy/mockHosts';
 

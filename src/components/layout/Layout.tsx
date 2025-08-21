@@ -5,17 +5,17 @@ import Sidebar from './Sidebar'
 import SubHeader from './SubHeader'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/models/auth/useAuth'
-import { USERROLE } from '@/models/User'
+import { USERROLE } from '@/models/admin/host/User'
 
 const adminMenuItems = [
-  { path: '/productRegist', name: '상품 등록' },
-  { path: '/productManage', name: '상품 관리' },
-  { path: '/announcement', name: '공지사항' },
+  { path: '/admin/productRegist', name: '상품 등록' },
+  { path: '/admin/productManage', name: '상품 관리' },
+  { path: '/admin/announcement', name: '공지사항' },
   {
     name: '운영 관리',
     subMenu: [
-      { path: '/operatManage/host', name: '주최자' },
-      { path: '/operatManage/user', name: '사용자' },
+      { path: '/admin/operatManage/host', name: '주최자' },
+      { path: '/admin/operatManage/user', name: '사용자' },
     ],
   },
 ]

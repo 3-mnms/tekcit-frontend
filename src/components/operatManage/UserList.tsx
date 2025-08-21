@@ -3,7 +3,7 @@ import Table from '@/components/shared/Table';
 import type { Column } from '@/components/shared/Table';
 import ToggleSwitch from '@/components/operatManage/ToggleSwitch';
 import AddressDropdown from '@/components/operatManage/AddressDropdown';
-import { USERROLE, type User } from '@/models/User';
+import { USERROLE, type User } from '@/models/admin/host/User';
 
 interface UserListProps {
     users: User[];
@@ -36,7 +36,7 @@ const UserList: React.FC<UserListProps> = ({ users, onToggleStatus }) => {
             )
         )},
     ];
-    return <Table columns={columns} data={users|| []} />;
+    return <Table columns={columns} data={users|| []} getUniqueKey={(item) => item.id} />;
 };
 
 export default UserList;

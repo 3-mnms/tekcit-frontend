@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams  } from 'react-router-dom';
+import { useNavigate, useParams  } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useMutation, useQueryClient, useQuery} from '@tanstack/react-query';
 import Input from '@/components/shared/Input';
@@ -7,9 +7,9 @@ import DatePicker from '@components/shared/DatePicker';
 import Button from '@components/common/Button';
 import PostcodeSearch from '@/components/product/PostcodeSearch';
 import ScheduleDropdown from '@/components/product/ScheduleDropdown';
-import {initialProductData, type Festival, type DayOfWeek} from '@/models/festival';
+import {initialProductData, type Festival, type DayOfWeek} from '@/models/admin/host/festival';
 import CastInput from '@/components/product/CastInput';
-import { createProduct, getProductDetail, updateProduct } from '@/shared/api/festival';
+import { createProduct, getProductDetail, updateProduct } from '@/shared/api/admin/host/festival';
 
 import styles from './ProductRegistPage.module.css';
 
@@ -21,190 +21,129 @@ interface ConfirmModalState {
 const ProductRegisterPage: React.FC = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const [searchParams] = useSearchParams();
-    const [isEditMode, setIsEditMode] = useState(false);
-    const fid = searchParams.get('id');
-
+    const { fid: fid } = useParams<{ fid: string }>();
+    const isEditMode = !!fid;
     
-    const { data: existingProduct } = useQuery({
-        queryKey: ['festival', fid],
-        queryFn: () => getProductDetail(Number(fid)),
-        enabled: !!fid, 
-        select: (data) => {
-            const fcastValue = data.detail.fcast as any;
-            
-            const fcastAsArray = typeof fcastValue === 'string'
-                ? fcastValue.split(',').map((s: string) => s.trim())
-                : Array.isArray(fcastValue) ? fcastValue : []; 
+    console.log('Step 1: ID from URL:', fid);
 
-            return {
-                ...data,
-                detail: {
-                    ...data.detail,
-                    fcast: fcastAsArray, 
-                }
-            };
-        }
-    });
-    
     const [productData, setProductData] = useState<Festival>(initialProductData);
     const [posterFile, setPosterFile] = useState<File | null>(null);
     const [contentFiles, setContentFiles] = useState<File[]>([]);
     const [confirmModal, setConfirmModal] = useState<ConfirmModalState>({ isOpen: false, onConfirm: () => {} });
+    
+    const { data: existingProduct } = useQuery({
+        queryKey: ['festival', fid],
+        queryFn: () => getProductDetail(fid!),
+        enabled: isEditMode,
+        select: (response) => {
+            const product = response.data; // API 응답에서 실제 데이터 객체 꺼내기
+           return {
+                ...product,
+                detail: {
+                    ...product.detail,
+                    fcast: typeof product.detail.fcast === 'string'
+                        ? product.detail.fcast.split(',').map(s => s.trim())
+                        : [],
+                }
+            };
+        }
+    });
+    console.log('Step 2: Data from useQuery:', existingProduct);
 
     useEffect(() => {
-        if (existingProduct) {
+         console.log('Step 3: useEffect is running. existingProduct is:', existingProduct);
+        if (isEditMode && existingProduct) {
             setProductData(existingProduct);
-            setIsEditMode(true); // 삐약! 수정 모드로 전환합니다!
         } else {
-            setIsEditMode(false);
-            setProductData(initialProductData); // 삐약! 수정 모드가 아니면 초기화합니다!
+            setProductData(initialProductData);
         }
-    }, [existingProduct]);
+    }, [isEditMode, existingProduct]);
 
     const { mutate, isPending } = useMutation({
-        mutationFn: (formData: FormData) => {
-        if (isEditMode && fid) {
-            return updateProduct(Number(fid), formData);
-        }
-        // createProduct도 마찬가지!
-        return createProduct(formData);
-    },
+        mutationFn: (formData: FormData) => isEditMode ? updateProduct(fid!, formData) : createProduct(formData),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['products'] });
-            setConfirmModal({ ...confirmModal, isOpen: false });
+            queryClient.invalidateQueries({ queryKey: ['products'] }); // 삐약! 목록 페이지 캐시 무효화!
+            if (isEditMode) {
+                queryClient.invalidateQueries({ queryKey: ['product', fid] }); // 상세 정보 캐시도 무효화!
+            }
             alert(`상품이 성공적으로 ${isEditMode ? '수정' : '등록'}되었습니다!`);
-            navigate('/productManage');
+            navigate('/admin/productManage');
         },
         onError: (error) => {
             console.error('상품 등록/수정 실패:', error);
-            alert(`상품 ${isEditMode ? '수정' : '등록'}에 실패했습니다. 다시 시도해 주세요.`);
+            alert(`상품 ${isEditMode ? '수정' : '등록'}에 실패했습니다.`);
         },
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setProductData(prevData => ({
-            ...prevData,
-            [name]: value,
-        }));
+        setProductData(p => ({ ...p, [name]: value }));
     };
 
     const handleDetailChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         const isNumeric = ['ticketPrice', 'maxPurchase', 'availableNOP', 'ticketPick'].includes(name);
-        setProductData(p => ({ 
-            ...p, 
-            detail: { 
-                ...p.detail, 
-                // 삐약! detail 객체 안의 값을 바꿔줘!
-                [name]: isNumeric ? (value === '' ? '' : Number(value)) : value 
-            } 
-        }));
-    };
-
-    const handleAddCast = (fcast: string) => {
-        setProductData(prevData => ({
-            ...prevData,
+        setProductData(p => ({
+            ...p,
             detail: {
-            ...prevData.detail,
-            fcast: [...(prevData.detail.fcast as string[]), fcast],
-        }
+                ...p.detail,
+                [name]: isNumeric ? (value === '' ? '' : Number(value)) : value
+            }
         }));
     };
 
+    const handleAddCast = (cast: string) => {
+        setProductData(p => ({ ...p, detail: { ...p.detail, fcast: [...p.detail.fcast, cast] } }));
+    };
     const handleRemoveCast = (castToRemove: string) => {
-    setProductData(prevData => {
-        const currentFcastArray = prevData.detail.fcast as string[];
-        const newFcastArray = currentFcastArray.filter(member => member !== castToRemove);
-            return {
-                ...prevData,
-                detail: {
-                    ...prevData.detail,
-                    fcast: newFcastArray,
-                }
-            };
-        });
+        setProductData(p => ({ ...p, detail: { ...p.detail, fcast: p.detail.fcast.filter(c => c !== castToRemove) } }));
     };
         
     const handleAddressComplete = (address: string) => {
-        setProductData(prevData => ({
-            ...prevData,
-            detail: {
-                ...prevData.detail,
-                faddress: address,
-            }
-        }));
+        setProductData(p => ({ ...p, detail: { ...p.detail, faddress: address } }));
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, files } = e.target;
-        if (!files || files.length === 0) return;
-
-        if (name === 'posterFile') {
-            setPosterFile(files[0]);
-        } 
-        else if (name === 'contentFile') {
-            setContentFiles(prevFiles => [...prevFiles, ...Array.from(files)]);
-        }
+        const { name, files } = e.target;
+        if (!files) return;
+        if (name === 'posterFile') setPosterFile(files[0] || null);
+        else if (name === 'contentFiles') setContentFiles(prev => [...prev, ...Array.from(files)]);
     };
     
     const handleRemoveDetailImage = (fileNameToRemove: string) => {
-        setContentFiles(prevFiles => 
-        prevFiles.filter(file => file.name !== fileNameToRemove)
-        );
+        setContentFiles(prevFiles => prevFiles.filter(file => file.name !== fileNameToRemove));
     };
 
-    const handleAddSchedule = (day: string, time: string) => {
-        const isDuplicate = productData.schedules.some(
-            (schedule) => schedule.dayOfWeek === day && schedule.time === time
-        );
-        if (!isDuplicate) {
-            setProductData((prevData) => ({
-                ...prevData,
-                schedules: [...prevData.schedules, { dayOfWeek: day as DayOfWeek, time: time }],
-            }));
-        }else {alert('삐약! 이미 등록된 스케줄이에요!');}
-    };
+    const handleAddSchedule = (day: DayOfWeek, time: string) => {
+        const newSchedule = { dayOfWeek: day, time };
+        if (!productData.schedules.some(s => s.dayOfWeek === day && s.time === time)) {
+            setProductData(p => ({ ...p, schedules: [...p.schedules, newSchedule] }));
+        }
+    }
 
     const handleRemoveSchedule = (indexToRemove: number) => {
-        setProductData((prevData) => ({
-            ...prevData,
-            schedules: prevData.schedules.filter((_, index) => index !== indexToRemove),
-        }));
+        setProductData(p => ({ ...p, schedules: p.schedules.filter((_, i) => i !== indexToRemove) }));
     };
 
-   const handleRegisterClick = () => {
-    if (!productData.fname) return alert('삐약! 상품명을 입력해주세요!');
-
-    setConfirmModal({
-        isOpen: true,
-        onConfirm: () => {
-            const formData = new FormData();
-            const productInfoToSend = {
-                ...productData,
-                detail: {
-                    ...productData.detail,
-                    fcast: (productData.detail.fcast as string[]).join(','),
-                },
-            };
-            formData.append('requestDTO', new Blob([JSON.stringify(productInfoToSend)], { type: "application/json" }));
-
-            if (posterFile) {
-                formData.append('posterFile', posterFile);
+    const handleSubmit = () => {
+        if (!productData.fname) return alert('삐약! 상품명을 입력해주세요!');
+        const formData = new FormData();
+        const productInfoToSend = {
+            ...productData,
+            detail: {
+                ...productData.detail,
+                fcast: productData.detail.fcast.join(','),
             }
-            contentFiles.forEach(file => {
-                formData.append('contentFiles', file);
-            });
-
-            mutate(formData);
-        },
-    });
-};
-
-    const handleCloseModal = () => {
-        setConfirmModal({ ...confirmModal, isOpen: false });
+        };
+        formData.append('requestDTO', new Blob([JSON.stringify(productInfoToSend)], { type: "application/json" }));
+        if (posterFile) formData.append('posterFile', posterFile);
+        contentFiles.forEach(file => formData.append('contentFiles', file));
+        mutate(formData);
     };
+
+    const handleOpenConfirmModal = () => setConfirmModal({ isOpen: true, onConfirm: () => { handleSubmit(); handleCloseModal(); } });
+    const handleCloseModal = () => setConfirmModal({ ...confirmModal, isOpen: false });
+
 
     return (
         <Layout subTitle={isEditMode ? '상품 수정' : '상품 등록'}>
@@ -426,7 +365,7 @@ const ProductRegisterPage: React.FC = () => {
                     </div>
                 </form>
                 <div className="flex justify-center">
-                <Button onClick={handleRegisterClick} disabled={isPending} className="w-1/2 h-7" >
+                <Button onClick={handleOpenConfirmModal} disabled={isPending} className="w-1/2 h-7" >
                     {isPending ? '처리 중...' : (isEditMode ? '수정하기' : '등록하기')}
                 </Button>
             </div>

@@ -69,7 +69,7 @@ export default defineConfig({
         target: 'http://localhost:8080',
       },
       '/api/festival': {
-        target: 'http://localhost:8083',
+        target: 'http://localhost:10000',
         changeOrigin: true,
       },
       '/api/booking': {

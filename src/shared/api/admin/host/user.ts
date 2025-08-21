@@ -1,4 +1,4 @@
-import { USERROLE, type User} from '@/models/User';
+import { USERROLE, type User} from '@/models/admin/host/User';
 import { MOCK_USERS } from '@/models/dummy/mockUsers';
 
 export const getUsers = async (searchTerm?: string): Promise<User[]> => {

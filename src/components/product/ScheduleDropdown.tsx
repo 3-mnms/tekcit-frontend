@@ -3,19 +3,19 @@
 import React, { useState } from 'react';
 import styles from './ScheduleDropdown.module.css';
 import Button from '@/components/common/Button';
-import type { FestivalScheduleDTO } from '../../models/festival';
+import type { FestivalScheduleDTO, DayOfWeek } from '../../models/admin/host/festival';
 
 interface ScheduleDropdownProps {
     schedules: FestivalScheduleDTO[];
-    onAddSchedule: (day: string, time: string) => void;
+    onAddSchedule: (day: DayOfWeek, time: string) => void;
     onRemoveSchedule: (index: number) => void;
 }
 
-const DAYS_OF_WEEK = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+const DAYS_OF_WEEK : DayOfWeek[] = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const TIMES = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`);
 
-const ScheduleDropdown: React.FC<ScheduleDropdownProps> = ({ schedules, onAddSchedule, onRemoveSchedule }) => {
-    const [selectedDay, setSelectedDay] = useState('');
+const ScheduleDropdown: React.FC<ScheduleDropdownProps> = ({ schedules = [], onAddSchedule, onRemoveSchedule }) => {
+    const [selectedDay, setSelectedDay] = useState<DayOfWeek | ''>('');
     const [selectedTime, setSelectedTime] = useState('');
 
     const handleAdd = () => {
@@ -33,7 +33,7 @@ const ScheduleDropdown: React.FC<ScheduleDropdownProps> = ({ schedules, onAddSch
                     name="dayOfWeek"
                     className={styles.select}
                     value={selectedDay}
-                    onChange={(e) => setSelectedDay(e.target.value)}
+                    onChange={(e) => setSelectedDay(e.target.value as DayOfWeek | '')}
                 >
                     <option value="">요일 선택</option>
                     {DAYS_OF_WEEK.map((day) => (

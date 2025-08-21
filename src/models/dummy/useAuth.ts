@@ -1,4 +1,4 @@
-import { USERROLE, type UserRole} from '@/models/User';
+import { USERROLE, type UserRole} from '@/models/admin/host/User';
 
 // 삐약! 가상의 로그인 유저 정보를 반환하는 훅입니다!
 export const useAuth = () => {

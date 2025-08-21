@@ -4,7 +4,9 @@ import SearchBar from '@/components/common/SearchBox';
 import AnnouncementList from '@/components/announcement/AnnouncementList';
 import AnnouncementModal from '@/components/announcement/AnnouncementModal';
 import styles from './AnnouncementListPage.module.css';
-import type { Announcement } from '@/models/Announcement';
+import type { Announcement } from '@/models/admin/host/Announcement';
+import Button from '@/components/common/Button';
+
 
 const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
   {
@@ -81,7 +83,7 @@ const AnnouncementListPage: React.FC = () => {
           <h3 className={styles.title}>전체 공지 {filtered.length}건</h3>
           <div className={styles.controls}>
             <SearchBar searchTerm={searchTerm} onSearch={setSearchTerm} />
-            <button
+            <Button
               className={styles.registerBtn}
               onClick={() => {
                 setEditTarget(null);
@@ -89,7 +91,7 @@ const AnnouncementListPage: React.FC = () => {
               }}
             >
               + 공지사항 등록
-            </button>
+            </Button>
           </div>
         </div>
         <div className={styles.tableSection}>

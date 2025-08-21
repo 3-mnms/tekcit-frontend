@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './AnnouncementList.module.css';
-import type { Announcement } from '@/models/Announcement';
+import type { Announcement } from '@/models/admin/host/Announcement';
+import Button from '../common/Button';
 
 interface Props {
   announcements: Announcement[];
@@ -26,8 +27,8 @@ const AnnouncementList: React.FC<Props> = ({ announcements, onDelete, onEdit }) 
             <td>{a.title}</td>
             <td>{a.createdAt}</td>
             <td className={styles.actions}>
-              <button className={styles.edit} onClick={() => onEdit(a)}>수정</button>
-              <button className={styles.delete} onClick={() => onDelete(a.id)}>삭제</button>
+              <Button onClick={() => onEdit(a)}>수정</Button>
+              <Button onClick={() => onDelete(a.id)}>삭제</Button>
             </td>
           </tr>
         ))}
