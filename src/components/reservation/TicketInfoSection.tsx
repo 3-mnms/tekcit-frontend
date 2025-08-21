@@ -1,5 +1,5 @@
-// src/components/reservation/TicketInfoSection.tsx
 import React from 'react';
+import styles from './TicketInfoSection.module.css';
 
 type TicketInfoSectionProps = {
   posterUrl?: string;
@@ -10,7 +10,7 @@ type TicketInfoSectionProps = {
   unitPrice?: number;
   quantity?: number;
   className?: string;
-  compact?: boolean;   // ✅ 추가: 컴팩트 모드
+  compact?: boolean;   // ✅ 컴팩트 모드
 };
 
 const formatKRW = (n: number) => `${new Intl.NumberFormat('ko-KR').format(n)}원`;
@@ -37,6 +37,7 @@ const TicketInfoSection: React.FC<TicketInfoSectionProps> = ({
   compact = false,
 }) => {
   const subtotal = unitPrice * quantity;
+
   const fallbackSvg =
     'data:image/svg+xml;utf8,' +
     encodeURIComponent(
@@ -47,46 +48,53 @@ const TicketInfoSection: React.FC<TicketInfoSectionProps> = ({
       </svg>`
     );
 
-  // ✅ compact 모드 크기/폰트 축소
-  const posterStyle = compact
-    ? { width: 120, aspectRatio: '2 / 3' as any }  // 약 120×180
-    : { width: '100%', aspectRatio: '2 / 3' as any };
+  const titleClass = compact ? styles.titleCompact : styles.title;
+  const posterClass = [
+    styles.poster,
+    compact ? styles.posterCompact : styles.posterWide,
+  ].join(' ');
 
-  const titleCls = compact ? 'text-sm font-semibold truncate' : 'text-base font-medium';
-  const metaCls  = compact ? 'text-xs opacity-80 truncate'   : 'text-sm opacity-80';
+  const titleTextClass = compact ? styles.titleTextCompact : styles.titleText;
+  const metaClass = compact ? styles.metaCompact : styles.meta;
 
   return (
-    <section className={`w-full rounded-2xl border p-4 ${className}`}>
-      <h2 className={compact ? 'mb-2 text-sm font-semibold' : 'mb-4 text-lg font-semibold'}>내 티켓 정보</h2>
+    <section className={`${styles.container} ${className}`}>
+      <h2 className={titleClass}>내 티켓 정보</h2>
 
-      <div className="flex gap-12">
-        {/* 포스터 (compact면 고정폭) */}
-        <div style={posterStyle} className="overflow-hidden rounded-lg border shrink-0">
+      <div className={styles.row}>
+        {/* 포스터 */}
+        <div className={posterClass}>
           <img
             src={posterUrl || fallbackSvg}
             alt={`${title} 포스터`}
-            className="h-full w-full object-cover"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).src = fallbackSvg; }}
+            className={styles.posterImg}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = fallbackSvg;
+            }}
             loading="lazy"
           />
         </div>
 
         {/* 정보 */}
-        <div className="min-w-0 flex-1">
-          <div className="grid gap-1">
-            <div className={titleCls} title={title}>{title}</div>
-            <div className={metaCls}  title={`${date} · ${time}`}>{date} · {time}</div>
-            <div className={metaCls}  title={venue}>{venue}</div>
+        <div className={styles.info}>
+          <div className={styles.stack}>
+            <div className={titleTextClass} title={title}>{title}</div>
+            <div className={metaClass} title={`${date} · ${time}`}>
+              {date} · {time}
+            </div>
+            <div className={metaClass} title={venue}>{venue}</div>
           </div>
 
-          <div className="mt-3 grid gap-1 text-sm">
-            <div className="flex items-center justify-between gap-2">
-              <span className="opacity-80">가격 × 수량</span>
-              <span className="font-medium">{formatKRW(unitPrice)} × {quantity}매</span>
+          <div className={styles.priceBox}>
+            <div className={styles.rowBetween}>
+              <span className={styles.muted}>가격 × 수량</span>
+              <span className={styles.titleText}>
+                {formatKRW(unitPrice)} × {quantity}매
+              </span>
             </div>
-            <div className="flex items-center justify-between gap-2">
-              <span className="opacity-80">소계</span>
-              <span className="text-base font-semibold">{formatKRW(subtotal)}</span>
+            <div className={styles.rowBetween}>
+              <span className={styles.muted}>소계</span>
+              <span className={styles.subtotal}>{formatKRW(subtotal)}</span>
             </div>
           </div>
         </div>

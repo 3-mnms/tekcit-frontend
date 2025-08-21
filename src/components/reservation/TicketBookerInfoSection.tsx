@@ -1,5 +1,5 @@
-// src/components/reservation/TicketBookerInfoSection.tsx
 import React from 'react';
+import styles from './TicketBookerInfoSection.module.css';
 
 type Props = {
   name?: string;
@@ -39,37 +39,65 @@ const TicketBookerInfoSection: React.FC<Props> = ({
   const [p1, p2, p3] = splitPhone(phone);
   const [eid, edom] = splitEmail(email);
 
-  const inputCls =
-    'w-full rounded border px-3 py-2 text-sm bg-gray-50 ' +
-    (readOnly ? 'cursor-default' : '');
+  const inputClass = `${styles.input} ${readOnly ? styles.readOnly : ''}`;
 
   return (
-    <section className={`w-full rounded-2xl border p-5 ${className}`}>
-      <h2 className="mb-3 text-lg font-semibold">예매자 확인</h2>
+    <section className={`${styles.container} ${className}`}>
+      <h2 className={styles.title}>예매자 확인</h2>
 
       {/* 예매자 이름 */}
-      <div className="mb-4">
-        <div className="mb-1 text-sm font-medium">예매자</div>
-        <input className={inputCls} value={name} readOnly={readOnly} aria-label="예매자" />
+      <div className={styles.block}>
+        <div className={styles.label}>예매자</div>
+        <input
+          className={inputClass}
+          value={name}
+          readOnly={readOnly}
+          aria-label="예매자"
+        />
       </div>
 
       {/* 전화번호 */}
-      <div className="mb-4">
-        <div className="mb-1 text-sm font-medium">전화번호</div>
-        <div className="flex gap-2">
-          <input className={`${inputCls}`} value={p1} readOnly={readOnly} aria-label="전화번호 앞자리" />
-          <input className={`${inputCls}`} value={p2} readOnly={readOnly} aria-label="전화번호 중간자리" />
-          <input className={`${inputCls}`} value={p3} readOnly={readOnly} aria-label="전화번호 끝자리" />
+      <div className={styles.block}>
+        <div className={styles.label}>전화번호</div>
+        <div className={styles.row}>
+          <input
+            className={inputClass}
+            value={p1}
+            readOnly={readOnly}
+            aria-label="전화번호 앞자리"
+          />
+          <input
+            className={inputClass}
+            value={p2}
+            readOnly={readOnly}
+            aria-label="전화번호 중간자리"
+          />
+          <input
+            className={inputClass}
+            value={p3}
+            readOnly={readOnly}
+            aria-label="전화번호 끝자리"
+          />
         </div>
       </div>
 
       {/* 이메일 */}
       <div>
-        <div className="mb-1 text-sm font-medium">이메일</div>
-        <div className="flex items-center gap-2">
-          <input className={inputCls} value={eid} readOnly={readOnly} aria-label="이메일 아이디" />
-          <span className="px-1 text-sm">@</span>
-          <input className={inputCls} value={edom} readOnly={readOnly} aria-label="이메일 도메인" />
+        <div className={styles.label}>이메일</div>
+        <div className={styles.emailRow}>
+          <input
+            className={inputClass}
+            value={eid}
+            readOnly={readOnly}
+            aria-label="이메일 아이디"
+          />
+          <span className={styles.at}>@</span>
+          <input
+            className={inputClass}
+            value={edom}
+            readOnly={readOnly}
+            aria-label="이메일 도메인"
+          />
         </div>
       </div>
     </section>

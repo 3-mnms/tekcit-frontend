@@ -88,6 +88,11 @@ const FindIdPage: React.FC = () => {
             </button>
           </div>
           {copied && <p className={styles.copied}>아이디가 복사되었습니다.</p>}
+          <div className={styles.actions}>
+            <Button onClick={() => (window.location.href = '/login')} className="w-full h-11 mt-2">
+              로그인하기
+            </Button>
+          </div>
         </>
       )}
     </AuthCard>

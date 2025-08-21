@@ -1,6 +1,6 @@
 import React from 'react';
 import DatePicker from 'react-datepicker';
-import ko from 'date-fns/locale/ko';
+import { ko } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
 import Button from '@/components/common/Button';
 import styles from './TicketOrderSection.module.css';
