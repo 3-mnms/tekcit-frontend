@@ -1,8 +1,8 @@
 // src/pages/result/ResultPage.tsx
 import { useEffect, useMemo } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import ResultLayout from './ResultLayout'
-import { RESULT_CONFIG, type ResultType, type ResultStatus } from './resultConfig'
+import ResultLayout from '@/components/common/result/ResultLayout'
+import { RESULT_CONFIG, type ResultType, type ResultStatus } from '@/shared/config/resultConfig'
 
 export default function ResultPage() {
   const [sp] = useSearchParams()

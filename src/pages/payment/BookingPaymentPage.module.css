@@ -1,276 +1,133 @@
-:root {
-  --bg: #f2f4f8;
-  --panel: #ffffff;
-  --card: #f8f9fb;
-  --text: #0f172a;
-  --muted: #64748b;
-  --brand: #1976d2;
-  --brand-2: #4d9afd;
-  --danger: #ef4444;
-  --ring: #94c6ff;
-  --radius: 12px;
-  --shadow: 0 12px 32px rgba(0, 0, 0, .08);
-}
-
 .page {
-  min-height: 100vh;
-  background: #f3f3f3;
-  padding-bottom: 0;
+  padding: 0;
+  background: #f9fafc;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 5;
+.container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 24px;
-  background: var(--panel);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .06);
-}
-
-.topbarTitle {
-  font-weight: 700;
-  color: var(--text);
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.topbarRight {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.badge {
-  background: var(--card);
-  color: var(--muted);
-  border-radius: 999px;
-  padding: 6px 10px;
-  font-size: .8rem;
-}
-
-.timer {
-  color: var(--brand);
-  font-weight: 600;
-}
-
-.booking-container {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 32px;
-  padding: 32px 20px;
-  max-width: 1120px;
+  flex-direction: row;
+  max-width: 980px;
+  height: calc(100vh - 60px);
   margin: 0 auto;
-  align-items: start;            
+  padding: 20px;
+  gap: 20px;
+  box-sizing: border-box;
 }
 
-.booking-container::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: calc(100% - 320px - 16px); 
-  width: 1px;
-  background-color: #e2e8f0; 
-}
-
-.left-panel {
-  min-width: 0;
+/* 왼쪽 */
+.left {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: #ffffff;
+  overflow-y: auto;
 }
 
-.right-panel {
-  position: sticky;              
-  top: 32px;                     
-  align-self: start;             /* grid 내부 높이 계산 안정화 */
-  height: calc(100vh - 32px - 32px); /* 뷰포트 높이 - 상/하 패딩(32+32) */
+/* 오른쪽 */
+.right {
+  width: 300px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;/* 위: 요약, 아래: 버튼 */
-  gap: 16px;                     /* 내부 섹션 간격 */
-  padding: 20px;
-  background: #ffffff;
-  border-radius: var(--radius);
+  gap: 16px;
 }
 
-.payment-summary-wrapper {
-  flex: 1 1 auto;    /* 가용 높이 채우기 */
-  min-height: 0;     /* flex 컨테이너에서 overflow 동작을 위해 필요 */
-  overflow: auto;    /* 내용이 많으면 내부 스크롤 */
-}
-
-.pay-button-wrapper {
-  flex: 0 0 auto;    /* 버튼은 고정 높이 */
-  margin-top: 12px;
-}
-
-.pay-button {
-  width: 100%;
-  padding: 14px;
+.sectionTitle {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #fff;
-  background: linear-gradient(90deg, var(--brand-2), var(--brand));
-  border: 0;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: transform .08s ease, box-shadow .12s ease;
-  box-shadow: 0 8px 20px rgba(25, 118, 210, .25);
-}
-
-.pay-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-.pay-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.pay-button:disabled {
-  opacity: .65;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.terms {
-  margin-top: 8px;
-  font-size: .85rem;
-  color: var(--muted);
-}
-
-.terms a {
-  color: var(--brand);
-  text-decoration: underline;
-}
-
-.section {
-  background: var(--panel);
-  padding: 20px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}
-
-.sectionGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-
-
-.title {
-  font-size: 1.1rem;
-  font-weight: 800;
   color: #111827;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #111827;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+}
+
+.sectionContainer,
+.summaryCard {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 10px;
+}
+
+/* 수령 방법과 결제 수단 사이 여백 추가 */
+.receiveSection {
+  margin-bottom: 20px;
+}
+
+.paymentBox {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 10px;
 }
 
 .methodCard {
-  background: var(--panel);
-  border: 1px solid transparent;
-  border-radius: 14px;
-  transition: border-color .15s ease, box-shadow .15s ease;
-  margin-bottom: 12px;
-}
-
-.methodCard[data-state="open"] {
-  border-color: var(--ring);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent);
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
 }
 
 .methodHeader {
   width: 100%;
   background: transparent;
-  border: 0;
-  padding: 16px;
+  border: none;
+  padding: 14px 12px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 10px;
   cursor: pointer;
-}
-
-.methodHeader:focus-visible {
-  outline: 0;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 40%, transparent);
-  border-radius: 12px;
-}
-
-.methodMeta {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  text-align: left;
-}
-
-.methodIcon {
-  width: 35px;
-  height: 35px;
-  object-fit: contain;
-}
-
-.methodTitle {
-  font-weight: 700;
-  color: var(--text);
-}
-
-.methodSub {
-  color: var(--muted);
-  font-size: .9rem;
-  margin-left: 6px;
-}
-
-.chevron {
-  transition: transform .2s ease;
-}
-
-.methodCard[data-state="open"] .chevron {
-  transform: rotate(180deg);
-}
-
-.methodBody {
-  padding: 0 16px 16px;
-  animation: expand .18s ease;
-}
-
-@keyframes expand {
-  from {
-    opacity: .2;
-    transform: translateY(-2px);
-  }
-
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.errorMsg {
-  margin-top: 8px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--danger) 12%, transparent);
-  color: var(--danger);
-  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  font-size: 0.92rem;
 }
 
 .radio {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
   border-radius: 999px;
-  border: 2px solid #cbd5e1;
+  border: 2px solid #ccc;
   background: #fff;
 }
 
 .radioOn {
-  border-color: var(--text);
-  box-shadow: inset 0 0 0 4px var(--text);
+  border-color: #111;
+  box-shadow: inset 0 0 0 4px #111;
+}
+
+.methodText {
+  font-weight: 600;
+  color: #111;
+}
+
+.methodBody {
+  padding: 14px;
+  background: #f9fafb;
+}
+
+.buttonWrapper {
+  margin-top: 8px;
+}
+
+.payButton {
+  width: 100%;
+  background: #4D9AFD;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 0.95rem;
+  min-height: 48px; /* ← 다시 추가 */
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+
+.payButton:hover {
+  background: #377ee7;
+}
+
+.errorMsg {
+  color: #b91c1c;
+  background: #fee2e2;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
 }

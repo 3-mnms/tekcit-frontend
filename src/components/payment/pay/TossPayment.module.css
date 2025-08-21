@@ -1,48 +1,60 @@
-.card{
-  border:1px solid #e9eef5;
-  border-radius:12px;
-  background:#fff;
+.wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 16px 20px;
+  transition: box-shadow 0.2s ease;
 }
 
-.header{
-  width:100%;
-  display:flex; justify-content:space-between; align-items:center;
-  gap:12px; padding:14px 16px; background:transparent; border:0; cursor:pointer;
-  border-radius:12px;
-}
-.header:focus:not(:focus-visible){outline:none;}
-.header:focus-visible{outline:3px solid #94c6ff; outline-offset:2px;}
-
-.left{display:flex; align-items:center; gap:10px; min-width:0;}
-.logo{width:22px; height:22px; object-fit:contain; flex-shrink:0;}
-.titles{display:flex; flex-direction:column; min-width:0;}
-.title{font-weight:700; color:#0f172a;}
-.sub{font-size:.9rem; color:#94a3b8;}
-
-.right{display:flex; align-items:center; gap:10px;}
-.radio{
-  width:10px; height:10px; border-radius:50%;
-  background:#4d9afd; box-shadow:0 0 0 3px rgba(77,154,253,.2);
-}
-.chevron{color:#9aa6b2; transition:transform .2s ease;}
-.header[aria-pressed="true"] .chevron,
-.header[aria-expanded="true"] .chevron{transform:rotate(180deg);}
-
-.body{
-  overflow:hidden; max-height:0; padding:0 16px; transition:max-height .25s ease;
-}
-.open{max-height:220px; padding-bottom:14px;}
-
-.note{margin:10px 0 6px; color:#475569;}
-.note strong{color:#0f172a;}
-
-.badges{
-  display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 0; padding:0; list-style:none;
-  color:#64748b; font-size:.9rem;
-}
-.badges .brand{
-  background:#eef6ff; color:#1e5bbf; padding:4px 8px; border-radius:999px; font-weight:700;
+.wrapper:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
-/* 클릭 시 네모 제거 + 모바일 탭 하이라이트 제거 */
-.header{-webkit-tap-highlight-color:transparent;}
+.header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+}
+
+.header:focus-visible {
+  outline: 2px solid #4D9AFD;
+  outline-offset: 4px;
+}
+
+.radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+
+.radioOn {
+  border-color: #111827;
+  box-shadow: inset 0 0 0 5px #111827;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.sub {
+  font-size: 0.88rem;
+  color: #6b7280;
+}

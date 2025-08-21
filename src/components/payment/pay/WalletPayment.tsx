@@ -42,9 +42,7 @@ const WalletPayment: React.FC<WalletPaymentProps> = ({ isOpen, dueAmount = 0 }) 
   const shortage = useMemo(() => Math.max(0, dueAmount - (balance ?? 0)), [dueAmount, balance])
 
   return (
-    <div className={styles.card}>
-
-      {/* 바디: 여백 넓게 + 3줄만 */}
+    <div className={styles.wrapper}>
       <div className={`${styles.body} ${isOpen ? styles.open : ''}`}>
         {error && <p className={styles.error}>{error}</p>}
         {balance === null && !error && <p className={styles.muted}>잔액을 불러오는 중…</p>}
@@ -52,14 +50,16 @@ const WalletPayment: React.FC<WalletPaymentProps> = ({ isOpen, dueAmount = 0 }) 
         {balance !== null && (
           <>
             <div className={styles.row}>
-              <span className={styles.label}>잔액</span>
+              <span className={styles.label}>보유 잔액</span>
               <span className={styles.value}>{balance.toLocaleString()}원</span>
             </div>
 
             {shortage > 0 && (
-              <div className={styles.shortageWarning}>
+              <div className={styles.shortageBox}>
                 <span className={styles.warningIcon}>⚠</span>
-                결제를 진행하려면 <strong>{shortage.toLocaleString()}원</strong>이 더 필요합니다.
+                <p>
+                  결제를 진행하려면 <strong>{shortage.toLocaleString()}원</strong>이 더 필요합니다.
+                </p>
               </div>
             )}
 

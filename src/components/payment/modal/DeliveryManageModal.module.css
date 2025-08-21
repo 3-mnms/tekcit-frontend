@@ -1,97 +1,43 @@
-.container {
-  padding: 24px;
-  width: 100%; /* 부모 기준 반응형 */
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-.title-row {
-  position: relative;
-  display: flex;
-  justify-content: center; /* 제목 가운데 정렬 */
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 0;
-  text-align: center;
-}
-
-.close-button {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  padding: 4px;
-  cursor: pointer;
-  font-size: 8px;
-  line-height: 1;
-}
-
-.close-icon {
-  width: 15px; /* 원하는 크기로 조절 가능 */
-  height: 15px;
-  object-fit: contain;
-}
-
+/* ✅ 카드 리스트 래퍼: 스크롤바 정리 + 위아래 여백 멍 */
 .address-wrapper {
-  background-color: #f9f9f9; /* 💡 회색 배경 */
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* 💡 살짝 그림자 */
-  width: 100%;
-  box-sizing: border-box;
-  height: 400px;
-}
-
-.address-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 auto;
-  width: 100%; /* 💡 리스트는 부모에 맞게 */
-}
-
-.address-item {
-  width: 100%; /* 💡 전체 너비 사용 */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  margin-bottom: 12px;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  background-color: #fff;
-  box-sizing: border-box;
-}
-
-.address-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.address-text {
-  margin: 0;
-  font-size: 1rem;
-  flex: 1;
-}
-
-.address-info {
-  flex: 1;
-}
-
-.default-label {
-  display: inline-block;
+  max-height: min(56vh, 540px);      /* 높이 제한으로 스크롤 발생 멍 */
+  overflow: auto;
+  padding-right: 4px;                /* 스크롤바 공간 보정 멍 */
   margin-top: 8px;
-  padding: 4px 8px;
-  background-color: #4d9afd;
-  color: white;
-  font-size: 0.75rem;
-  border-radius: 4px;
-  white-space: nowrap;
+}
+
+/* ✅ 스크롤바 미세 스타일 (크로미움) 멍 */
+.address-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+.address-wrapper::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 8px;
+}
+.address-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+/* ✅ 리스트 간격/아이템 패딩 정리 멍 */
+.address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;                         /* 카드 간격 넉넉히 멍 */
+  padding: 8px 0 4px;
+  margin: 0;
+  list-style: none;
+}
+
+.address-list-item {
+  cursor: pointer;
+}
+
+/* ✅ 선택된 아이템에는 외곽선 비활성, 내부 카드가 강조되므로 얇게만 멍 */
+.address-list-item.selected {
+  outline: none;
+}
+
+/* ✅ 하단 고정 버튼(있다면) 상단 그림자 멍 */
+.footerStickyShadow {
+  box-shadow: 0 -8px 24px rgba(0,0,0,.06);
 }

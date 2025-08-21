@@ -1,31 +1,31 @@
 import Button from '@/components/common/button/Button'
-
 import styles from './AddressItem.module.css'
-interface AddressItemProps {
-  address1: string
-  address2: string
-  isDefault: boolean
-  onClick?: () => void
-  selected?: boolean // ✅ 추가
+
+export interface AddressItemProps {
+  address: string            // 단일 주소
+  zipCode?: string           // 우편번호(있으면 표시)
+  isDefault: boolean         // 기본 배송지 여부
+  selected?: boolean         // 선택 상태
+  onClick?: () => void       // 클릭 콜백
 }
 
 const AddressItem = ({
-  address1,
-  address2,
+  address,
+  zipCode,
   isDefault,
+  selected = false,
   onClick,
-  selected = false, // ✅ 기본값 false
 }: AddressItemProps) => {
+  const line = `${zipCode ? `[${zipCode}] ` : ''}${address}`
+
   return (
     <Button
       onClick={onClick}
-      className={`${styles.addressItem} ${selected ? styles.selected : ''}`} // ✅ class 조건부 적용
+      className={`${styles.addressItem} ${selected ? styles.selected : ''}`}
     >
       <div className={styles.addressInfo}>
         <div className={styles.addressRow}>
-          <p className={styles.addressText}>
-            {address1} {address2}
-          </p>
+          <p className={styles.addressText}>{line}</p>
           {isDefault && <span className={styles.defaultLabel}>기본 배송지</span>}
         </div>
       </div>

@@ -1,6 +1,3 @@
-// ✅ 공연 결제 정보 카드 컴포넌트 리팩터링 멍
-// ✅ 모든 줄에 주석을 붙였어요 멍
-import React from 'react' // 리액트 임포트 멍
 import styles from './BookingProductInfo.module.css' // CSS 모듈 임포트 멍
 import { bookingProduct } from '@models/payment/bookingProduct' // 더미/실데이터 임포트 멍
 

@@ -1,5 +1,4 @@
 import { FaQrcode, FaTruck } from 'react-icons/fa'
-
 import styles from './ReceiveInfo.module.css'
 
 export type ReceiveType = 'QR' | 'DELIVERY'
@@ -20,20 +19,17 @@ const ReceiveInfo: React.FC<Props> = ({ value, labelOverride }) => {
   const desc = labelOverride?.desc ?? base.desc
 
   return (
-    <section aria-label="수령 방법">
-      <h2 className={styles.title}>수령 방법</h2>
-
-      <div className={`${styles.displayBox} ${styles.readonly}`} role="status" aria-live="polite">
-        <span className={styles.icon}>
+    <div className={styles.wrapper}>
+      <div className={styles.box}>
+        <div className={styles.icon}>
           {value === 'QR' ? <FaQrcode /> : <FaTruck />}
-        </span>
-
-        <div className={styles.textGroup}>
-          <span className={styles.label}>{title}</span>
-          <span className={styles.desc}>{desc}</span>
+        </div>
+        <div className={styles.texts}>
+          <p className={styles.title}>{title}</p>
+          <p className={styles.desc}>{desc}</p>
         </div>
       </div>
-    </section>
+    </div>
   )
 }
 
