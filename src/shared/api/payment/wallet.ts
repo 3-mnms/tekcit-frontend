@@ -1,3 +1,4 @@
+// wallet.ts
 import { PayMethod } from '@portone/browser-sdk/v2'
 import { api } from '../axios'
 

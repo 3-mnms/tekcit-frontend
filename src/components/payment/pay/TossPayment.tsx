@@ -1,8 +1,10 @@
 import { forwardRef, useImperativeHandle } from 'react'
 import PortOne, { Currency, PayMethod } from '@portone/browser-sdk/v2'
 import styles from './TossPayment.module.css'
-import { paymentConfirm, paymentRequest } from '@/shared/api/payment/wallet'
+import { paymentRequest } from '@/shared/api/payment/toss'
 
+import { api } from '@/shared/api/axios'
+import { useNavigate } from 'react-router-dom'
 export interface TossPaymentProps {
   isOpen: boolean
   onToggle: () => void
@@ -10,61 +12,105 @@ export interface TossPaymentProps {
   orderName: string
   redirectUrl?: string
 }
-export type TossPaymentHandle = { requestPay: () => Promise<void> }
+
+export type TossPaymentHandle = {
+  requestPay: (args: {
+    paymentId: string
+    amount: number
+    orderName: string
+    userId: number      // ✅ X-User-Id 헤더용 멍
+    bookingId: string   // ✅ 백엔드 DTO 필수 멍
+    festivalId: string  // ✅ 백엔드 DTO 필수 멍
+    sellerId: number    // ✅ 백엔드 DTO 필수 멍
+  }) => Promise<void>
+}
 
 const STORE_ID = import.meta.env.VITE_PORTONE_STORE_ID?.trim()
 const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY?.trim()
 
-function createPaymentId(): string {
-  const c = globalThis.crypto
-  if (c?.randomUUID) return c.randomUUID()
-  const buf = c?.getRandomValues
-    ? c.getRandomValues(new Uint32Array(2))
-    : new Uint32Array([Date.now() & 0xffffffff, (Math.random() * 1e9) | 0])
-  return `pay_${Array.from(buf).join('')}`
-}
-
 type PortOneError = { code: string; message?: string }
 const isPortOneError = (v: unknown): v is PortOneError =>
-  !!v &&
-  typeof v === 'object' &&
-  'code' in (v as Record<string, unknown>) &&
-  typeof (v as Record<string, unknown>).code === 'string'
+  !!v && typeof v === 'object' && 'code' in (v as Record<string, unknown>) && typeof (v as Record<string, unknown>).code === 'string'
 
 const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
-  ({ isOpen, onToggle, amount, orderName, redirectUrl }, ref) => {
-    useImperativeHandle(ref, () => ({
-      async requestPay() {
-        if (!STORE_ID || !CHANNEL_KEY) {
-          alert('PortOne storeId/channelKey가 설정되지 않았어요.')
-          return
+  ({ isOpen, onToggle, amount: defaultAmount, orderName: defaultOrderName, redirectUrl }, ref) => {
+    const navigate = useNavigate();
+    const paymentConfirm = async (paymentId: string) => {
+      const MAX_TRIES = 3
+
+      console.log("payment confirm action");
+
+      for (let tryCount = 0; tryCount < MAX_TRIES; tryCount++) {
+        await new Promise((r) => setTimeout(r, (tryCount + 1) * 2000))
+
+        try {
+          const completeResponse = await api.post(`/payments/complete/${paymentId}`)
+
+          console.log(`paymentConfirm 시도 ${tryCount + 1}:`, completeResponse);
+          const isSuccess = completeResponse.data.success;
+          if (isSuccess) {
+            // 성공 응답 처리
+            return true;
+          }
+        } catch (e) {
+          return false;
         }
 
-        const paymentId = createPaymentId()
+        if (tryCount === MAX_TRIES - 1) {
+          console.error('결제 실패');
+          return false;
+          // 실패 처리
+        }
+      }
+    }
+
+    useImperativeHandle(ref, () => ({
+
+      // ✅ 결제 트리거 멍(결과 페이지에서 상태 확정) 멍
+      async requestPay({ paymentId, amount, orderName, userId, bookingId, festivalId, sellerId }) {
+
+        // 1) 결과 페이지 리다이렉트 URL 구성 (여기서는 paymentId만 넘김)
         const base = redirectUrl ?? `${window.location.origin}/payment/result?type=booking`
         const finalRedirect = `${base}${base.includes('?') ? '&' : '?'}paymentId=${encodeURIComponent(paymentId)}`
 
-        // bookingId는 가예매 상태일 때 미리 받아서 갖고 있다가 넣어줘야 함.
-        // festivalId,sellerId는 게시글 받아올 때 요청으로 받아와야 함.
-        const paymentReqestRes = paymentRequest(paymentId, bookingId, festivalId, sellerId, amount)
-        // -> 응답이 true일 때 52번 line portOne이 실행 돼야 함.
+        // 2) 백엔드에 "결제 시작" 알림
+        try {
+          await paymentRequest(paymentId, bookingId, festivalId, sellerId, amount, userId)
+        } catch (e) {
+          console.error('paymentRequest 실패', e)
+          alert('결제 요청 준비에 실패했어요.')
+          return
+        }
 
+        // 3) PortOne 결제 요청 멍(redirectUrl로 결과 페이지 진입) 멍
         const result: unknown = await PortOne.requestPayment({
-          storeId: STORE_ID,
-          channelKey: CHANNEL_KEY,
+          storeId: STORE_ID!,
+          channelKey: CHANNEL_KEY!,
           paymentId,
-          orderName,
-          totalAmount: amount,
+          orderName: orderName || defaultOrderName,
+          totalAmount: amount ?? defaultAmount,
           currency: Currency.KRW,
           payMethod: PayMethod.CARD,
           redirectUrl: finalRedirect,
         })
 
-        // PortOne이 PAID인지 아닌지 모르겠는데 상태 반환해주는 거 보고 밑에 paymentConfirm 실행
-        const paymentConfirmRes = paymentConfirm(paymentId)
+        console.log(result);
 
-        // paymentConfirmRes가 ok 즉, 200을 반환하면 결제 완료 후 navigate 시켜주면 됨.
-        if (isPortOneError(result)) alert(`결제 실패: ${result.message ?? result.code}`)
+        // ✅ 사용자가 결제창 닫음(취소)
+        if (!result) {          
+          navigate(`/payment/result?type=booking&status=fail`, { replace: true })
+          return
+        }
+
+        // 결제 승인 확인
+        if (result) {
+          const res = await paymentConfirm(paymentId)
+          if (res) {
+            navigate(`/payment/result?type=booking&status=success`, { replace: true })
+          } else {
+            navigate(`/payment/result?type=booking&status=fail`, { replace: true })
+          }
+        }
       },
     }))
 
