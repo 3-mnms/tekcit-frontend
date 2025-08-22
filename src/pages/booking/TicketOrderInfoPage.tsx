@@ -2,11 +2,11 @@ import React from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './TicketOrderInfoPage.module.css';
 
-import TicketInfoSection from '@/components/reservation/TicketInfoSection';
-import TicketDeliverySelectSection, { type DeliveryMethod } from '@/components/reservation/TicketDeliverySelectSection';
+import TicketInfoSection from '@/components/booking/TicketInfoSection';
+import TicketDeliverySelectSection, { type DeliveryMethod } from '@/components/booking/TicketDeliverySelectSection';
 import AddressForm from '@/components/payment/address/AddressForm';
-import TicketBookerInfoSection from '@/components/reservation/TicketBookerInfoSection';
-import OrderConfirmSection from '@/components/reservation/OrderConfirmSection';
+import TicketBookerInfoSection from '@/components/booking/TicketBookerInfoSection';
+import OrderConfirmSection from '@/components/booking/OrderConfirmSection';
 
 type NavState = { fid: string; dateYMD: string; time: string; quantity: number; };
 const UNIT_PRICE = 88000; // 더미
@@ -21,7 +21,7 @@ const TicketOrderInfoPage: React.FC = () => {
   const qty = state?.quantity ?? 1;
 
   const handlePay = () => {
-    if (fid) navigate(`/reservation/${fid}/pay`, { state });
+    if (fid) navigate(`/booking/${fid}/pay`, { state });
   };
 
   return (

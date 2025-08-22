@@ -1,4 +1,4 @@
-// src/components/reservation/TicketDeliverySelectSection.tsx
+// src/components/booking/TicketDeliverySelectSection.tsx
 import React from 'react';
 
 export type DeliveryMethod = 'QR' | 'PAPER';
