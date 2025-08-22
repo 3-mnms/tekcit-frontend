@@ -1,10 +1,15 @@
 import React from 'react';
 import DatePicker from 'react-datepicker';
-import { ko } from 'date-fns/locale';
+// ✅ date-fns는 개별 로케일을 default import로 쓰는 게 안정적
+import ko from 'date-fns/locale/ko';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import styles from './TicketOrderSection.module.css';
+
+// ✅ 1차 API 훅 (reservationNumber 받는 용도)
+import { useSelectDate } from '@/models/booking/tanstack-query/useBookingDetail';
+import type { BookingSelect } from '@/models/booking/BookingTypes';
 
 type NextPayload = {
   fid?: string;
@@ -31,9 +36,9 @@ type Props = {
 
   /** 예매하기 클릭 시 이 컴포넌트가 직접 이동할 경로.
    *  문자열이거나, payload → 경로 생성 함수 둘 다 허용.
-   *  예: to={(p) => `/reservation/${p.fid}/order-info`}
+   *  예: to={(p) => `/booking/${p.fid}/order-info`}
    */
-  to?: string | ((p: NextPayload) => string);
+  to?: string | ((p: { fid?: string; dateYMD: string; time: string; quantity: number; reservationNumber: string }) => string);
 
   /** 제공된 날짜/시간/매수 정보가 비어있을 때 데모 데이터로 표시 */
   useDemoIfEmpty?: boolean;
@@ -54,7 +59,7 @@ const toLocalISO = (date: Date, hhmm: string) => {
   const [h, m] = hhmm.split(':').map(Number);
   const d = new Date(date);
   d.setHours(h, m, 0, 0);
-  const pad = (n: number) => String(n).padStart(2, '0');
+  const pad = (x: number) => String(x).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
 };
 
@@ -79,6 +84,8 @@ const TicketOrderSection: React.FC<Props> = ({
   useDemoIfEmpty = true, className = '',
 }) => {
   const navigate = useNavigate();
+  const selectDateMut = useSelectDate();          // ✅ 1차 API 훅
+  const [submitting, setSubmitting] = React.useState(false); // ✅ 버튼 로딩 제어
 
   // ------ normalize incoming dates ------
   const normalizedDates = React.useMemo<Date[]>(
@@ -132,29 +139,59 @@ const TicketOrderSection: React.FC<Props> = ({
   // ------ helpers ------
   const includeDate = (d: Date) => sortedDates.some(ad => ymd(ad) === ymd(d));
 
-  const emitPayload = (): NextPayload | null => {
-    if (!isReady || !date || !time) return null;
-    return { fid, date, time, quantity };
-  };
+  // ✅ 핵심: 1차(selectDate) 호출 → reservationNumber 수신 → state에 싣고 이동
+  const handleNext = async () => {
+    if (!isReady || !date || !time) return;
+    if (!fid) { console.warn('[order] fid 없음'); return; }
 
-  const handleNext = () => {
-    const payload = emitPayload();
-    if (!payload) return;
+    // 상위에서 뭔가 하려면 먼저 호출
+    onNext?.({ fid, date, time, quantity });
 
-    // 상위 훅
-    onNext?.(payload);
+    try {
+      setSubmitting(true);
 
-    // 이 컴포넌트가 직접 라우팅
-    if (to) {
-      const path = typeof to === 'function' ? to(payload) : to;
-      const performanceDate = toLocalISO(payload.date, payload.time);
-      navigate(path, {
-        state: {
-          fid: payload.fid,
-          performanceDate,            // "YYYY-MM-DDTHH:mm:ss"
-          selectedTicketCount: payload.quantity,
-        },
-      });
+      // 1차 바디
+      const body: BookingSelect = {
+        festivalId: fid,
+        performanceDate: toLocalISO(date, time),
+        selectedTicketCount: quantity,
+      };
+
+      // 서버 호출 (reservationNumber 수신)
+      const res = await selectDateMut.mutateAsync(body);
+      const reservationNumber = res.data; // 서버가 { data: "예약번호" }로 응답한다고 가정
+
+      // 이동 경로
+      const defaultPath = `/booking/${fid}/order-info`;
+      const dateYMD = ymd(date);
+      const path = typeof to === 'function'
+        ? to({ fid, dateYMD, time, quantity, reservationNumber })
+        : (to || defaultPath);
+
+      // 넘길 state (받는 쪽이 쓰는 키로 통일)
+      const navState = {
+        fid,
+        dateYMD,
+        time,
+        quantity,
+        reservationNumber,              // ✅ 2차 상세 조회용
+        // 호환/백엔드 DTO용도 같이 실어줌
+        performanceDate: body.performanceDate,
+        selectedTicketCount: quantity,
+      };
+
+      console.log('[order] selectDate OK →', { reservationNumber, body });
+      console.log('[order] navigate payload →', navState, 'path=', path);
+
+      // 새로고침 대비(선택): URL 쿼리도 같이 쓰고 싶으면 아래로 교체
+      // navigate(`${path}?resNo=${reservationNumber}&date=${dateYMD}&time=${time}&qty=${quantity}`, { state: navState });
+
+      navigate(path, { state: navState });
+    } catch (e) {
+      console.error('[order] selectDate 실패', e);
+      alert('예매 선택 처리에 실패했어요. 다시 시도해 주세요.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -207,7 +244,7 @@ const TicketOrderSection: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setQuantity((q) => clamp(q - 1, 1, maxQty))}
-                disabled={quantity <= 1 || isSoldOut}
+                disabled={quantity <= 1 || isSoldOut || submitting}
                 className={styles.qtyBtn}
                 aria-label="매수 감소"
               >
@@ -217,7 +254,7 @@ const TicketOrderSection: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setQuantity((q) => clamp(q + 1, 1, maxQty))}
-                disabled={quantity >= maxQty || isSoldOut}
+                disabled={quantity >= maxQty || isSoldOut || submitting}
                 className={styles.qtyBtn}
                 aria-label="매수 증가"
               >
@@ -243,11 +280,11 @@ const TicketOrderSection: React.FC<Props> = ({
 
         <Button
           type="button"
-          disabled={!isReady}
+          disabled={!isReady || submitting}
           className={styles.nextButton}
           onClick={handleNext}
         >
-          예매하기
+          {submitting ? '처리중…' : '예매하기'}
         </Button>
       </div>
     </aside>

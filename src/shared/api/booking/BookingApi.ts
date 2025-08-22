@@ -48,12 +48,12 @@ export async function apiGetPhase1Detail(req: BookingSelect) {
 
 export async function apiGetPhase2Detail(req: Booking) {
   const { data } = await api.post('/booking/detail/phases/2', req);
+  console.log(data);
   return data as { data: BookingDetail };
 }
 
 export async function apiSelectDate(req: BookingSelect) {
   const { data } = await api.post('/booking/selectDate', req);
-  console.log('선택 : ', data);
   return data as { data: string }; // reservationNumber 반환
 }
 

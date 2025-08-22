@@ -1,43 +1,39 @@
+// src/components/booking/TicketInfoSection.tsx
 import React from 'react';
 import styles from './TicketInfoSection.module.css';
 
 type TicketInfoSectionProps = {
-  posterUrl?: string;
-  title?: string;
-  date?: string;
-  time?: string;
-  venue?: string;
-  unitPrice?: number;
-  quantity?: number;
+  posterUrl?: string | null;
+  title?: string | null;
+  date?: string | null;       // YYYY-MM-DD
+  time?: string | null;       // HH:mm
+  unitPrice?: number | null;  // 1매 가격
+  quantity?: number | null;   // 매수
   className?: string;
-  compact?: boolean;   // ✅ 컴팩트 모드
+  compact?: boolean;          // 컴팩트 모드
 };
 
 const formatKRW = (n: number) => `${new Intl.NumberFormat('ko-KR').format(n)}원`;
 
-const DUMMY = {
-  posterUrl: 'https://picsum.photos/600/900?random=42',
-  title: '그랜드 민트 페스티벌 2025',
-  date: '2025-10-18(토)',
-  time: '18:00',
-  venue: '올림픽공원 88잔디마당',
-  unitPrice: 120000,
-  quantity: 2,
-};
-
 const TicketInfoSection: React.FC<TicketInfoSectionProps> = ({
-  posterUrl = DUMMY.posterUrl,
-  title = DUMMY.title,
-  date = DUMMY.date,
-  time = DUMMY.time,
-  venue = DUMMY.venue,
-  unitPrice = DUMMY.unitPrice,
-  quantity = DUMMY.quantity,
+  posterUrl,
+  title,
+  date,
+  time,
+  unitPrice,
+  quantity,
   className = '',
   compact = false,
 }) => {
-  const subtotal = unitPrice * quantity;
+  // 안전 값
+  const safeTitle = title ?? '';
+  const safeDate = date ?? '';
+  const safeTime = time ?? '';
+  const price = typeof unitPrice === 'number' ? unitPrice : 0;
+  const qty = typeof quantity === 'number' ? quantity : 0;
+  const subtotal = price * qty;
 
+  // 포스터 폴백
   const fallbackSvg =
     'data:image/svg+xml;utf8,' +
     encodeURIComponent(
@@ -66,7 +62,7 @@ const TicketInfoSection: React.FC<TicketInfoSectionProps> = ({
         <div className={posterClass}>
           <img
             src={posterUrl || fallbackSvg}
-            alt={`${title} 포스터`}
+            alt={safeTitle ? `${safeTitle} 포스터` : '포스터 이미지'}
             className={styles.posterImg}
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = fallbackSvg;
@@ -78,23 +74,24 @@ const TicketInfoSection: React.FC<TicketInfoSectionProps> = ({
         {/* 정보 */}
         <div className={styles.info}>
           <div className={styles.stack}>
-            <div className={titleTextClass} title={title}>{title}</div>
-            <div className={metaClass} title={`${date} · ${time}`}>
-              {date} · {time}
+            <div className={titleTextClass} title={safeTitle}>{safeTitle}</div>
+            <div
+              className={metaClass}
+              title={[safeDate, safeTime].filter(Boolean).join(' · ')}
+            >
+              {safeDate}
+              {safeDate && safeTime ? ' · ' : ''}
+              {safeTime}
             </div>
-            <div className={metaClass} title={venue}>{venue}</div>
+            {/* ✅ venue(장소) 완전 제거 */}
           </div>
 
           <div className={styles.priceBox}>
             <div className={styles.rowBetween}>
               <span className={styles.muted}>가격 × 수량</span>
               <span className={styles.titleText}>
-                {formatKRW(unitPrice)} × {quantity}매
+                {formatKRW(price)} × {qty}매
               </span>
-            </div>
-            <div className={styles.rowBetween}>
-              <span className={styles.muted}>소계</span>
-              <span className={styles.subtotal}>{formatKRW(subtotal)}</span>
             </div>
           </div>
         </div>
