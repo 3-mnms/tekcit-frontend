@@ -1,7 +1,7 @@
-// src/components/reservation/OrderConfirmSection.tsx
+// src/components/booking/OrderConfirmSection.tsx
 import React, { useMemo } from 'react';
 import Button from '@/components/common/Button';
-import type { DeliveryMethod } from '@/components/reservation/TicketDeliverySelectSection';
+import type { DeliveryMethod } from '@/components/booking/TicketDeliverySelectSection';
 import styles from './OrderConfirmSection.module.css';
 
 type Props = {

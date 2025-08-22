@@ -37,7 +37,7 @@ const toJsDow = (raw?: string): number | undefined => {
   return map[three];
 };
 
-const openReservationPopup = (fid: number, date: Date, time?: string | null) => {
+const openbookingPopup = (fid: number, date: Date, time?: string | null) => {
   const width = 1000;
   const height = 600;
 
@@ -45,7 +45,7 @@ const openReservationPopup = (fid: number, date: Date, time?: string | null) => 
   const left = window.screenX + (window.outerWidth - width) / 2;
   const top = window.screenY + (window.outerHeight - height) / 2;
 
-  const url = `/reservation/${fid}?date=${ymd(date)}&time=${encodeURIComponent(time ?? '')}`;
+  const url = `/booking/${fid}?date=${ymd(date)}&time=${encodeURIComponent(time ?? '')}`;
 
   window.open(url, '_blank', `width=${width},height=${height},left=${left},top=${top},noopener,noreferrer`);
 };
@@ -271,7 +271,7 @@ const FestivalScheduleSection: React.FC = () => {
               disabled={confirmDisabled}
               onClick={() => {
                 if (!selectedDate) return;
-                openReservationPopup(fid, selectedDate, selectedTime);
+                openbookingPopup(fid, selectedDate, selectedTime);
               }}
             >
               예매하기

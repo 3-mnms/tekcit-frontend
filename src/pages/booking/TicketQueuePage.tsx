@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import WaitingQueue from '@/components/reservation/waiting/WaitingQueue';
+import WaitingQueue from '@/components/booking/waiting/WaitingQueue';
 import styles from './TicketQueuePage.module.css';
 
 const TOTAL_AHEAD = 10; // 더미 총 대기 인원
@@ -19,12 +19,12 @@ const TicketQueuePage: React.FC = () => {
     return () => clearInterval(itv);
   }, []);
 
-  // 앞사람이 0명 되면 예매창으로 이동 (/reservation/:fid)
+  // 앞사람이 0명 되면 예매창으로 이동 (/booking/:fid)
   React.useEffect(() => {
     if (!fid || navigatedRef.current) return;
     if (ahead === 0) {
       navigatedRef.current = true;
-      navigate(`/reservation/${fid}`); 
+      navigate(`/booking/${fid}`); 
     }
   }, [ahead, fid, navigate]);
 

@@ -1,8 +1,8 @@
-// src/pages/reservation/TicketOrderPage.tsx
+// src/pages/booking/TicketOrderPage.tsx
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './TicketOrderPage.module.css';
-import TicketOrderSection from '@/components/reservation/TicketOrderSection';
+import TicketOrderSection from '@/components/booking/TicketOrderSection';
 
 const ymd = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -14,7 +14,7 @@ const TicketOrderPage: React.FC = () => {
   // ✅ TicketOrderSection에서 올라오는 최소 데이터만 받기
   const handleNext = ({ date, time, quantity }: { date: Date; time: string; quantity: number }) => {
     if (!fid) return; // 안전 가드
-    navigate(`/reservation/${fid}/order-info`, {
+    navigate(`/booking/${fid}/order-info`, {
       state: {
         fid,
         dateYMD: ymd(date),
