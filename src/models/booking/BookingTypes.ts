@@ -23,7 +23,7 @@ export interface BookingDetail {
 
 export interface BookingSelect {
   festivalId: string;
-  performanceDate: string;     // BE: LocalDateTime ↔ FE: ISO string
+  performanceDate: string;
   selectedTicketCount: number;
 }
 

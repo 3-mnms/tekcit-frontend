@@ -74,7 +74,7 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/api/booking': {
-        target: 'http://localhost:8082',
+        target: 'http://localhost:10000',
         changeOrigin: true,
         secure: false,
       },

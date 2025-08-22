@@ -187,7 +187,7 @@ const TicketOrderSection: React.FC<Props> = ({
           className={styles.nextButton}
           onClick={handleNext}
         >
-          다음
+          예매하기
         </Button>
       </div>
     </aside>
