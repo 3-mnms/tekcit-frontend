@@ -28,10 +28,6 @@ export type TossPaymentHandle = {
 const STORE_ID = import.meta.env.VITE_PORTONE_STORE_ID?.trim()
 const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY?.trim()
 
-type PortOneError = { code: string; message?: string }
-const isPortOneError = (v: unknown): v is PortOneError =>
-  !!v && typeof v === 'object' && 'code' in (v as Record<string, unknown>) && typeof (v as Record<string, unknown>).code === 'string'
-
 const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
   ({ isOpen, onToggle, amount: defaultAmount, orderName: defaultOrderName, redirectUrl }, ref) => {
     const navigate = useNavigate();
