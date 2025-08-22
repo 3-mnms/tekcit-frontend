@@ -76,6 +76,9 @@ export default defineConfig({
       '/api/booking': {
         target: 'http://localhost:8082',
       },
+      '/api/payments': {
+        target: 'http://localhost:8081',
+      },
     },
   },
 })
