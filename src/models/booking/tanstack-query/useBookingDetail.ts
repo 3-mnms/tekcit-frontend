@@ -51,7 +51,7 @@ export function useSelectDelivery() {
   return useMutation({
     mutationFn: (req: BookingSelectDelivery) => apiSelectDelivery(req),
     onSuccess: () => {
-      // 수령방법 선택 후 Phase2 정보가 바뀔 수 있으면 갱신
+      // 수령방법 반영되면 phase2 상세가 바뀔 수 있으니 갱신
       qc.invalidateQueries({ queryKey: ['booking', 'phase2'] });
     },
   });

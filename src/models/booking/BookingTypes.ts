@@ -1,3 +1,18 @@
+export type DeliveryMethodUI = 'QR' | 'PAPER';
+
+// 백엔드에 보낼 값
+export type DeliveryMethodBE = 'MOBILE' | 'PAPER';
+
+export interface BookingSelectDelivery {
+  festivalId: string;
+  reservationNumber: string;
+  deliveryMethod: DeliveryMethodBE; // MOBILE | PAPER
+  address?: string;                 // PAPER일 때 필수
+}
+
+// UI → BE 맵퍼
+export const mapUiToBeDelivery = (ui: DeliveryMethodUI): DeliveryMethodBE =>
+  ui === 'QR' ? 'MOBILE' : 'PAPER';
 export interface Schedule {
   scheduleId: number;   // 공연 일정 PK
   dayOfWeek: string;    // 요일 코드 (예: MON, TUE, ...)
