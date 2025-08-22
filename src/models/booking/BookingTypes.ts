@@ -13,10 +13,27 @@ export interface FestivalDetail {
   performanceDate: string;  // 선택한 날짜/시간
 }
 
-export interface bookingDetail {
+export interface BookingDetail {
   festivalName: string;     // 공연명
   ticketPrice: number;      // 티켓 가격
   posterFile: string;       // 포스터 파일 경로
   performanceDate: string;  // LocalDateTime -> ISO 문자열
   ticketCount: number;      // 선택 매수
+}
+
+export interface BookingSelect {
+  festivalId: string;
+  performanceDate: string;     // BE: LocalDateTime ↔ FE: ISO string
+  selectedTicketCount: number;
+}
+
+export interface BookingSelectDelivery {
+  festivalId: string;
+  reservationNumber: string;
+  deliveryMethod: string;      // 필요 시 'MOBILE' | 'PAPER' 로 좁혀도 됨
+}
+
+export interface Booking {
+  festivalId: string;
+  reservationNumber: string;
 }
