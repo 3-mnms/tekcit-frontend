@@ -2,8 +2,16 @@ import React from 'react';
 import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
+import { useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import styles from './TicketOrderSection.module.css';
+
+type NextPayload = {
+  fid?: string;
+  date: Date;
+  time: string;
+  quantity: number;
+};
 
 type Props = {
   fid?: string;
@@ -18,17 +26,21 @@ type Props = {
   maxQuantity?: number;
   initialQuantity?: number;
 
-  onNext?: (payload: {
-    fid?: string;
-    date: Date;
-    time: string;
-    quantity: number;
-  }) => void;
+  /** 예매하기 클릭 시 상위에서 추가 로직 실행하고 싶을 때 사용 (선택) */
+  onNext?: (payload: NextPayload) => void;
 
+  /** 예매하기 클릭 시 이 컴포넌트가 직접 이동할 경로.
+   *  문자열이거나, payload → 경로 생성 함수 둘 다 허용.
+   *  예: to={(p) => `/reservation/${p.fid}/order-info`}
+   */
+  to?: string | ((p: NextPayload) => string);
+
+  /** 제공된 날짜/시간/매수 정보가 비어있을 때 데모 데이터로 표시 */
   useDemoIfEmpty?: boolean;
   className?: string;
 };
 
+// ---------- utils ----------
 const ymd = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
@@ -36,6 +48,15 @@ const formatPrice = (n: number) =>
   new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(n);
 
 const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
+
+/** 로컬 타임존 기준으로 HH:mm를 합쳐 "YYYY-MM-DDTHH:mm:ss" 문자열 생성 */
+const toLocalISO = (date: Date, hhmm: string) => {
+  const [h, m] = hhmm.split(':').map(Number);
+  const d = new Date(date);
+  d.setHours(h, m, 0, 0);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
+};
 
 function makeDemo() {
   const base = new Date();
@@ -54,8 +75,12 @@ const TicketOrderSection: React.FC<Props> = ({
   selectedDate, selectedTime,
   availableDates = [], timesByDate = {},
   pricePerTicket, maxQuantity, initialQuantity = 1,
-  onNext, useDemoIfEmpty = true, className = '',
+  onNext, to,
+  useDemoIfEmpty = true, className = '',
 }) => {
+  const navigate = useNavigate();
+
+  // ------ normalize incoming dates ------
   const normalizedDates = React.useMemo<Date[]>(
     () => (Array.isArray(availableDates) ? availableDates : [])
       .map(d => (d instanceof Date ? new Date(d) : new Date(String(d))))
@@ -63,6 +88,7 @@ const TicketOrderSection: React.FC<Props> = ({
     [availableDates]
   );
 
+  // ------ demo fallback ------
   const demo = useDemoIfEmpty && normalizedDates.length === 0 ? makeDemo() : null;
   const dates = demo ? demo.dates : normalizedDates;
   const tbd = demo ? demo.times : (timesByDate ?? {});
@@ -70,16 +96,23 @@ const TicketOrderSection: React.FC<Props> = ({
   const maxQty = demo ? demo.maxQty : (maxQuantity ?? 4);
   const isSoldOut = maxQty <= 0;
 
-  const sortedDates = React.useMemo(() => [...dates].sort((a, b) => a.getTime() - b.getTime()), [dates]);
+  // ------ calendar range ------
+  const sortedDates = React.useMemo(
+    () => [...dates].sort((a, b) => a.getTime() - b.getTime()),
+    [dates]
+  );
   const minDate = sortedDates[0] ?? null;
   const maxDate = sortedDates[sortedDates.length - 1] ?? null;
 
+  // ------ selection states ------
   const [date, setDate] = React.useState<Date | null>(selectedDate ?? minDate ?? null);
+
   const timesForDate = React.useMemo(() => {
     if (!date) return [];
     const arr = tbd[ymd(date)] ?? [];
     return Array.from(new Set(arr)).sort((a, b) => {
-      const [ha, ma] = a.split(':').map(Number); const [hb, mb] = b.split(':').map(Number);
+      const [ha, ma] = a.split(':').map(Number);
+      const [hb, mb] = b.split(':').map(Number);
       return ha * 60 + ma - (hb * 60 + mb);
     });
   }, [date, tbd]);
@@ -96,11 +129,33 @@ const TicketOrderSection: React.FC<Props> = ({
   const totalPrice = unitPrice * (isSoldOut ? 0 : quantity);
   const isReady = !!date && !!time && !isSoldOut;
 
+  // ------ helpers ------
   const includeDate = (d: Date) => sortedDates.some(ad => ymd(ad) === ymd(d));
 
+  const emitPayload = (): NextPayload | null => {
+    if (!isReady || !date || !time) return null;
+    return { fid, date, time, quantity };
+  };
+
   const handleNext = () => {
-    if (!isReady || !date || !time) return;
-    onNext?.({ fid, date, time, quantity });
+    const payload = emitPayload();
+    if (!payload) return;
+
+    // 상위 훅
+    onNext?.(payload);
+
+    // 이 컴포넌트가 직접 라우팅
+    if (to) {
+      const path = typeof to === 'function' ? to(payload) : to;
+      const performanceDate = toLocalISO(payload.date, payload.time);
+      navigate(path, {
+        state: {
+          fid: payload.fid,
+          performanceDate,            // "YYYY-MM-DDTHH:mm:ss"
+          selectedTicketCount: payload.quantity,
+        },
+      });
+    }
   };
 
   return (
@@ -122,13 +177,14 @@ const TicketOrderSection: React.FC<Props> = ({
               showDisabledMonthNavigation
             />
           </div>
+
           <div>
             <div className={styles.subTitle}>시간</div>
             {timesForDate.length === 0 ? (
               <div style={{ color: '#9ca3af', fontSize: 14 }}>선택 가능한 시간이 없습니다</div>
             ) : (
               <div className={styles.timeList}>
-                {timesForDate.map(t => (
+                {timesForDate.map((t) => (
                   <button
                     key={t}
                     type="button"
@@ -150,19 +206,23 @@ const TicketOrderSection: React.FC<Props> = ({
             <div className={styles.qtyBox}>
               <button
                 type="button"
-                onClick={() => setQuantity(q => clamp(q - 1, 1, maxQty))}
+                onClick={() => setQuantity((q) => clamp(q - 1, 1, maxQty))}
                 disabled={quantity <= 1 || isSoldOut}
                 className={styles.qtyBtn}
                 aria-label="매수 감소"
-              >−</button>
+              >
+                −
+              </button>
               <span className={styles.qtyVal}>{isSoldOut ? 0 : quantity}</span>
               <button
                 type="button"
-                onClick={() => setQuantity(q => clamp(q + 1, 1, maxQty))}
+                onClick={() => setQuantity((q) => clamp(q + 1, 1, maxQty))}
                 disabled={quantity >= maxQty || isSoldOut}
                 className={styles.qtyBtn}
                 aria-label="매수 증가"
-              >+</button>
+              >
+                +
+              </button>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './TicketOrderInfoPage.module.css';
 
@@ -8,7 +8,7 @@ import AddressForm from '@/components/payment/address/AddressForm';
 import TicketBookerInfoSection from '@/components/booking/TicketBookerInfoSection';
 import OrderConfirmSection from '@/components/booking/OrderConfirmSection';
 
-type NavState = { fid: string; dateYMD: string; time: string; quantity: number; };
+type NavState = { fid: string; dateYMD: string; time: string; quantity: number };
 const UNIT_PRICE = 88000; // 더미
 
 const TicketOrderInfoPage: React.FC = () => {
@@ -20,6 +20,11 @@ const TicketOrderInfoPage: React.FC = () => {
   const isPaper = method === 'PAPER';
   const qty = state?.quantity ?? 1;
 
+  // ✅ 받은 state 콘솔에 찍기
+  useEffect(() => {
+    console.log('넘겨받은 예매 state 👉', state);
+  }, [state]);
+
   const handlePay = () => {
     if (fid) navigate(`/booking/${fid}/pay`, { state });
   };
@@ -29,7 +34,7 @@ const TicketOrderInfoPage: React.FC = () => {
       {/* 왼쪽: 정보/수령/배송지 */}
       <div className={styles.leftCol}>
         <TicketInfoSection
-          compact              // ✅ 높이 줄이기
+          compact
           date={state?.dateYMD}
           time={state?.time}
           quantity={qty}
@@ -37,10 +42,7 @@ const TicketOrderInfoPage: React.FC = () => {
           className={styles.noScroll}
         />
 
-        <TicketDeliverySelectSection
-          value={method}
-          onChange={setMethod}
-        />
+        <TicketDeliverySelectSection value={method} onChange={setMethod} />
 
         {isPaper && (
           <section className={styles.noScroll}>
@@ -49,7 +51,7 @@ const TicketOrderInfoPage: React.FC = () => {
         )}
       </div>
 
-      {/* 오른쪽: 예매자 + 총 가격/결제 버튼 — 항상 오른쪽 */}
+      {/* 오른쪽: 예매자 + 총 가격/결제 버튼 */}
       <div className={styles.rightCol}>
         <TicketBookerInfoSection className={styles.noScroll} />
         <OrderConfirmSection
