@@ -4,7 +4,7 @@ import UserList from '@/components/operatManage/UserList';
 import styles from './OperatManageUser.module.css';
 import Layout from '@components/layout/Layout';
 import { useQuery } from '@tanstack/react-query';
-import { getUsers } from '@/shared/api/admin/host/user'
+import { getUsers } from '@/shared/api/admin/user'
 
 const OperatManageUserPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');

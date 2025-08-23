@@ -7,7 +7,7 @@ import Layout from '@components/layout/Layout';
 import AddModal from '@/components/operatManage/AddModal';
 import type {NewHostData} from '@/components/operatManage/AddModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getHosts, registerHost } from '@/shared/api/admin/host/host';
+import { getHosts, registerHost } from '@/shared/api/admin/host';
 
 const OperatManageHostPage: React.FC = () => {
     const queryClient = useQueryClient();

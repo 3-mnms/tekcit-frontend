@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import styles from './ScheduleDropdown.module.css';
 import Button from '@/components/common/Button';
-import type { FestivalScheduleDTO, DayOfWeek } from '../../models/admin/host/festival';
+import type { FestivalScheduleDTO, DayOfWeek } from '../../models/admin/festival';
 
 interface ScheduleDropdownProps {
     schedules: FestivalScheduleDTO[];
