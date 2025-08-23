@@ -11,7 +11,7 @@ export const api = axios.create({
 })
 
 export const kakaoApi = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: 'http://localhost:10000',
   withCredentials: true,
 })
 

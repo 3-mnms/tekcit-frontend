@@ -37,10 +37,10 @@ import EntranceCheckPage from '@/pages/my/ticket/EntranceCheckPage'
 // transfer
 import TransferPage from '@/pages/transfer/TransferPage'
 
-// reservation
-import QueuePage from '@pages/reservation/TicketQueuePage'
-import OrderPage from '@pages/reservation/TicketOrderPage'
-import OrderInfoPage from '@pages/reservation/TicketOrderInfoPage'
+// booking
+import QueuePage from '@pages/booking/TicketQueuePage'
+import OrderPage from '@pages/booking/TicketOrderPage'
+import OrderInfoPage from '@pages/booking/TicketOrderInfoPage'
 
 // payment
 import BookingPaymentPage from '@/pages/payment/BookingPaymentPage'
@@ -130,9 +130,9 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // reservation
+  // booking
   {
-    path: '/reservation',
+    path: '/booking',
     children: [
       { path: ':fid/queue', element: <QueuePage />},
       { path: ':fid', element: <OrderPage /> },

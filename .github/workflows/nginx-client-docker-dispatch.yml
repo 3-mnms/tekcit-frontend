@@ -95,7 +95,11 @@ jobs:
           ls -al ci-context/dist | head -n 30
 
       - name: ⏱️ Tag
-        run: echo "TAG=v$(date -u +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+        run: |
+          TS=$(date -u +'%Y%m%d%H%M%S')
+          echo "TAG_AMD=v${TS}-win" >> $GITHUB_ENV
+          echo "TAG_ARM=v${TS}-mac" >> $GITHUB_ENV
+          echo "TAG=v${TS}-win" >> $GITHUB_ENV
 
       - uses: docker/setup-buildx-action@v3
 
@@ -109,7 +113,8 @@ jobs:
         with:
           images: ${{ env.IMAGE }}
           tags: |
-            type=raw,value=${{ env.TAG }}
+            type=raw,value=${{ env.TAG_AMD }}
+            type=raw,value=${{ env.TAG_ARM }}
             type=sha
             type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
 
@@ -118,6 +123,7 @@ jobs:
           context: ./ci-context
           file: ./ci-context/Dockerfile
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha

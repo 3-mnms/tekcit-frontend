@@ -37,17 +37,31 @@ const toJsDow = (raw?: string): number | undefined => {
   return map[three];
 };
 
-const openReservationPopup = (fid: number, date: Date, time?: string | null) => {
+const openbookingPopup = (
+  fid: number,
+  date: Date,
+  time?: string | null,
+  fdfrom?: string | null,
+  fdto?: string | null
+) => {
   const width = 1000;
   const height = 600;
-
-  // 브라우저 화면 중앙 계산
   const left = window.screenX + (window.outerWidth - width) / 2;
   const top = window.screenY + (window.outerHeight - height) / 2;
 
-  const url = `/reservation/${fid}?date=${ymd(date)}&time=${encodeURIComponent(time ?? '')}`;
+  const params = new URLSearchParams();
+  params.set('date', ymd(date));
+  if (time) params.set('time', time);
+  if (fdfrom) params.set('fdfrom', fdfrom);
+  if (fdto) params.set('fdto', fdto);
 
-  window.open(url, '_blank', `width=${width},height=${height},left=${left},top=${top},noopener,noreferrer`);
+  const url = `/booking/${fid}?${params.toString()}`;
+
+  window.open(
+    url,
+    '_blank',
+    `width=${width},height=${height},left=${left},top=${top},noopener,noreferrer`
+  );
 };
 
 const FestivalScheduleSection: React.FC = () => {
@@ -271,7 +285,12 @@ const FestivalScheduleSection: React.FC = () => {
               disabled={confirmDisabled}
               onClick={() => {
                 if (!selectedDate) return;
-                openReservationPopup(fid, selectedDate, selectedTime);
+
+                // ✅ start/end를 YYYY-MM-DD로 정규화해서 같이 넘김
+                const fdfrom = startDate ? ymd(startDate) : null;
+                const fdto = endDate ? ymd(endDate) : null;
+
+                openbookingPopup(fid, selectedDate, selectedTime, fdfrom, fdto);
               }}
             >
               예매하기
