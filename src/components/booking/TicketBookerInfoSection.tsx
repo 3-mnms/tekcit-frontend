@@ -1,45 +1,46 @@
 import React from 'react';
 import styles from './TicketBookerInfoSection.module.css';
+import { usePreReservation } from '@/models/booking/tanstack-query/useUser'; 
+// ↑ 네가 만든 useUser 훅 import 경로 맞춰줘! (ex. usePreReservation → useUser)
 
 type Props = {
-  name?: string;
-  phone?: string;   // '010-1234-5678' 또는 숫자만
-  email?: string;   // 'user@example.com'
   className?: string;
   readOnly?: boolean; // 기본 true
 };
 
-const DUMMY = {
-  name: '김예매',
-  phone: '010-1234-5678',
-  email: 'ticket.user@example.com',
-};
-
 function splitPhone(p: string): [string, string, string] {
   const digits = (p ?? '').replace(/\D/g, '');
-  // 010-XXXX-XXXX 기준으로 나눔
-  const a = digits.slice(0, 3) || '010';
-  const b = digits.slice(3, digits.length === 10 ? 6 : 7) || '1234';
-  const c = digits.slice(digits.length === 10 ? 6 : 7) || '5678';
+  const a = digits.slice(0, 3) || '';
+  const b = digits.slice(3, digits.length === 10 ? 6 : 7) || '';
+  const c = digits.slice(digits.length === 10 ? 6 : 7) || '';
   return [a, b, c];
 }
 
 function splitEmail(e: string): [string, string] {
-  const [id = 'ticket.user', domain = 'example.com'] = (e ?? '').split('@');
+  const [id = '', domain = ''] = (e ?? '').split('@');
   return [id, domain];
 }
 
 const TicketBookerInfoSection: React.FC<Props> = ({
-  name = DUMMY.name,
-  phone = DUMMY.phone,
-  email = DUMMY.email,
   className = '',
   readOnly = true,
 }) => {
+  const { data, isLoading, isError } = usePreReservation(true); // API 호출
+  const name = data?.name ?? '';
+  const phone = data?.phone ?? '';
+  const email = data?.email ?? '';
+
   const [p1, p2, p3] = splitPhone(phone);
   const [eid, edom] = splitEmail(email);
 
   const inputClass = `${styles.input} ${readOnly ? styles.readOnly : ''}`;
+
+  if (isLoading) {
+    return <div className={styles.container}>불러오는 중…</div>;
+  }
+  if (isError || !data) {
+    return <div className={styles.container}>예매자 정보를 불러오지 못했어요.</div>;
+  }
 
   return (
     <section className={`${styles.container} ${className}`}>

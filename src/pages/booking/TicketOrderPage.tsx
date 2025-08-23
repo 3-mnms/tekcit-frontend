@@ -244,14 +244,15 @@ const TicketOrderPage: React.FC = () => {
         selectedTicketCount: quantity,
       };
 
-      console.log('[PHASE2 payload → /api/booking/detail/selectDate]');
+      console.log('[PHASE2 payload → /api/booking/selectDate]');
       console.log(payload);
-      console.log('[cURL]', toCurl('/api/booking/detail/selectDate', payload));
+      console.log('[cURL]', toCurl('/api/booking/selectDate', payload));
 
       try {
         const res = await selMut.mutateAsync(payload);
         navigate(`/booking/${fid}/order-info?res=${encodeURIComponent(res.data)}`, { replace: true });
       } catch (e) {
+        console.log("예약 오류", e);
         alert('예약번호 발급에 실패했어요. 잠시 후 다시 시도해주세요.');
       }
     },
