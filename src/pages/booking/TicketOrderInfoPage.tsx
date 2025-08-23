@@ -10,18 +10,25 @@ import TicketBookerInfoSection from '@/components/booking/TicketBookerInfoSectio
 import OrderConfirmSection from '@/components/booking/OrderConfirmSection';
 
 import { usePhase2Detail } from '@/models/booking/tanstack-query/useBookingDetail';
-import { usePreReservation } from '@/models/booking/tanstack-query/useUser'; // ✅ 예매자 이름용
+import { usePreReservation } from '@/models/booking/tanstack-query/useUser'; // 예매자 이름/연락처
 
-type NavState = { fid: string; dateYMD: string; time: string; quantity: number; reservationNumber?: string };
-const UNIT_PRICE = 88000; // fallback
-const RESNO_KEY = 'booking.reservationNumber.v1';
+type NavState = {
+  fid: string;
+  dateYMD: string;
+  time: string;
+  quantity: number;
+  reservationNumber?: string;
+};
+
+// 세션에 사용하는 예약번호 키 (요청대로 B 키만 사용)
+const RESNO_KEY = 'reservationId';
 
 const TicketOrderInfoPage: React.FC = () => {
   const { state } = useLocation() as { state?: Partial<NavState> };
   const navigate = useNavigate();
   const { fid: fidFromPath } = useParams<{ fid: string }>();
   const [sp] = useSearchParams();
-  const { data: user } = usePreReservation(true); // ✅ 예매자 이름/연락처 가져오기 (TicketBookerInfoSection도 내부에서 사용)
+  const { data: user } = usePreReservation(true);
 
   const [method, setMethod] = useState<DeliveryMethod>('QR');
   const isPaper = method === 'PAPER';
@@ -31,18 +38,24 @@ const TicketOrderInfoPage: React.FC = () => {
     console.log('넘겨받은 예매 state 👉', state);
   }, [state]);
 
+  // fid 결정 (state > path 파라미터)
   const fid = state?.fid || fidFromPath || '';
 
+  // 예약번호(reservationId/reservationNumber) 확보: state > query(resNo) > session
   const reservationNumber = useMemo(() => {
     const fromState = state?.reservationNumber;
     const fromQuery = sp.get('resNo') || undefined;
-    const fromStorage = sessionStorage.getItem(RESNO_KEY) || undefined;
+    const fromStorage = typeof window !== 'undefined' ? sessionStorage.getItem(RESNO_KEY) || undefined : undefined;
+
     const v = fromState || fromQuery || fromStorage;
-    if (v) sessionStorage.setItem(RESNO_KEY, v);
+    if (v && typeof window !== 'undefined') {
+      sessionStorage.setItem(RESNO_KEY, v);
+    }
+    console.log('[session]', RESNO_KEY, '→', fromStorage);
     return v;
   }, [state?.reservationNumber, sp]);
 
-  // Phase2 상세 조회
+  // Phase2 상세 조회 (fid + reservationNumber)
   const { data: detail, isLoading, isError, error } = usePhase2Detail({
     festivalId: fid,
     reservationNumber: reservationNumber ?? '',
@@ -51,6 +64,7 @@ const TicketOrderInfoPage: React.FC = () => {
   useEffect(() => {
     console.log('[phase2] request →', { festivalId: fid, reservationNumber });
   }, [fid, reservationNumber]);
+
   useEffect(() => {
     if (detail) console.log('[phase2] detail ←', detail);
     if (isError) console.warn('[phase2] error ←', error);
@@ -66,43 +80,54 @@ const TicketOrderInfoPage: React.FC = () => {
 
   if (!fid || !reservationNumber) return null;
 
-  // ✅ 화면 표시용 값 매핑 (서버 우선 → state → fallback)
+  // 화면 표시용 값 (서버값 우선, 부족하면 state 보조)
   const display = useMemo(() => {
     const perf = detail?.performanceDate; // "YYYY-MM-DDTHH:mm:ss"
     const [d, tFull] = perf ? perf.split('T') : [state?.dateYMD, state?.time];
+
     const date = d ?? '';
     const time = (tFull ?? '').slice(0, 5) || state?.time || '';
-    const unitPrice = (detail?.ticketPrice ?? state?.quantity ? detail?.ticketPrice : undefined) ?? UNIT_PRICE;
+
+    const unitPrice = (detail?.ticketPrice ?? 0); // 서버값만 사용, 없으면 0
     const quantity = detail?.ticketCount ?? state?.quantity ?? 1;
-    const posterUrl = detail?.posterFile; // 서버 필드명에 맞춤
+
+    const posterUrl = detail?.posterFile;
     const title = detail?.festivalName;
+
     return { posterUrl, title, date, time, unitPrice, quantity };
   }, [detail, state]);
 
-  // ✅ 결제 페이지로 넘길 페이로드 생성 & 로그 + 이동
+  // 결제 페이지로 넘길 페이로드 생성 & 로그 + 이동 (/payment)
   const handlePay = () => {
+    // bookingId는 reservationNumber를 그대로 사용
+    const bookingId = reservationNumber;
+
     const payload = {
-      bookingId: undefined as string | undefined, // 지금은 없음(필요 시 결제 세션 API에서 받아 세팅)
+      bookingId,                // ✅ 예약번호 = bookingId
       festivalId: fid,
       posterUrl: display.posterUrl,
       title: display.title,
       performanceDate: display.date,
+      performanceTime: display.time, // ✅ 시간 유지
       unitPrice: display.unitPrice,
       quantity: display.quantity,
-      bookerName: user?.name ?? '', // useUser에서 가져온 이름
+      bookerName: user?.name ?? '',
       deliveryMethod: method,
-      total: display.unitPrice * display.quantity,
-      reservationNumber, // 참고용
     };
 
     console.log('[결제하기 payload → /payment]', payload);
 
+    // 새로고침 대비 백업 (bookingId가 있으면 그 키로, 없으면 latest)
     try {
-      // 새로고침 대비 백업(bookingId가 생기면 키에 bookingId를 쓰는 걸 추천)
-      sessionStorage.setItem('payment:latest', JSON.stringify(payload));
+      if (bookingId) {
+        sessionStorage.setItem(`payment:${bookingId}`, JSON.stringify(payload));
+      } else {
+        sessionStorage.setItem('payment:latest', JSON.stringify(payload));
+      }
+      // 예약번호만 별도 키로도 백업 (요청 키)
+      sessionStorage.setItem(RESNO_KEY, bookingId ?? '');
     } catch {}
 
-    // ❗ 요구사항: BookingPaymentPage로만 이동 (URL: /payment)
     navigate('/payment', { state: payload });
   };
 
@@ -137,7 +162,7 @@ const TicketOrderInfoPage: React.FC = () => {
       <div className={styles.rightCol}>
         <TicketBookerInfoSection className={styles.noScroll} />
 
-        {/* ✅ 안전 값으로 전달 (detail? state? → display로 일원화) */}
+        {/* 안전 값으로 전달 */}
         <OrderConfirmSection
           unitPrice={display.unitPrice}
           quantity={display.quantity}
@@ -146,6 +171,7 @@ const TicketOrderInfoPage: React.FC = () => {
           posterUrl={display.posterUrl}
           title={display.title}
           performanceDate={display.date}
+          performanceTime={display.time}   // ✅ 시간 유지
           bookerName={user?.name ?? ''}
           onPay={handlePay}
         />
