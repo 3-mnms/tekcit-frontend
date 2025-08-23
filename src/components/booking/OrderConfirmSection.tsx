@@ -1,3 +1,4 @@
+// src/components/booking/OrderConfirmSection.tsx
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
@@ -12,11 +13,13 @@ type Props = {
   posterUrl?: string;
   title?: string;
   performanceDate?: string;  // YYYY-MM-DD
+  performanceTime?: string;  // HH:mm
   bookerName?: string;
-  bookingId?: string;        // ✅ 포함!
+  bookingId?: string;        // reservationId가 여기로 올 예정
   className?: string;
 };
 
+const RESNO_KEY = 'reservationId';
 const fmt = (n: number) => new Intl.NumberFormat('ko-KR').format(n) + '원';
 
 const OrderConfirmSection: React.FC<Props> = ({
@@ -27,6 +30,7 @@ const OrderConfirmSection: React.FC<Props> = ({
   posterUrl,
   title,
   performanceDate,
+  performanceTime,
   bookerName,
   bookingId,
   className = '',
@@ -39,32 +43,42 @@ const OrderConfirmSection: React.FC<Props> = ({
   }, [unitPrice, quantity]);
 
   const handlePayClick = () => {
+    // ✅ bookingId 우선순위: props.bookingId > sessionStorage['reservationId']
+    const ssResNo =
+      (typeof window !== 'undefined' && sessionStorage.getItem(RESNO_KEY)) || undefined;
+    const finalBookingId = bookingId ?? ssResNo;
+
+    // 필수 값 체크 (bookingId 없으면 진행 불가)
+    if (!finalBookingId) {
+      console.warn('[결제하기] bookingId 비어있음: props=', bookingId, 'session=', ssResNo);
+      alert('결제 식별자(bookingId)를 찾을 수 없어요. 뒤로 가서 다시 시도해 주세요.');
+      return;
+    }
+
     const payload = {
-      bookingId,
+      bookingId: finalBookingId,
       festivalId,
       posterUrl,
       title,
       performanceDate,
+      performanceTime,
       unitPrice,
       quantity,
       bookerName,
       deliveryMethod: method,
-      total,
+      total, // 참고로 합계도 같이 넣어둠
     };
 
-    // 1) 디버깅용 출력
+    // 디버깅 로그
     console.log('[결제하기 payload → /payment]', payload);
 
-    // 2) 새로고침 대비 저장 (선택)
+    // 새로고침 대비 저장
     try {
-      if (bookingId) {
-        sessionStorage.setItem(`payment:${bookingId}`, JSON.stringify(payload));
-      } else {
-        sessionStorage.setItem('payment:latest', JSON.stringify(payload));
-      }
+      sessionStorage.setItem(`payment:${finalBookingId}`, JSON.stringify(payload));
+      sessionStorage.setItem(RESNO_KEY, finalBookingId); // 예약번호 키에도 최신값 저장
     } catch {}
 
-    // 3) /payment로 이동 (state로도 함께 전달)
+    // /payment 이동
     navigate('/payment', { state: payload });
   };
 
