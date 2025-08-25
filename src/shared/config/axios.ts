@@ -1,9 +1,12 @@
 import axios, { AxiosError, AxiosHeaders, type InternalAxiosRequestConfig } from 'axios'
 import { reissue, type ReissueResponseDTO } from '../api/auth/login'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
+import { getEnv } from '@/shared/config/env'
+
+const API_URL = getEnv('API_URL', '') + '/api'
 
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_URL,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 })
