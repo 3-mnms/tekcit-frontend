@@ -97,10 +97,8 @@ const Step2Form: React.FC<Props> = ({ acc, onPrev, onNext, updateAcc }) => {
             aria-describedby={errors.rrnBackFirst ? 'rrnBackFirst-error' : undefined}
           />
 
-          {/* dots를 같은 그룹 안으로 이동 */}
           <span className={styles.dots}>●●●●●●</span>
 
-          {/* 에러가 두 칸 전체 너비로 깔림 */}
           {errors.rrnBackFirst?.message && (
             <p id="rrnBackFirst-error" className={styles.rrnBackError}>
               {errors.rrnBackFirst.message}
