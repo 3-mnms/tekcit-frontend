@@ -10,14 +10,45 @@
   margin-bottom: 1.25rem;
 }
 
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .card {
-  border: 1px solid #ddd;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  background-color: #fff;
-  margin-bottom: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 12px;
+  background: #fff;
+}
+
+.skeletonTitle {
+  width: 40%;
+  height: 18px;
+  background: #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.skeletonLine {
+  width: 70%;
+  height: 12px;
+  background: #eef0f3;
+  border-radius: 8px;
+}
+
+.errorText {
+  color: #ef4444;
+  font-size: 14px;
 }
 
 .addButton {
+  margin-top: 12px;
   width: 100%;
+}
+
+.addrText {
+  color: #6b7280;
+  font-size: 14px;
 }

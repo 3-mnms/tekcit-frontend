@@ -81,6 +81,9 @@ export default defineConfig({
       '/api/payments': {
         target: 'http://localhost:8081',
       },
+      '/api/addresses': {
+        target: 'http://localhost:10000',
+      },
     },
   },
 })
