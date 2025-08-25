@@ -1,12 +1,13 @@
 .page {
   width: 100%;
-  padding: 1.5rem;
+  padding: 2rem;
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 1.7rem;
+  font-weight: 700;
   margin-bottom: 2rem;
+  color: #222;
 }
 
 .list {
@@ -16,63 +17,89 @@
 }
 
 .card {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 1.25rem;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 1.5rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background-color: #fff;
+  transition: box-shadow 0.2s ease;
+  border: 1px solid #b4b4b4;
+  align-items: flex-start;
+  max-width: 640px;
 }
 
 .poster {
   width: 100px;
   height: 140px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 8px;
   flex-shrink: 0;
 }
 
-.info {
+.details {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  justify-content: space-between;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   font-size: 0.95rem;
+  color: #333;
+}
+
+.buttonWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
 }
 
 .transferBtn {
-  padding: 0.5rem 1.2rem;
-  background-color: #4D9AFD;
-  color: white;
+  padding: 0.5rem 1.3rem;
+  background-color: #4d9afd;
+  color: #fff;
   border: none;
   border-radius: 6px;
-  cursor: pointer;
   font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
   white-space: nowrap;
+  transition: background-color 0.2s ease;
 }
 
 .transferBtn:hover {
   background-color: #3579cc;
 }
 
-.disabledBtn {
-  padding: 0.5rem 1.2rem;
-  background-color: #ccc;
-  color: #666;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: not-allowed;
-}
-
+/* 양도 완료 뱃지 */
 .transferredBadge {
-  padding: 0.4rem 0.9rem;
-  background-color: #e0e7ff;
+  padding: 0.45rem 1rem;
+  background-color: #eef1ff;
   color: #3b47a2;
-  border: 1px solid #b8c2ff;
+  border: 1px solid #d0d7ff;
   border-radius: 6px;
   font-weight: 600;
   font-size: 0.9rem;
   white-space: nowrap;
+}
+
+/* 반응형 대응 */
+@media (max-width: 768px) {
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .poster {
+    width: 100%;
+    height: auto;
+  }
+
+  .transferBtn,
+  .transferredBadge {
+    align-self: flex-end;
+  }
 }
