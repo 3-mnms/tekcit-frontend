@@ -37,19 +37,25 @@ const Step1Form: React.FC<Props> = ({ acc, onNext, updateAcc }) => {
   })
 
   const checkLoginIdMut = useCheckLoginId()
-  const [idChecked, setIdChecked] = useState(false)  // ✅ 중복확인 여부 저장
+  const [idChecked, setIdChecked] = useState(false)
 
   const loginId = watch('loginId') ?? ''
+  const loginPw = watch('loginPw') ?? ''
   const loginIdReg = register('loginId')
+  const loginPwReg = register('loginPw')
+  const passwordConfirmReg = register('passwordConfirm')
 
-  // 아이디 변경 시에는 다시 중복확인 필요 → 플래그 리셋
   useEffect(() => {
     setIdChecked(false)
   }, [loginId])
 
-  const disableIdCheck = !loginId.trim() || !!errors.loginId || checkLoginIdMut.isPending
+  const idCheckDone = idChecked && !errors.loginId && loginId.trim().length >= 4
+
+  const disableIdCheck =
+    !loginId.trim() || !!errors.loginId || checkLoginIdMut.isPending || idCheckDone
 
   const onCheckLoginId = async () => {
+    if (idCheckDone) return
     const ok = await trigger('loginId')
     if (!ok) return
     const id = getValues('loginId').trim()
@@ -57,10 +63,10 @@ const Step1Form: React.FC<Props> = ({ acc, onNext, updateAcc }) => {
     checkLoginIdMut.mutate(id, {
       onSuccess: (ok) => {
         if (ok) {
-          alert('사용 가능')
-          setIdChecked(true) // ✅ 성공 시 플래그 true
+          alert('사용 가능한 아이디입니다.')
+          setIdChecked(true)
         } else {
-          alert('이미 사용 중')
+          alert('이미 사용 중인 아이디입니다.')
           setIdChecked(false)
         }
       },
@@ -71,9 +77,15 @@ const Step1Form: React.FC<Props> = ({ acc, onNext, updateAcc }) => {
     })
   }
 
+  useEffect(() => {
+    if (getFieldState('passwordConfirm').isTouched) {
+      void trigger('passwordConfirm')
+    }
+  }, [loginPw, trigger, getFieldState])
+
   const submit = (data: Step1) => {
-    if (!idChecked) {
-      alert('아이디 중복 확인을 해주세요!')
+    if (!idCheckDone) {
+      alert('아이디 중복 확인을 해주세요.')
       return
     }
     updateAcc(data)
@@ -87,25 +99,35 @@ const Step1Form: React.FC<Props> = ({ acc, onNext, updateAcc }) => {
         onChange={(e) => {
           loginIdReg.onChange(e)
           const v = (e.target as HTMLInputElement).value
-          setValue('loginId', v, {
-            shouldDirty: true,
-            shouldValidate: true,
-            shouldTouch: true,
-          })
+          setValue('loginId', v, { shouldDirty: true, shouldValidate: true, shouldTouch: true })
           updateAcc({ loginId: v })
         }}
         icon={<FaUser />}
         placeholder="아이디"
         hasButton
-        buttonText="중복 확인"
+        buttonText={
+          checkLoginIdMut.isPending ? '확인 중...' : idCheckDone ? '확인 완료' : '중복 확인'
+        }
         onButtonClick={onCheckLoginId}
         buttonDisabled={disableIdCheck}
         error={errors.loginId?.message}
-        touched={getFieldState('loginId').isTouched}
+        touched={!!touchedFields.loginId}
       />
 
+      {idCheckDone && (
+        <p className={styles.successMsg} role="status" aria-live="polite">
+          ✓ 사용 가능한 아이디입니다.
+        </p>
+      )}
+
       <SignupInputField
-        {...register('loginPw')}
+        {...loginPwReg}
+        onChange={(e) => {
+          loginPwReg.onChange(e)
+          const v = (e.target as HTMLInputElement).value
+          setValue('loginPw', v, { shouldDirty: true, shouldValidate: true, shouldTouch: true }) // ✅ 입력 즉시 검증
+          updateAcc({ loginPw: v })
+        }}
         icon={<FaLock />}
         placeholder="비밀번호"
         type="password"
@@ -114,7 +136,17 @@ const Step1Form: React.FC<Props> = ({ acc, onNext, updateAcc }) => {
       />
 
       <SignupInputField
-        {...register('passwordConfirm')}
+        {...passwordConfirmReg}
+        onChange={(e) => {
+          passwordConfirmReg.onChange(e)
+          const v = (e.target as HTMLInputElement).value
+          setValue('passwordConfirm', v, {
+            shouldDirty: true,
+            shouldValidate: true,
+            shouldTouch: true,
+          }) 
+          updateAcc({ passwordConfirm: v })
+        }}
         icon={<FaLock />}
         placeholder="비밀번호 확인"
         type="password"

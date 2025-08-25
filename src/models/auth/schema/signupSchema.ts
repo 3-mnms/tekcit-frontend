@@ -1,9 +1,18 @@
 import { z } from 'zod';
 
+const PASSWORD_REGEX =
+  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[~`!@#$%^&*()_\-+={}\[\]|\\:;"'<>,.?]).{8,}$/;
+
 export const signupStep1 = z
   .object({
     loginId: z.string().min(4, '아이디는 4자 이상 입력하세요.'),
-    loginPw: z.string().min(8, '비밀번호는 8자 이상 입력하세요.'),
+    // ✅ 한 번에 메시지
+    loginPw: z
+      .string()
+      .regex(
+        PASSWORD_REGEX,
+        '8~20자의 영문/숫자/특수문자를 모두 포함해야 합니다.'
+      ),
     passwordConfirm: z.string(),
   })
   .superRefine((v, ctx) => {
@@ -20,7 +29,7 @@ export const signupStep2 = z.object({
   name: z.string().min(2, '이름은 2자 이상 입력하세요.'),
   phone: z
     .string()
-    .regex(/^01[016789]-?\d{3,4}-?\d{4}$/, '전화번호 형식이 올바르지 않습니다. 예: 010-1234-5678'),
+    .regex(/^01[016789]-?\d{4}-?\d{4}$/, '전화번호 형식이 올바르지 않습니다. 예: 010-1234-5678'),
   rrnFront: z.string().regex(/^\d{6}$/, '주민번호 앞 6자리를 입력하세요.'),
   rrnBackFirst: z.string().min(1, '주민번호를 입력하세요.').regex(/^[1-4]$/, '주민등록번호 뒷자리 첫 글자는 1~4만 가능합니다.'),
 });
