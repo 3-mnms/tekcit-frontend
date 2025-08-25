@@ -1,4 +1,4 @@
-import { api } from '@/shared/api/axios'
+import { api } from '@/shared/config/axios'
 
 /** 결제 사전요청 멍 */
 export const paymentRequest = async (

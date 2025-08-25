@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosHeaders, type InternalAxiosRequestConfig } from 'axios'
-import { reissue, type ReissueResponseDTO } from './auth/login'
+import { reissue, type ReissueResponseDTO } from '../api/auth/login'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 
 export const api = axios.create({

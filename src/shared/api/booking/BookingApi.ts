@@ -1,5 +1,5 @@
 // src/shared/api/booking/BookingApi.ts
-import { api } from '@/shared/api/axios' // ✅ 공용 axios 인스턴스만 사용
+import { api } from '@/shared/config/axios' // ✅ 공용 axios 인스턴스만 사용
 import type {
   BookingSelect,
   BookingSelectDelivery,

@@ -1,6 +1,6 @@
 // src/shared/api/useTokenInfoQuery.ts
 import { useQuery } from '@tanstack/react-query'
-import { api } from '@/shared/api/axios'
+import { api } from '@/shared/config/axios'
 
 type Role = 'USER' | 'HOST' | 'ADMIN'
 export interface TokenInfo { userId: number; role: Role; name: string }
