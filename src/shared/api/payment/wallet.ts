@@ -1,6 +1,6 @@
 // wallet.ts
 import { PayMethod } from '@portone/browser-sdk/v2'
-import { api } from '../axios'
+import { api } from '@/shared/api/axios'
 
 // src/shared/api/wallet.ts
 export type SimpleMethod = '네이버페이' | '카카오페이'

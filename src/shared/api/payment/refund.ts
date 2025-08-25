@@ -1,4 +1,4 @@
-import { api } from '../axios'
+import { api } from '@/shared/api/axios'
 
 function getUserIdOrThrow(): number {
   const raw = localStorage.getItem('userId')
