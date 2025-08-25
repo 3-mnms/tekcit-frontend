@@ -34,8 +34,7 @@ export const paymentRequest = async (
   return res.data // 백엔드 응답 스키마는 상위에서 해석 멍
 }
 
-/** 결제 승인 확인(간단 재시도 3회: 2/4/6초) 멍 */
-// 📄 src/shared/api/payment/toss.ts (paymentConfirm만 교체) 멍
+/** 결제 승인 확인(간단 재시도 3회: 2/4/6초) */
 export const paymentConfirm = async (paymentId: string) => {
   const MAX_TRIES = 3
 

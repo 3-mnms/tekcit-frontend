@@ -69,8 +69,8 @@ export default defineConfig({
         target: 'http://localhost:10000',
       },
       '/api/festival': {
-        //target: 'http://localhost:10000',
-        target: 'http://localhost:8083',
+        target: 'http://localhost:10000',
+        // target: 'http://localhost:8083',
         changeOrigin: true,
       },
       '/api/booking': {
@@ -79,7 +79,8 @@ export default defineConfig({
         secure: false,
       },
       '/api/payments': {
-        target: 'http://localhost:8081',
+        target: 'http://localhost:10000',
+        // target: 'http://localhost:8081',
       },
     },
   },

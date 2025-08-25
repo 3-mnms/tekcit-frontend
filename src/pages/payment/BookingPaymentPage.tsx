@@ -13,18 +13,22 @@ import AlertModal from '@/components/common/modal/AlertModal'
 
 import styles from './BookingPaymentPage.module.css'
 
-// ✅ 결제 수단 타입
+// ✅ (NEW) 서버 세션 생성 API (엔드포인트는 프로젝트에 맞게 구현/수정)
+import { api } from '@/shared/api/axios'
+
+// 결제 수단 타입
 type PaymentMethod = 'wallet' | 'Toss'
 
-// ✅ 라우터 state 타입
+// ✅ 라우터 state 타입 (호환 위해 optional로 둠)
 type CheckoutState = {
   posterUrl?: string
   title: string
-  dateTimeLabel: string
+  performanceDate: string      // 신규 키
   unitPrice: number
   quantity: number
-  receiveType: string
+  deliveryMethod: string       // 신규 키: 'QR' | 'DELIVERY'
   buyerName?: string
+  bookerName?: string
   festivalId?: string
 }
 
@@ -40,7 +44,7 @@ function createPaymentId(): string {
   return `pay_${Array.from(buf).join('')}`
 }
 
-// ✅ 로그인 사용자 ID 획득(미연동 시 목값)
+// ✅ 로그인 사용자 ID 획득 (미연동 시 목값)
 function getUserIdSafely(): number {
   const v = Number(localStorage.getItem('userId') ?? NaN)
   return Number.isFinite(v) ? v : 1001
@@ -49,23 +53,22 @@ function getUserIdSafely(): number {
 const BookingPaymentPage: React.FC = () => {
   const navigate = useNavigate()
 
-  // ✅ (1) 페이지 최상단에서 라우터 state 받기
+  // (1) 페이지 최상단에서 라우터 state 받기
   const { state } = useLocation()
   const checkout = state as CheckoutState | undefined
 
-  // ✅ (2) 파생값들은 컴포넌트 최상위에서 계산 (Hook 규칙 준수)
-  const unitPrice = checkout?.unitPrice ?? 0    // 없으면 0으로 방어
-  const quantity  = checkout?.quantity  ?? 0    // 없으면 0으로 방어
-  const amount    = useMemo(() => unitPrice * quantity, [unitPrice, quantity]) // 총 결제 금액
-  const orderName = useMemo(
-    () => (checkout?.title || '티켓 예매'),
-    [checkout?.title]
-  )
+  // (2) 파생값 계산
+  const unitPrice = checkout?.unitPrice ?? 0
+  const quantity  = checkout?.quantity  ?? 0
+  const amount    = useMemo(() => unitPrice * quantity, [unitPrice, quantity]) // 클라 계산(백업용)
+  const orderName = useMemo(() => checkout?.title || '티켓 예매', [checkout?.title])
   const festivalIdVal = checkout?.festivalId ?? ''
-  const receiveTypeVal: ReceiveType =
-    checkout?.receiveType === 'DELIVERY' ? 'DELIVERY' : 'QR'
 
-  // ✅ (3) 나머지 훅들
+  // ✅ receiveType ↔ deliveryMethod 호환 처리
+  const receiveTypeRaw = checkout?.deliveryMethod ?? 'QR'
+  const receiveTypeVal: ReceiveType = receiveTypeRaw === 'DELIVERY' ? 'DELIVERY' : 'QR'
+
+  // (3) 나머지 훅들
   const tossRef = useRef<TossPaymentHandle>(null)
   const [openedMethod, setOpenedMethod] = useState<PaymentMethod | null>(null)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
@@ -73,30 +76,60 @@ const BookingPaymentPage: React.FC = () => {
   const [isPaying, setIsPaying] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
-  // ✅ paymentId는 진입 시 1회 생성해 보관
+  // paymentId는 진입 시 1회 생성해 보관
   const [paymentId, setPaymentId] = useState<string | null>(null)
   useEffect(() => {
     if (!paymentId) setPaymentId(createPaymentId())
   }, [paymentId])
 
-  // ✅ 타이머
-  const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS)
-  useEffect(() => {
-    const id = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          clearInterval(id)
-          setIsTimeUpModalOpen(true)
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-    return () => clearInterval(id)
-  }, [])
+  // ✅ (NEW) 서버 세션 값 보관: bookingId / sellerId / amount
+  const [sessionBookingId, setSessionBookingId] = useState<string | null>(null)
+  const [sessionSellerId,   setSessionSellerId] = useState<number | null>(null)
+  const [sessionAmount,     setSessionAmount]   = useState<number | null>(null)
+  const [isSessionLoading,  setIsSessionLoading]= useState<boolean>(false)
 
+  // ✅ (NEW) 진입 시 결제 세션 생성
+  useEffect(() => {
+    // checkout 없으면 세션 생성 불가
+    if (!checkout) return
+
+    // 서버로 넘길 payload (백엔드 스펙 맞게 수정)
+    const payload = {
+      festivalId: festivalIdVal,
+      unitPrice,
+      quantity,
+      deliveryMethod: receiveTypeVal, // 'QR' | 'DELIVERY'
+      title: orderName,
+    }
+
+    ;(async () => {
+      try {
+        setIsSessionLoading(true)
+        // ⚠️ 엔드포인트/response는 백엔드에 맞추세요!
+        const { data } = await api.post('/payments/session', payload)
+
+        // ✅ 서버 확정값 반영
+        setSessionBookingId(data.bookingId)
+        setSessionSellerId(data.sellerId)
+        setSessionAmount(data.amount)       // 서버가 최종 확정한 금액(신뢰 소스)
+      } catch (e) {
+        console.error('[session] createPaymentSession error:', e)
+        setErr('결제 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.')
+      } finally {
+        setIsSessionLoading(false)
+      }
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkout?.festivalId, unitPrice, quantity, receiveTypeVal, orderName])
+
+  // ✅ (NEW) 최종 결제 금액: 서버 금액 우선, 없으면 클라 계산값
+  const finalAmount = sessionAmount ?? amount
+
+  // 타이머(헤더가 관리)
+  const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS)
   const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false)
 
+  // 결제 결과 페이지 이동 (쿼리 파라미터: 성공/실패)
   const routeToResult = (ok: boolean) => {
     const params = new URLSearchParams({ type: 'booking', status: ok ? 'success' : 'fail' })
     navigate(`/payment/result?${params.toString()}`)
@@ -108,7 +141,7 @@ const BookingPaymentPage: React.FC = () => {
     setErr(null)
   }
 
-  // ✅ 결제 실행
+  // 결제 실행
   const handlePayment = async () => {
     // 필수 체크
     if (!checkout) {
@@ -122,6 +155,11 @@ const BookingPaymentPage: React.FC = () => {
     if (remainingSeconds <= 0) {
       setErr('결제 시간이 만료되었습니다.')
       setIsTimeUpModalOpen(true)
+      return
+    }
+    // ✅ 세션 준비 안 됐으면 막기
+    if (isSessionLoading || !sessionBookingId || !sessionSellerId) {
+      setErr('결제 준비 중입니다. 잠시만 기다려주세요.')
       return
     }
     if (isPaying) return
@@ -139,19 +177,17 @@ const BookingPaymentPage: React.FC = () => {
       if (!paymentId) setPaymentId(ensuredId)
 
       const userId = getUserIdSafely()
-      const bookingId = 'BKG-20250822-01' // TODO: 실제 값 연동 시 교체
-      const sellerId = 2002               // TODO: 실제 값 연동 시 교체
 
       setIsPaying(true)
       try {
         await tossRef.current?.requestPay({
           paymentId: ensuredId,
-          amount,               // ✅ state 기반
-          orderName,            // ✅ state 기반
+          amount: finalAmount,          // ✅ 서버 확정 금액 우선
+          orderName,                    // (필요 시 서버 orderName으로 치환 가능)
           userId,
-          bookingId,
-          festivalId: festivalIdVal, // ✅ state 기반
-          sellerId,
+          bookingId: sessionBookingId,  // ✅ 서버 세션 값
+          festivalId: festivalIdVal,    // ✅ payload에서 받은 값
+          sellerId: sessionSellerId,    // ✅ 서버 세션 값
         })
       } catch (e) {
         console.error(e)
@@ -163,22 +199,25 @@ const BookingPaymentPage: React.FC = () => {
     }
   }
 
-  const canPay = !!openedMethod && !isPaying && remainingSeconds > 0
-  const timeString = `${String(Math.floor(remainingSeconds / 60)).padStart(2, '0')}:${String(remainingSeconds % 60).padStart(2, '0')}`
+  // ✅ 세션 로딩/만료/결제중 등에 따라 버튼 비활성
+  const canPay = !!openedMethod && !isPaying && remainingSeconds > 0 && !isSessionLoading
 
   return (
     <div className={styles.page}>
-      <BookingPaymentHeader timeString={timeString} />
+      {/* ⏱️ 타이머는 헤더가 관리 */}
+      <BookingPaymentHeader
+        initialSeconds={DEADLINE_SECONDS}
+        onTick={(sec) => setRemainingSeconds(sec)}   // 매초 남은 시간 반영
+        onExpire={() => setIsTimeUpModalOpen(true)}  // 만료 시 모달 오픈
+      />
 
       <div className={styles.container} role="main">
-        <h1 className="sr-only">예매 결제</h1>
-
         {/* 좌측: 수령 방법 + 결제 수단 */}
         <section className={styles.left}>
           <div className={styles.sectionContainer}>
             <div className={styles.receiveSection}>
               <h2 className={styles.sectionTitle}>수령 방법</h2>
-              {/* ✅ 페이지 state 파생값으로 전달 */}
+              {/* ✅ 호환 처리된 enum 전달 */}
               <ReceiveInfo value={receiveTypeVal} />
             </div>
 
@@ -199,7 +238,7 @@ const BookingPaymentPage: React.FC = () => {
 
                   {openedMethod === 'wallet' && (
                     <div className={styles.methodBody}>
-                      <WalletPayment isOpen onToggle={() => toggleMethod('wallet')} dueAmount={amount} />
+                      <WalletPayment isOpen onToggle={() => toggleMethod('wallet')} dueAmount={finalAmount} />
                     </div>
                   )}
                 </div>
@@ -222,7 +261,7 @@ const BookingPaymentPage: React.FC = () => {
                         ref={tossRef}
                         isOpen
                         onToggle={() => toggleMethod('Toss')}
-                        amount={amount}
+                        amount={finalAmount} // ✅ TossPayment 기본 amount에도 서버 금액 반영
                         orderName={orderName}
                         redirectUrl={`${window.location.origin}/payment/result?type=booking`}
                       />
@@ -236,20 +275,10 @@ const BookingPaymentPage: React.FC = () => {
           </div>
         </section>
 
-        {/* 우측 요약: 페이지 → PaymentInfo로 직접 props 전달 */}
+        {/* 우측 요약: PaymentInfo는 useLocation으로 표시용 총액 계산 */}
         <aside className={styles.right}>
           <div className={styles.summaryCard}>
-            {checkout && (
-              <PaymentInfo
-                posterUrl={checkout.posterUrl}
-                title={checkout.title}
-                dateTimeLabel={checkout.dateTimeLabel}
-                unitPrice={checkout.unitPrice}
-                quantity={checkout.quantity}
-                receiveType={checkout.receiveType}
-                buyerName={checkout.buyerName}
-              />
-            )}
+            <PaymentInfo />
           </div>
 
           <div className={styles.buttonWrapper}>
@@ -274,6 +303,7 @@ const BookingPaymentPage: React.FC = () => {
             setIsPaying(true)
             try {
               await new Promise((r) => setTimeout(r, 700))
+              // TODO: 지갑 결제 API 연동 위치
               routeToResult(true)
             } finally {
               setIsPaying(false)
