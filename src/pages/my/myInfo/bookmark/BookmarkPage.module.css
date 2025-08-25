@@ -14,12 +14,6 @@
   padding: 1.5rem;
 }
 
-.subTitle {
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-}
-
 .cardList {
   display: flex;
   gap: 1.5rem;
