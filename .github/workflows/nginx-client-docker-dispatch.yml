@@ -95,11 +95,7 @@ jobs:
           ls -al ci-context/dist | head -n 30
 
       - name: ⏱️ Tag
-        run: |
-          TS=$(date -u +'%Y%m%d%H%M%S')
-          echo "TAG_AMD=v${TS}-win" >> $GITHUB_ENV
-          echo "TAG_ARM=v${TS}-mac" >> $GITHUB_ENV
-          echo "TAG=v${TS}-win" >> $GITHUB_ENV
+        run: echo "TAG=v$(date -u +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
       - uses: docker/setup-buildx-action@v3
 
@@ -113,10 +109,14 @@ jobs:
         with:
           images: ${{ env.IMAGE }}
           tags: |
-            type=raw,value=${{ env.TAG_AMD }}
-            type=raw,value=${{ env.TAG_ARM }}
+            # 타임스탬프 태그
+            type=raw,value=${{ env.TAG }}
+            # git sha 태그
             type=sha
-            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
+            # 고정 별칭
+            type=raw,value=v0.1
+            # latest (develop/main 모두 발행)
+            type=raw,value=latest
 
       - uses: docker/build-push-action@v5
         with:
