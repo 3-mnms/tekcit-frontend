@@ -1,4 +1,4 @@
-import { api } from '@/shared/api/axios'
+import { api } from '@/shared/config/axios'
 
 // ✅ 서버 원본 구조
 type AddressRaw = {

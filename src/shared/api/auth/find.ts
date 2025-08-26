@@ -1,5 +1,5 @@
 // src/shared/api/user/UserApi.ts
-import { api } from '@/shared/api/axios';
+import { api } from '@/shared/config/axios';
 
 export interface ApiSuccess<T> {
   success: boolean;

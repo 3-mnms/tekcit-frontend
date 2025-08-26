@@ -2,6 +2,9 @@ import { defineConfig } from 'vite'
 import path from 'path';
 
 import react from '@vitejs/plugin-react'
+import { getEnv } from './src/shared/config/env'
+
+const API_URL = getEnv('API_URL', '')
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -58,28 +61,30 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/users': {
-        target: 'http://localhost:10000',
+        target: API_URL,
         changeOrigin: true,
       },
       '/api/mail': {
-        target: 'http://localhost:10000',
+        target: API_URL,
         changeOrigin: true,
       },
       '/api/auth/kakao': {
-        target: 'http://localhost:10000',
+        target: API_URL,
+        // changeOrigin: true,
       },
       '/api/festival': {
-        target: 'http://localhost:10000',
+        target: API_URL,
         // target: 'http://localhost:8083',
         changeOrigin: true,
       },
       '/api/booking': {
-        target: 'http://localhost:10000',
+        target: API_URL,
         changeOrigin: true,
         secure: false,
       },
       '/api/payments': {
-        target: 'http://localhost:8081',
+        target: API_URL,
+        changeOrigin: true,
       },
     },
   },
