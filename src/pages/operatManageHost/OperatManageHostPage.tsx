@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo  } from 'react';
 import SearchBar from '@/components/common/SearchBox';
 import HostList from '@/components/operatManage/HostList';
 import Button from '@/components/common/Button';
@@ -14,10 +14,9 @@ const OperatManageHostPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // 삐약! useQuery 훅을 사용해 호스트 목록을 가져옵니다!
     const { data: hosts, isLoading, isError, isFetching } = useQuery({
-        queryKey: ['hosts', searchTerm],
-        queryFn: () => getHosts(searchTerm),
+        queryKey: ['hosts'],
+        queryFn: () => getHosts(),
     });
     
     // 삐약! useMutation 훅을 사용해 호스트를 등록합니다!
@@ -47,7 +46,7 @@ const OperatManageHostPage: React.FC = () => {
         },
     });
 
-    const handleToggleStatus = (userId: string, currentIsActive: boolean) => {
+    const handleToggleStatus = (userId: number, currentIsActive: boolean) => {
         const newIsActive = !currentIsActive;
         if (window.confirm(`정말로 계정을 ${newIsActive ? '활성화' : '정지'}하시겠습니까?`)) {
             toggleStatusMutation({ userId, isActive: newIsActive });
@@ -58,7 +57,23 @@ const OperatManageHostPage: React.FC = () => {
         registerHostMutation(newHost);
     };
 
+    const filteredHosts = useMemo(() => {
+        const lowercasedTerm = searchTerm.toLowerCase();
+        if (!hosts) return []; // 데이터가 없으면 빈 배열 반환
+        if (!lowercasedTerm) return hosts; // 검색어가 없으면 전체 목록 반환
+
+        return hosts.filter(host => 
+            host.name.toLowerCase().includes(lowercasedTerm) ||
+            host.email.toLowerCase().includes(lowercasedTerm) ||
+            host.loginId.toLowerCase().includes(lowercasedTerm) ||
+            host.businessName.toLowerCase().includes(lowercasedTerm) ||
+            host.phone.toLowerCase().includes(lowercasedTerm)
+        );
+    }, [hosts, searchTerm]);
+
     const totalUsers = hosts ? hosts.length : 0;
+    // const filteredTotal = filteredHosts.length;
+
 
     // 삐약! 로딩 및 에러 상태를 처리하는 UI를 추가합니다!
     if (isLoading) {
@@ -80,7 +95,7 @@ const OperatManageHostPage: React.FC = () => {
                 </div>
                 {isFetching && <div className={styles.loadingIndicator}>주최자 목록을 가져오는 중...</div>}
                 <div className={styles.tableSection}>
-                    <HostList users={hosts || []} onToggleStatus={handleToggleStatus} />
+                    <HostList users={filteredHosts} onToggleStatus={handleToggleStatus} />
                 </div>
             </div>
             <AddModal

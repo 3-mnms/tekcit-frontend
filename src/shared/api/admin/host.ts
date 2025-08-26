@@ -21,7 +21,7 @@ export const registerHost = async (newPartner: NewHostData): Promise<User> => {
     return response.data;
 };
 
-export const toggleHostStatus = async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
+export const toggleHostStatus = async ({ userId, isActive }: { userId: number; isActive: boolean }) => {
   await api.patch(`/admin/${userId}/state`, null, {
     params: {
       active: isActive,

@@ -10,7 +10,7 @@ interface HostListProps  {
 
 const HostList: React.FC<HostListProps > = ({ users, onToggleStatus }) => {
     const handleToggleStatus = (user: User, currentIsActive: boolean) => {
-        onToggleStatus(user.id, currentIsActive);
+        onToggleStatus(user.userId, currentIsActive);
     };
     
     const columns: Column<User>[] = [ 

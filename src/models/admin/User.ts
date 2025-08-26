@@ -14,7 +14,7 @@ export interface Address {
 }
 
 export interface BaseUser {
-    id: number; 
+    userId: number; 
     loginId: string;
     loginPw?: string;
     name: string;
