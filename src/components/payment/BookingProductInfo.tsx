@@ -26,7 +26,7 @@ const BookingProductInfo: React.FC = () => {
         </div>
 
         <div className={styles.detailRow}>
-          <span className={styles.label}>전석</span>
+          <span className={styles.label}>수량</span>
           <span className={styles.value}>{bookingProduct.ticket}매</span>
         </div>
 
