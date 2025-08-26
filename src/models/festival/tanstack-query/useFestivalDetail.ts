@@ -1,7 +1,7 @@
 // src/models/festival/tanstack-query/useFestivalDetail.ts
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { getFestivalDetail, increaseFestivalViews } from '@/shared/api/festival/FestivalApi';
-import type { FestivalDetail } from '@models/festival/FestivalType';
+import { getFestivalDetail, increaseFestivalViews } from '@/shared/api/festival/festivalApi';
+import type { FestivalDetail } from '@/models/festival/festivalType';
 
 export function useFestivalDetail(fid?: string) {
   return useQuery<FestivalDetail>({
