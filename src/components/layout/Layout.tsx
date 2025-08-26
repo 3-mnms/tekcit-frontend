@@ -5,7 +5,7 @@ import Sidebar from './Sidebar'
 import SubHeader from './SubHeader'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/models/auth/useAuth'
-import { USERROLE } from '@/models/admin/host/User'
+import { USERROLE } from '@/models/admin/User'
 
 const adminMenuItems = [
   { path: '/admin/productRegist', name: '상품 등록' },

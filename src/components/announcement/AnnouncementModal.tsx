@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './AnnouncementModal.module.css';
 import { useQuery } from '@tanstack/react-query';
-import { getProducts } from '@/shared/api/admin/host/festival'; 
+import { getProducts } from '@/shared/api/admin/festival'; 
 // import type { Festival } from '@/models/admin/host/festival';
 
 interface Props {

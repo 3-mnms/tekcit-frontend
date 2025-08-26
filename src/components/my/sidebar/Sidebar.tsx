@@ -25,8 +25,8 @@ const sidebarItems: SidebarItem[] = [
     path: '/mypage/ticket',
     children: [
       { label: '예매 / 취소 내역', path: '/mypage/ticket/history' },
-      { label: '양도', path: '/mypage/ticket/transfer' },
-      { label: '입장 인원 수 조회', path: '/mypage/ticket/entrancecheck' },
+      { label: '티켓 양도', path: '/mypage/ticket/transfer' },
+      // { label: '입장 인원 수 조회', path: '/mypage/ticket/entrancecheck' },
     ],
   },
   { label: '북마크', path: '/mypage/bookmark' },

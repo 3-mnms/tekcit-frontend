@@ -34,6 +34,7 @@
   background-color: #fff;
   font-size: 0.9rem;
   cursor: pointer;
+  margin-left: 5px;
   transition: background-color 0.2s, border-color 0.2s;
 }
 

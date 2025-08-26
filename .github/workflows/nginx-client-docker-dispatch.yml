@@ -33,6 +33,20 @@ jobs:
       - name: Install deps
         run: npm ci --prefer-offline --no-audit --no-fund
 
+      # ENV 생성
+      - name: Prepare env.js
+        run: |
+          mkdir -p public
+          
+          if [ ! -f public/env.js ]; then
+            echo "public/env.js not found. Creating temporary empty env.js..."
+            printf 'window.__ENV__ = {\n' \
+                   '  API_URL: "",\n' \
+                   '  VITE_PORTONE_STORE_ID: "",\n' \
+                   '  VITE_PORTONE_CHANNEL_KEY: ""\n' \
+                   '};\n' > public/env.js
+          fi
+
       - name: Build (vite only, no typecheck)
         run: npx vite build
 
@@ -80,6 +94,7 @@ jobs:
           cp -r dist ci-context/dist
           cp default.conf ci-context/default.conf
 
+          
           # 3) 컨텍스트용 Dockerfile 생성
           cat > ci-context/Dockerfile <<'DOCKER'
           FROM nginx:1.27-alpine

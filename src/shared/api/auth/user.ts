@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { api } from '@/shared/api/axios';
+import { api } from '@/shared/config/axios';
 
 export const signupUser = async (data: any) => {
   const res = await api.post('/users/signupUser', data);
@@ -7,12 +6,12 @@ export const signupUser = async (data: any) => {
 };
 
 export const checkLoginId = async (loginId: string) => {
-  const res = await api.get(`/api/users/checkLoginId?loginId=${loginId}`);
+  const res = await api.get(`/users/checkLoginId?loginId=${loginId}`);
   return res.data as boolean;
 };
 
 export const checkEmail = async (email: string) => {
-  const res = await axios.get(`/api/users/checkEmail?email=${email}`);
+  const res = await api.get(`/users/checkEmail?email=${email}`);
   return res.data as boolean;
 };
 

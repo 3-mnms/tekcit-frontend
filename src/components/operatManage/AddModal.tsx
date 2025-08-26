@@ -10,7 +10,6 @@ export interface NewHostData {
     email: string;
     hostProfile: {
         businessName: string;
-        genre: string;
     };
 }
 
@@ -31,7 +30,6 @@ const AddModal: React.FC<AddHostModalProps> = ({ isOpen, onClose, onSave }) => {
         email: '',
         hostProfile: {
             businessName: '',
-            genre: '',
         },
     });
 
@@ -92,10 +90,6 @@ const AddModal: React.FC<AddHostModalProps> = ({ isOpen, onClose, onSave }) => {
                 <div className={styles.formGroup}>
                     <label htmlFor="phone">전화번호</label>
                     <input type="tel" id="phone" name="phone" value={hostData.phone} onChange={handleChange} />
-                </div>
-                <div className={styles.formGroup}>
-                    <label htmlFor="genre">장르</label>
-                    <input type="text" id="genre" name="genre" value={hostData.hostProfile.genre} onChange={handleChange} />
                 </div>
                 <div className={styles.formGroup}>
                     <label htmlFor="businessName">사업자명</label>
