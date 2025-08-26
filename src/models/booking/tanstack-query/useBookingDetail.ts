@@ -6,14 +6,14 @@ import type {
   Booking,
   FestivalDetail,
   BookingDetail,
-} from '@/models/booking/rbookingTypes'
+} from '@/models/booking/bookingTypes'
 import {
   apiGetPhase1Detail,
   apiGetPhase2Detail,
   apiSelectDate,
   apiSelectDelivery,
   apiReserveTicket,
-} from '@/shared/api/booking/rbookingApi'
+} from '@/shared/api/booking/bookingApi'
 
 // Phase 1
 export function usePhase1Detail(req: BookingSelect) {

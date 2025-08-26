@@ -6,7 +6,7 @@ import type {
   Booking,
   FestivalDetail,
   BookingDetail,
-} from '@/models/booking/rbookingTypes'
+} from '@/models/booking/bookingTypes'
 
 // ✅ 서버 응답을 안전하게 정규화
 type Ok<T>  = { success: true; data: T; message?: string }
