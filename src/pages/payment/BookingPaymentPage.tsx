@@ -149,16 +149,6 @@ const BookingPaymentPage: React.FC = () => {
       const userId = getUserIdSafely()       // X-User-Id 헤더로 전달될 값 멍
       const bookingId = 'BKG-20250822-01'    // 가예매/주문 ID(목) 멍
       const sellerId = 2002                  // 판매자 ID(목) 멍
-      // festivalId는 상단 목값 사용 멍
-
-      // 🔍 디버깅: 전달할 값들 확인
-      // console.log('🎯 결제 요청 파라미터:')
-      // console.log('paymentId:', ensuredId)
-      // console.log('userId:', userId)
-      // console.log('bookingId:', bookingId)
-      // console.log('festivalId:', festivalId)
-      // console.log('sellerId:', sellerId)
-      // console.log('amount:', amount)
 
       setIsPaying(true)
       try {

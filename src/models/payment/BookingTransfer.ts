@@ -10,8 +10,6 @@ export interface BookingProduct {
 // 양도 정보 전체
 export interface BookingTransfer {
   product: BookingProduct
-  sender: string
-  receiver: string
 }
 
 // 테스트용 더미 데이터 (API 연동 전까지 사용 가능)
@@ -23,6 +21,4 @@ export const bookingTransfer: BookingTransfer = {
     ticket: 2,
     price: '380,000원',
   },
-  sender: '정혜영',
-  receiver: '김민정',
 }
