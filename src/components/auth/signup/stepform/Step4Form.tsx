@@ -99,7 +99,6 @@ const Step4Form: React.FC<Props> = ({
   const onSendEmailCode = () => {
     if (!email) return alert('이메일을 먼저 입력하세요')
     if (errors.email) return alert('올바른 이메일 형식을 입력하세요')
-      console.log('[sendCode] email =', email);
 
     // RHF에 확정 반영
     setValue('email', email, { shouldValidate: true, shouldDirty: false })

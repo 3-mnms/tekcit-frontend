@@ -1,32 +1,62 @@
 .item {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  border: 1px solid #ddd;
+  align-items: flex-start;
+  padding: 1rem;
   border-radius: 0.75rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.75rem;
   background-color: #fff;
+  border: 1px solid #e5e7eb;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.left {
+.item:hover {
+  background-color: #f9fafb;
+}
+
+.content {
+  flex: 1;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.namePhone {
+  display: flex;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.phone {
+  color: #6b7280;
+  font-weight: 500;
+}
+
 .badge {
+  font-size: 0.7rem;
   padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
-  background-color: #e0e0e0;
-  border-radius: 0.5rem;
-  color: #555;
+  border-radius: 9999px;
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.address {
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.4;
 }
 
 .arrow {
   font-size: 1.25rem;
-  color: #aaa;
+  color: #cbd5e1;
   margin-left: 1rem;
+  padding-top: 0.25rem;
 }

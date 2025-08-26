@@ -3,8 +3,6 @@ import path from 'path';
 
 import react from '@vitejs/plugin-react'
 
-const API_URL = 'http://localhost:10000'
-
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -56,38 +54,5 @@ export default defineConfig({
         replacement: path.resolve(__dirname, 'src/shared/storage'),
       },
     ],
-  },
-  server: {
-    proxy: {
-      '/api/users': {
-        target: API_URL,
-        changeOrigin: true,
-      },
-      '/api/mail': {
-        target: API_URL,
-        changeOrigin: true,
-      },
-      '/api/auth/kakao': {
-        target: API_URL,
-        // changeOrigin: true,
-      },
-      '/api/festival': {
-        target: API_URL,
-        // target: 'http://localhost:8083',
-        changeOrigin: true,
-      },
-      '/api/booking': {
-        target: API_URL,
-        changeOrigin: true,
-        secure: false,
-      },
-      '/api/payments': {
-        target: API_URL,
-        changeOrigin: true,
-      },
-      '/api/addresses': {
-        target: 'http://localhost:10000',
-      },
-    },
   },
 })

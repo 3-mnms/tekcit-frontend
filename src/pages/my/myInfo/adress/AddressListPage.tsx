@@ -40,16 +40,14 @@ const AddressListPage: React.FC = () => {
               (data ?? []).map((addr, idx) => (
                 <div className={styles.card} key={idx}>
                   <AddressItem
-                    label={`${addr.name} · ${addr.phone}`}
+                    name={addr.name} 
+                    phone={addr.phone} 
+                    zipCode={addr.zipCode}
+                    address={addr.address} 
                     isDefault={addr.isDefault}
                     onClick={() => {
                     }}
                   />
-                  <div className={styles.meta}>
-                    <div className={styles.addrText}>
-                      {addr.zipCode} · {addr.address}
-                    </div>
-                  </div>
                 </div>
               ))
             )}
