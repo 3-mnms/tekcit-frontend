@@ -38,7 +38,7 @@ export type AddressDTO = {
 }
 
 export const getAddresses = async (): Promise<AddressDTO[]> => {
-  const { data } = await api.get('/addresses')
+  const { data } = await api.get('/addresses/allAddress')
   if (!data || typeof data !== 'object') return []
   return unwrap<AddressDTO[]>(data, [])
 }

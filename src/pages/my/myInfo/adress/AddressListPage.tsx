@@ -35,7 +35,7 @@ const AddressListPage: React.FC = () => {
         {!isLoading && !isError && (
           <>
             {!(data && data.length > 0) ? (
-              <AddressEmpty onAdd={goNew} />
+              <AddressEmpty />
             ) : (
               (data ?? []).map((addr, idx) => (
                 <div className={styles.card} key={idx}>
