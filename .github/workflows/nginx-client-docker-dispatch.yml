@@ -37,16 +37,16 @@ jobs:
       - name: Prepare env.js
         run: |
           mkdir -p public
+          
           if [ ! -f public/env.js ]; then
             echo "public/env.js not found. Creating temporary empty env.js..."
-            cat > public/env.js <<'ENV'
-            window.__ENV__ = {
-              API_URL: "",
-              VITE_PORTONE_STORE_ID: "",
-              VITE_PORTONE_CHANNEL_KEY: ""
-            };
-            ENV
+            printf 'window.__ENV__ = {\n' \
+                   '  API_URL: "",\n' \
+                   '  VITE_PORTONE_STORE_ID: "",\n' \
+                   '  VITE_PORTONE_CHANNEL_KEY: ""\n' \
+                   '};\n' > public/env.js
           fi
+
       - name: Build (vite only, no typecheck)
         run: npx vite build
 
