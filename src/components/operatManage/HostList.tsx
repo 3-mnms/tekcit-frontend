@@ -5,7 +5,7 @@ import {type User } from '@/models/admin/User';
 
 interface HostListProps  {
     users: User[];
-    onToggleStatus: (id: number, currentIsActive: boolean) => void;
+    onToggleStatus: (userId: number, currentIsActive: boolean) => void;
 }
 
 const HostList: React.FC<HostListProps > = ({ users, onToggleStatus }) => {
@@ -27,7 +27,7 @@ const HostList: React.FC<HostListProps > = ({ users, onToggleStatus }) => {
         )},
     ];
 
-    return <Table columns={columns} data={users|| []}  getUniqueKey={(item) => item.loginId} />;
+    return <Table columns={columns} data={users|| []}  getUniqueKey={(item) => item.userId} />;
 };
 
 export default HostList;

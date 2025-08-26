@@ -1,18 +1,26 @@
-import { USERROLE, type User} from '@/models/admin/User';
-import { MOCK_USERS } from '@/models/dummy/mockUsers';
+import {type User} from '@/models/admin/User';
+import { api } from '../axios';
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message: string;
+}
 
 export const getUsers = async (searchTerm?: string): Promise<User[]> => {
-    let filteredUsers = MOCK_USERS;
+  const response = await api.get<ApiResponse<User[]>>('/admin/userList', {
+    params: {
+      search: searchTerm,
+    },
+  });
+  return response.data.data || [];
+};
 
-    filteredUsers = filteredUsers.filter(user => user.role === USERROLE.USER);
-    
-    if (searchTerm) {
-        filteredUsers = filteredUsers.filter(user =>
-            user.name.includes(searchTerm) ||
-            user.loginId.includes(searchTerm) ||
-            user.email.includes(searchTerm) ||
-            user.phone.includes(searchTerm)
-        );
-    }
-    return filteredUsers;
+
+export const toggleHostStatus = async ({ userId, isActive }: { userId: number; isActive: boolean }) => {
+  await api.patch(`/admin/${userId}/state`, null, {
+    params: {
+      active: isActive,
+    },
+  });
 };

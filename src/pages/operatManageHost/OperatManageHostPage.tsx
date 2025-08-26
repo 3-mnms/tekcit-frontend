@@ -63,11 +63,11 @@ const OperatManageHostPage: React.FC = () => {
         if (!lowercasedTerm) return hosts; // 검색어가 없으면 전체 목록 반환
 
         return hosts.filter(host => 
-            host.name.toLowerCase().includes(lowercasedTerm) ||
-            host.email.toLowerCase().includes(lowercasedTerm) ||
-            host.loginId.toLowerCase().includes(lowercasedTerm) ||
-            host.businessName.toLowerCase().includes(lowercasedTerm) ||
-            host.phone.toLowerCase().includes(lowercasedTerm)
+            host.name?.toLowerCase().includes(lowercasedTerm) ||
+            host.email?.toLowerCase().includes(lowercasedTerm) ||
+            host.loginId?.toLowerCase().includes(lowercasedTerm) ||
+            host.businessName?.toLowerCase().includes(lowercasedTerm) ||
+            host.phone?.toLowerCase().includes(lowercasedTerm)
         );
     }, [hosts, searchTerm]);
 
