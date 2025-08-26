@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getFestivalCategories } from '@/shared/api/festival/festivalApi';
+import { getFestivalCategories } from '@/shared/api/festival/FsestivalApi';
 import styles from './FilterPanel.module.css';
 
 const WEEK_LABELS = ['일','월','화','수','목','금','토'];

@@ -9,7 +9,7 @@ import styles from './TicketOrderSection.module.css';
 
 // ✅ 1차 API 훅 (reservationNumber 받는 용도)
 import { useSelectDate } from '@/models/booking/tanstack-query/useBookingDetail';
-import type { BookingSelect } from '@/models/booking/bookingTypes';
+import type { BookingSelect } from '@/models/booking/rbookingTypes';
 
 type NextPayload = {
   fid?: string;

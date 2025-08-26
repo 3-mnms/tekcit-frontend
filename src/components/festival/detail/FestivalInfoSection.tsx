@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './FestivalInfoSection.module.css';
-import type { FestivalDetail } from '@/models/festival/festivalType';
+import type { FestivalDetail } from '@/models/festival/rfestivalType';
 
 type Props = {
   detail?: FestivalDetail;

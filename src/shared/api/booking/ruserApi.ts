@@ -1,4 +1,4 @@
-import type { ApiSuccessResponse, PreReservationDTO } from '@/models/booking/userType'
+import type { ApiSuccessResponse, PreReservationDTO } from '@/models/booking/ruserType'
 import { api } from '@/shared/config/axios';
 
 export async function getPreReservation() {
