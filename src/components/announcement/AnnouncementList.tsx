@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './AnnouncementList.module.css';
-import type { Announcement } from '@/models/admin/host/Announcement';
+import type { Announcement } from '@/models/admin/Announcement';
 import Button from '../common/Button';
 
 interface Props {

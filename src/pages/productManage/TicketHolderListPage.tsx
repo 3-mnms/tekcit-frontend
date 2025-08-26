@@ -7,8 +7,8 @@ import Layout from '@/components/layout/Layout';
 import Button from '@/components/common/Button';
 import Table from '@/components/shared/Table';
 import type { Column } from '@/components/shared/Table';
-import { getAttendeesByFestivalId } from '@/shared/api/admin/host/festival';
-import type { TicketHolderType } from '@/models/admin/host/User'; 
+import { getAttendeesByFestivalId } from '@/shared/api/admin/festival';
+import type { TicketHolderType } from '@/models/admin/User'; 
 import styles from './TicketHolderListPage.module.css';
 
 const TicketHolderListPage: React.FC = () => {
