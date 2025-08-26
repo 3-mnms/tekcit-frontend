@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styles from './CategorySection.module.css';
-import { getFestivals } from '@/shared/api/festival/FsestivalApi';
-import type { Festival } from '@/models/festival/rfestivalType';
+import { getFestivals } from '@/shared/api/festival/festivalApi';
+import type { Festival } from '@/models/festival/festivalType';
 import { useParams, Link } from 'react-router-dom';
 
 // 문자열 정규화
