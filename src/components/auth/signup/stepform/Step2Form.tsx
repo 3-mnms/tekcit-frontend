@@ -38,6 +38,14 @@ const Step2Form: React.FC<Props> = ({ acc, onPrev, onNext, updateAcc }) => {
     onNext()
   }
 
+  // 컴포넌트 상단 내부에 헬퍼 추가해도 되고, 파일 밖 util로 빼도 돼요.
+  const autoHyphen344 = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11) // 010 + 8자리 = 11
+    if (digits.length <= 3) return digits
+    if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
+  }
+
   return (
     <form onSubmit={handleSubmit(submit)} className={styles.formContent}>
       <SignupInputField
@@ -50,12 +58,14 @@ const Step2Form: React.FC<Props> = ({ acc, onPrev, onNext, updateAcc }) => {
       <SignupInputField
         {...register('phone', {
           onChange: (e) => {
-            const value = e.target.value.replace(/[^0-9-]/g, '')
-            setValue('phone', value, { shouldValidate: true })
+            const formatted = autoHyphen344(e.target.value)
+            setValue('phone', formatted, { shouldValidate: true, shouldDirty: true })
           },
         })}
         icon={<FaPhone />}
-        placeholder="전화번호 (예: 010-0000-0000)"
+        placeholder="전화번호 (숫자만 입력)"
+        inputMode="numeric" 
+        maxLength={13} 
         error={errors.phone?.message}
         touched={!!touchedFields.phone}
       />
@@ -97,10 +107,8 @@ const Step2Form: React.FC<Props> = ({ acc, onPrev, onNext, updateAcc }) => {
             aria-describedby={errors.rrnBackFirst ? 'rrnBackFirst-error' : undefined}
           />
 
-          {/* dots를 같은 그룹 안으로 이동 */}
           <span className={styles.dots}>●●●●●●</span>
 
-          {/* 에러가 두 칸 전체 너비로 깔림 */}
           {errors.rrnBackFirst?.message && (
             <p id="rrnBackFirst-error" className={styles.rrnBackError}>
               {errors.rrnBackFirst.message}

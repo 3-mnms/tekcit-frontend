@@ -1,20 +1,21 @@
-import React from 'react';
-import styles from './ReservationTable.module.css';
-import { useNavigate } from 'react-router-dom';
+import React from 'react'
+import styles from './ReservationTable.module.css'
+import { useNavigate } from 'react-router-dom'
 
 interface Reservation {
-  id: number;
-  date: string; 
-  number: string;
-  title: string;
-  dateTime: string;
-  count: number;
-  status: string;
+  id: number
+  date: string
+  number: string
+  title: string
+  dateTime: string
+  count: number
+  status: string
 }
 
 interface Props {
-  startDate: Date | null;
-  endDate: Date | null;
+  startDate: Date | null
+  endDate: Date | null
+  statusFilter: string
 }
 
 const dummyData: Reservation[] = [
@@ -25,7 +26,7 @@ const dummyData: Reservation[] = [
     title: '그린플러그드 페스티벌',
     dateTime: '2025.10.18 17:00',
     count: 2,
-    status: '결제 완료',
+    status: '예매 완료',
   },
   {
     id: 2,
@@ -36,21 +37,22 @@ const dummyData: Reservation[] = [
     count: 1,
     status: '취소 완료',
   },
-];
+]
 
-const ReservationTable: React.FC<Props> = ({ startDate, endDate }) => {
-  const navigate = useNavigate();
+const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter }) => {
+  const navigate = useNavigate()
 
   const handleRowClick = (id: number) => {
-    navigate(`/mypage/ticket/detail/${id}`);
-  };
+    navigate(`/mypage/ticket/detail/${id}`)
+  }
 
   const filteredData = dummyData.filter((item) => {
-    const reservationDate = new Date(item.date.replace(/\./g, '-')); // '2025.07.01' -> '2025-07-01'
-    if (startDate && reservationDate < startDate) return false;
-    if (endDate && reservationDate > endDate) return false;
-    return true;
-  });
+    const reservationDate = new Date(item.date.replace(/\./g, '-'))
+    if (startDate && reservationDate < startDate) return false
+    if (endDate && reservationDate > endDate) return false
+    if (statusFilter !== '전체' && item.status !== statusFilter) return false
+    return true
+  })
 
   return (
     <div className={styles.tableWrapper}>
@@ -67,7 +69,11 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate }) => {
         </thead>
         <tbody>
           {filteredData.map((item) => (
-            <tr key={item.id} onClick={() => handleRowClick(item.id)} className={styles.clickableRow}>
+            <tr
+              key={item.id}
+              onClick={() => handleRowClick(item.id)}
+              className={styles.clickableRow}
+            >
               <td>{item.date}</td>
               <td>{item.number}</td>
               <td>{item.title}</td>
@@ -79,7 +85,7 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate }) => {
         </tbody>
       </table>
     </div>
-  );
-};
+  )
+}
 
-export default ReservationTable;
+export default ReservationTable

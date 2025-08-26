@@ -6,10 +6,10 @@ const MyTicketPage: React.FC = () => {
   const navigate = useNavigate()
 
   return (
-    <div className="w-full p-8">
-      <h2 className="text-2xl font-bold mb-6">내 티켓</h2>
+    <div className="w-full p-6">
+      <h2 className="text-2xl font-bold mb-5">내 티켓</h2>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col">
         <MyInfoCardItem
           label="예매 확인/취소"
           onClick={() => navigate('/mypage/ticket/history')}

@@ -15,12 +15,12 @@
   height: 44px;
   border: 1.5px solid #e5e7eb;
   border-radius: 10px;
-  padding: 0 0.75rem 0 0.5rem;
+  padding: 0 0.3rem 0.1rem 0.5rem;
   background: #fff;
   transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
 }
 
-.inputWrapper:focus-within {
+.inputWrapper:focus-within:not(.invalid):not(.valid) {
   border-color: #60a5fa;
   box-shadow: 0 0 0 3px rgba(96,165,250,.25);
 }
@@ -28,13 +28,15 @@
 .left {
   display: flex;
   align-items: center;
-  gap: 6px;
+  /* gap: 6px; */
   color: #6b7280;
-  margin-right: 8px;
 }
 
 .bar {
   color: #e5e7eb;
+  font-size: 20px;
+  margin-left: -2px;
+  margin-bottom: 3px;
 }
 
 .input {
@@ -91,11 +93,32 @@
 .errorText {
   width: 100%;
   order: 2;
-  margin-top: 6px;
   font-size: 12px;
   line-height: 1.2;
   color: #ef4444;
   padding-left: 36px;
+  margin-top: -5px;
+}
+
+.inlineRow {
+  width: auto;
+  margin-bottom: 0;
+  flex-wrap: nowrap;          
+}
+.inlineRow .inputWrapper {
+  flex: 0 0 100%;               
+  width: 80%;
+}
+
+.hasButtonRow {               
+  flex-wrap: wrap;
+}
+.hasButtonRow .inputWrapper {       
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.hasButtonRow .buttonWrapper {      
+  flex: 0 0 auto;
 }
 
 @media (max-width: 480px) {
