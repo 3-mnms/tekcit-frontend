@@ -1,5 +1,5 @@
 import {type User} from '@/models/admin/User';
-import { api } from '../axios';
+import { api } from '@/shared/config/axios';
 
 interface ApiResponse<T> {
   success: boolean;

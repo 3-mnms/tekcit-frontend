@@ -1,4 +1,4 @@
-import {api} from '@/shared/api/axios';
+import {api} from '@/shared/config/axios';
 import type {User} from '@/models/admin/User';
 import type { NewHostData } from '@/components/operatManage/AddModal';
 
