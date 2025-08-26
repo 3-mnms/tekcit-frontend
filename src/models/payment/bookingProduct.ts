@@ -11,5 +11,5 @@ export const bookingProduct: BookingProduct = {
   datetime: '2025.09.21 (일) 오후 3시',
   location: '강남아트홀 1관',
   ticket: 2,
-  price: '570,000원',
+  price: '100,000원',
 }

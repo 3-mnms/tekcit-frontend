@@ -8,7 +8,7 @@ import TransferTicketInfo from '@/components/payment/refund/RefundTicketInfo'
 import TransferFeeInfo from '@/components/payment/transfer/TransferFeeInfo'
 import ConfirmModal from '@/components/common/modal/AlertModal'
 import PasswordInputModal from '@/components/payment/modal/PasswordInputModal'
-import { bookingTransfer } from '@/models/payment/BookingTransfer'
+import { bookingTransfer } from '@/models/payment/bookingTransfer'
 import { transferFee } from '@/models/payment/TransferFee'
 import WalletPayment from '@/components/payment/pay/WalletPayment'
 import TossPayment, { type TossPaymentHandle } from '@/components/payment/pay/TossPayment'
@@ -46,19 +46,6 @@ const TransferFeePaymentPage: React.FC = () => {
       // 킷페이(지갑): 안내 모달 → 비밀번호 모달
       setIsConfirmModalOpen(true)
       return
-    }
-
-    if (selectedMethod === 'toss') {
-      // 토스: redirectUrl로 ResultPage로 이동
-      setIsPaying(true)
-      try {
-        await tossRef.current?.requestPay()
-      } catch (e) {
-        console.error(e)
-        routeToResult(false)
-      } finally {
-        setIsPaying(false)
-      }
     }
   }
 
