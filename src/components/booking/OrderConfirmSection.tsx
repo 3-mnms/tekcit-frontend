@@ -1,22 +1,29 @@
 // src/components/booking/OrderConfirmSection.tsx
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import type { DeliveryMethod } from '@/components/booking/TicketDeliverySelectSection';
 import styles from './OrderConfirmSection.module.css';
+import { apiReserveTicket } from '@api/booking/bookingApi';
 
 type Props = {
   unitPrice: number;
   quantity: number;
-  method?: DeliveryMethod;   // 수령 방법
+  method?: DeliveryMethod;         // 'QR' | 'PAPER'
   festivalId?: string;
   posterUrl?: string;
   title?: string;
-  performanceDate?: string;  // YYYY-MM-DD
-  performanceTime?: string;  // HH:mm
+  performanceDate?: string;        // YYYY-MM-DD
+  performanceTime?: string;        // HH:mm
   bookerName?: string;
-  bookingId?: string;        // reservationId가 여기로 올 예정
+  bookingId?: string;              // reservationId(=reservationNumber)
   className?: string;
+};
+
+const toLocalDateTimeISO = (dateYmd?: string, timeHm?: string) => {
+  if (!dateYmd || !timeHm) return undefined;
+  const hhmmss = timeHm.length === 5 ? `${timeHm}:00` : timeHm; // HH:mm:ss 보장
+  return `${dateYmd}T${hhmmss}`;
 };
 
 const RESNO_KEY = 'reservationId';
@@ -36,50 +43,82 @@ const OrderConfirmSection: React.FC<Props> = ({
   className = '',
 }) => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const { total } = useMemo(() => {
     const subtotal = unitPrice * quantity;
     return { total: subtotal };
   }, [unitPrice, quantity]);
 
-  const handlePayClick = () => {
-    // ✅ bookingId 우선순위: props.bookingId > sessionStorage['reservationId']
+  const handlePayClick = async () => {
+    // bookingId 우선순위: props.bookingId > sessionStorage['reservationId']
     const ssResNo =
       (typeof window !== 'undefined' && sessionStorage.getItem(RESNO_KEY)) || undefined;
     const finalBookingId = bookingId ?? ssResNo;
 
-    // 필수 값 체크 (bookingId 없으면 진행 불가)
     if (!finalBookingId) {
       console.warn('[결제하기] bookingId 비어있음: props=', bookingId, 'session=', ssResNo);
       alert('결제 식별자(bookingId)를 찾을 수 없어요. 뒤로 가서 다시 시도해 주세요.');
       return;
     }
+    if (!festivalId) {
+      alert('공연 식별자(festivalId)가 없어요.');
+      return;
+    }
 
+    const performanceDateTime = toLocalDateTimeISO(performanceDate, performanceTime);
+    console.log("date랑 시간 : ", performanceDateTime);
+    if (!performanceDateTime) {
+      alert('공연 시작시간 형식이 올바르지 않아요.');
+      return;
+    }
+
+    // 결제/확인 화면에서도 쓸 payload
     const payload = {
       bookingId: finalBookingId,
       festivalId,
       posterUrl,
       title,
-      performanceDate,
-      performanceTime,
+      performanceDate,           // YYYY-MM-DD
+      performanceTime,           // HH:mm
       unitPrice,
       quantity,
       bookerName,
-      deliveryMethod: method,
-      total, // 참고로 합계도 같이 넣어둠
+      deliveryMethod: method ?? 'QR',
+      total,
     };
-
-    // 디버깅 로그
-    console.log('[결제하기 payload → /payment]', payload);
 
     // 새로고침 대비 저장
     try {
       sessionStorage.setItem(`payment:${finalBookingId}`, JSON.stringify(payload));
-      sessionStorage.setItem(RESNO_KEY, finalBookingId); // 예약번호 키에도 최신값 저장
+      sessionStorage.setItem(RESNO_KEY, finalBookingId);
     } catch {}
 
-    // /payment 이동
-    navigate('/payment', { state: payload });
+    // ✅ 최종 발권 API 요청 바디 (누락되었던 필드 추가!)
+    const req = {
+      festivalId: festivalId,
+      reservationNumber: String(finalBookingId),
+      performanceDate: performanceDateTime, // ex) "2025-09-23T17:00:00"
+      ticketCount: Number.isFinite(quantity) ? Number(quantity) : 1,
+      deliveryMethod: (method ?? 'QR') as 'QR' | 'PAPER',
+    };
+
+    console.log('[apiReserveTicket req]', req);
+
+    // ✅ 발권 API 호출 → 성공 시 /payment 이동
+    try {
+      if (loading) return;
+      setLoading(true);
+
+      await apiReserveTicket(req); // bookingApi.ts의 강화된 버전과 호환
+
+      navigate('/payment', { state: payload });
+    } catch (e: any) {
+      console.error('[발권 실패] /booking/qr', e?.response?.data || e);
+      alert(e?.response?.data?.message || '발권에 실패했어요. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -98,8 +137,13 @@ const OrderConfirmSection: React.FC<Props> = ({
         </div>
       </div>
 
-      <Button type="button" onClick={handlePayClick} className={styles.payButton}>
-        결제하기
+      <Button
+        type="button"
+        onClick={handlePayClick}
+        className={styles.payButton}
+        disabled={loading}
+      >
+        {loading ? '처리 중…' : '결제하기'}
       </Button>
     </section>
   );
