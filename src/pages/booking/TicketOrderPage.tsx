@@ -133,7 +133,7 @@ function buildCalendarData(detail: any, fdfrom?: string, fdto?: string) {
 
 // -------------------- page --------------------
 const TicketOrderPage: React.FC = () => {
-  const accessToken = useAuthStore((s) => s.accessToken)
+  const accessToken = useAuthStore((s) => s.accessToken) // ⚠️ 요청대로 그대로 유지!
   const navigate = useNavigate();
   const { fid: fidParam } = useParams<{ fid: string }>();
   const { state } = useLocation() as {
@@ -235,11 +235,18 @@ const TicketOrderPage: React.FC = () => {
     if (!selTime && serverSelectedTime) setSelTime(serverSelectedTime);
   }, [selDate, selTime, serverSelectedDate, serverSelectedTime]);
 
-  // 6) “다음” → selectDate로 예약번호 발급
+  // 6) “다음” → selectDate로 예약번호 발급 (부모에서만 호출)
   const selMut = useSelectDate();
+
+  // ✅ 더블클릭/중복 호출 방지 락
+  const clickLockRef = React.useRef(false);
+
   const handleNext = useCallback(
     async ({ date, time, quantity }: { date: Date; time: string; quantity: number }) => {
       if (!fid) return;
+      if (clickLockRef.current) return;   // 즉시 가드
+      clickLockRef.current = true;
+
       const payload: BookingSelect = {
         festivalId: fid,
         performanceDate: toLocalIsoString(date, time),
@@ -252,10 +259,30 @@ const TicketOrderPage: React.FC = () => {
 
       try {
         const res = await selMut.mutateAsync(payload);
-        navigate(`/booking/${fid}/order-info?res=${encodeURIComponent(res.data)}`, { replace: true });
+        // res가 문자열(예약번호) 또는 {data: 예약번호}인 케이스 모두 호환
+        const reservationNumber = typeof res === 'string' ? res : (res?.data ?? res);
+
+        // 세션 보강 (새로고침 대비)
+        try { sessionStorage.setItem('reservationId', reservationNumber); } catch {}
+
+        // 네비게이션 (기존 파라미터 키 유지: res)
+        navigate(`/booking/${fid}/order-info?res=${encodeURIComponent(reservationNumber)}`, {
+          replace: true,
+          state: {
+            fid,
+            dateYMD: ymd(date),
+            time,
+            quantity,
+            reservationNumber,
+            performanceDate: payload.performanceDate,
+            selectedTicketCount: quantity,
+          },
+        });
       } catch (e) {
         console.log("예약 오류", e);
         alert('예약번호 발급에 실패했어요. 잠시 후 다시 시도해주세요.');
+      } finally {
+        clickLockRef.current = false;     // 완료 후 해제
       }
     },
     [fid, navigate, selMut]

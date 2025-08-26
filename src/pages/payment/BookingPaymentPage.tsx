@@ -176,7 +176,10 @@ const BookingPaymentPage: React.FC = () => {
       const ensuredId = paymentId ?? createPaymentId()
       if (!paymentId) setPaymentId(ensuredId)
 
-      const userId = getUserIdSafely()
+      // ── 서버 사전요청에 필요한 도메인 값들(연동안 전 목데이터) 멍
+      const userId = getUserIdSafely()       // X-User-Id 헤더로 전달될 값 멍
+      const bookingId = 'BKG-20250822-01'    // 가예매/주문 ID(목) 멍
+      const sellerId = 2002                  // 판매자 ID(목) 멍
 
       setIsPaying(true)
       try {

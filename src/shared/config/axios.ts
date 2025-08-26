@@ -26,10 +26,23 @@ function unsetBearer(cfg: InternalAxiosRequestConfig) {
 }
 
 // 요청 인터셉터: Zustand에서 바로 토큰
+// ✅ 항상 주석 달기!
+// 요청 인터셉터: 이미 요청에 Authorization이 있으면 건드리지 않고, 없을 때만 Zustand 토큰을 붙임
 api.interceptors.request.use((cfg) => {
+  const headers = ensureAxiosHeaders(cfg.headers)
+
+  // 1) 요청에 이미 Authorization이 들어있다면(개별 API에서 직접 넣은 경우) 그대로 둔다
+  if (headers.has('Authorization')) {
+    return cfg
+  }
+
+  // 2) 그렇지 않다면 Zustand에서 accessToken을 가져와 붙인다
   const at = useAuthStore.getState().accessToken
-  if (at) setBearer(cfg, at)
-  else unsetBearer(cfg)
+  if (at) {
+    headers.set('Authorization', `Bearer ${at}`) // ✅ 토큰 자동 부착
+  }
+
+  cfg.headers = headers
   return cfg
 })
 
