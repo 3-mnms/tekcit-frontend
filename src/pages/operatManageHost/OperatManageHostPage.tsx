@@ -7,7 +7,7 @@ import Layout from '@components/layout/Layout';
 import AddModal from '@/components/operatManage/AddModal';
 import type {NewHostData} from '@/components/operatManage/AddModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getHosts, registerHost, toggleHostStatus } from '@/shared/api/admin/host';
+import { getHosts, registerHost, toggleHostStatus, deleteHosts } from '@/shared/api/admin/host';
 
 const OperatManageHostPage: React.FC = () => {
     const queryClient = useQueryClient();
@@ -32,11 +32,13 @@ const OperatManageHostPage: React.FC = () => {
             alert('호스트 등록에 실패했습니다.');
         },
     });
-
+    const handleSaveHost = (newHost: NewHostData) => {
+        registerHostMutation(newHost);
+    };
+    
     const { mutate: toggleStatusMutation } = useMutation({
         mutationFn: toggleHostStatus,
         onSuccess: () => {
-            // 성공하면 주최자 목록을 새로고침해서 변경된 상태를 바로 보여줘!
             queryClient.invalidateQueries({ queryKey: ['hosts'] });
             alert('계정 상태가 변경되었습니다.');
         },
@@ -53,8 +55,23 @@ const OperatManageHostPage: React.FC = () => {
         }
     };
 
-    const handleSaveHost = (newHost: NewHostData) => {
-        registerHostMutation(newHost);
+    const { mutate: deleteHostsMutation, isPending: isDeleting } = useMutation({
+        mutationFn: deleteHosts, // 우리가 만든 deleteHosts 함수를 사용!
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['hosts'] });
+            alert('선택한 항목이 삭제되었습니다.');
+            setSelectedHostIds([]); // 성공하면 선택 상태를 초기화!
+        },
+        onError: (error) => {
+            alert('삭제에 실패했습니다.');
+            console.error('주최자 삭제 실패:', error);
+        },
+    });
+
+    const handleDeleteSelected = () => {
+        if (window.confirm(`정말로 ${selectedHostIds.length}개의 항목을 삭제하시겠습니까?`)) {
+            deleteHostsMutation(selectedHostIds);
+        }
     };
 
     const filteredHosts = useMemo(() => {
@@ -72,8 +89,12 @@ const OperatManageHostPage: React.FC = () => {
     }, [hosts, searchTerm]);
 
     const totalUsers = hosts ? hosts.length : 0;
-    // const filteredTotal = filteredHosts.length;
 
+    const [selectedHostIds, setSelectedHostIds] = useState<(string | number)[]>([]);
+
+    const handleSelectionChange = (selectedIds: (string | number)[]) => {
+        setSelectedHostIds(selectedIds);
+    };
 
     // 삐약! 로딩 및 에러 상태를 처리하는 UI를 추가합니다!
     if (isLoading) {
@@ -95,9 +116,17 @@ const OperatManageHostPage: React.FC = () => {
                 </div>
                 {isFetching && <div className={styles.loadingIndicator}>주최자 목록을 가져오는 중...</div>}
                 <div className={styles.tableSection}>
-                    <HostList users={filteredHosts} onToggleStatus={handleToggleStatus} />
+                    <HostList users={filteredHosts} onToggleStatus={handleToggleStatus} onSelectionChange={handleSelectionChange} />
                 </div>
             </div>
+             {selectedHostIds.length > 0 && (
+                <div className={styles.floatingActionBar}>
+                    <span className={styles.selectedCount}>
+                        {selectedHostIds.length}개 선택됨
+                    </span>
+                    <Button onClick={handleDeleteSelected} variant="danger" disabled={isDeleting}>탈퇴하기</Button>
+                </div>
+            )}
             <AddModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
