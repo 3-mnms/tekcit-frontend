@@ -1,13 +1,12 @@
 import React from 'react';
-import Table from '@/components/shared/Table';
-import type { Column } from '@/components/shared/Table';
+import Table, {type Column} from '@/components/shared/Table';
 import ToggleSwitch from '@/components/operatManage/ToggleSwitch';
 import AddressDropdown from '@/components/operatManage/AddressDropdown';
-import { USERROLE, type User } from '@/models/admin/host/User';
+import { type User } from '@/models/admin/User';
 
 interface UserListProps {
     users: User[];
-    onToggleStatus: (userId: string, currentIsActive: boolean) => void;
+    onToggleStatus: (userId: number, currentIsActive: boolean) => void;
 }
 
 const UserList: React.FC<UserListProps> = ({ users, onToggleStatus }) => {
@@ -19,24 +18,17 @@ const UserList: React.FC<UserListProps> = ({ users, onToggleStatus }) => {
         { columnId: 'residentNum', label: '주민번호' },
         { columnId: 'birth', label: '생년월일' },
         { columnId: 'gender', label: '성별' },
-        { columnId: 'userProfile.address', label: '주소', render: (user) => (
-            <AddressDropdown addresses={user.userProfile?.address || []} />
+        { columnId: 'address', label: '주소', render: (user) => (
+            <AddressDropdown addresses={user.addresses.address || []} />
         )},
-        { columnId: 'loginPw', label: '비밀번호', render: (user) => (
-            user.loginPw ? `${user.loginPw.substring(0, 3)}****` : '********'
-        )},
-        { columnId: 'userProfile.isActive', label: '계정 상태', render: (user) => (
-            user.role === USERROLE.USER ? (
+        { columnId: 'active', label: '계정 상태', render: (user) => (
             <ToggleSwitch 
-                isActive={user.userProfile?.isActive}
-                onChange={() => onToggleStatus(user.loginId, user.userProfile?.isActive)}
+                isActive={user.active ?? false}
+                onChange={() => onToggleStatus(user.userId, user.active ?? false)}
             />
-            ) : (
-                <span>-</span>
-            )
         )},
     ];
-    return <Table columns={columns} data={users|| []} getUniqueKey={(item) => item.id} />;
+    return <Table columns={columns} data={users|| []} getUniqueKey={(item) => item.userId} />;
 };
 
 export default UserList;
