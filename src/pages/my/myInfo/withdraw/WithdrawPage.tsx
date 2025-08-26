@@ -1,15 +1,17 @@
+// src/pages/my/WithdrawPage.tsx
 import React, { useState } from 'react'
 import Button from '@/components/common/button/Button'
 import styles from './WithdrawPage.module.css'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { useDeleteAccountMutation } from '@/models/auth/tanstack-query/useDeleteAccount'
-import { tokenStore } from '@/shared/storage/tokenStore'
+import { useAuthStore } from '@/shared/storage/useAuthStore' // ✅ 추가
 
 const WithdrawPage: React.FC = () => {
   const [checked, setChecked] = useState(false)
   const navigate = useNavigate()
   const delMut = useDeleteAccountMutation()
+  const logout = useAuthStore((s) => s.logout) // ✅ 토큰/유저/로그인 상태 초기화
 
   const handleWithdraw = () => {
     if (!checked || delMut.isPending) return
@@ -17,7 +19,7 @@ const WithdrawPage: React.FC = () => {
 
     delMut.mutate(undefined, {
       onSuccess: () => {
-        tokenStore.clear() 
+        logout() 
         alert('회원 탈퇴 처리되었습니다.')
         navigate('/login', { replace: true })
       },
@@ -37,8 +39,8 @@ const WithdrawPage: React.FC = () => {
       <div className={styles.noticeBox}>
         <p className={styles.notice}>
           - 탈퇴 시 모든 계정 정보가 삭제되며 복구가 불가능합니다. <br />
-          - 보유한 티켓 및 예매 정보 또한 함께 삭제됩니다. <br />- 탈퇴 후 90일 이내에는 동일한
-          이메일로 재가입이 가능하지만, 이후에는 제한될 수 있습니다.
+          - 보유한 티켓 및 예매 정보 또한 함께 삭제됩니다. <br />
+          - 탈퇴 후 90일 이내에는 동일한 이메일로 재가입이 가능하지만, 이후에는 제한될 수 있습니다.
         </p>
       </div>
 

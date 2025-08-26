@@ -6,15 +6,17 @@
 
 .wrapper {
   display: flex;
-  align-items: flex-start; 
-  padding: 2.5rem 2.5rem;
-  gap: 5rem;
-  margin-left: 10rem;
+  align-items: flex-start;
+  padding: 2.5rem 10vw; 
+  gap: 4rem;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 1440px;    
+  margin: 0 auto;      
 }
 
 .content {
   flex: 1;
-  min-width: 0; 
+  min-width: 0;
   background-color: #fff;
-  margin-right: 10rem;
 }

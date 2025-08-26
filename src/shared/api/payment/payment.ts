@@ -1,4 +1,4 @@
-import { api } from '@/shared/api/axios'
+import { api } from '@/shared/config/axios'
 
 /** 서버 공통 응답 래퍼 타입 */
 type SuccessResponse<T> = { data: T; message?: string }

@@ -105,7 +105,7 @@ const KakaoSignupPage: React.FC = () => {
                 {(signupMut.error as Error)?.message || '회원가입에 실패했어요.'}
               </p>
             )}
-            {signupMut.isPending && <p className="mt-2 text-sm">가입 처리 중…</p>}
+            {/* {signupMut.isPending && <p className="mt-2 text-sm">가입 처리 중…</p>} */}
           </>
         )}
 

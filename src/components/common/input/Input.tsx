@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styles from './Input.module.css'
+import { FaEye, FaEyeSlash } from 'react-icons/fa6'
 
 interface FormInputProps {
   type?: string
@@ -8,7 +9,7 @@ interface FormInputProps {
   defaultValue?: string
   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
   label?: string
-  options?: string[] // select용
+  options?: string[]
   disabled?: boolean
   className?: string
   rightElement?: React.ReactNode
@@ -26,6 +27,31 @@ const Input: React.FC<FormInputProps> = ({
   className = '',
   rightElement,
 }) => {
+  const [showPassword, setShowPassword] = useState(false)
+  const isPasswordField = type === 'password'
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev)
+  }
+
+  const renderRightElement = () => {
+    if (rightElement) return rightElement
+
+    if (isPasswordField) {
+      const Icon = showPassword ? FaEye : FaEyeSlash
+      return (
+        <Icon
+          className={styles.eyeIcon}
+          onClick={togglePasswordVisibility}
+        />
+      )
+    }
+
+    return null
+  }
+
+  const inputType = isPasswordField ? (showPassword ? 'text' : 'password') : type
+
   return (
     <div className={styles.field}>
       {label && <label className={styles.label}>{label}</label>}
@@ -42,29 +68,19 @@ const Input: React.FC<FormInputProps> = ({
             </option>
           ))}
         </select>
-      ) : rightElement ? (
+      ) : (
         <div className={styles.row}>
           <input
-            type={type}
+            type={inputType}
+            placeholder={placeholder}
             value={value}
             defaultValue={defaultValue}
             onChange={onChange}
             disabled={disabled}
             className={`${styles.input} ${className}`}
-            placeholder={placeholder}
           />
-          {rightElement}
+          {renderRightElement()}
         </div>
-      ) : (
-        <input
-          type={type}
-          placeholder={placeholder}
-          value={value}
-          defaultValue={defaultValue}
-          onChange={onChange}
-          disabled={disabled}
-          className={`${styles.input} ${className}`}
-        />
       )}
     </div>
   )

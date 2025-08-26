@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
-import ReservationFilter from '@/components/my/ticket/ReservationFilter';
-import ReservationTable from '@/components/my/ticket/ReservationTable';
-import styles from './TicketHistoryPage.module.css';
+import React, { useState } from 'react'
+import ReservationFilter from '@/components/my/ticket/ReservationFilter'
+import ReservationTable from '@/components/my/ticket/ReservationTable'
+import styles from './TicketHistoryPage.module.css'
 
 const TicketHistoryPage: React.FC = () => {
-  const [startDate, setStartDate] = useState<Date | null>(null); 
-  const [endDate, setEndDate] = useState<Date | null>(null); 
+  const [startDate, setStartDate] = useState<Date | null>(null)
+  const [endDate, setEndDate] = useState<Date | null>(null)
 
-  const [filteredStartDate, setFilteredStartDate] = useState<Date | null>(null);
-  const [filteredEndDate, setFilteredEndDate] = useState<Date | null>(null);
+  const [filteredStartDate, setFilteredStartDate] = useState<Date | null>(null)
+  const [filteredEndDate, setFilteredEndDate] = useState<Date | null>(null)
+
+  const [statusFilter, setStatusFilter] = useState<string>('전체') // 👈 상태 필터 추가
 
   const handleSearch = () => {
-    setFilteredStartDate(startDate);
-    setFilteredEndDate(endDate);
-  };
+    setFilteredStartDate(startDate)
+    setFilteredEndDate(endDate)
+  }
 
   return (
     <div className={styles.container}>
@@ -25,9 +27,30 @@ const TicketHistoryPage: React.FC = () => {
         onChangeEndDate={setEndDate}
         onSearch={handleSearch}
       />
-      <ReservationTable startDate={filteredStartDate} endDate={filteredEndDate} />
-    </div>
-  );
-};
 
-export default TicketHistoryPage;
+      <div className={styles.statusFilterWrapper}>
+        <select
+          id="statusFilter"
+          className={styles.statusSelect}
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="" disabled>
+            예매 상태
+          </option>{' '}
+          <option value="전체">전체</option>
+          <option value="결제 완료">결제 완료</option>
+          <option value="취소 완료">취소 완료</option>
+        </select>
+      </div>
+
+      <ReservationTable
+        startDate={filteredStartDate}
+        endDate={filteredEndDate}
+        statusFilter={statusFilter} 
+      />
+    </div>
+  )
+}
+
+export default TicketHistoryPage

@@ -9,8 +9,13 @@ interface BaseProps extends React.InputHTMLAttributes<HTMLInputElement> {
   buttonText?: string
   onButtonClick?: () => void
   buttonDisabled?: boolean
+  buttonClassName?: string
+  rightSlot?: React.ReactNode
+  success?: string
   error?: string
   touched?: boolean
+  /** ✅ 추가: 행을 가로 auto로(= 옆에 요소 둘 수 있게) */
+  inline?: boolean
 }
 
 const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
@@ -22,10 +27,14 @@ const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
       buttonText,
       onButtonClick,
       buttonDisabled = false,
+      buttonClassName = '',
+      rightSlot,
       type = 'text',
       error,
+      success,
       touched,
       readOnly,
+      inline = false,
       ...inputProps
     },
     ref,
@@ -34,22 +43,27 @@ const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
     const isPassword = type === 'password'
     const inputType = isPassword ? (showPassword ? 'text' : 'password') : type
 
-    const showError = !!error && !!touched
-    const showSuccess = !!touched && !error
+    const isTouched = Boolean(touched)
+    const showError = !!error && isTouched
+    const showSuccess = (isTouched && !error) || !!success
 
     return (
-      <div className={`${styles.row} ${hasButton ? styles.hasButtonRow : ''}`}>
+      <div
+        className={[
+          styles.row,
+          hasButton ? styles.hasButtonRow : '',
+          inline ? styles.inlineRow : '',
+        ].join(' ')}
+      >
         <div
           className={[
             styles.inputWrapper,
             showError ? styles.invalid : '',
-            showSuccess ? styles.valid : '',
-            readOnly 
-              ? '!bg-gray-100 rounded-md cursor-not-allowed border border-gray-100'
-              : '',
+            showSuccess && !showError ? styles.valid : '',
+            readOnly ? '!bg-gray-100 rounded-md cursor-not-allowed border border-gray-100' : '',
           ].join(' ')}
         >
-          <div className={`${styles.left}`}>
+          <div className={styles.left}>
             {icon}
             <span className={styles.bar}>&nbsp;|</span>
           </div>
@@ -59,11 +73,13 @@ const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
             type={inputType}
             placeholder={placeholder}
             readOnly={readOnly}
-            className={`${styles.input} ${readOnly  ? 'bg-gray-100 border-none text-gray-600' : ''}`}
+            className={`${styles.input} ${readOnly ? 'bg-gray-100 border-none text-gray-600' : ''}`}
             aria-invalid={showError}
             aria-describedby={showError ? `${inputProps.name}-error` : undefined}
             {...inputProps}
           />
+
+          {rightSlot && <div className={styles.rightSlot}>{rightSlot}</div>}
 
           {isPassword && (
             <button
@@ -87,18 +103,20 @@ const SignupInputField = forwardRef<HTMLInputElement, BaseProps>(
               type="button"
               onClick={onButtonClick}
               disabled={buttonDisabled}
-              className="w-[95px] h-[44px] text-sm"
+              className={`w-[95px] h-[44px] text-sm ${buttonClassName}`}
             >
               {buttonText}
             </Button>
           </div>
         )}
 
-        {showError && (
+        {showError ? (
           <p id={`${inputProps.name}-error`} className={styles.errorText}>
             {error}
           </p>
-        )}
+        ) : success ? (
+          <p className={styles.successText}>{success}</p>
+        ) : null}
       </div>
     )
   },

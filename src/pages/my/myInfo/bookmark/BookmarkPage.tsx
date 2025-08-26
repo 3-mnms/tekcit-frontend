@@ -20,7 +20,6 @@ const BookmarkPage: React.FC = () => {
     <div className={styles.pageWrapper}>
       <h2 className={styles.title}>북마크</h2>
       <div className={styles.cardContainer}>
-        <p className={styles.subTitle}>관심 공연</p>
         <div className={styles.cardList}>
           {bookmarks.map((item) => (
             <BookmarkCard

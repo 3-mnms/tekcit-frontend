@@ -13,8 +13,8 @@ const MyInfoPage: React.FC = () => {
       <MyInfoCardItem label="사용자명(기본정보)" onClick={() => navigate('/mypage/myinfo/detail')} />
 
       <div className={styles.group}>
-        <MyInfoCardItem label="비밀번호 변경" onClick={() => navigate('/mypage/myinfo/password')} />
-        <MyInfoCardItem label="연결된 계정" onClick={() => navigate('/mypage/myinfo/account')} />
+        <MyInfoCardItem label="비밀번호 변경" onClick={() => navigate('/mypage/myinfo/changepassword')} />
+        {/* <MyInfoCardItem label="연결된 계정" onClick={() => navigate('/mypage/myinfo/account')} /> */}
         <MyInfoCardItem label="배송지 관리" onClick={() => navigate('/mypage/myinfo/address')} />
       </div>
 

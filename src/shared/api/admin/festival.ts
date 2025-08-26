@@ -1,7 +1,7 @@
 import type { Festival } from '@/models/admin/festival';
 // import { dummyProducts } from '@/models/dummy/dummyProducts';
 import type { TicketHolderType } from '@/models/admin/User';
-import { api } from '@/shared/api/axios';
+import { api } from '@/shared/config/axios';
 
 
 // 공연 조회
