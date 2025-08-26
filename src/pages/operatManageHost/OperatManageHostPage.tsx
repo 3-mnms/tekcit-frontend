@@ -7,7 +7,7 @@ import Layout from '@components/layout/Layout';
 import AddModal from '@/components/operatManage/AddModal';
 import type {NewHostData} from '@/components/operatManage/AddModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getHosts, registerHost } from '@/shared/api/admin/host';
+import { getHosts, registerHost, toggleHostStatus } from '@/shared/api/admin/host';
 
 const OperatManageHostPage: React.FC = () => {
     const queryClient = useQueryClient();
@@ -34,13 +34,24 @@ const OperatManageHostPage: React.FC = () => {
         },
     });
 
+    const { mutate: toggleStatusMutation } = useMutation({
+        mutationFn: toggleHostStatus,
+        onSuccess: () => {
+            // 성공하면 주최자 목록을 새로고침해서 변경된 상태를 바로 보여줘!
+            queryClient.invalidateQueries({ queryKey: ['hosts'] });
+            alert('계정 상태가 변경되었습니다.');
+        },
+        onError: (error) => {
+            console.error('상태 변경 실패:', error);
+            alert('계정 상태 변경에 실패했습니다.');
+        },
+    });
+
     const handleToggleStatus = (userId: string, currentIsActive: boolean) => {
         const newIsActive = !currentIsActive;
-        console.log(`${userId} 계정을 ${newIsActive ? '활성화' : '정지'}하시겠습니까?`);
-    
-    // 예시: API 호출
-    // useMutation 훅을 이용해 계정 상태 변경 API를 호출하는 로직이 들어갈 수 있어요.
-    // toggleHostStatusMutation.mutate({ userId, newIsActiveStatus });
+        if (window.confirm(`정말로 계정을 ${newIsActive ? '활성화' : '정지'}하시겠습니까?`)) {
+            toggleStatusMutation({ userId, isActive: newIsActive });
+        }
     };
 
     const handleSaveHost = (newHost: NewHostData) => {

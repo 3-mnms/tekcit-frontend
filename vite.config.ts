@@ -61,6 +61,10 @@ export default defineConfig({
         target: 'http://localhost:10000',
         changeOrigin: true,
       },
+      '/api/admin': {
+        target: 'http://localhost:10000',
+        changeOrigin: true,
+      },
       '/api/mail': {
         target: 'http://localhost:10000',
         changeOrigin: true,
@@ -81,6 +85,7 @@ export default defineConfig({
       '/api/payments': {
         target: 'http://localhost:8081',
       },
+
     },
   },
 })
