@@ -1,6 +1,6 @@
 // src/shared/api/festival/FestivalApi.ts
 import { api } from '@/shared/config/axios'             // ✅ 공용 axios 인스턴스
-import type { Festival, FestivalDetail } from '@models/festival/FestivalType'
+import type { Festival, FestivalDetail } from '@/models/festival/festivalType'
 
 type SuccessResponse<T> = { data: T; message?: string }
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styles from './HotSection.module.css';
-import type { Festival, FestivalWithViews } from '@models/festival/FestivalType';
-import { getFestivals, getFestivalViews } from '@/shared/api/festival/FestivalApi';
+import type { Festival, FestivalWithViews } from '@/models/festival/festivalType';
+import { getFestivals, getFestivalViews } from '@/shared/api/festival/festivalApi';
 import { useParams, Link } from 'react-router-dom'; // ✅ 추가!
 
 // ✅ 라우트 슬러그 -> 그룹 카테고리

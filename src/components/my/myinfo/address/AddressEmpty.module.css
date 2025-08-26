@@ -1,0 +1,30 @@
+.emptyCard {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.emptyTitle {
+  font-weight: 700;
+  font-size: 16px;
+}
+.emptyDesc {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.addInlineBtn {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+}
+.addInlineBtn:active {
+  transform: translateY(1px);
+}

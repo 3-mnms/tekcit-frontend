@@ -4,9 +4,8 @@ import { useAuthStore } from '@/shared/storage/useAuthStore'
 import { getEnv } from '@/shared/config/env'
 
 const API_URL = getEnv('API_URL', '') + '/api'
-
 export const api = axios.create({
-  baseURL:           API_URL,
+  baseURL: API_URL,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 })
@@ -21,7 +20,7 @@ function setBearer(cfg: InternalAxiosRequestConfig, token: string) {
 }
 function unsetBearer(cfg: InternalAxiosRequestConfig) {
   const headers = ensureAxiosHeaders(cfg.headers)
-  try { (headers as AxiosHeaders).delete?.('Authorization') } catch {}
+  try { (headers as AxiosHeaders).delete?.('Authorization') } catch { }
   delete (headers as any).Authorization
   cfg.headers = headers
 }

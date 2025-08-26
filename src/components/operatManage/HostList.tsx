@@ -1,16 +1,17 @@
 import React from 'react';
 import Table, {type Column} from '@/components/shared/Table';
 import ToggleSwitch from '@/components/operatManage/ToggleSwitch';
-import { USERROLE, type User } from '@/models/admin/host/User';
+import {type User } from '@/models/admin/User';
 
 interface HostListProps  {
     users: User[];
-    onToggleStatus: (id: string, currentIsActive: boolean) => void;
+    onToggleStatus: (userId: number, currentIsActive: boolean) => void;
+    onSelectionChange?: (selectedIds: (string | number)[]) => void;
 }
 
-const HostList: React.FC<HostListProps > = ({ users, onToggleStatus }) => {
+const HostList: React.FC<HostListProps > = ({ users, onToggleStatus, onSelectionChange}) => {
     const handleToggleStatus = (user: User, currentIsActive: boolean) => {
-        onToggleStatus(user.loginId, currentIsActive);
+        onToggleStatus(user.userId, currentIsActive);
     };
     
     const columns: Column<User>[] = [ 
@@ -18,23 +19,16 @@ const HostList: React.FC<HostListProps > = ({ users, onToggleStatus }) => {
         { columnId: 'loginId', label: '아이디' },
         { columnId: 'phone', label: '전화번호' },
         { columnId: 'email', label: '이메일' },
-        { columnId: 'hostProfile.businessName', label: '사업자명', render: (user) => user.hostProfile?.businessName },
-        { columnId: 'loginPw', label: '비밀번호', render: (user) => (
-            user.loginPw ? `${user.loginPw.substring(0, 3)}****` : '********'
-        )},
-        { columnId: 'hostProfile.isActive', label: '계정 상태', render: (user) => (
-            user.role === USERROLE.HOST ? (
-                <ToggleSwitch 
-                    isActive={user.hostProfile?.isActive}
-                    onChange={() => handleToggleStatus(user, user.hostProfile?.isActive)}
-                />
-            ) : (
-                <span>-</span>
-            )
+        { columnId: 'businessName', label: '사업자명'},
+        { columnId: 'active', label: '계정 상태', render: (user) => (
+            <ToggleSwitch 
+                isActive={user.active ?? false}
+                onChange={() => handleToggleStatus(user, user.active ?? false)}
+            />
         )},
     ];
 
-    return <Table columns={columns} data={users|| []}  getUniqueKey={(item) => item.id} />;
+    return <Table columns={columns} data={users|| []}  getUniqueKey={(item) => item.userId} isSelectable={true}  onSelectionChange={onSelectionChange} />;
 };
 
 export default HostList;

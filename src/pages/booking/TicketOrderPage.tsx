@@ -5,7 +5,8 @@ import styles from './TicketOrderPage.module.css';
 import TicketOrderSection from '@/components/booking/TicketOrderSection';
 
 import { useSelectDate, usePhase1Detail } from '@/models/booking/tanstack-query/useBookingDetail';
-import type { BookingSelect } from '@/models/booking/BookingTypes';
+import type { BookingSelect } from '@/models/booking/bookingTypes';
+import { useAuthStore } from '@/shared/storage/useAuthStore' 
 
 // -------------------- utils --------------------
 const pad2 = (n: number) => String(n).padStart(2, '0');
@@ -132,6 +133,7 @@ function buildCalendarData(detail: any, fdfrom?: string, fdto?: string) {
 
 // -------------------- page --------------------
 const TicketOrderPage: React.FC = () => {
+  const accessToken = useAuthStore((s) => s.accessToken)
   const navigate = useNavigate();
   const { fid: fidParam } = useParams<{ fid: string }>();
   const { state } = useLocation() as {

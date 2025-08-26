@@ -13,27 +13,32 @@ interface TableProps<T extends object> {
     onRowClick?: (item: T) => void;
     isSelectable?: boolean; 
     getUniqueKey: (item: T) => string | number;
+    onSelectionChange?: (selectedIds: (string | number)[]) => void;
 }
 
-const Table = <T extends object>({ columns, data, onRowClick, getUniqueKey, isSelectable = false }: TableProps<T>) => {
-    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+const Table = <T extends object>({ columns, data, onRowClick, getUniqueKey, isSelectable = false, onSelectionChange }: TableProps<T>) => {
+    const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
+
+    React.useEffect(() => {
+        onSelectionChange?.(selectedIds);
+    }, [selectedIds, onSelectionChange]);
 
     const safeData = Array.isArray(data) ? data : [];
 
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
-            const allIds = safeData.map(item => (item as { id: number }).id as number);
+            const allIds = safeData.map(item => getUniqueKey(item));
             setSelectedIds(allIds);
         } else {
             setSelectedIds([]);
         }
     };
 
-    const handleSelectOne = (id: number) => {
-        if (selectedIds.includes(id)) {
-            setSelectedIds(selectedIds.filter(itemId => itemId !== id));
+    const handleSelectOne = (key: string | number) => {
+        if (selectedIds.includes(key)) {
+            setSelectedIds(selectedIds.filter(itemId => itemId !== key));
         } else {
-            setSelectedIds([...selectedIds, id]);
+            setSelectedIds([...selectedIds, key]);
         }
     };
 
@@ -62,25 +67,29 @@ const Table = <T extends object>({ columns, data, onRowClick, getUniqueKey, isSe
                     </tr>
                 </thead>
                 <tbody>
-                    {safeData.map(item => (
-                        <tr key={getUniqueKey(item)} onClick={() => onRowClick?.(item)}
-                        className={onRowClick ? styles.clickableRow : ''}
-                    >   {isSelectable && (
-                            <td key={`${(item as { id: string | number }).id}-checkbox`} className={styles.td}>
-                                <input
-                                    type="checkbox"
-                                    onChange={() => handleSelectOne((item as { id: number }).id)}
-                                    checked={selectedIds.includes((item as { id: number }).id)}
-                                />
-                            </td>
-                        )}
-                        {columns.map(column => (
-                            <td key={`${getUniqueKey(item)}-${String(column.columnId)}`}> 
-                                {column.render ? column.render(item) : (item[column.columnId as keyof T] as React.ReactNode)}
-                            </td>
-                        ))}
-                        </tr>
-                    ))}
+                    {safeData.map(item => {
+                        const key = getUniqueKey(item);
+                        return (
+                            <tr key={key} onClick={() => onRowClick?.(item)}
+                                className={onRowClick ? styles.clickableRow : ''}
+                            >
+                                {isSelectable && (
+                                    <td key={`${key}-checkbox`} className={styles.td}>
+                                        <input
+                                            type="checkbox"
+                                            onChange={() => handleSelectOne(key)}
+                                            checked={selectedIds.includes(key)}
+                                        />
+                                    </td>
+                                )}
+                                {columns.map(column => (
+                                    <td key={`${key}-${String(column.columnId)}`}> 
+                                        {column.render ? column.render(item) : (item[column.columnId as keyof T] as React.ReactNode)}
+                                    </td>
+                                ))}
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>

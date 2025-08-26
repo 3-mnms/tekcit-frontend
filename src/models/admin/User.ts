@@ -6,41 +6,27 @@ export const USERROLE = {
 
 export type UserRole = typeof USERROLE[keyof typeof USERROLE];
 export interface Address {
+    name: string;
+    phone: string;
     address: string;
-    is_primary: boolean; 
+    zipCode: string;
+    default: boolean;
 }
 
 export interface BaseUser {
-    id: number;
+    userId: number; 
     loginId: string;
-    loginPw: string;
+    loginPw?: string;
     name: string;
     phone: string;
     email: string;
     role: UserRole;
-    userProfile?: UserProfile;
-    hostProfile?: HostProfile;
 }
 
-export type User =
-    | (BaseUser & { role: typeof USERROLE.HOST; hostProfile: HostProfile; userProfile?: undefined })
-    | (BaseUser & { role: typeof USERROLE.USER; userProfile: UserProfile; hostProfile?: undefined })
-    | (BaseUser & { role: typeof USERROLE.ADMIN; hostProfile?: undefined; userProfile?: undefined });
-
-export interface UserProfile{
-    age: number;
-    residentNum: string; // 주민번호
-    birth: string;  
-    gender: 'male' | 'female';
-    address: Address[];
-    isActive: boolean; 
-}
-
-export interface HostProfile{
-    businessName: string;
-    isActive: boolean; 
-}
-
+export type User = (BaseUser & {role: typeof USERROLE.HOST; businessName: string; active: boolean;
+}) | (BaseUser & {role: typeof USERROLE.USER; residentNum: string; birth: string; gender: 'MALE' | 'FEMALE';  addresses: Address[];  active: boolean;
+}) | (BaseUser & {role: typeof USERROLE.ADMIN;
+});
 
 export interface TicketHolderType {
     id: number; 

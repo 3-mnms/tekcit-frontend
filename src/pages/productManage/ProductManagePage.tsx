@@ -7,8 +7,8 @@ import Table, {type Column} from '@/components/shared/Table';
 import Button from '@/components/common/Button';
 import styles from './ProductManagePage.module.css';
 
-import { getProducts } from '@/shared/api/admin/host/festival';
-import type { Festival } from '@/models/admin/host/festival';
+import { getProducts } from '@/shared/api/admin/festival';
+import type { Festival } from '@/models/admin/festival';
 
 const ProductManagePage: React.FC = () => {
     const navigate = useNavigate();

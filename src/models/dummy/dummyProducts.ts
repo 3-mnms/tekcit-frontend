@@ -1,4 +1,4 @@
-import type { ProductType } from '@/models/admin/host/festival'; 
+import type { ProductType } from '@/models/admin/festival'; 
 
 // 삐약! ProductType을 사용해서 더미 데이터를 만듭니다!
 export const dummyProducts: ProductType[] = [

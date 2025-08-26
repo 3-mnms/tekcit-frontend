@@ -1,6 +1,6 @@
-import type { Festival } from '@/models/admin/host/festival';
+import type { Festival } from '@/models/admin/festival';
 // import { dummyProducts } from '@/models/dummy/dummyProducts';
-import type { TicketHolderType } from '@/models/admin/host/User';
+import type { TicketHolderType } from '@/models/admin/User';
 import { api } from '@/shared/config/axios';
 
 

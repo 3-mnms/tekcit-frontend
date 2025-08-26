@@ -22,7 +22,7 @@ const dummyTickets: Ticket[] = [
     time: '2025.10.18 17:00',
     count: 2,
     status: '결제 완료',
-    imageUrl: '/images/poster-1.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1497032205916-ac775f0649ae?w=200&h=280&fit=crop',
     isTransferred: false,
   },
   {
@@ -33,7 +33,7 @@ const dummyTickets: Ticket[] = [
     time: '2025.11.10 19:30',
     count: 1,
     status: '결제 완료',
-    imageUrl: '/images/poster-2.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1497032205916-ac775f0649ae?w=200&h=280&fit=crop',
     isTransferred: true,
   },
 ]
@@ -52,30 +52,34 @@ const TransferTicketPage: React.FC = () => {
         {visibleTickets.map((ticket) => (
           <div key={ticket.id} className={styles.card}>
             <img src={ticket.imageUrl} alt={`${ticket.title} 포스터`} className={styles.poster} />
-            <div className={styles.info}>
-              <p>
-                <strong>예매일</strong>: {ticket.date}
-              </p>
-              <p>
-                <strong>예매번호</strong>: {ticket.number}
-              </p>
-              <p>
-                <strong>공연명</strong>: {ticket.title}
-              </p>
-              <p>
-                <strong>일시</strong>: {ticket.time}
-              </p>
-              <p>
-                <strong>매수</strong>: {ticket.count}
-              </p>
+            <div className={styles.details}>
+              <div className={styles.info}>
+                <p>
+                  <strong>예매일</strong>: {ticket.date}
+                </p>
+                <p>
+                  <strong>예매번호</strong>: {ticket.number}
+                </p>
+                <p>
+                  <strong>공연명</strong>: {ticket.title}
+                </p>
+                <p>
+                  <strong>일시</strong>: {ticket.time}
+                </p>
+                <p>
+                  <strong>매수</strong>: {ticket.count}
+                </p>
+              </div>
+              <div className={styles.buttonWrapper}>
+                {ticket.isTransferred ? (
+                  <span className={styles.transferredBadge}>양도 완료됨</span>
+                ) : (
+                  <button className={styles.transferBtn} onClick={() => handleTransfer(ticket.id)}>
+                    양도하기
+                  </button>
+                )}
+              </div>
             </div>
-            {ticket.isTransferred ? (
-              <span className={styles.transferredBadge}>양도 완료됨</span>
-            ) : (
-              <button className={styles.transferBtn} onClick={() => handleTransfer(ticket.id)}>
-                양도하기
-              </button>
-            )}
           </div>
         ))}
       </div>
