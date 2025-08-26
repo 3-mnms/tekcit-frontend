@@ -158,8 +158,7 @@ const TicketOrderSection: React.FC<Props> = ({
       };
 
       // 서버 호출 (reservationNumber 수신)
-      const res = await selectDateMut.mutateAsync(body);
-      const reservationNumber = res.data; // 서버가 { data: "예약번호" }로 응답한다고 가정
+      const reservationNumber = await selectDateMut.mutateAsync(body);
 
       // 이동 경로
       const defaultPath = `/booking/${fid}/order-info`;
