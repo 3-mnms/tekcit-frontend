@@ -1,7 +1,7 @@
 import React from 'react';
 import DatePicker from 'react-datepicker';
 // ✅ date-fns는 개별 로케일을 default import로 쓰는 게 안정적
-import ko from 'date-fns/locale/ko';
+import { ko } from 'date-fns/locale/ko';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
@@ -9,7 +9,7 @@ import styles from './TicketOrderSection.module.css';
 
 // ✅ 1차 API 훅 (reservationNumber 받는 용도)
 import { useSelectDate } from '@/models/booking/tanstack-query/useBookingDetail';
-import type { BookingSelect } from '@/models/booking/BookingTypes';
+import type { BookingSelect } from '@/models/booking/bookingTypes';
 
 type NextPayload = {
   fid?: string;

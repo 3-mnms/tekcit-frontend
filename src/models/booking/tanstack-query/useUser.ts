@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getPreReservation } from '@/shared/api/booking/userApi';
-import type { PreReservationDTO, ApiSuccessResponse } from '@/models/booking/UserType';
+import type { PreReservationDTO, ApiSuccessResponse } from '@/models/booking/userType';
 
 export const preReservationKeys = {
   all: ['users', 'preReservation'] as const,
