@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getFestivalCategories } from '@shared/api/festival/FestivalApi'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
 import UserDropdown from '@/pages/my/dropdown/UserDropdown'
+import { useAuthStore } from '@/shared/storage/useAuthStore' 
 import '@fortawesome/fontawesome-free/css/all.min.css'
 
 const CATEGORY_ORDER = ['무용', '대중음악', '뮤지컬/연극', '복합', '클래식/국악', '서커스/마술']
@@ -25,6 +26,7 @@ const Header: React.FC = () => {
   const [keyword, setKeyword] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const accessToken = useAuthStore((s) => s.accessToken)
 
   const { data: tokenInfo, isLoading } = useTokenInfoQuery()
   const isStaff = tokenInfo?.role === 'ADMIN' || tokenInfo?.role === 'HOST'

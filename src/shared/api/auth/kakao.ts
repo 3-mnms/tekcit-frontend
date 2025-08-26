@@ -1,5 +1,5 @@
 // src/shared/api/auth/kakao.ts
-import { api } from '@/shared/api/axios';
+import { api } from '@/shared/config/axios';
 import type { KakaoSignupDTO } from '@/models/auth/schema/kakaoSignupSchema';
 
 export interface ApiErrorPayload {

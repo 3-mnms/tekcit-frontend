@@ -1,4 +1,5 @@
-import { tokenStore } from '@/shared/storage/tokenStore'
+// src/models/auth/admin/session-utils.ts (예시 경로)
+import { useAuthStore } from '@/shared/storage/useAuthStore' 
 import { parseJwt } from '@/shared/storage/jwt'
 
 export type JwtRole = 'USER' | 'HOST' | 'ADMIN'
@@ -17,14 +18,19 @@ export function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n))
 }
 
-export function remainingSecondsFromLS(maxUiSec: number = MAX_UI_SEC): number {
-  const token = tokenStore.get()
+/**
+ * 현재 메모리(Zustand)에 있는 accessToken의 exp로부터 남은 시간을 계산
+ * 토큰이 없거나 exp가 없으면 maxUiSec으로 대체
+ */
+export function remainingSecondsFromStore(maxUiSec: number = MAX_UI_SEC): number {
+  const token = useAuthStore.getState().accessToken // ✅ 메모리에서 직접
   if (!token) return maxUiSec
 
   const decoded = parseJwt<JwtPayload>(token)
   if (decoded?.exp) {
-    const left = Math.floor(decoded.exp * 1000 - Date.now()) / 1000
-    return clamp(Math.floor(left), 0, maxUiSec)
+    const leftMs = decoded.exp * 1000 - Date.now()
+    const leftSec = Math.floor(leftMs / 1000)
+    return clamp(leftSec, 0, maxUiSec)
   }
   return maxUiSec
 }

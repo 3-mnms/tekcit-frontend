@@ -1,10 +1,11 @@
+// src/components/admin/layout/Header.tsx (예시 경로)
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './Header.module.css'
 import logo from '@shared/assets/manager_logo.png'
 import { IoLogOutOutline } from 'react-icons/io5'
 
-import { tokenStore } from '@/shared/storage/tokenStore'
+import { useAuthStore } from '@/shared/storage/useAuthStore' 
 import { useSessionTimer } from '@/models/auth/admin/useSessionTimer'
 import { formatSeconds } from '@/models/auth/admin/session-utils'
 
@@ -15,10 +16,12 @@ interface HeaderProps {
 
 const AdminHeader: React.FC<HeaderProps> = ({ userName, onLogout, ...props }) => {
   const navigate = useNavigate()
+  const accessToken = useAuthStore((s) => s.accessToken)
+  const logout = useAuthStore((s) => s.logout)
 
   const handleLogout = () => {
-    tokenStore.clear()                
-    onLogout()
+    logout()
+    onLogout?.()
     navigate('/login', { replace: true })
   }
 
