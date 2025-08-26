@@ -28,3 +28,11 @@ export const toggleHostStatus = async ({ userId, isActive }: { userId: number; i
     },
   });
 };
+
+export const deleteHosts = async (hostIds: (string | number)[]) => {
+  const deletePromises = hostIds.map(userId =>
+    api.delete(`/admin/${userId}`)
+  );
+
+  await Promise.all(deletePromises);
+};
