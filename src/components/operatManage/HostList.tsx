@@ -27,7 +27,7 @@ const HostList: React.FC<HostListProps > = ({ users, onToggleStatus }) => {
         )},
     ];
 
-    return <Table columns={columns} data={users|| []}  getUniqueKey={(item) => item.userId} />;
+    return <Table columns={columns} data={users|| []}  getUniqueKey={(item) => item.userId} isSelectable={true}  />;
 };
 
 export default HostList;
