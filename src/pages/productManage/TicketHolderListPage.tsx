@@ -29,13 +29,13 @@ const TicketHolderListPage: React.FC = () => {
 
     // 삐약! Table 컴포넌트에 넘겨줄 columns를 정의합니다!
     const columns: Column<TicketHolderType>[] = [
-        { columnId: 'reservation_number', label: '예매번호' },
-        { columnId: 'name', label: '이름' },
-        { columnId: 'maxPurchase', label: '티켓 수량' },
-        { columnId: 'phone', label: '전화번호' },
-        { columnId: 'delivery_method', label: '수령 방법' },
+        { columnId: 'reservationNumber', label: '예매번호' },
+        { columnId: 'userName', label: '이름' },
+        { columnId: 'selectedTicketCount', label: '티켓 수량' },
+        { columnId: 'phoneNumber', label: '전화번호' },
+        { columnId: 'deliveryMethod', label: '수령 방법' },
         { columnId: 'address', label: '주소' },
-        { columnId: 'festival_date', label: '페스티벌 날짜' },
+        { columnId: 'performanceDate', label: '페스티벌 날짜' },
     ];
 
     if (isLoading) {
@@ -53,7 +53,7 @@ const TicketHolderListPage: React.FC = () => {
     return (
         <Layout subTitle={`예매자 명단`}>
             <div className={styles.container}>
-                <Table<TicketHolderType> columns={columns} data={attendees} />
+                <Table<TicketHolderType> columns={columns} data={attendees} getUniqueKey={(attendee) => attendee.reservationNumber} />
                 <div className={styles.buttonWrapper}>
                     <Button onClick={() => navigate(-1)}>뒤로가기</Button>
                 </div>

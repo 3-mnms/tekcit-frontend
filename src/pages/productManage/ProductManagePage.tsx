@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query'; 
 import Layout from '@/components/layout/Layout';
@@ -15,7 +15,7 @@ const ProductManagePage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const { 
-        data: products, 
+        data: allProducts,
         isLoading, 
         isError,
     } = useQuery({
@@ -34,6 +34,17 @@ const ProductManagePage: React.FC = () => {
             }));
         }
     });
+
+    const filteredProducts = useMemo(() => {
+        const lowercasedTerm = searchTerm.toLowerCase();
+        if (!allProducts) return [];
+        if (!lowercasedTerm) return allProducts; 
+
+        return allProducts.filter(product =>
+            product.fname?.toLowerCase().includes(lowercasedTerm) ||
+            product.detail?.entrpsnmH?.toLowerCase().includes(lowercasedTerm)
+        );
+    }, [allProducts, searchTerm]);
 
     // 삐약! 이 부분에서 상품 클릭 시 상세 페이지로 이동합니다!
     const handleRowClick = (item: Festival) => {
@@ -72,7 +83,6 @@ const ProductManagePage: React.FC = () => {
         },
     ];
 
-    // 삐약! 로딩 및 에러 상태를 처리하는 UI를 추가합니다!
     if (isLoading) {
         return <Layout subTitle="상품 관리"><div>삐약! 상품 목록을 불러오는 중...</div></Layout>;
     }
@@ -80,7 +90,6 @@ const ProductManagePage: React.FC = () => {
     if (isError) {
         return <Layout subTitle="상품 관리"><div>삐약! 오류가 발생했어요. 다시 시도해 주세요.</div></Layout>;
     }
-
 
     return (
         <Layout subTitle="상품 관리 ">
@@ -93,7 +102,7 @@ const ProductManagePage: React.FC = () => {
                 </div>
                 <Table 
                     columns={columns} 
-                    data={products || []}
+                    data={filteredProducts}
                     onRowClick={handleRowClick}
                     getUniqueKey={(item) => item.fid}
                 />
