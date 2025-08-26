@@ -5,7 +5,7 @@ import styles from './TicketOrderPage.module.css';
 import TicketOrderSection from '@/components/booking/TicketOrderSection';
 
 import { useSelectDate, usePhase1Detail } from '@/models/booking/tanstack-query/useBookingDetail';
-import type { BookingSelect } from '@/models/booking/bookingTypes';
+import type { BookingSelect } from '@/models/booking/rbookingTypes';
 
 // -------------------- utils --------------------
 const pad2 = (n: number) => String(n).padStart(2, '0');
