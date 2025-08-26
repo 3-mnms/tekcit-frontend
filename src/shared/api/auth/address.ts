@@ -1,5 +1,5 @@
 // src/shared/api/user/address.ts
-import { api } from '@/shared/api/axios'
+import { api } from '@/shared/config/axios'
 
 /** 서버 응답 공통 래퍼 */
 type ApiResponse<T> = {

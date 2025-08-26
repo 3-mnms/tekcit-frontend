@@ -2,9 +2,8 @@ import { defineConfig } from 'vite'
 import path from 'path';
 
 import react from '@vitejs/plugin-react'
-import { getEnv } from './src/shared/config/env'
 
-const API_URL = getEnv('API_URL', '')
+const API_URL = 'http://localhost:10000'
 
 // https://vite.dev/config/
 export default defineConfig({
