@@ -14,6 +14,8 @@ const TicketHolderListPage: React.FC = () => {
     const { fid } = useParams<{ fid: string }>();
     const navigate = useNavigate();
 
+     console.log('1. API에 전달할 최종 fid:', fid);
+     
     const [searchTerm, setSearchTerm] = useState('');
     const { data: attendees, isLoading, isError } = useQuery({
         queryKey: ['attendees', fid],

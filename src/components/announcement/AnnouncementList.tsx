@@ -25,7 +25,7 @@ const AnnouncementList: React.FC<Props> = ({ announcements, onDelete, onEdit }) 
           <tr key={a.fid}>
             <td>{a.fname}</td>
             <td>{a.title}</td>
-            <td>{a.sentTime}</td>
+            <td>{a.sendTime}</td>
             <td className={styles.actions}>
               <Button onClick={() => onEdit(a)}>수정</Button>
               <Button onClick={() => onDelete(a.fid)}>삭제</Button>

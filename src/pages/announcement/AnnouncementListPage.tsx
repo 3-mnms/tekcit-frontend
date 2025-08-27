@@ -1,66 +1,58 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import SearchBar from '@/components/common/SearchBox';
 import AnnouncementList from '@/components/announcement/AnnouncementList';
 import AnnouncementModal from '@/components/announcement/AnnouncementModal';
 import styles from './AnnouncementListPage.module.css';
 import type { Announcement } from '@/models/admin/Announcement';
+import { getAnnouncements, updateAnnouncement, deleteAnnouncement, createAnnouncement } from '@/shared/api/admin/announcement';
 import Button from '@/components/common/Button';
 
-
-const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
-  {
-    id: 1,
-    genre: '콘서트',
-    title: '무료 물 나눔 장소',
-    content: '정문 부스에서 나눔 예정입니다.',
-    createdAt: '2025-07-25 14:00',
-  },
-  {
-    id: 2,
-    genre: '페스티벌',
-    title: '현장 부스 운영 안내',
-    content: '운영 시간: 12시~20시까지',
-    createdAt: '2025-07-22 10:00',
-  },
-  {
-    id: 3,
-    genre: '뮤지컬',
-    title: '티켓 예매 일정 변경',
-    content: '예매 오픈: 2025-08-01',
-    createdAt: '2025-07-20 18:30',
-  },
-];
-
 const AnnouncementListPage: React.FC = () => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<Announcement | null>(null);
 
-  const fetchFromLocalStorage = () => {
-    const stored = localStorage.getItem('announcements');
-    if (stored) {
-      setAnnouncements(JSON.parse(stored));
-    } else {
-      localStorage.setItem('announcements', JSON.stringify(DEFAULT_ANNOUNCEMENTS));
-      setAnnouncements(DEFAULT_ANNOUNCEMENTS);
+
+  const { data: announcements, isLoading, isError } = useQuery({
+    queryKey: ['announcements'],
+    queryFn: getAnnouncements,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: (announcement: Announcement) => 
+        editTarget ? updateAnnouncement(announcement) : createAnnouncement(announcement),
+    onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['announcements'] });
+        alert(editTarget ? '공지사항이 수정되었습니다.' : '공지사항이 등록되었습니다.');
+        handleModalClose();
+    },
+    onError: (error) => {
+        console.error("저장/수정 실패:", error);
+        alert('작업에 실패했습니다.');
     }
-  };
+  });
 
-  useEffect(() => {
-    fetchFromLocalStorage();
-  }, []);
+  const deleteMutation = useMutation({
+    mutationFn: deleteAnnouncement,
+    onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['announcements'] });
+        alert('공지사항이 삭제되었습니다.');
+    },
+    onError: (error) => {
+        console.error("삭제 실패:", error);
+        alert('삭제에 실패했습니다.');
+    }
+  });
 
-  const handleDelete = (id: number) => {
-    const target = announcements.find((a) => a.id === id);
-    const confirmDelete = window.confirm(`'${target?.title}' 공지를 삭제하시겠습니까?`);
-    if (!confirmDelete) return;
-
-    const updated = announcements.filter((a) => a.id !== id);
-    setAnnouncements(updated);
-    localStorage.setItem('announcements', JSON.stringify(updated));
-  };
+  const handleDelete = (scheduleId: number) => {
+        const target = announcements?.find((a) => a.scheduleId === scheduleId);
+        if (window.confirm(`'${target?.title}' 공지를 삭제하시겠습니까?`)) {
+            deleteMutation.mutate(scheduleId);
+        }
+    };
 
   const handleEdit = (announcement: Announcement) => {
     setEditTarget(announcement);
@@ -72,9 +64,19 @@ const AnnouncementListPage: React.FC = () => {
     setEditTarget(null);
   };
 
-  const filtered = announcements.filter(
-    (a) => a.genre.includes(searchTerm) || a.title.includes(searchTerm),
-  );
+  const handleSave = (announcementData: Announcement) => {
+    saveMutation.mutate(announcementData);
+    };
+
+  const filtered = useMemo(() => {
+    if (!announcements) return [];
+    return announcements.filter(
+        (a) => a.fname?.includes(searchTerm) || a.title.includes(searchTerm)
+    );
+  }, [announcements, searchTerm]);
+
+  if (isLoading) return <Layout subTitle="공지사항 목록"><div>로딩 중...</div></Layout>;
+  if (isError) return <Layout subTitle="공지사항 목록"><div>에러 발생!</div></Layout>;
 
   return (
     <Layout subTitle="공지사항 목록">
@@ -105,7 +107,7 @@ const AnnouncementListPage: React.FC = () => {
         <AnnouncementModal
           isOpen={isModalOpen}
           onClose={handleModalClose}
-          onSave={fetchFromLocalStorage}
+          onSave={handleSave}
           editTarget={editTarget}
         />
       </div>

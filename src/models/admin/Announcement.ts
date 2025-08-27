@@ -1,10 +1,12 @@
 export interface Announcement {
-  fid: string;
-  fname: string;
+  scheduleId: number;
   title: string;
-  content?: string;
+  body: string;
+  sendTime: string;
+  sent: boolean;
+  fid: string;
   startAt: string;
-  sentTime: string;
+  fname: string;
 }
 
 export interface Props {
