@@ -93,8 +93,8 @@ const ProductDetailPage: React.FC = () => {
                     <p>관람 연령: {product.detail.prfage}</p>
                     <p>공연장: {product.fcltynm}</p>
                     <p>공연장 주소: {product.detail.faddress}</p>
-                    <p>공연 시작일: {product.fdto}</p>
-                    <p>공연 종료일: {product.fdfrom}</p>
+                    <p>공연 시작일: {product.fdfrom}</p>
+                    <p>공연 종료일: {product.fdto}</p>
                     {product.schedules && product.schedules.length > 0 && (
                         <p>공연 스케줄: 
                             <span className={styles.scheduleTags}>
