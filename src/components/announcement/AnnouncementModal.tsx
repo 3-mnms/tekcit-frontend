@@ -60,12 +60,11 @@ const AnnouncementModal: React.FC<Props> = ({ isOpen, onClose, onSave, editTarge
   const [selectedFestivalId, setSelectedFestivalId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  // ✅ 삐약! 발송 예약 날짜와 시간을 위한 새로운 상태!
   const [dispatchDate, setDispatchDate] = useState('');
   const [dispatchTime, setDispatchTime] = useState('');
 
   const { data: festivals, isLoading: isLoadingFestivals } = useQuery({
-      queryKey: ['allFestivalsForNotice'],
+      queryKey: ['products'],
       queryFn: () => getProducts(),
       enabled: isOpen,
       select: (response) => response.data,
