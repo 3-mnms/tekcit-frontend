@@ -9,7 +9,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;   
   className?: string; // 너비/높이 tailwind로 조정 가능
   disabled?: boolean;
-  type?: 'button';
+  type?: 'button' | 'submit';
 }
 
 const Button: React.FC<ButtonProps> = ({

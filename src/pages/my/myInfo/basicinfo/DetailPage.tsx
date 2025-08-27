@@ -13,8 +13,6 @@ const DetailPage: React.FC = () => {
     email: 'a@example.com',
   }
 
-  // DetailPage.tsx 중 일부 구조 예시
-
   return (
     <section className={styles.container}>
       <h2 className={styles.title}>기본정보</h2>
