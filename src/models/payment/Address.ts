@@ -1,10 +1,8 @@
 // 📄 models/payment/Address.ts
-
-// 배송지 타입 정의
 export interface Address {
   id: number
-  name: string       // ✅ 사용자 이름
-  phone: string      // ✅ 전화번호
+  name: string    
+  phone: string     
   address1: string
   address2: string
   isDefault: boolean

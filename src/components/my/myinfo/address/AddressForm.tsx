@@ -13,21 +13,19 @@ const AddressForm: React.FC = () => {
   const [address, setAddress] = useState('')
   const [addressDetail, setAddressDetail] = useState('')
   const [phone, setPhone] = useState('')
-  const [isDefault, setIsDefault] = useState(false) // 서버에서 기본설정은 별도 API, 이 값은 로컬 UI만
+  const [isDefault, setIsDefault] = useState(false) 
   const [openPostcode, setOpenPostcode] = useState(false)
 
   const addMut = useAddAddressMutation()
   const navigate = useNavigate()
 
   const handleSubmit = async () => {
-    // 최소 유효성
     if (!name || !phone || !zonecode || !address) {
       alert('필수 정보를 입력해주세요.')
       return
     }
 
-    // 서버 DTO에는 addressDetail이 없으므로, 필요 시 address에 합쳐서 보냄
-    const fullAddress = addressDetail ? `${address} ${addressDetail}` : address
+    const fullAddress = addressDetail ? `${address}, ${addressDetail}` : address
 
     try {
       await addMut.mutateAsync({
@@ -35,14 +33,10 @@ const AddressForm: React.FC = () => {
         phone,
         zipCode: zonecode,
         address: fullAddress,
+        isDefault,  
       })
-      if (isDefault) {
-        // 새로 생성된 주소의 id를 모르면 기본설정 호출 불가.
-        // 현재 스펙상 AddressDTO에 id가 없으므로, 기본설정은 목록에서 선택 후 처리로 유도.
-        // (리스트로 돌아가서 방금 추가한 항목의 "기본설정" 버튼을 눌러 처리하는 UX)
-      }
       alert('주소가 저장되었습니다.')
-      navigate('/my/info/addresses') // 실제 경로에 맞게 수정
+      navigate('/mypage/info/addresses') 
     } catch (e: any) {
       alert(e?.message ?? '주소 저장에 실패했어요.')
     }

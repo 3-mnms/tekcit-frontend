@@ -1,0 +1,111 @@
+.container {
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 640px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.panel {
+  border: 1px solid #b4b4b4;
+  border-radius: 16px;
+  background: #fff;
+  padding: 1.5rem;
+}
+
+.form > div {
+  /* 공용 Input.module.css의 .field margin-bottom(1.25rem)을 덮어씀 */
+  margin: 0 0 0.5rem 0 !important;  /* ← 원하는 값(0.4~0.6rem)으로 조절 */
+}
+
+/* 마지막 요소는 하단 여백 제거 */
+.form > div:last-child {
+  margin-bottom: 0 !important;
+}
+
+.addressGroup > div {
+  margin: 0 0 0.5rem 0 !important;
+}
+.addressGroup > div:last-child {
+  margin-bottom: 0 !important;
+}
+
+.label {
+  font-weight:400;
+}
+
+.phoneInput {
+  flex: 1;
+  margin-top: -0.5rem;
+}
+
+.addressRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.zonecodeInput {
+  flex: 1;
+}
+.searchButton {
+  white-space: nowrap;
+  padding: 0.6rem 1rem;
+}
+
+.addressInput {
+  flex: 1;
+  margin-top: -0.5rem;
+}
+
+.detailInput {
+  flex: 1;
+  margin-top: -0.5rem;
+}
+
+
+.checkboxLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #333;
+  user-select: none;
+}
+.checkboxLabel input[type="checkbox"] {
+  accent-color: #4D9AFD;
+  width: 1rem;
+  height: 1rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.actionButton {
+  width: 50%;
+}
+
+.errorText {
+  color: #ef4444;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.fullButton { width: 100%; }
+
+.skeleton {
+  width: 100%;
+  height: 320px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  0% { opacity: 0.55; }
+  50% { opacity: 1; }
+  100% { opacity: 0.55; }
+}

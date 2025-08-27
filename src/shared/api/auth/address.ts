@@ -1,7 +1,6 @@
 // src/shared/api/user/address.ts
 import { api } from '@/shared/config/axios'
 
-/** 서버 응답 공통 래퍼 */
 type ApiResponse<T> = {
   success: boolean
   data: T
@@ -27,9 +26,11 @@ export type AddressRequestDTO = {
   zipCode: string
   name: string
   phone: string
+  isDefault: boolean
 }
 
 export type AddressDTO = {
+  id: number
   name: string
   phone: string
   address: string
@@ -37,23 +38,51 @@ export type AddressDTO = {
   isDefault: boolean
 }
 
+const normalizeAddress = (raw: any): AddressDTO => ({
+  id: raw.id,
+  name: raw.name,
+  phone: raw.phone,
+  address: raw.address,
+  zipCode: raw.zipCode,
+  isDefault: ('isDefault' in raw) ? Boolean(raw.isDefault) : Boolean(raw.default),
+})
+
+/** ⬇️ 전송 정규화: 서버가 기대하는 키 이름으로 변경 */
+const toServerPayload = (p: AddressRequestDTO) => ({
+  name: p.name,
+  phone: p.phone,
+  zipCode: p.zipCode,
+  address: p.address,
+  // 핵심: isDefault 대신 default 로 보냄
+  default: p.isDefault,
+})
+
 export const getAddresses = async (): Promise<AddressDTO[]> => {
-  const { data } = await api.get('/addresses/allAddress')
-  if (!data || typeof data !== 'object') return []
+  const { data } = await api.get<ApiResponse<AddressDTO[]>>('/addresses/allAddress')
   return unwrap<AddressDTO[]>(data, [])
 }
 
+export const getDefaultAddress = async (): Promise<AddressDTO | null> => {
+  const { data } = await api.get<ApiResponse<AddressDTO | null>>('/addresses/defaultAddress')
+  return unwrap<AddressDTO | null>(data, null)
+}
+
+export const getAddressById = async (addressId: number): Promise<AddressDTO> => {
+  const { data } = await api.get<ApiResponse<AddressDTO>>(`/addresses/${addressId}`)
+  return unwrap<AddressDTO>(data)
+}
+
 export const addAddress = async (payload: AddressRequestDTO): Promise<AddressDTO> => {
-  const { data } = await api.post<ApiResponse<AddressDTO>>('/addresses', payload)
-  return unwrap(data)
+  const { data } = await api.post<ApiResponse<any>>('/addresses', toServerPayload(payload))
+  return normalizeAddress(data?.data ?? data)
 }
 
 export const updateAddress = async (addressId: number, payload: AddressRequestDTO): Promise<AddressDTO> => {
-  const { data } = await api.patch<ApiResponse<AddressDTO>>(
+  const { data } = await api.patch<ApiResponse<any>>(
     `/addresses/updateAddress/${addressId}`,
-    payload
+    toServerPayload(payload)
   )
-  return unwrap(data)
+  return normalizeAddress(data?.data ?? data)
 }
 
 export const changeDefaultAddress = async (addressId: number): Promise<AddressDTO> => {
