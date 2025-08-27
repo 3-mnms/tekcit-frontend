@@ -1,3 +1,4 @@
+// src/shared/api/booking/bookingApi.ts
 import { api } from '@/shared/config/axios'
 import type {
   BookingSelect,
@@ -7,33 +8,35 @@ import type {
   BookingDetail,
 } from '@/models/booking/bookingTypes'
 
-/** 공통 응답 Envelope */
+/** 공통 응답 타입 */
 type Ok<T>  = { success: true; data: T; message?: string }
 type Err    = { success: false; errorCode?: string; errorMessage?: string; message?: string }
 type ApiEnvelope<T> = Ok<T> | Err
 type ApiResponse<T> = ApiEnvelope<T> | T
 
-function unwrap<T>(payload: ApiResponse<T>): T {
+/** 바디 있는 응답용(unwrapped data 반환) */
+export function unwrap<T>(payload: ApiResponse<T>): T {
   if (payload && typeof payload === 'object' && 'success' in (payload as any)) {
     const p = payload as ApiEnvelope<T>
-    if (p.success === true) {
-      // ✅ data === null/undefined여도 성공으로 간주
-      return (p as any).data as T
-    }
-    throw new Error(
-      (p as Err).errorMessage ||
-      (p as Err).message ||
-      (p as Err).errorCode ||
-      'Request failed'
-    )
+    if (p.success === true) return (p as any).data as T // data null 허용
+    const e = p as Err
+    throw new Error(e.errorMessage || e.message || e.errorCode || 'Request failed')
   }
-  // success-envelope가 아니라면 원본을 그대로 반환(백엔드가 생바디일 수도)
-  if (payload === undefined || payload === null) {
-    // 과거 로직은 오류로 처리했지만, 성공 200에 빈 바디인 경우도 허용
-    return (null as unknown) as T
-  }
+  // envelope가 아니면 원본 반환
   return payload as T
 }
+
+/** 바디 없는 성공 응답용(void) */
+export function unwrapVoid(payload: any): void {
+  if (payload && typeof payload === 'object' && 'success' in payload) {
+    if (payload.success === true) return
+    const e = payload as Err
+    throw new Error(e.errorMessage || e.message || e.errorCode || 'Request failed')
+  }
+  // 200 이면서 envelope 아님 → OK
+}
+
+/** ===== Phase / Details ===== */
 
 /** 1차 상세 */
 export async function apiGetPhase1Detail(req: BookingSelect): Promise<FestivalDetail> {
@@ -53,56 +56,44 @@ export async function apiSelectDate(req: BookingSelect): Promise<string> {
   return unwrap(res.data) // reservationNumber
 }
 
-/** 수령 방법/주소 선택 (MOBILE | PAPER)  */
-export async function apiSelectDelivery(req: BookingSelectDelivery): Promise<null> {
-  // 주의: req.deliveryMethod 는 'MOBILE' | 'PAPER'
-  const res = await api.post<ApiResponse<null>>('/booking/selectDeliveryMethod', req)
-  return unwrap(res.data)
+/** ===== Delivery / Issue ===== */
+
+/** UI → BE 수령방법 매퍼: 'QR' | 'PAPER' → 'MOBILE' | 'PAPER' */
+export const mapUiDeliveryToBE = (v: 'QR' | 'PAPER'): 'MOBILE' | 'PAPER' =>
+  v === 'QR' ? 'MOBILE' : 'PAPER'
+
+/** 수령 방법/주소 선택 */
+export async function apiSelectDelivery(req: BookingSelectDelivery): Promise<void> {
+  const res = await api.post('/booking/selectDeliveryMethod', req)
+  unwrapVoid(res.data)
 }
 
-/** QR 발권 직전(3차) - /booking/qr 는 아래 3필드만! */
+/** QR 발권 직전(3차) - /booking/qr 는 3필드만! */
 export type IssueQrRequest = {
   festivalId: string
   reservationNumber: string            // ex) 'TE3167730'
   performanceDate: string              // 'YYYY-MM-DDTHH:mm:ss' (LocalDateTime)
 }
 
-function assertIssueQr(req: IssueQrRequest) {
-  const miss: string[] = []
-  if (!req.festivalId) miss.push('festivalId')
-  if (!req.reservationNumber) miss.push('reservationNumber')
-  if (!req.performanceDate) miss.push('performanceDate')
-  if (miss.length) throw new Error(`/booking/qr missing fields: ${miss.join(', ')}`)
-}
-
 /** 3차 예매 완료(결제 직전) */
-export async function apiReserveTicket(req: IssueQrRequest): Promise<null> {
-  assertIssueQr(req)
-
-  const body = {
-    festivalId: req.festivalId,
-    reservationNumber: req.reservationNumber,
-    performanceDate: req.performanceDate,
-  }
-
+export async function apiReserveTicket(req: IssueQrRequest): Promise<void> {
   const idem = (globalThis.crypto?.randomUUID?.() ?? String(Date.now()))
-
   try {
-    const res = await api.post<ApiResponse<null>>('/booking/qr', body, {
+    const res = await api.post('/booking/qr', {
+      festivalId: req.festivalId,
+      reservationNumber: req.reservationNumber,
+      performanceDate: req.performanceDate,
+    }, {
       headers: {
         'Idempotency-Key': idem,
         'Content-Type': 'application/json',
       },
     })
-    return unwrap(res.data)
+    unwrapVoid(res.data)
   } catch (e: any) {
     console.error('[QR 4xx/5xx] status=', e?.response?.status)
-    console.error('[QR 4xx/5xx] request body=', body)
+    console.error('[QR 4xx/5xx] request body=', req)
     console.error('[QR 4xx/5xx] response body=', e?.response?.data ?? e?.message)
     throw e
   }
 }
-
-/** UI → BE 수령방법 매퍼: 'QR' | 'PAPER'  →  'MOBILE' | 'PAPER' */
-export const mapUiDeliveryToBE = (v: 'QR' | 'PAPER'): 'MOBILE' | 'PAPER' =>
-  v === 'QR' ? 'MOBILE' : 'PAPER'

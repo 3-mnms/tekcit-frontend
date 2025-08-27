@@ -23,7 +23,6 @@ type Props = {
   performanceTime?: string;        // HH:mm
   bookerName?: string;
   bookingId?: string;              // reservationId(=reservationNumber)
-  address?: string;                // PAPER일 때 사용
   className?: string;
 };
 
@@ -47,7 +46,6 @@ const OrderConfirmSection: React.FC<Props> = ({
   performanceTime,
   bookerName,
   bookingId,
-  address,
   className = '',
 }) => {
   const navigate = useNavigate();
@@ -75,32 +73,30 @@ const OrderConfirmSection: React.FC<Props> = ({
     }
 
     const performanceDateTime = toLocalDateTimeISO(performanceDate, performanceTime);
-    console.log('date랑 시간 : ', performanceDateTime);
     if (!performanceDateTime) {
       alert('공연 시작시간 형식이 올바르지 않아요.');
       return;
     }
 
-    // 결제/확인 화면에서도 쓸 payload
+    // ✅ 결제 페이지로 넘길 payload (시간 포함 / total 제거)
     const payload = {
       bookingId: finalBookingId,
       festivalId,
       posterUrl,
       title,
-      performanceDate,           // YYYY-MM-DD
-      performanceTime,           // HH:mm
+      performanceDate: performanceDateTime, // full datetime
       unitPrice,
       quantity,
       bookerName,
       deliveryMethod: method ?? 'QR',
-      total,
-      address,
     };
 
-    // 새로고침 대비 저장
+    // ✅ navigate 전에 반드시 보이는 로그 + 세션 백업
+    console.log('[결제하기 payload → /payment][PRE-SEND]', payload);
     try {
       sessionStorage.setItem(`payment:${finalBookingId}`, JSON.stringify(payload));
       sessionStorage.setItem(RESNO_KEY, finalBookingId);
+      sessionStorage.setItem('payment:last', JSON.stringify(payload));
     } catch {}
 
     if (loading) return;
@@ -109,12 +105,14 @@ const OrderConfirmSection: React.FC<Props> = ({
     try {
       // 1) 수령방법/주소 먼저 설정 (서버가 예약번호로 매수 등 조회한다고 가정)
       const delivery = mapUiDeliveryToBE((method ?? 'QR') as 'QR' | 'PAPER'); // 'QR' -> 'MOBILE'
+      console.time('[selectDelivery]');
       await apiSelectDelivery({
         festivalId: festivalId!,
         reservationNumber: String(finalBookingId),
         deliveryMethod: delivery,   // 'MOBILE' | 'PAPER'
-        address,                    // PAPER일 경우만 의미, 서버에서 optional 처리
       });
+      console.timeEnd('[selectDelivery]');
+      console.log('[selectDelivery] OK');
 
       // 2) 그 다음 QR 발권 (/booking/qr : 3필드만)
       const req: IssueQrRequest = {
@@ -123,9 +121,13 @@ const OrderConfirmSection: React.FC<Props> = ({
         performanceDate: performanceDateTime, // ex) "2025-09-23T17:00:00"
       };
       console.log('[apiReserveTicket req]', req);
+      console.time('[reserveTicket]');
       await apiReserveTicket(req);
+      console.timeEnd('[reserveTicket]');
+      console.log('[reserveTicket] OK');
 
-      // 성공 시 결제 페이지 이동
+      // ✅ 페이지 이동 직전에도 한 번 더 찍기
+      console.log('[navigate → /payment][STATE]', payload);
       navigate('/payment', { state: payload });
     } catch (e: any) {
       console.error('[발권 실패] /booking/selectDeliveryMethod 또는 /booking/qr', e?.response?.data || e);
