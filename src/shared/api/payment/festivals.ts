@@ -1,8 +1,3 @@
-// 📄 src/shared/api/festival.ts 멍
-// - FestivalController 상세 조회 전용(조회만 필요하다고 해서 슬림 버전) 멍
-// - 공통 axios 인스턴스: import { api } from '@/shared/api/axios'
-// - 응답 포맷: SuccessResponse<FestivalRegisterResponseDTO> → res.data.data 언랩 후 프론트 DTO로 매핑 멍
-
 import { api } from '@/shared/config/axios'
 
 /** ✅ 서버 공통 래퍼(주소록 예시와 동일 패턴) 멍 */

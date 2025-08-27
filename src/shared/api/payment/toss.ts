@@ -1,19 +1,22 @@
+// 예매 결제 api 호출
+
 import { api } from '@/shared/config/axios'
 
 /** 결제 사전요청 멍 */
 export const paymentRequest = async (
-  paymentId: string,   // 결제ID(프론트 생성) 멍
-  bookingId: string,   // 가예매ID 멍
-  festivalId: string,  // 공연ID 멍
-  sellerId: number,    // 판매자ID 멍
-  amount: number,      // 금액 멍
-  userId: number,      // 로그인 사용자 ID (X-User-Id 헤더로 전달) 멍
+  paymentId: string,   // 결제ID (프론트에서 생성함)
+  bookingId: string,   // 가예매ID 
+  festivalId: string,  // 공연ID 
+  sellerId: number,    // 판매자ID
+  amount: number,      // 금액
+  // buyerId가 userId로 되기 때문에 따로 안적음; X-User-Id 헤더로 덮어씌워짐
+  userId: number,      // 로그인 사용자 ID
 ) => {
   const body = {
     paymentId,
     bookingId,
     festivalId,
-    eventType: 'Payment_Requested', // ✅ 백엔드 enum 값에 맞춤 멍
+    eventType: 'Payment_Requested', // 백엔드 enum 값에 맞춤
     sellerId,
     amount,
     currency: 'KRW',
@@ -31,7 +34,7 @@ export const paymentRequest = async (
   if (res.status < 200 || res.status >= 300) {
     throw new Error(`paymentRequest 실패: ${res.status}`)
   }
-  return res.data // 백엔드 응답 스키마는 상위에서 해석 멍
+  return res.data // 백엔드 응답 스키마는 상위에서 해석
 }
 
 /** 결제 승인 확인(간단 재시도 3회: 2/4/6초) */

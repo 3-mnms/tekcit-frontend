@@ -13,7 +13,6 @@ import AlertModal from '@/components/common/modal/AlertModal'
 import PaymentSection from '@/components/payment/pay/PaymentSection'
 import type { CheckoutState, PaymentMethod } from '@/models/payment/types/paymentTypes'
 import { createPaymentId, getUserIdSafely } from '@/models/payment/utils/paymentUtils'
-import { usePaymentSession } from '@/models/payment/hooks/paymentSession'
 import styles from './BookingPaymentPage.module.css'
 
 // 5분
@@ -22,40 +21,42 @@ const DEADLINE_SECONDS = 5 * 60
 const BookingPaymentPage: React.FC = () => {
   const navigate = useNavigate()
 
-  // (1) 라우터 state 획득 ─ 결제에 필요한 ㅇ기본 정보
+  // (1) 라우터 state 획득 ─ 결제에 필요한 기본 정보
   const { state } = useLocation()
   const checkout = state as CheckoutState | undefined
 
   // (2) 파생값 계산 ─ 클라이언트 백업용 금액 계산 등
   const unitPrice = checkout?.unitPrice ?? 0
   const quantity = checkout?.quantity ?? 0
-
-  // 계산 금액은 amountClient로 명시(세션 금액이랑 이름 충돌 나서 변경함)
   const amountClient = useMemo(() => unitPrice * quantity, [unitPrice, quantity])
   const orderName = useMemo(() => checkout?.title || '티켓 예매', [checkout?.title])
   const festivalIdVal = checkout?.festivalId ?? ''
 
-  // 수령방법 세팅(QR/DELIVERY) ─ 타입 호환 멍
+  // 수령 방법 (기본값: QR)
   const receiveTypeRaw = checkout?.deliveryMethod ?? 'QR'
   const receiveTypeVal: ReceiveType = receiveTypeRaw === 'DELIVERY' ? 'DELIVERY' : 'QR'
 
-  // (3) 서버 세션(확정 금액/아이디 등) ─ 서버 값이 우선 멍
-  const {
-    bookingId,
-    sellerId,
-    isLoading: isSessionLoading,
-    error: sessionErr,
-  } = usePaymentSession({
-    festivalId: festivalIdVal,
-    unitPrice,
-    quantity,
-    deliveryMethod: receiveTypeVal,
-    title: orderName,
-  })
+  // (3) 초기 진입 가드 ─ 필수 데이터 없으면 알림 후 이전 화면/홈으로 이동
+  useEffect(() => {
+    // ✅ 필수 값들 체크: bookingId/sellerId는 예매 단계에서 생성/확보되어 state로 전달된다고 가정
+    const hasEssential =
+      !!checkout &&
+      !!checkout.festivalId &&
+      !!checkout.bookingId &&             
+      typeof checkout.sellerId === 'number' &&
+      checkout.sellerId > 0 &&
+      unitPrice > 0 &&
+      quantity > 0
+
+    if (!hasEssential) {
+      alert('결제 정보가 유효하지 않습니다. 처음부터 다시 시도해주세요.')
+      navigate(-1) // 또는 navigate('/', { replace: true })
+    }
+  }, [checkout, unitPrice, quantity, navigate])
 
   // 총 결제 금액은 프론트에서
   const finalAmount = amountClient
-
+  
   // (4) 기타 훅/상태 ─ 멍
   const tossRef = useRef<TossPaymentHandle>(null) // PaymentSection이 forwardRef로 TossPaymentHandle을 전달한다고 가정
   const [openedMethod, setOpenedMethod] = useState<PaymentMethod | null>(null)
@@ -103,11 +104,24 @@ const BookingPaymentPage: React.FC = () => {
       setIsTimeUpModalOpen(true)
       return
     }
-    // 세션 준비 상태 확인(서버 값 필요)
-    if (isSessionLoading || !bookingId || !sellerId) {
-      setErr('결제 준비 중입니다. 잠시만 기다려주세요.')
+
+    // 1) 필수 데이터 가드(라우터 state에 반드시 들어있어야 함)
+    if (!checkout.bookingId || !checkout.sellerId || !festivalIdVal) {
+      alert('결제 정보가 부족해 결제를 진행할 수 없어요.')
+      navigate(-1)
       return
     }
+
+    // 2) 로그인 가드 ─ 미로그인 시 alert 후 로그인 페이지로 보냄
+    let buyerId: number
+    try {
+      buyerId = getUserIdSafely() // ✅ useAuthStore 기반, 미로그인이면 throw
+    } catch {
+      alert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.')
+      navigate('/login')
+      return
+    }
+
     if (isPaying) return
     setErr(null)
 
@@ -122,21 +136,16 @@ const BookingPaymentPage: React.FC = () => {
       const ensuredId = paymentId ?? createPaymentId()
       if (!paymentId) setPaymentId(ensuredId)
 
-      // 목데이터 (연동하면 삭제해야됨!!!!)
-      const userId = getUserIdSafely()
-      const mockBookingId = 'BKG-20250822-01' // ← 실제에선 서버 세션 bookingId 사용
-      const mockSellerId = 2002               // ← 실제에선 서버 세션 sellerId 사용
-
-      setIsPaying(true)
+      setIssetIsPaying(true)
       try {
         await tossRef.current?.requestPay({
           paymentId: ensuredId,
-          amount: finalAmount,      // ✅ 서버 확정 금액 우선
+          amount: finalAmount,                // ✅ 실제 결제 금액(프론트 계산)
           orderName,
-          userId,
-          bookingId: mockBookingId, // ⚠️ 연동 완료 시 bookingId로 교체
+          userId: buyerId,                    // ✅ X-User-Id 헤더에 들어갈 값
+          bookingId: checkout.bookingId,      // ✅ 예매 단계에서 확보된 값
           festivalId: festivalIdVal,
-          sellerId: mockSellerId,   // ⚠️ 연동 완료 시 sellerId로 교체
+          sellerId: checkout.sellerId,        // ✅ 예매 단계에서 확보된 값
         })
         // 필요 시 결과 라우팅/검증 추가
       } catch (e) {
@@ -149,8 +158,13 @@ const BookingPaymentPage: React.FC = () => {
     }
   }
 
-  // 결제 버튼 활성 조건 멍
-  const canPay = !!openedMethod && !isPaying && remainingSeconds > 0 && !isSessionLoading
+  const canPay =
+    !!openedMethod &&
+    !isPaying &&
+    remainingSeconds > 0 &&
+    !!checkout?.bookingId &&           // ✅ 필수 데이터 존재해야 버튼 활성
+    typeof checkout?.sellerId === 'number' &&
+    checkout!.sellerId! > 0
 
   return (
     <div className={styles.page}>
@@ -177,7 +191,7 @@ const BookingPaymentPage: React.FC = () => {
                 onToggle={toggleMethod}
                 amount={finalAmount}
                 orderName={orderName}
-                errorMsg={err ?? sessionErr}
+                errorMsg={err}
               />
             </div>
           </div>
