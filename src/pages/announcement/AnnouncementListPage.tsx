@@ -5,9 +5,11 @@ import SearchBar from '@/components/common/SearchBox';
 import AnnouncementList from '@/components/announcement/AnnouncementList';
 import AnnouncementModal from '@/components/announcement/AnnouncementModal';
 import styles from './AnnouncementListPage.module.css';
-import type { Announcement } from '@/models/admin/Announcement';
+import type { Announcement, NewAnnouncement } from '@/models/admin/Announcement';
 import { getAnnouncements, updateAnnouncement, deleteAnnouncement, createAnnouncement } from '@/shared/api/admin/announcement';
 import Button from '@/components/common/Button';
+
+import {getProducts} from '@/shared/api/admin/festival'
 
 const AnnouncementListPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -21,17 +23,28 @@ const AnnouncementListPage: React.FC = () => {
     queryFn: getAnnouncements,
   });
 
+  const { data: festivals } = useQuery({
+    queryKey: ['festivals'],
+    queryFn: getProducts,
+    select: (response) => response.data || [],
+  });
+
   const saveMutation = useMutation({
-    mutationFn: (announcement: Announcement) => 
-        editTarget ? updateAnnouncement(announcement) : createAnnouncement(announcement),
+    mutationFn: (announcementData: Announcement | NewAnnouncement) => {
+      if ('scheduleId' in announcementData) {
+        return updateAnnouncement(announcementData as Announcement);
+      } else {
+        return createAnnouncement(announcementData as NewAnnouncement);
+      }
+    },
     onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['announcements'] });
-        alert(editTarget ? '공지사항이 수정되었습니다.' : '공지사항이 등록되었습니다.');
-        handleModalClose();
+      queryClient.invalidateQueries({ queryKey: ['announcements'] });
+      alert(editTarget ? '공지사항이 수정되었습니다.' : '공지사항이 등록되었습니다.');
+      handleModalClose();
     },
     onError: (error) => {
-        console.error("저장/수정 실패:", error);
-        alert('작업에 실패했습니다.');
+      console.error("저장/수정 실패:", error);
+      alert('작업에 실패했습니다.');
     }
   });
 
@@ -64,9 +77,9 @@ const AnnouncementListPage: React.FC = () => {
     setEditTarget(null);
   };
 
-  const handleSave = (announcementData: Announcement) => {
+  const handleSave = (announcementData: Announcement | NewAnnouncement) => {
     saveMutation.mutate(announcementData);
-    };
+  };
 
   const filtered = useMemo(() => {
     if (!announcements) return [];
@@ -109,6 +122,7 @@ const AnnouncementListPage: React.FC = () => {
           onClose={handleModalClose}
           onSave={handleSave}
           editTarget={editTarget}
+          festivals={festivals || []}
         />
       </div>
     </Layout>

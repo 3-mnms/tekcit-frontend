@@ -9,6 +9,8 @@ export interface Announcement {
   fname: string;
 }
 
-export interface Props {
-  announcements: Announcement[];
-}
+// export interface Props {
+//   announcements: Announcement[];
+// }
+
+export type NewAnnouncement = Omit<Announcement, 'scheduleId' | 'sent'>;
