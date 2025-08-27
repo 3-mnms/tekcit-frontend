@@ -1,5 +1,6 @@
 import React from 'react'
 import styles from './TransferTicketPage.module.css'
+import { useNavigate } from 'react-router-dom'
 
 interface Ticket {
   id: number
@@ -39,11 +40,19 @@ const dummyTickets: Ticket[] = [
 ]
 
 const TransferTicketPage: React.FC = () => {
-  const handleTransfer = (id: number) => {
-    alert(`티켓 ${id} 양도하기`)
+  const navigate = useNavigate()
+
+  // ✅ 양도하기 클릭 시 /mypage/ticket/transfer/test 로 이동 + state 전달
+  const handleTransfer = (ticket: Ticket) => {
+    navigate('/mypage/ticket/transfer/test', {
+      state: {
+        ticketId: ticket.id,
+        ticket, // Transfer 대상 페이지에서 바로 사용 가능
+      },
+    })
   }
 
-  const visibleTickets = dummyTickets.filter((ticket) => ticket.status === '결제 완료')
+  const visibleTickets = dummyTickets.filter((t) => t.status === '결제 완료')
 
   return (
     <div className={styles.page}>
@@ -54,27 +63,20 @@ const TransferTicketPage: React.FC = () => {
             <img src={ticket.imageUrl} alt={`${ticket.title} 포스터`} className={styles.poster} />
             <div className={styles.details}>
               <div className={styles.info}>
-                <p>
-                  <strong>예매일</strong>: {ticket.date}
-                </p>
-                <p>
-                  <strong>예매번호</strong>: {ticket.number}
-                </p>
-                <p>
-                  <strong>공연명</strong>: {ticket.title}
-                </p>
-                <p>
-                  <strong>일시</strong>: {ticket.time}
-                </p>
-                <p>
-                  <strong>매수</strong>: {ticket.count}
-                </p>
+                <p><strong>예매일</strong>: {ticket.date}</p>
+                <p><strong>예매번호</strong>: {ticket.number}</p>
+                <p><strong>공연명</strong>: {ticket.title}</p>
+                <p><strong>일시</strong>: {ticket.time}</p>
+                <p><strong>매수</strong>: {ticket.count}</p>
               </div>
               <div className={styles.buttonWrapper}>
                 {ticket.isTransferred ? (
                   <span className={styles.transferredBadge}>양도 완료됨</span>
                 ) : (
-                  <button className={styles.transferBtn} onClick={() => handleTransfer(ticket.id)}>
+                  <button
+                    className={styles.transferBtn}
+                    onClick={() => handleTransfer(ticket)}
+                  >
                     양도하기
                   </button>
                 )}
