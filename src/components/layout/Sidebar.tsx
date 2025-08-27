@@ -11,11 +11,11 @@ interface MenuItem {
 interface SidebarProps {
   menuItems: MenuItem[];
   userName: string; 
-  userEmail?: string; 
+  role: string; 
   style?: React.CSSProperties;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ menuItems, userName, userEmail,  ...props }) => {
+const Sidebar: React.FC<SidebarProps> = ({ menuItems, userName, role,  ...props }) => {
     const [openMenu, setOpenMenu] = useState<string | null>(null);
 
     const toggleMenu = (menuName: string) => {
@@ -26,7 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ menuItems, userName, userEmail,  ...p
     <aside className={styles.sidebar}{...props}>
       <div className={styles.userInfoArea}>
         <div className={styles.userName}>{userName}</div>
-        <div className={styles.userEmail}>{userEmail}</div>
+        <div className={styles.role}>{role}</div>
       </div>
 
       <nav className={styles.sidebarNav}>

@@ -30,13 +30,13 @@ export type User = (BaseUser & {role: typeof USERROLE.HOST; businessName: string
 
 export interface TicketHolderType {
     id: number; 
-    userid: string; // 삐약! 사용자 id
-    festival_id: number; // 삐약! 페스티벌 id
+    userId: string; // 삐약! 사용자 id
+    festivalId: number; // 삐약! 페스티벌 id
     name: string; // 삐약! 예매자 이름
     maxPurchase: number; // 삐약! 예매한 티켓 수량
-    delivery_method: string; // 삐약! 수령 방법
+    deliveryMethod: string; // 삐약! 수령 방법
     address: string; // 삐약! 주소
-    festival_date: string; // 삐약! 페스티벌 날짜
+    festivalDate: string; // 삐약! 페스티벌 날짜
     phone: string; // 삐약! 전화번호
-    reservation_number: string; // 삐약! 예매번호
+    reservationNumber: string; // 삐약! 예매번호
 }

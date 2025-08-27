@@ -27,7 +27,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => {
   const navigate = useNavigate()
-  const { name, email, role } = useAuth()
+  const { name, role } = useAuth()
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken')
@@ -69,7 +69,7 @@ const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => {
       <Sidebar
         menuItems={filteredMenuItems}
         userName={name}
-        userEmail={email}
+        role={role}
         style={{ width: sidebarWidth }}
       />
       <Header userName={name} onLogout={handleLogout} />

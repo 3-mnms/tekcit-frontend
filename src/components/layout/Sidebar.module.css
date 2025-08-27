@@ -28,7 +28,7 @@
     margin-bottom: 5px; /* 이메일과의 간격, 삐약! */
 }
 
-.userEmail {
+.role {
     font-size: 12px; /* 이메일 글자 크기, 삐약! */
     color: #cccccc; /* 연한 회색, 삐약! */
 }
