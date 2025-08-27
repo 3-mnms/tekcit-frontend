@@ -1,11 +1,11 @@
 export interface Announcement {
-  id: number;
-  genre: string;
+  fid: string;
+  fname: string;
   title: string;
   content?: string;
-  createdAt: string;
+  startAt: string;
+  sentTime: string;
 }
-
 
 export interface Props {
   announcements: Announcement[];

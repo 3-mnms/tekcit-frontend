@@ -1,11 +1,9 @@
-// src/components/admin/announcement/AnnouncementModal.tsx
-
 import React, { useState, useEffect, useMemo } from 'react';
 import styles from './AnnouncementModal.module.css';
 import { useQuery } from '@tanstack/react-query';
 import { getProducts } from '@/shared/api/admin/festival';
 import Button from '@/components/common/Button';
-// import type { Festival } from '@/models/admin/festival';
+import type { Festival } from '@/models/admin/festival';
 
 // --- 작은 컴포넌트들 
 interface CalendarProps {
