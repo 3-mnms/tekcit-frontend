@@ -21,7 +21,7 @@ export const createAnnouncement = async (newAnnouncement: NewAnnouncement): Prom
 
 export const updateAnnouncement = async (updatedAnnouncement: Announcement): Promise<Announcement> => {
     const { scheduleId, ...dataToUpdate } = updatedAnnouncement;
-    const response = await api.patch<ApiResponse<Announcement>>(`/users/notice${scheduleId}`, dataToUpdate);
+    const response = await api.patch<ApiResponse<Announcement>>(`/users/notice/${scheduleId}`, dataToUpdate);
     return response.data.data;
 };
 
