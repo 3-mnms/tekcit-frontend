@@ -1,210 +1,51 @@
-/* ✅ 카드 전체 섹션 마진 멍 */
 .productSection {
   margin-bottom: 24px;
-  /* 하단 간격 멍 */
 }
 
-/* ✅ 카드 박스: 양쪽 정렬 + 그림자 + 라운드 멍 */
-.card {
-  display: grid;
-  /* 그리드 레이아웃 멍 */
-  grid-template-columns: 1fr auto;
-  /* 좌:정보 우:가격 요약 멍 */
-  gap: 20px;
-}
-
-/* ✅ 좌측 칼럼 멍 */
-.left {
-  display: grid;
-  /* 포스터 + 정보 2열 그리드 멍 */
-  grid-template-columns: 72px 1fr;
-  /* 포스터 고정폭 멍 */
-  gap: 16px;
-  /* 간격 멍 */
-  align-items: start;
-  /* 위 정렬 멍 */
-  min-width: 0;
-  /* 내용 축소 허용 멍 */
-}
-
-/* ✅ 포스터(없으면 플레이스홀더) 멍 */
-.poster {
-  width: 72px;
-  /* 포스터 폭 멍 */
-  height: 96px;
-  /* 포스터 높이 멍 */
-  border-radius: 8px;
-  /* 포스터 라운드 멍 */
-  background: linear-gradient(135deg, #f0f4ff, #e6f7ff);
-  /* 플레이스홀더 그라데이션 멍 */
-  border: 1px solid #e5eaf0;
-  /* 경계선 멍 */
-}
-
-/* ✅ 정보 텍스트 영역 멍 */
-.info {
-  display: grid;
-  /* 수직 흐름 멍 */
-  gap: 6px;
-  /* 요소 간격 멍 */
-  min-width: 0;
-  /* 텍스트 줄바꿈 허용 멍 */
-}
-
-/* ✅ 공연명 타이틀 멍 */
-.title {
-  margin: 0;
-  /* 기본 여백 제거 멍 */
+.sectionTitle {
   font-size: 18px;
-  /* 크기 멍 */
   font-weight: 700;
-  /* 볼드 멍 */
-  line-height: 1.2;
-  /* 줄간격 멍 */
+  margin-bottom: 12px;
   color: #111;
-  /* 색상 멍 */
-  overflow: hidden;
-  /* 넘침 처리 멍 */
-  text-overflow: ellipsis;
-  /* 말줄임표 멍 */
-  white-space: nowrap;
-  /* 한 줄 고정 멍 */
 }
 
-/* ✅ 일시·장소 메타 행 멍 */
-.meta {
-  margin: 0;
-  /* 여백 제거 멍 */
-  color: #60656c;
-  /* 중간 톤 멍 */
-  font-size: 13px;
-  /* 작은 크기 멍 */
-}
-
-/* ✅ 메타 아이템 기본 멍 */
-.metaItem {
-  vertical-align: baseline;
-  /* 기준선 정렬 멍 */
-}
-
-/* ✅ 구분 점 멍 */
-.dot {
-  color: #b0b5bb;
-}
-
-/* ✅ 라벨-값 2열 그리드 멍 */
-.kvGrid {
-  display: grid;
-  /* 그리드 멍 */
-  grid-template-columns: 1fr;
-  /* 행 단위 멍 */
-  gap: 6px;
-  /* 행 간격 멍 */
-  margin: 4px 0 0;
-  /* 위쪽 소간격 멍 */
-}
-
-/* ✅ 각 행 래퍼 멍 */
-.kvRow {
-  display: grid;
-  /* 그리드 멍 */
-  grid-template-columns: 88px 1fr;
-  /* 라벨 88px 고정 멍 */
-  align-items: center;
-  /* 수직 가운데 멍 */
-  gap: 8px;
-  /* 열 간격 멍 */
-}
-
-/* ✅ 라벨 스타일 멍 */
-.kvLabel {
-  color: #6b7280;
-  /* 회색 톤 멍 */
-  font-size: 13px;
-  /* 크기 멍 */
-  font-weight: 600;
-  /* 반볼드 멍 */
-}
-
-/* ✅ 값 스타일 멍 */
-.kvValue {
-  color: #2b2f36;
-  /* 진한 회색 멍 */
-  font-size: 14px;
-  /* 내용 크기 멍 */
-  font-variant-numeric: tabular-nums;
-  /* 숫자 자릿수 정렬 멍 */
-  -webkit-font-feature-settings: "tnum";
-  /* 사파리 보정 멍 */
-  font-feature-settings: "tnum";
-  /* 탭형 숫자 멍 */
-}
-
-/* ✅ 우측 요약 영역 멍 */
-.right {
-  display: grid;
-  /* 그리드 멍 */
-  align-content: start;
-  /* 위쪽 정렬 멍 */
-}
-
-/* ✅ 총액 행 멍 */
-.totalRow {
-  margin-top: 16px;
-  /* 위쪽 여백 */
+.card {
   display: flex;
-  /* 플렉스 박스로 변경 */
-  justify-content: space-between;
-  /* 좌우 끝으로 배치 */
-  align-items: center;
-  /* ✅ 세로 가운데 정렬 */
-  background: #f8fafc;
-  border: 1px solid #eef2f7;
-  border-radius: 10px;
-  padding: 12px 14px;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 0;
+  border-top: 1px solid #e5e7eb;
 }
 
-/* ✅ 총액 라벨 멍 */
-.totalLabel {
-  color: #4b5563;
-  /* 중간 회색 멍 */
-  font-size: 13px;
-  /* 크기 멍 */
+.infoBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-size: 16px;
   font-weight: 700;
-  /* 굵게 멍 */
-  white-space: nowrap;
-  /* 한 줄 고정 멍 */
+  color: #111;
 }
 
-/* ✅ 총액 금액(강조) 멍 */
-.totalPrice {
-  justify-self: end;
-  /* 오른쪽 정렬 멍 */
-  color: #d71921;
-  /* 레드 톤 멍 */
-  font-size: 20px;
-  /* 크게 멍 */
-  font-weight: 800;
-  /* 두껍게 멍 */
-  letter-spacing: 0.2px;
-  /* 미세 자간 멍 */
-  font-variant-numeric: tabular-nums;
-  /* 숫자 정렬 멍 */
-  -webkit-font-feature-settings: "tnum";
-  /* 사파리 보정 멍 */
-  font-feature-settings: "tnum";
-  /* 탭형 숫자 멍 */
+.meta {
+  font-size: 13px;
+  color: #6b7280;
 }
 
-/* ✅ 좁은 화면 대응(반응형) 멍 */
-@media (max-width: 560px) {
-  .card {
-    grid-template-columns: 1fr;
-    /* 단일 열로 전환 멍 */
-  }
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
 
-  .right {
-    margin-top: 6px;
-    /* 위쪽 간격 추가 멍 */
-  }
+.label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.value {
+  color: #111;
+  font-weight: 500;
 }
