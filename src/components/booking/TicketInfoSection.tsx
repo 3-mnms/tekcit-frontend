@@ -44,7 +44,7 @@ const TicketInfoSection: React.FC<TicketInfoSectionProps> = ({
       </svg>`
     );
 
-  const titleClass = compact ? styles.titleCompact : styles.title;
+  const titleClass = styles.titleLarge;
   const posterClass = [
     styles.poster,
     compact ? styles.posterCompact : styles.posterWide,
@@ -55,8 +55,6 @@ const TicketInfoSection: React.FC<TicketInfoSectionProps> = ({
 
   return (
     <section className={`${styles.container} ${className}`}>
-      <h2 className={titleClass}>내 티켓 정보</h2>
-
       <div className={styles.row}>
         {/* 포스터 */}
         <div className={posterClass}>
@@ -73,6 +71,7 @@ const TicketInfoSection: React.FC<TicketInfoSectionProps> = ({
 
         {/* 정보 */}
         <div className={styles.info}>
+          <h2 className={titleClass}>내 티켓 정보</h2>
           <div className={styles.stack}>
             <div className={titleTextClass} title={safeTitle}>{safeTitle}</div>
             <div
@@ -89,7 +88,8 @@ const TicketInfoSection: React.FC<TicketInfoSectionProps> = ({
           <div className={styles.priceBox}>
             <div className={styles.rowBetween}>
               <span className={styles.muted}>가격 × 수량</span>
-              <span className={styles.titleText}>
+              {/* ▼ 여기 styles.titleText → styles.priceValue 로 변경 */}
+              <span className={styles.priceValue}>
                 {formatKRW(price)} × {qty}매
               </span>
             </div>

@@ -4,7 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import type { DeliveryMethod } from '@/components/booking/TicketDeliverySelectSection';
 import styles from './OrderConfirmSection.module.css';
-import { apiReserveTicket } from '@api/booking/bookingApi';
+
+import {
+  apiReserveTicket,
+  apiSelectDelivery,
+  mapUiDeliveryToBE,
+  type IssueQrRequest,
+} from '@api/booking/bookingApi';
 
 type Props = {
   unitPrice: number;
@@ -17,6 +23,7 @@ type Props = {
   performanceTime?: string;        // HH:mm
   bookerName?: string;
   bookingId?: string;              // reservationId(=reservationNumber)
+  address?: string;                // PAPER일 때 사용
   className?: string;
 };
 
@@ -40,13 +47,14 @@ const OrderConfirmSection: React.FC<Props> = ({
   performanceTime,
   bookerName,
   bookingId,
+  address,
   className = '',
 }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const { total } = useMemo(() => {
-    const subtotal = unitPrice * quantity;
+    const subtotal = (unitPrice || 0) * (quantity || 0);
     return { total: subtotal };
   }, [unitPrice, quantity]);
 
@@ -67,7 +75,7 @@ const OrderConfirmSection: React.FC<Props> = ({
     }
 
     const performanceDateTime = toLocalDateTimeISO(performanceDate, performanceTime);
-    console.log("date랑 시간 : ", performanceDateTime);
+    console.log('date랑 시간 : ', performanceDateTime);
     if (!performanceDateTime) {
       alert('공연 시작시간 형식이 올바르지 않아요.');
       return;
@@ -86,6 +94,7 @@ const OrderConfirmSection: React.FC<Props> = ({
       bookerName,
       deliveryMethod: method ?? 'QR',
       total,
+      address,
     };
 
     // 새로고침 대비 저장
@@ -94,28 +103,33 @@ const OrderConfirmSection: React.FC<Props> = ({
       sessionStorage.setItem(RESNO_KEY, finalBookingId);
     } catch {}
 
-    // ✅ 최종 발권 API 요청 바디 (누락되었던 필드 추가!)
-    const req = {
-      festivalId: festivalId,
-      reservationNumber: String(finalBookingId),
-      performanceDate: performanceDateTime, // ex) "2025-09-23T17:00:00"
-      ticketCount: Number.isFinite(quantity) ? Number(quantity) : 1,
-      deliveryMethod: (method ?? 'QR') as 'QR' | 'PAPER',
-    };
+    if (loading) return;
+    setLoading(true);
 
-    console.log('[apiReserveTicket req]', req);
-
-    // ✅ 발권 API 호출 → 성공 시 /payment 이동
     try {
-      if (loading) return;
-      setLoading(true);
+      // 1) 수령방법/주소 먼저 설정 (서버가 예약번호로 매수 등 조회한다고 가정)
+      const delivery = mapUiDeliveryToBE((method ?? 'QR') as 'QR' | 'PAPER'); // 'QR' -> 'MOBILE'
+      await apiSelectDelivery({
+        festivalId: festivalId!,
+        reservationNumber: String(finalBookingId),
+        deliveryMethod: delivery,   // 'MOBILE' | 'PAPER'
+        address,                    // PAPER일 경우만 의미, 서버에서 optional 처리
+      });
 
-      await apiReserveTicket(req); // bookingApi.ts의 강화된 버전과 호환
+      // 2) 그 다음 QR 발권 (/booking/qr : 3필드만)
+      const req: IssueQrRequest = {
+        festivalId: festivalId!,
+        reservationNumber: String(finalBookingId),
+        performanceDate: performanceDateTime, // ex) "2025-09-23T17:00:00"
+      };
+      console.log('[apiReserveTicket req]', req);
+      await apiReserveTicket(req);
 
+      // 성공 시 결제 페이지 이동
       navigate('/payment', { state: payload });
     } catch (e: any) {
-      console.error('[발권 실패] /booking/qr', e?.response?.data || e);
-      alert(e?.response?.data?.message || '발권에 실패했어요. 잠시 후 다시 시도해 주세요.');
+      console.error('[발권 실패] /booking/selectDeliveryMethod 또는 /booking/qr', e?.response?.data || e);
+      alert(e?.response?.data?.errorMessage || e?.response?.data?.message || '발권에 실패했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
       setLoading(false);
     }
