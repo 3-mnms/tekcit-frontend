@@ -119,30 +119,29 @@ const AnnouncementModal: React.FC<Props> = ({ isOpen, onClose, onSave, editTarge
   }, [selectedFestivalId]);
 
   useEffect(() => {
-  if (isOpen) {
-    if (editTarget) {
-      setTitle(editTarget.title);
-      setContent(editTarget.body); // content 대신 body
-      setSelectedFestivalId(editTarget.fid); // festivalId 대신 fid
+    if (isOpen && editTarget) {
+        setTitle(editTarget.title);
+        setContent(editTarget.body);
+        setSelectedFestivalId(editTarget.fid);
 
-      const targetDate = new Date(editTarget.startAt);
-      setSelectedDate(targetDate);
-      setSelectedTime(targetDate.toTimeString().slice(0, 5)); 
+        const targetStartAt = new Date(editTarget.startAt);
+        setSelectedDate(targetStartAt);
+        setSelectedTime(targetStartAt.toTimeString().slice(0, 5));
 
-      const dispatchDate = new Date(editTarget.sendTime);
-      setDispatchDate(dispatchDate.toISOString().slice(0, 10)); // "YYYY-MM-DD"
-      setDispatchTime(dispatchDate.toTimeString().slice(0, 5)); // "HH:MM"
-    } else {
-      // --- 삐약! 등록 모드일 때 폼 비우기 ---
-      setTitle('');
-      setContent('');
-      setSelectedFestivalId('');
-      setSelectedDate(null);
-      setSelectedTime(null);
-      setDispatchDate('');
-      setDispatchTime('');
+        const [dispatchDatePart, dispatchTimePart] = editTarget.sendTime.split('T');
+        setDispatchDate(dispatchDatePart);
+        // HH:MM 부분만 가져오기
+        setDispatchTime(dispatchTimePart.slice(0, 5));
+
+    } else if (isOpen) {
+        setTitle('');
+        setContent('');
+        setSelectedFestivalId('');
+        setSelectedDate(null);
+        setSelectedTime(null);
+        setDispatchDate('');
+        setDispatchTime('');
     }
-  }
 }, [editTarget, isOpen]);
 
   if (!isOpen) return null;

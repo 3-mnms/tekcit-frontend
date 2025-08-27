@@ -37,16 +37,20 @@ const AnnouncementListPage: React.FC = () => {
         return createAnnouncement(announcementData as NewAnnouncement);
       }
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['announcements'] });
-      alert(editTarget ? '공지사항이 수정되었습니다.' : '공지사항이 등록되었습니다.');
+      if ('scheduleId' in variables) {
+        alert('공지사항이 수정되었습니다.');
+      } else {
+        alert('공지사항이 등록되었습니다.');
+      }
       handleModalClose();
     },
     onError: (error) => {
       console.error("저장/수정 실패:", error);
       alert('작업에 실패했습니다.');
     }
-  });
+});
 
   const deleteMutation = useMutation({
     mutationFn: deleteAnnouncement,
