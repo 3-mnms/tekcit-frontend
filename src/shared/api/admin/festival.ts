@@ -1,5 +1,4 @@
 import type { Festival } from '@/models/admin/festival';
-// import { dummyProducts } from '@/models/dummy/dummyProducts';
 import type { TicketHolderType } from '@/models/admin/User';
 import { api } from '@/shared/config/axios';
 
@@ -65,10 +64,12 @@ interface ApiResponse<T> {
   message: string;
 }
 
-export const getAttendeesByFestivalId = async (festivalId: number): Promise<TicketHolderType[]> => {
-  // ✅ 실제 백엔드 API 경로로 수정해야 할 수도 있어!
-  const response = await api.get<ApiResponse<TicketHolderType[]>>(`/host/booking/list`);
+export const getAttendeesByFestivalId = async (fid: string): Promise<TicketHolderType[]> => {
+  const response = await api.post<ApiResponse<TicketHolderType[]>>(`/host/booking/list`, null, {
+    params: {
+      festivalId: fid,
+    },
+  });
   
-  // 데이터가 없을 경우를 대비해 || [] 추가!
   return response.data.data || [];
 };

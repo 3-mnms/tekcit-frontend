@@ -180,7 +180,7 @@ export const router = createBrowserRouter([
       { path: 'announcement', element: <AnnouncementListPage /> },
       { path: 'productManage', element: <ProductManagePage /> },
       { path: 'product-detail/:fid', element: <ProductDetailPage /> },
-      { path: 'productManage/:fid/TicketHolderList', element: <TicketHolderListPage /> },
+      { path: 'productManage/TicketHolderList/:fid', element: <TicketHolderListPage /> },
       { path: 'productManage/Statistics/:id', element: <StatisticsPage /> },
 
       { path: 'button', element: <HomePage /> },
