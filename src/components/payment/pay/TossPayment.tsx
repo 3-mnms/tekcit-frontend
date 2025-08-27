@@ -18,19 +18,15 @@ export type TossPaymentHandle = {
     paymentId: string
     amount: number
     orderName: string
-    userId: number      // ✅ X-User-Id 헤더용 멍
-    bookingId: string   // ✅ 백엔드 DTO 필수 멍
-    festivalId: string  // ✅ 백엔드 DTO 필수 멍
-    sellerId: number    // ✅ 백엔드 DTO 필수 멍
+    userId: number      // ✅ X-User-Id 헤더용 
+    bookingId: string   // 백엔드 넘겨줘야 함
+    festivalId: string  // 백엔드 넘겨줘야 함
+    sellerId: number    // ✅ 백엔드 DTO 필수 
   }) => Promise<void>
 }
 
 const STORE_ID = import.meta.env.VITE_PORTONE_STORE_ID?.trim()
 const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY?.trim()
-
-type PortOneError = { code: string; message?: string }
-const isPortOneError = (v: unknown): v is PortOneError =>
-  !!v && typeof v === 'object' && 'code' in (v as Record<string, unknown>) && typeof (v as Record<string, unknown>).code === 'string'
 
 const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
   ({ isOpen, onToggle, amount: defaultAmount, orderName: defaultOrderName, redirectUrl }, ref) => {
@@ -52,7 +48,7 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
             // 성공 응답 처리
             return true;
           }
-        } catch (e) {
+        } catch {
           return false;
         }
 
@@ -66,7 +62,7 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
 
     useImperativeHandle(ref, () => ({
 
-      // ✅ 결제 트리거 멍(결과 페이지에서 상태 확정) 멍
+      // ✅ 결제 트리거 멍(결과 페이지에서 상태 확정)
       async requestPay({ paymentId, amount, orderName, userId, bookingId, festivalId, sellerId }) {
 
         // 1) 결과 페이지 리다이렉트 URL 구성 (여기서는 paymentId만 넘김)
@@ -82,7 +78,7 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           return
         }
 
-        // 3) PortOne 결제 요청 멍(redirectUrl로 결과 페이지 진입) 멍
+        // 3) PortOne 결제 요청 멍(redirectUrl로 결과 페이지 진입)
         const result: unknown = await PortOne.requestPayment({
           storeId: STORE_ID!,
           channelKey: CHANNEL_KEY!,
