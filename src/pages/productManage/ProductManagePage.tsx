@@ -46,19 +46,17 @@ const ProductManagePage: React.FC = () => {
         );
     }, [allProducts, searchTerm]);
 
-    // 삐약! 이 부분에서 상품 클릭 시 상세 페이지로 이동합니다!
     const handleRowClick = (item: Festival) => {
         navigate(`/admin/product-detail/${item.fid}`);
     };
 
-    // 삐약! 버튼 클릭 핸들러를 따로 만듭니다!
     const handleViewTicketHolderList = (e: React.MouseEvent, fid: string) => {
         e.stopPropagation(); // 삐약! 행 클릭 이벤트가 발생하는 것을 막아줍니다!
-        navigate(`/admin/productManage/${fid}/TicketHolderList`);
+        navigate(`/admin/productManage/TicketHolderList/${fid}`);
     };
 
     const handleViewStats = (e: React.MouseEvent, fid: string) => {
-        e.stopPropagation(); // 삐약! 행 클릭 이벤트가 발생하는 것을 막아줍니다!
+        e.stopPropagation();
         navigate(`/admin/productManage/Statistics/${fid}`);
     };
 
@@ -66,6 +64,7 @@ const ProductManagePage: React.FC = () => {
         { columnId: 'fid', label: 'id' },
         { columnId: 'fname', label: '상품명' },
         { columnId: 'genrenm', label: '장르' },
+        { columnId: 'fcltynm', label: '공연장 이름'},
         {
           columnId: 'entrpsnmH',
           label: '주최자명',
