@@ -36,7 +36,7 @@ const AddressForm: React.FC = () => {
         isDefault,  
       })
       alert('주소가 저장되었습니다.')
-      navigate('/mypage/info/addresses') 
+      navigate('/mypage/myinfo/address') 
     } catch (e: any) {
       alert(e?.message ?? '주소 저장에 실패했어요.')
     }
@@ -81,7 +81,7 @@ const AddressForm: React.FC = () => {
             checked={isDefault}
             onChange={() => setIsDefault(!isDefault)}
           />
-          <span>기본 배송지로 설정 (목록에서 설정)</span>
+          <span>기본 배송지로 설정</span>
         </label>
       </div>
 

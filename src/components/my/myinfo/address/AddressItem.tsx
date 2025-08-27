@@ -21,17 +21,23 @@ const AddressItem: React.FC<AddressItemProps> = ({
   return (
     <div className={styles.item} onClick={onClick}>
       <div className={styles.content}>
+        {/* 이름 + 배지 (같은 줄) */}
         <div className={styles.topRow}>
-          <div className={styles.namePhone}>
-            <span>{name}</span>
-            <span className={styles.phone}>{phone}</span>
-          </div>
+          <span className={styles.name}>{name}</span>
           {isDefault && <span className={styles.badge}>기본 배송지</span>}
         </div>
+
+        {/* 전화번호 (아래 줄) */}
+        <div className={styles.phoneRow}>
+          <span className={styles.phone}>{phone}</span>
+        </div>
+
+        {/* 주소 */}
         <div className={styles.address}>
           ({zipCode}) {address}
         </div>
       </div>
+
       <span className={styles.arrow}>›</span>
     </div>
   )

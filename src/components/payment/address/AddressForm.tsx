@@ -69,7 +69,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
       <div className={styles['address-tabs']}>
         <span className={styles['tabs-label']}>배송지 선택</span>
 
-        {/* 모달 열기: 등록된 배송지 목록에서 선택 */}
         <button
           type="button"
           className={`plain-button ${styles['tab-manage-btn']}`}

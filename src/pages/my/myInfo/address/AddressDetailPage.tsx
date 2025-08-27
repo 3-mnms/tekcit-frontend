@@ -1,5 +1,5 @@
 // AddressDetailPage.tsx
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Button from '@/components/common/button/Button'
 import Input from '@/components/common/input/Input'
@@ -9,6 +9,7 @@ import {
   useAddressQuery,
   useDeleteAddressMutation,
   useUpdateAddressMutation,
+  useChangeDefaultMutation,
 } from '@/models/auth/tanstack-query/useAddress'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -17,6 +18,7 @@ const AddressDetailPage: React.FC = () => {
   const addressId = Number(id) || 0
   const navigate = useNavigate()
   const qc = useQueryClient()
+  const changeDefaultMut = useChangeDefaultMutation()
 
   const { data: address, isLoading, isError } = useAddressQuery(addressId)
   const deleteAddressMut = useDeleteAddressMutation()
@@ -51,7 +53,6 @@ const AddressDetailPage: React.FC = () => {
 
   useEffect(() => {
     if (!address) return
-    console.log('address', pickIsDefault(address))
     const { base, detail } = splitAddress(address.address)
     setName(address.name || '')
     setPhone(address.phone || '')
@@ -69,7 +70,7 @@ const AddressDetailPage: React.FC = () => {
         alert('배송지가 삭제되었습니다.')
         qc.invalidateQueries({ queryKey: ['addresses'] })
         qc.invalidateQueries({ queryKey: ['addresses', 'default'] })
-        navigate('/my/address')
+        navigate('/mypage/myinfo/address')
       },
       onError: (e: any) => {
         alert(e?.response?.data?.message || '배송지 삭제에 실패했습니다.')
@@ -105,11 +106,19 @@ const AddressDetailPage: React.FC = () => {
       alert('필수 정보를 입력해주세요.')
       return
     }
+
+    const wasDefault = Boolean((address as any)?.isDefault ?? (address as any)?.default)
     const fullAddress = joinAddress(baseAddress, addressDetail)
-    const payload = { name, phone, zipCode: zonecode, address: fullAddress, isDefault } // ✅ isDefault 포함
-    console.log('[PATCH payload]', payload)
+    const payload = { name, phone, zipCode: zonecode, address: fullAddress, isDefault }
+
     try {
       await updateAddressMut.mutateAsync({ addressId, payload })
+
+      // ✅ 체크되어 있고, 이전엔 기본이 아니었다면 서버 측도 단일 기본으로 강제
+      if (isDefault && !wasDefault) {
+        await changeDefaultMut.mutateAsync(addressId)
+      }
+
       alert('주소가 저장되었습니다.')
       setEditing(false)
       qc.invalidateQueries({ queryKey: ['addresses'] })
