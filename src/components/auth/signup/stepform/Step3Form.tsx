@@ -16,12 +16,20 @@ interface Props {
   openAddress: () => void
 }
 
+const joinAddress = (addr?: string, detail?: string) => {
+  const a = (addr ?? '').trim()
+  const d = (detail ?? '').trim()
+  if (!d) return a
+  if (a.endsWith(d) || a.endsWith(`, ${d}`)) return a
+  return `${a}${a.endsWith(',') ? ' ' : ', '}${d}`
+}
+
 const Step3Form: React.FC<Props> = ({ acc, onPrev, onNext, updateAcc, openAddress }) => {
   const {
     register,
     handleSubmit,
     watch,
-     reset,  
+    reset,
     formState: { errors },
   } = useForm<Step3>({
     resolver: zodResolver(signupStep3),
@@ -43,7 +51,11 @@ const Step3Form: React.FC<Props> = ({ acc, onPrev, onNext, updateAcc, openAddres
   }, [acc.zipCode, acc.address, acc.detailAddress, reset])
 
   const submit = (data: Step3) => {
-    updateAcc(data)
+    const combined = joinAddress(data.address, data.detailAddress)
+    updateAcc({
+      ...data,
+      address: combined,
+    })
     onNext()
   }
 
@@ -82,11 +94,15 @@ const Step3Form: React.FC<Props> = ({ acc, onPrev, onNext, updateAcc, openAddres
       />
 
       <div className={styles.navButtons}>
-        <Button type="button" onClick={onPrev}>이전</Button>
+        <Button type="button" onClick={onPrev}>
+          이전
+        </Button>
         {zip?.trim() ? (
           <Button type="submit">다음</Button>
         ) : (
-          <Button type="button" onClick={handleSkip}>건너뛰기</Button>
+          <Button type="button" onClick={handleSkip}>
+            건너뛰기
+          </Button>
         )}
       </div>
     </form>

@@ -4,6 +4,9 @@ import styles from './SocialLogin.module.css'
 import KaKao from '@assets/kakao.png'
 import { reissue, type ReissueResponseDTO } from '@/shared/api/auth/login'
 import { useAuthStore } from '@/shared/storage/useAuthStore' 
+import { getEnv } from '@/shared/config/env'
+
+const API_URL = getEnv('API_URL', '')
 
 const POPUP_NAME = 'kakaoPopup'
 
@@ -91,16 +94,17 @@ const SocialLogin: React.FC = () => {
     const top = window.screenY + (window.outerHeight - h) / 2
 
     processedRef.current = false
-
+console.log("url: ", API_URL)
     popupRef.current = window.open(
-      '/api/auth/kakao/authorize',
+      
+      `${API_URL}/api/auth/kakao/authorize`,
       POPUP_NAME,
       `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`,
     )
 
     if (!popupRef.current) {
       // 팝업 차단 시 직접 이동
-      window.location.href = '/api/auth/kakao/authorize'
+      window.location.href = `${API_URL}/api/auth/kakao/authorize`
       return
     }
 
