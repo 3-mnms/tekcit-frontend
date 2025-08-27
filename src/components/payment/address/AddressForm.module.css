@@ -1,121 +1,213 @@
-.address-container {
-  padding: 32px;
-  background-color: #f3f3f3;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-family: sans-serif;
-  width: 100%;
+/* ===== 카드 컨테이너 ===== */
+.address-container input,
+.address-container select {
+  height: 42px;
+  /* input & select 같은 키 */
+  padding: 0 12px;
+  /* 상하 0으로 맞추면 select가 더 커보이지 않음 */
   box-sizing: border-box;
+  border-radius: 10px;
+  font-size: 14px;
 }
 
-.section-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 16px;
-}
 
+/* ===== 상단 탭/헤더 ===== */
+/* 상단 헤더 */
 .address-tabs {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
-  gap: 8px;
+  justify-content: space-between;
+  /* 왼쪽/오른쪽 끝으로 배치 */
+  margin-bottom: 18px;
+  gap: 10px;
 }
 
 .tabs-label {
-  margin-right: 8px;
-  font-weight: 500;
+  font-weight: 600;
+  color: #222;
 }
 
-.tab-button {
-  border: 1px solid #ccc;
-  background-color: #fff;
-  color: #333;
-  padding: 6px 12px;
-  border-radius: 100px;
-  cursor: pointer;
-  font-size: 14px;
+.address-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  /* 왼쪽은 타이틀, 오른쪽은 버튼 */
+  margin-bottom: 18px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-title {
+  font-weight: 600;
+  color: #222;
+}
+
+/* 공통 버튼 */
+button,
+.tab-button,
+.tab-manage-btn,
+.address-row button {
+  cursor: pointer;
+  border-radius: 10px;
+  font-size: 14px;
+  padding: 10px 14px;
+  background-color: #fff;
+  border: 1px solid #cfcfcf;
+  transition: all 0.2s ease;
+}
+
+/* 프라이머리 버튼(선택) */
+.btn-primary {
+  background: #4D9AFD;
+  border-color: #4D9AFD;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  filter: brightness(0.96);
+}
+
+/* 아웃라인 버튼(선택) */
+.btn-outline {
+  color: #4D9AFD;
+  border-color: #4D9AFD;
+  background: #fff;
+}
+
+.btn-outline:hover {
+  background: rgba(77, 154, 253, 0.06);
+}
+
+/* 기본 버튼 호버/포커스 */
+button:hover,
+.tab-button:hover,
+.tab-manage-btn:hover,
+.address-row button:hover {
+  border-color: #4D9AFD;
+  color: #4D9AFD;
+}
+
+button:focus-visible,
+.tab-button:focus-visible,
+.address-row button:focus-visible {
+  outline: 3px solid rgba(77, 154, 253, 0.35);
+  outline-offset: 2px;
+}
+
+/* 탭 버튼 */
+.tab-button {
+  color: #333;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #fafafa;
 }
 
 .tab-button.active {
-  border: 1px solid #4d9afd;
-  background-color: #fff;
-  color: #4d9afd;
-  position: relative;
+  border-color: #4D9AFD;
+  color: #4D9AFD;
+  background: #fff;
 }
 
 .tab-button.active::before {
   content: '';
   width: 8px;
   height: 8px;
-  background-color: #4d9afd;
+  background-color: #4D9AFD;
   border-radius: 50%;
-  margin-right: 6px;
 }
 
-.tab-manage-btn {
-  border: 1px solid #999;
-  background-color: #eee;
-  padding: 6px 12px;
-  font-size: 14px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
+/* ===== 모달 ===== */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   z-index: 1000;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .modal-content {
-  width: 640px;
-  max-height: 90vh;
+  width: 720px;
+  max-height: 88vh;
   background: #fff;
   margin: 60px auto;
   padding: 24px;
-  border-radius: 12px;
-  overflow-y: auto;
+  border-radius: 16px;
+  overflow: auto;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.16);
 }
 
+/* ===== 폼 그리드 ===== */
 .form-grid {
   display: flex;
-  gap: 32px;
-  margin-top: 16px;
+  gap: 28px;
+  margin-top: 6px;
 }
 
-.form-left,
-.form-right {
+.form-left {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
+.form-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* 라벨·입력칸 사이 간격 통일 */
+}
+
+/* 라벨/필드 */
 label {
-  font-weight: 600;
-  margin: 12px 0 4px;
+  font-weight: 700;
+  margin: 14px 0 8px;
+  color: #202124;
 }
 
 input,
 select {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 12px 12px;
+  border: 1px solid #d7d7d7;
+  border-radius: 10px;
   font-size: 14px;
   width: 100%;
   box-sizing: border-box;
+  background: #fbfbfb;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
 }
 
+input:focus,
+select:focus {
+  border-color: #4D9AFD;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(77, 154, 253, 0.15);
+  outline: none;
+}
+
+/* 전화번호 묶음 */
 .phone-inputs {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+}
+
+.phone-inputs select {
+  width: 84px;
+  /* 필요하면 76~90px에서 조절 */
+  flex: 0 0 auto;
+}
+
+/* ▶ 뒤 두 칸은 균등 분배 + 가운데 정렬 */
+.phone-inputs input {
+  flex: 1;
+  min-width: 60px;
+  text-align: center;
+  /* height는 위 공통 규칙을 따름 */
 }
 
 .phone-box {
@@ -124,59 +216,69 @@ select {
   flex-direction: column;
 }
 
+/* 주소 행 */
 .address-row {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 12px;
+  /* 여백 */
 }
 
+/* 주소 input은 가능한 한 넓게 */
 .address-row input {
   flex: 1;
+  /* 남는 공간 모두 차지 */
+  min-width: 300px;
+  /* 최소 너비 보장 (필요 시 조정) */
 }
 
+/* 버튼은 크기 고정 */
 .address-row button {
-  padding: 8px 12px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
+/* 최근 주소 리스트(옵션) */
 .recent-address-list-box {
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
   padding: 16px;
-  background-color: #f9f9f9;
+  background: #fafcff;
   margin-top: 16px;
 }
 
 .town-label {
   margin-top: 8px;
-  color: #222;
+  color: #4a4a4a;
 }
 
+/* 에러 */
 .error {
-  color: red;
+  color: #e53935;
   font-size: 12px;
-  margin-top: 2px;
-}
-
-.submit-wrap {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 32px;
-}
-
-.submit-wrap button {
-  padding: 10px 20px;
-  background-color: black;
-  color: white;
-  font-weight: bold;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  margin-top: 6px;
 }
 
 .error-space {
-  min-height: 20px;
+  min-height: 18px;
+}
+
+/* 제출 영역(옵션) */
+.submit-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 28px;
+}
+
+.submit-wrap button {
+  padding: 12px 18px;
+  background: #4D9AFD;
+  color: #fff;
+  font-weight: 700;
+  border: 1px solid #4D9AFD;
+  border-radius: 10px;
+}
+
+.submit-wrap button:hover {
+  filter: brightness(0.96);
 }

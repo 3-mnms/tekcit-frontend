@@ -1,15 +1,9 @@
 import React from 'react';
 import DatePicker from 'react-datepicker';
-// ✅ date-fns는 개별 로케일을 default import로 쓰는 게 안정적
-import { ko } from 'date-fns/locale/ko';
+import ko from 'date-fns/locale/ko';
 import 'react-datepicker/dist/react-datepicker.css';
-import { useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import styles from './TicketOrderSection.module.css';
-
-// ✅ 1차 API 훅 (reservationNumber 받는 용도)
-import { useSelectDate } from '@/models/booking/tanstack-query/useBookingDetail';
-import type { BookingSelect } from '@/models/booking/bookingTypes';
 
 type NextPayload = {
   fid?: string;
@@ -31,42 +25,33 @@ type Props = {
   maxQuantity?: number;
   initialQuantity?: number;
 
-  /** 예매하기 클릭 시 상위에서 추가 로직 실행하고 싶을 때 사용 (선택) */
+  /** 부모에서 예약 API 호출 */
   onNext?: (payload: NextPayload) => void;
 
-  /** 예매하기 클릭 시 이 컴포넌트가 직접 이동할 경로.
-   *  문자열이거나, payload → 경로 생성 함수 둘 다 허용.
-   *  예: to={(p) => `/booking/${p.fid}/order-info`}
-   */
-  to?: string | ((p: { fid?: string; dateYMD: string; time: string; quantity: number; reservationNumber: string }) => string);
+  /** 선택 변경 시 부모에 전달 (date, time, quantity) */
+  onSelectionChange?: (date: Date | null, time: string | null, quantity: number) => void;
 
-  /** 제공된 날짜/시간/매수 정보가 비어있을 때 데모 데이터로 표시 */
+  /** 데모 데이터 사용 여부 (기본 false로 쓰길 권장) */
   useDemoIfEmpty?: boolean;
   className?: string;
 };
 
-// ---------- utils ----------
 const ymd = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+    d.getDate()
+  ).padStart(2, '0')}`;
 
 const formatPrice = (n: number) =>
   new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(n);
 
 const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
 
-/** 로컬 타임존 기준으로 HH:mm를 합쳐 "YYYY-MM-DDTHH:mm:ss" 문자열 생성 */
-const toLocalISO = (date: Date, hhmm: string) => {
-  const [h, m] = hhmm.split(':').map(Number);
-  const d = new Date(date);
-  d.setHours(h, m, 0, 0);
-  const pad = (x: number) => String(x).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
-};
-
 function makeDemo() {
   const base = new Date();
-  const d1 = new Date(base); d1.setDate(base.getDate() + 2);
-  const d2 = new Date(base); d2.setDate(base.getDate() + 5);
+  const d1 = new Date(base);
+  d1.setDate(base.getDate() + 2);
+  const d2 = new Date(base);
+  d2.setDate(base.getDate() + 5);
   return {
     dates: [d1, d2],
     times: { [ymd(d1)]: ['14:00', '18:00'], [ymd(d2)]: ['16:00'] },
@@ -77,41 +62,37 @@ function makeDemo() {
 
 const TicketOrderSection: React.FC<Props> = ({
   fid,
-  selectedDate, selectedTime,
-  availableDates = [], timesByDate = {},
-  pricePerTicket, maxQuantity, initialQuantity = 1,
-  onNext, to,
-  useDemoIfEmpty = true, className = '',
+  selectedDate,
+  selectedTime,
+  availableDates = [],
+  timesByDate = {},
+  pricePerTicket,
+  maxQuantity,
+  initialQuantity = 1,
+  onNext,
+  onSelectionChange,
+  useDemoIfEmpty = false,
+  className = '',
 }) => {
-  const navigate = useNavigate();
-  const selectDateMut = useSelectDate();          // ✅ 1차 API 훅
-  const [submitting, setSubmitting] = React.useState(false); // ✅ 버튼 로딩 제어
-
-  // ------ normalize incoming dates ------
   const normalizedDates = React.useMemo<Date[]>(
-    () => (Array.isArray(availableDates) ? availableDates : [])
-      .map(d => (d instanceof Date ? new Date(d) : new Date(String(d))))
-      .filter(d => !isNaN(d.getTime())),
+    () =>
+      (Array.isArray(availableDates) ? availableDates : [])
+        .map((d) => (d instanceof Date ? new Date(d) : new Date(String(d))))
+        .filter((d) => !isNaN(d.getTime())),
     [availableDates]
   );
 
-  // ------ demo fallback ------
   const demo = useDemoIfEmpty && normalizedDates.length === 0 ? makeDemo() : null;
   const dates = demo ? demo.dates : normalizedDates;
-  const tbd = demo ? demo.times : (timesByDate ?? {});
-  const unitPrice = demo ? demo.price : (pricePerTicket ?? 88000);
-  const maxQty = demo ? demo.maxQty : (maxQuantity ?? 4);
+  const tbd = demo ? demo.times : timesByDate ?? {};
+  const unitPrice = demo ? demo.price : pricePerTicket ?? 88000;
+  const maxQty = demo ? demo.maxQty : maxQuantity ?? 4;
   const isSoldOut = maxQty <= 0;
 
-  // ------ calendar range ------
-  const sortedDates = React.useMemo(
-    () => [...dates].sort((a, b) => a.getTime() - b.getTime()),
-    [dates]
-  );
+  const sortedDates = React.useMemo(() => [...dates].sort((a, b) => a.getTime() - b.getTime()), [dates]);
   const minDate = sortedDates[0] ?? null;
   const maxDate = sortedDates[sortedDates.length - 1] ?? null;
 
-  // ------ selection states ------
   const [date, setDate] = React.useState<Date | null>(selectedDate ?? minDate ?? null);
 
   const timesForDate = React.useMemo(() => {
@@ -124,7 +105,10 @@ const TicketOrderSection: React.FC<Props> = ({
     });
   }, [date, tbd]);
 
-  const [time, setTime] = React.useState<string | null>(selectedTime ?? (timesForDate[0] ?? null));
+  const [time, setTime] = React.useState<string | null>(
+    selectedTime ?? (timesForDate[0] ?? null)
+  );
+
   React.useEffect(() => {
     if (!date) return setTime(null);
     if (timesForDate.length === 0) return setTime(null);
@@ -136,61 +120,24 @@ const TicketOrderSection: React.FC<Props> = ({
   const totalPrice = unitPrice * (isSoldOut ? 0 : quantity);
   const isReady = !!date && !!time && !isSoldOut;
 
-  // ------ helpers ------
-  const includeDate = (d: Date) => sortedDates.some(ad => ymd(ad) === ymd(d));
+  const includeDate = (d: Date) => sortedDates.some((ad) => ymd(ad) === ymd(d));
 
-  // ✅ 핵심: 1차(selectDate) 호출 → reservationNumber 수신 → state에 싣고 이동
-  const handleNext = async () => {
+  // 선택 변경 시 부모에 알려주기
+  React.useEffect(() => {
+    onSelectionChange?.(date, time, quantity);
+  }, [date, time, quantity, onSelectionChange]);
+
+  // 더블클릭 가드 (부모 onNext 중복 호출 방지)
+  const clickLockRef = React.useRef(false);
+  const handleNext = () => {
     if (!isReady || !date || !time) return;
-    if (!fid) { console.warn('[order] fid 없음'); return; }
-
-    // 상위에서 뭔가 하려면 먼저 호출
-    onNext?.({ fid, date, time, quantity });
-
+    if (clickLockRef.current) return;
+    clickLockRef.current = true;
     try {
-      setSubmitting(true);
-
-      // 1차 바디
-      const body: BookingSelect = {
-        festivalId: fid,
-        performanceDate: toLocalISO(date, time),
-        selectedTicketCount: quantity,
-      };
-
-      // 서버 호출 (reservationNumber 수신)
-      const reservationNumber = await selectDateMut.mutateAsync(body);
-
-      // 이동 경로
-      const defaultPath = `/booking/${fid}/order-info`;
-      const dateYMD = ymd(date);
-      const path = typeof to === 'function'
-        ? to({ fid, dateYMD, time, quantity, reservationNumber })
-        : (to || defaultPath);
-
-      // 넘길 state (받는 쪽이 쓰는 키로 통일)
-      const navState = {
-        fid,
-        dateYMD,
-        time,
-        quantity,
-        reservationNumber,              // ✅ 2차 상세 조회용
-        // 호환/백엔드 DTO용도 같이 실어줌
-        performanceDate: body.performanceDate,
-        selectedTicketCount: quantity,
-      };
-
-      console.log('[order] selectDate OK →', { reservationNumber, body });
-      console.log('[order] navigate payload →', navState, 'path=', path);
-
-      // 새로고침 대비(선택): URL 쿼리도 같이 쓰고 싶으면 아래로 교체
-      // navigate(`${path}?resNo=${reservationNumber}&date=${dateYMD}&time=${time}&qty=${quantity}`, { state: navState });
-
-      navigate(path, { state: navState });
-    } catch (e) {
-      console.error('[order] selectDate 실패', e);
-      alert('예매 선택 처리에 실패했어요. 다시 시도해 주세요.');
+      onNext?.({ fid, date, time, quantity });
     } finally {
-      setSubmitting(false);
+      // 부모에서 비동기 처리하므로, 즉시 해제해도 되고 부모에서 done 콜백 받아도 OK
+      clickLockRef.current = false;
     }
   };
 
@@ -243,7 +190,7 @@ const TicketOrderSection: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setQuantity((q) => clamp(q - 1, 1, maxQty))}
-                disabled={quantity <= 1 || isSoldOut || submitting}
+                disabled={quantity <= 1 || isSoldOut}
                 className={styles.qtyBtn}
                 aria-label="매수 감소"
               >
@@ -253,7 +200,7 @@ const TicketOrderSection: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setQuantity((q) => clamp(q + 1, 1, maxQty))}
-                disabled={quantity >= maxQty || isSoldOut || submitting}
+                disabled={quantity >= maxQty || isSoldOut}
                 className={styles.qtyBtn}
                 aria-label="매수 증가"
               >
@@ -279,11 +226,11 @@ const TicketOrderSection: React.FC<Props> = ({
 
         <Button
           type="button"
-          disabled={!isReady || submitting}
+          disabled={!isReady}
           className={styles.nextButton}
           onClick={handleNext}
         >
-          {submitting ? '처리중…' : '예매하기'}
+          예매하기
         </Button>
       </div>
     </aside>
