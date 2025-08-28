@@ -1,4 +1,3 @@
-// ✅ 결제 요약 카드 (DEMO 더미 값 지원) - no-unused-vars 해결 버전 멍
 import { useLocation } from 'react-router-dom'
 import styles from './PaymentInfo.module.css'
 
@@ -17,46 +16,16 @@ interface PaymentInfoState {
 }
 
 const PaymentInfo: React.FC = () => {
-  // ✅ 라우터 state 수신 멍
+  // ✅ 라우터 state 수신
   const location = useLocation()
   const state = location.state as PaymentInfoState | undefined
 
-  // ✅ DEMO 스위치: URL(?demo=1) 또는 .env(VITE_PAYMENT_DEMO=true) 멍
-  const isDemoFromEnv = import.meta.env?.VITE_PAYMENT_DEMO === 'true'
-  const isDemoFromUrl = new URLSearchParams(location.search).get('demo') === '1'
-  const isDemo = isDemoFromEnv || isDemoFromUrl
+  // 데이터 없으면 표시
+  if (!state) return <p>결제 정보가 없습니다.</p>
 
-  // ✅ DEMO 더미 데이터 (state가 없을 때 사용) 멍
-  const DEMO_STATE: PaymentInfoState = {
-    bookingId: 'DEMO-BOOK-001',
-    festivalId: 'DEMO-FST-01',
-    posterUrl: 'https://via.placeholder.com/140x200?text=DEMO',
-    title: '데모 공연',
-    performanceDate: '2025.09.14 (일) 16:30',
-    unitPrice: 12000,
-    quantity: 2,
-    bookerName: '홍길동',
-    deliveryMethod: 'QR',
-    reservationNumber: 'R-20250914-0001',
-  }
-
-  // ✅ 최종 표시용 데이터: 실제 state > DEMO_STATE 멍
-  //    ※ 변수명을 stateOrDemo로 바꿔서 실제로 아래에서 사용하므로 no-unused-vars 해결 멍
-  const stateOrDemo = state ?? (isDemo ? DEMO_STATE : undefined)
-
-  // ✅ 아무 데이터도 없으면 안내 멍
-  if (!stateOrDemo) return <p>결제 정보가 없습니다.</p>
-
-  // ✅ 여기부터는 stateOrDemo가 정의됨 (TS가 타입을 좁힘) 멍
-  const {
-    posterUrl,
-    title,
-    performanceDate,
-    unitPrice,
-    quantity,
-    bookerName,
-    deliveryMethod,
-  } = stateOrDemo
+  // ✅ 여기부터는 state가 정의됨 (TS가 타입을 좁힘)
+  const { posterUrl, title, performanceDate, unitPrice, quantity, bookerName, deliveryMethod } =
+    state
 
   // ✅ 총 결제 금액 계산 멍
   const total = unitPrice * quantity
@@ -91,7 +60,7 @@ const PaymentInfo: React.FC = () => {
         <div className={styles.row}>
           <div className={styles.label}>수령 방법</div>
           <div className={styles.value}>
-            {deliveryMethod === 'QR' ? 'QR 티켓' : 'QR 티켓과 배송'}
+            {deliveryMethod === 'QR' ? 'QR 티켓' : 'QR 티켓과 지류 티켓 배송'}
           </div>
         </div>
 

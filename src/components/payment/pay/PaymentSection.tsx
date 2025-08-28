@@ -1,4 +1,4 @@
-// 결제 수단 선택 컴포넌트 (UI만 담당, 결제 실행은 페이지에서 함)
+// 결제 수단 선택 컴포넌트
 
 import { forwardRef } from 'react'
 import WalletPayment from '@/components/payment/pay/WalletPayment'
@@ -12,15 +12,19 @@ type Props = {
   amount: number
   orderName: string
   errorMsg?: string | null
+  bookingId: string
+  festivalId: string
+  sellerId: number
+  userId: number
 }
 
 const PaymentSection = forwardRef<TossPaymentHandle, Props>(function PaymentMethods(
-  { openedMethod, onToggle, amount, orderName, errorMsg },
-  tossRef
+  { openedMethod, onToggle, amount, orderName, errorMsg, bookingId, festivalId, sellerId, userId },
+  tossRef,
 ) {
   return (
     <section className={styles.paymentBox}>
-      {/* 킷페이 */}
+      {/* 킷페이 아직 UI만 있음 (연동전임)*/}
       <div className={styles.methodCard}>
         <button
           className={styles.methodHeader}
@@ -28,13 +32,15 @@ const PaymentSection = forwardRef<TossPaymentHandle, Props>(function PaymentMeth
           aria-expanded={openedMethod === 'wallet'}
           type="button"
         >
-          <span className={styles.radio + (openedMethod === 'wallet' ? ` ${styles.radioOn}` : '')} />
+          <span
+            className={styles.radio + (openedMethod === 'wallet' ? ` ${styles.radioOn}` : '')}
+          />
           <span className={styles.methodText}>킷페이 (포인트 결제)</span>
         </button>
 
         {openedMethod === 'wallet' && (
           <div className={styles.methodBody}>
-            {/* UI만 렌더링: 결제 실행은 페이지에서 */}
+            {/* 결제하기 실행은 페이지 버튼에서 ref로 호출함 */}
             <WalletPayment isOpen onToggle={() => onToggle('wallet')} dueAmount={amount} />
           </div>
         )}
@@ -54,14 +60,18 @@ const PaymentSection = forwardRef<TossPaymentHandle, Props>(function PaymentMeth
 
         {openedMethod === 'Toss' && (
           <div className={styles.methodBody}>
-            {/* 결제 실행은 페이지에서 tossRef.current?.requestPay(...) 호출 */}
+            {/* ✅ TossPayment가 요구하는 모든 필수 props 전달 */}
             <TossPayment
-              ref={tossRef}
+              ref={tossRef} // 페이지에서 tossRef.current?.requestPay(...) 호출
               isOpen
               onToggle={() => onToggle('Toss')}
               amount={amount}
               orderName={orderName}
               redirectUrl={`${window.location.origin}/payment/result?type=booking`}
+              bookingId={bookingId}
+              festivalId={festivalId}
+              sellerId={sellerId}
+              userId={userId}
             />
           </div>
         )}

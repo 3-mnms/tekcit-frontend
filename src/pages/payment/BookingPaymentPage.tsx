@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { type TossPaymentHandle } from '@/components/payment/pay/TossPayment'
 import PaymentInfo from '@/components/payment/pay/PaymentInfo'
 import BookingPaymentHeader from '@/components/payment/pay/BookingPaymentHeader'
-import ReceiveInfo, { type ReceiveType } from '@/components/payment/delivery/ReceiveInfo'
+import ReceiveInfo from '@/components/payment/delivery/ReceiveInfo'
 
 import Button from '@/components/common/button/Button'
 import PasswordInputModal from '@/components/payment/modal/PasswordInputModal'
@@ -25,24 +25,19 @@ const BookingPaymentPage: React.FC = () => {
   const { state } = useLocation()
   const checkout = state as CheckoutState | undefined
 
-  // (2) 파생값 계산 ─ 클라이언트 백업용 금액 계산 등
+  // (2) 파생값 계산 — 클라이언트 백업용 금액/주문명
   const unitPrice = checkout?.unitPrice ?? 0
   const quantity = checkout?.quantity ?? 0
-  const amountClient = useMemo(() => unitPrice * quantity, [unitPrice, quantity])
+  const finalAmount = useMemo(() => unitPrice * quantity, [unitPrice, quantity])
   const orderName = useMemo(() => checkout?.title || '티켓 예매', [checkout?.title])
-  const festivalIdVal = checkout?.festivalId ?? ''
-
-  // 수령 방법 (기본값: QR)
-  const receiveTypeRaw = checkout?.deliveryMethod ?? 'QR'
-  const receiveTypeVal: ReceiveType = receiveTypeRaw === 'DELIVERY' ? 'DELIVERY' : 'QR'
 
   // (3) 초기 진입 가드 ─ 필수 데이터 없으면 알림 후 이전 화면/홈으로 이동
   useEffect(() => {
-    // ✅ 필수 값들 체크: bookingId/sellerId는 예매 단계에서 생성/확보되어 state로 전달된다고 가정
+    // 필수 값 체크
     const hasEssential =
       !!checkout &&
       !!checkout.festivalId &&
-      !!checkout.bookingId &&             
+      !!checkout.bookingId &&
       typeof checkout.sellerId === 'number' &&
       checkout.sellerId > 0 &&
       unitPrice > 0 &&
@@ -54,11 +49,20 @@ const BookingPaymentPage: React.FC = () => {
     }
   }, [checkout, unitPrice, quantity, navigate])
 
-  // 총 결제 금액은 프론트에서
-  const finalAmount = amountClient
-  
-  // (4) 기타 훅/상태 ─ 멍
-  const tossRef = useRef<TossPaymentHandle>(null) // PaymentSection이 forwardRef로 TossPaymentHandle을 전달한다고 가정
+  // (4) 로그인 가드 — 페이지 렌더 전에 구매자 ID 확보(없으면 로그인으로 이동)
+  let buyerId: number
+  try {
+    buyerId = getUserIdSafely()
+  } catch {
+    alert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.')
+    navigate('/login')
+    return null
+  }
+
+  const deliveryMethodRaw = checkout?.deliveryMethod
+
+  // (6) 페이지 상태
+  const tossRef = useRef<TossPaymentHandle>(null) // PaymentSection이 ref를 TossPayment로 전달
   const [openedMethod, setOpenedMethod] = useState<PaymentMethod | null>(null)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState(false)
@@ -84,7 +88,7 @@ const BookingPaymentPage: React.FC = () => {
   // 결제수단 토글 멍
   const toggleMethod = (m: PaymentMethod) => {
     if (isPaying || remainingSeconds <= 0) return
-    setOpenedMethod(prev => (prev === m ? null : m))
+    setOpenedMethod((prev) => (prev === m ? null : m))
     setErr(null)
   }
 
@@ -112,16 +116,6 @@ const BookingPaymentPage: React.FC = () => {
       return
     }
 
-    // 2) 로그인 가드 ─ 미로그인 시 alert 후 로그인 페이지로 보냄
-    let buyerId: number
-    try {
-      buyerId = getUserIdSafely() // ✅ useAuthStore 기반, 미로그인이면 throw
-    } catch {
-      alert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.')
-      navigate('/login')
-      return
-    }
-
     if (isPaying) return
     setErr(null)
 
@@ -136,16 +130,16 @@ const BookingPaymentPage: React.FC = () => {
       const ensuredId = paymentId ?? createPaymentId()
       if (!paymentId) setPaymentId(ensuredId)
 
-      setIssetIsPaying(true)
+      setIsPaying(true)
       try {
         await tossRef.current?.requestPay({
           paymentId: ensuredId,
-          amount: finalAmount,                // ✅ 실제 결제 금액(프론트 계산)
+          amount: finalAmount, // ✅ 실제 결제 금액(프론트 계산)
           orderName,
-          userId: buyerId,                    // ✅ X-User-Id 헤더에 들어갈 값
-          bookingId: checkout.bookingId,      // ✅ 예매 단계에서 확보된 값
+          userId: buyerId, // ✅ X-User-Id 헤더에 들어갈 값
+          bookingId: checkout.bookingId, // ✅ 예매 단계에서 확보된 값
           festivalId: festivalIdVal,
-          sellerId: checkout.sellerId,        // ✅ 예매 단계에서 확보된 값
+          sellerId: checkout.sellerId, // ✅ 예매 단계에서 확보된 값
         })
         // 필요 시 결과 라우팅/검증 추가
       } catch (e) {
@@ -162,7 +156,7 @@ const BookingPaymentPage: React.FC = () => {
     !!openedMethod &&
     !isPaying &&
     remainingSeconds > 0 &&
-    !!checkout?.bookingId &&           // ✅ 필수 데이터 존재해야 버튼 활성
+    !!checkout?.bookingId && // ✅ 필수 데이터 존재해야 버튼 활성
     typeof checkout?.sellerId === 'number' &&
     checkout!.sellerId! > 0
 
@@ -170,8 +164,8 @@ const BookingPaymentPage: React.FC = () => {
     <div className={styles.page}>
       <BookingPaymentHeader
         initialSeconds={DEADLINE_SECONDS}
-        onTick={(sec) => setRemainingSeconds(sec)}   // 매초 남은 시간 반영
-        onExpire={() => setIsTimeUpModalOpen(true)}  // 만료 시 모달 열기
+        onTick={(sec) => setRemainingSeconds(sec)} // 매초 남은 시간 반영
+        onExpire={() => setIsTimeUpModalOpen(true)} // 만료 시 모달 열기
       />
 
       <div className={styles.container} role="main">
@@ -180,7 +174,7 @@ const BookingPaymentPage: React.FC = () => {
           <div className={styles.sectionContainer}>
             <div className={styles.receiveSection}>
               <h2 className={styles.sectionTitle}>수령 방법</h2>
-              <ReceiveInfo value={receiveTypeVal} />
+              <ReceiveInfo rawValue={checkout?.deliveryMethod} />
             </div>
 
             <div>
@@ -192,6 +186,10 @@ const BookingPaymentPage: React.FC = () => {
                 amount={finalAmount}
                 orderName={orderName}
                 errorMsg={err}
+                bookingId={checkout!.bookingId}
+                festivalId={checkout!.festivalId!}
+                sellerId={checkout!.sellerId!}
+                userId={buyerId}
               />
             </div>
           </div>

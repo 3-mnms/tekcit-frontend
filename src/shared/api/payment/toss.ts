@@ -4,13 +4,13 @@ import { api } from '@/shared/config/axios'
 
 /** 결제 사전요청 멍 */
 export const paymentRequest = async (
-  paymentId: string,   // 결제ID (프론트에서 생성함)
-  bookingId: string,   // 가예매ID 
-  festivalId: string,  // 공연ID 
-  sellerId: number,    // 판매자ID
-  amount: number,      // 금액
+  paymentId: string, // 결제ID (프론트에서 생성함)
+  bookingId: string, // 가예매ID
+  festivalId: string, // 공연ID
+  sellerId: number, // 판매자ID
+  amount: number, // 금액
   // buyerId가 userId로 되기 때문에 따로 안적음; X-User-Id 헤더로 덮어씌워짐
-  userId: number,      // 로그인 사용자 ID
+  userId: number, // 로그인 사용자 ID
 ) => {
   const body = {
     paymentId,
@@ -26,7 +26,7 @@ export const paymentRequest = async (
 
   const res = await api.post('/payments/request', body, {
     headers: {
-      'X-User-Id': String(userId), 
+      'X-User-Id': String(userId),
       'Content-Type': 'application/json',
     },
   })
@@ -41,16 +41,16 @@ export const paymentRequest = async (
 export const paymentConfirm = async (paymentId: string) => {
   const MAX_TRIES = 3
 
-  console.log("payment confirm action");
-  
+  console.log('payment confirm action')
+
   for (let tryCount = 0; tryCount < MAX_TRIES; tryCount++) {
     // ⏳ 2/4/6초 대기
     await new Promise((r) => setTimeout(r, (tryCount + 1) * 2000))
 
     try {
       const res = await api.post(`/payments/complete/${paymentId}`)
-      console.log(`paymentConfirm 시도 ${tryCount + 1}:`, res   );
-      
+      console.log(`paymentConfirm 시도 ${tryCount + 1}:`, res)
+
       // ✅ axios는 res.ok가 없음 → status로 확인 멍
       if (res.status >= 200 && res.status < 300) {
         return res.data // 승인 완료 멍
