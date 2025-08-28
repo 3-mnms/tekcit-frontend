@@ -71,10 +71,10 @@
 }
 
 .transferBtn:hover {
-  background-color: #3579cc;
+  background-color: #3585ea;
+   color: whitesmoke;
 }
 
-/* 양도 완료 뱃지 */
 .transferredBadge {
   padding: 0.45rem 1rem;
   background-color: #eef1ff;
@@ -86,7 +86,6 @@
   white-space: nowrap;
 }
 
-/* 반응형 대응 */
 @media (max-width: 768px) {
   .card {
     flex-direction: column;

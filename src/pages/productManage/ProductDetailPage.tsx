@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 import { getProductDetail, deleteProduct } from '@/shared/api/admin/festival';
 import styles from './ProductDetailPage.module.css';
 import type { FestivalScheduleDTO} from '@/models/admin/festival';

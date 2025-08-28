@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 import styles from './PostcodeSearch.module.css';
-import Button from '@components/common/Button';
+import Button from '@components/common/button/Button';
 
 
 // 삐약! Daum Postcode API의 Address 타입을 직접 정의합니다!

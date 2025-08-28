@@ -1,5 +1,5 @@
 .container {
-  border: 1px solid #ddd;
+  border: 1px solid #b4b4b4;
   padding: 1.5rem;
   border-radius: 12px;
   margin-bottom: 2rem;
@@ -64,5 +64,6 @@ input[type="date"] {
 }
 
 .searchBtn:hover {
-  background-color: #377fd0;
+  background-color: #3585ea;
+   color: whitesmoke;
 }

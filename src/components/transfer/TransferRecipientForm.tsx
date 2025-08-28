@@ -1,7 +1,7 @@
 // src/components/transfer/TransferRecipientForm.tsx
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import styles from './TransferRecipientForm.module.css';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 import IdSearchModal, { type AccountMini } from './IdSearchModal';
 
 type Relation = 'FAMILY' | 'FRIEND' | null;

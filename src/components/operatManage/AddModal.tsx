@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Button from '../common/Button';
+import Button from '../common/button/Button';
 import styles from './AddModal.module.css';
 
 export interface NewHostData {

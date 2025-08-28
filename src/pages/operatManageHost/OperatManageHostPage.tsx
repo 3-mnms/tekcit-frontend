@@ -1,7 +1,7 @@
 import React, { useState, useMemo  } from 'react';
 import SearchBar from '@/components/common/SearchBox';
 import HostList from '@/components/operatManage/HostList';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 import styles from './OperatManageHost.module.css';
 import Layout from '@components/layout/Layout';
 import AddModal from '@/components/operatManage/AddModal';

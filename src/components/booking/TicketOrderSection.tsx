@@ -2,7 +2,7 @@ import React from 'react';
 import DatePicker from 'react-datepicker';
 import ko from 'date-fns/locale/ko';
 import 'react-datepicker/dist/react-datepicker.css';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 import styles from './TicketOrderSection.module.css';
 
 type NextPayload = {

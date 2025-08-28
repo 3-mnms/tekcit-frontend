@@ -1,62 +1,38 @@
-import React from 'react'
-import styles from './ReservationTable.module.css'
-import { useNavigate } from 'react-router-dom'
-
-interface Reservation {
-  id: number
-  date: string
-  number: string
-  title: string
-  dateTime: string
-  count: number
-  status: string
-}
+// src/components/my/reservation/ReservationTable.tsx
+import React, { useMemo } from 'react';
+import styles from './ReservationTable.module.css';
+import { useNavigate } from 'react-router-dom';
+import { useTicketsQuery } from '@/models/my/ticket/tanstack-query/useTickets';
+import type { TicketListItem } from '@/models/my/ticket/ticketTypes';
 
 interface Props {
-  startDate: Date | null
-  endDate: Date | null
-  statusFilter: string
+  startDate: Date | null;
+  endDate: Date | null;
+  statusFilter: string; 
 }
 
-const dummyData: Reservation[] = [
-  {
-    id: 1,
-    date: '2025.07.01',
-    number: 'A123456',
-    title: '그린플러그드 페스티벌',
-    dateTime: '2025.10.18 17:00',
-    count: 2,
-    status: '예매 완료',
-  },
-  {
-    id: 2,
-    date: '2025.06.15',
-    number: 'B654321',
-    title: 'GMF 2025',
-    dateTime: '2025.10.19 18:00',
-    count: 1,
-    status: '취소 완료',
-  },
-]
-
 const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { data, isLoading, isError, error } = useTicketsQuery();
 
-  const handleRowClick = (id: number) => {
-    navigate(`/mypage/ticket/detail/${id}`)
-  }
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    return data.filter((item) => {
+      const reservationDate = new Date(item.date.replaceAll('.', '-'));
+      if (startDate && reservationDate < startDate) return false;
+      if (endDate && reservationDate > endDate) return false;
+      if (statusFilter !== '전체' && item.statusLabel !== statusFilter) return false;
+      return true;
+    });
+  }, [data, startDate, endDate, statusFilter]);
 
-  const filteredData = dummyData.filter((item) => {
-    const reservationDate = new Date(item.date.replace(/\./g, '-'))
-    if (startDate && reservationDate < startDate) return false
-    if (endDate && reservationDate > endDate) return false
-    if (statusFilter !== '전체' && item.status !== statusFilter) return false
-    return true
-  })
+  const handleRowClick = (row: TicketListItem) => {
+    navigate(`/mypage/ticket/detail/${row.reservationNumber}`);
+  };
 
   return (
     <div className={styles.tableWrapper}>
-      <table className={styles.table}>
+      <table className={styles.table} aria-label="예매 내역">
         <thead>
           <tr>
             <th>예매일</th>
@@ -68,10 +44,19 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter })
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((item) => (
+          {isLoading && (
+            <tr><td colSpan={6}>불러오는 중…</td></tr>
+          )}
+          {isError && (
+            <tr><td colSpan={6}>목록 조회 실패: {(error as Error)?.message ?? '알 수 없는 오류'}</td></tr>
+          )}
+          {!isLoading && !isError && filteredData.length === 0 && (
+            <tr><td colSpan={6}>조건에 맞는 예매 내역이 없습니다.</td></tr>
+          )}
+          {!isLoading && !isError && filteredData.map((item) => (
             <tr
-              key={item.id}
-              onClick={() => handleRowClick(item.id)}
+              key={item.reservationNumber}
+              onClick={() => handleRowClick(item)}
               className={styles.clickableRow}
             >
               <td>{item.date}</td>
@@ -79,13 +64,13 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter })
               <td>{item.title}</td>
               <td>{item.dateTime}</td>
               <td>{item.count}</td>
-              <td>{item.status}</td>
+              <td>{item.statusLabel}</td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-  )
-}
+  );
+};
 
-export default ReservationTable
+export default ReservationTable;

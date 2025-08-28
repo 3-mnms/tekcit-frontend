@@ -2,6 +2,7 @@
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
   max-width: 640px;
 }
 
@@ -9,7 +10,7 @@
   font-size: 1.5rem;
   font-weight: 700;
   color: #111;
-  margin-bottom: 1rem;
+  margin-bottom: -0.5rem;
 }
 
 .title2 {
@@ -47,4 +48,5 @@
   font-weight: 600;
   font-size: 1rem;
   border-radius: 0.5rem;
+  height: 44px;
 }

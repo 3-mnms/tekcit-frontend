@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import styles from './AnnouncementModal.module.css';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 import type { Announcement, NewAnnouncement } from '@/models/admin/Announcement';
 import type { DayOfWeek, Festival } from '@/models/admin/festival';
 

@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 
 type Props = {
   /** 확정된 파일을 부모에 알려주고 싶으면 사용 */
