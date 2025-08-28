@@ -10,12 +10,19 @@
   margin-bottom: 1.5rem;
 }
 
+/* ✅ 한 줄 그리드 + 가운데 정렬 + 실제 렌더 개수 기준 max-width */
 .cardList {
+  --cols: 5;
+  --count: var(--cols);
+  --gap: 40px; /* ← 기본값, TSX에서 덮어씀 */
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  justify-content: center;
-  align-items: start;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: var(--gap);            /* ← 이것만 바꿔주면 OK */
+  /* ... */
+  max-width: calc(var(--count) * 220px + (var(--count) - 1) * var(--gap));
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
 }
 
 .card {
@@ -27,9 +34,9 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
   width: 100%;
-  max-width: 220px; /* 카드의 최대 너비 */
-  min-width: 160px; /* 카드의 최소 너비 */
-  flex: 1 1 auto;
+  max-width: 220px; /* JS MIN_CARD와 일치 */
+  min-width: 160px;
+  margin: 0 auto; /* 칼럼 내부 수평 중앙 */
 }
 
 .cardLink { display: block; text-decoration: none; color: inherit; }
@@ -37,13 +44,13 @@
 
 .imageWrapper {
   position: relative;
-  aspect-ratio: 2 / 3; /* 포스터 비율 고정 */
+  aspect-ratio: 2 / 3;
   width: 100%;
-  max-width: 180px; /* 카드 안에서 최대 크기 제한 */
+  max-width: 180px;
   border-radius: 12px;
   overflow: hidden;
   background-color: #eee;
-  margin: 0 auto; /* 가운데 정렬 */
+  margin: 0 auto;
 }
 
 .image {
@@ -76,7 +83,6 @@
   font-size: 0.875rem;
   color: #444;
   margin-bottom: 0.2rem;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -84,6 +90,45 @@
 
 .date {
   font-size: 0.875rem;
-  color: #999; /* 기존보다 연한 색상 */
+  color: #999;
   margin-bottom: 0.2rem;
+}
+
+.emptyCard {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+
+  /* 일반 카드와 같은 폭/비율 확보 */
+  width: 100%;
+  max-width: 220px;
+  min-width: 160px;
+  aspect-ratio: 2 / 3;
+  margin: 0 auto;
+
+  /* ✅ 추가: 일반 카드처럼 높이 조금 더 확보 */
+  min-height: 393px; /* 포스터 + 텍스트 합친 대략적인 높이 */
+}
+
+/* 안내 문구: 카드 위에 전체 폭으로 표시 */
+.emptyOverlay {
+  position: absolute;
+  inset: 0;                       /* top:0; right:0; bottom:0; left:0 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;           /* 클릭 막지 않기 */
+  z-index: 1;
+  padding: 0 1rem;                /* 양옆 살짝 여백 */
+}
+
+/* 한 줄 중앙 정렬 문구 */
+.emptyOverlayText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;            /* ✅ 한 줄 유지 */
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,.25); /* 가독성 살짝 업 */
+  margin-bottom: 20%;
 }
