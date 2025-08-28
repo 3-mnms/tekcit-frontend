@@ -44,6 +44,7 @@ const TicketDetailPage: React.FC = () => {
             deliveryMethod={data.deliveryMethod}
             qrIds={data.qrId}
             address={data.address ?? undefined}
+            posterFile={data.posterFile} 
             reserverName={reserverName}
           />
           <PaymentInfoSection 

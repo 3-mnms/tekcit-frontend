@@ -4,22 +4,20 @@ import styles from './TicketInfoCard.module.css'
 import Modal from './QRModal'
 import EntranceCheckModal from '@/components/my/ticket/EntranceCheckModal'
 import { format } from 'date-fns'
-import QRCode from 'react-qr-code'
 import QRViewer from './QRViewer'
 
 type Props = {
   reservationNumber: string
   title: string
   place: string
-  performanceDateISO: string // ex) 2025-10-18T17:00:00
+  performanceDateISO: string
   deliveryMethod: 'MOBILE' | 'PAPER'
   qrIds: string[]
   address?: string
-  reserverName?: string // DTO엔 없으니 옵션
-  // 아래 두 값은 현재 DTO에 없어서 임시로 selectedTicketCount를 쓰는 편.
-  // 필요하면 detail DTO에 매수, 결제정보 등을 추가해줘.
+  posterFile?: string
+  reserverName?: string
   selectedTicketCount?: number
-  totalCountForGauge?: number // 원형/막대그래프용 기준값
+  totalCountForGauge?: number
 }
 
 const deliveryLabel = (t: 'MOBILE' | 'PAPER') => (t === 'MOBILE' ? '모바일 티켓' : '지류 티켓')
@@ -32,6 +30,7 @@ const TicketInfoCard: React.FC<Props> = ({
   deliveryMethod,
   qrIds,
   address,
+  posterFile,
   reserverName,
   selectedTicketCount = 1,
   totalCountForGauge,
@@ -51,11 +50,25 @@ const TicketInfoCard: React.FC<Props> = ({
 
   const gaugeTotal = totalCountForGauge ?? selectedTicketCount
 
+  const posterSrc = useMemo(() => {
+    const src = (posterFile ?? '').trim()
+    return src.length > 0 ? src : '/dummy-poster.jpg'
+  }, [posterFile])
+
   return (
     <>
       <div className={styles.card}>
         <div className={styles.left}>
-          <img src="/dummy-poster.jpg" alt="포스터" className={styles.poster} />
+          <img
+            src={posterSrc}
+            alt={`포스터 - ${title}`}
+            className={styles.poster}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              ;(e.currentTarget as HTMLImageElement).src = '/dummy-poster.jpg'
+            }} 
+          />
         </div>
 
         <div className={styles.right}>

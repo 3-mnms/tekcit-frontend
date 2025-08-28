@@ -3,40 +3,38 @@ export type ReservationStatus = 'CONFIRMED' | 'CANCELED' | 'TEMP_RESERVED' | 'PA
 
 export type TicketResponseDTO = {
   id: number;
-  reservationNumber: string;        // 예매번호
-  performanceDate: string;          // ISO(또는 yyyy-MM-ddTHH:mm:ss) 로컬 DateTime
-  selectedTicketCount: number;      // 매수
-  deliveryMethod: 'MOBILE' | 'PAPER';   // TicketType
-  reservationDate: string;          // yyyy-MM-dd
+  reservationNumber: string;        
+  performanceDate: string;        
+  selectedTicketCount: number; 
+  deliveryMethod: 'MOBILE' | 'PAPER';   
+  reservationDate: string;        
   reservationStatus: ReservationStatus;
-
-  // festival
-  fname: string;    // 공연명
-  fcltynm: string;  // 장소
+  fname: string;   
+  fcltynm: string;  
 };
 
 export type TicketListItem = {
   id: number;
-  date: string;          // 2025.07.01
-  number: string;        // 예매번호
-  title: string;         // 공연명
-  dateTime: string;      // 2025.10.18 17:00
-  count: number;         // 매수
-  statusLabel: string;   // 예매 완료 / 취소 완료 등
+  date: string;      
+  number: string;  
+  title: string;    
+  dateTime: string;    
+  count: number;      
+  statusLabel: string;   
   rawStatus: ReservationStatus;
   reservationNumber: string;
 };
 
-// src/models/ticket/ticketDetailTypes.ts
 export type TicketType = 'MOBILE' | 'PAPER';
 
 export type TicketDetailResponseDTO = {
   id: number;
-  reservationNumber: string;   // 예매 번호
-  performanceDate: string;     // ISO LocalDateTime
-  deliveryMethod: TicketType;  // 'QR' | 'PAPER'
-  qrId: string[];              // QR 코드 문자열 배열
-  address?: string | null;     // 지류 배송 주소 (PAPER일 때)
-  fname: string;               // 공연명
-  fcltynm: string;             // 장소
+  reservationNumber: string;   
+  performanceDate: string;  
+  deliveryMethod: TicketType;
+  qrId: string[];            
+  address?: string | null;    
+  posterFile: string;
+  fname: string;              
+  fcltynm: string;           
 };

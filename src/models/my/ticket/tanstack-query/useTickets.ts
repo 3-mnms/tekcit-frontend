@@ -1,6 +1,6 @@
 // src/models/ticket/tanstack-query/useTickets.ts
 import { useQuery } from '@tanstack/react-query';
-import { getTickets, getTicketDetail } from '@/shared/api/history/ticket';
+import { getTickets, getTicketDetail } from '@/shared/api/my/history/ticket';
 import type { TicketResponseDTO, TicketListItem, ReservationStatus } from '@/models/my/ticket/ticketTypes';
 import { format } from 'date-fns';
 

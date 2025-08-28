@@ -15,13 +15,11 @@ const EditInfoPage: React.FC = () => {
 
   const handleSendCode = () => {
     if (!email) return alert('이메일을 입력해주세요!')
-    // TODO: 이메일로 인증 코드 전송 API 호출
     setIsVerifying(true)
   }
 
   const handleVerifyCode = () => {
     if (!code) return alert('인증 코드를 입력해주세요!')
-    // TODO: 인증 코드 검증 API 호출
     alert('인증 완료!')
   }
 

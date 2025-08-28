@@ -18,20 +18,54 @@
   margin: 1rem 0 1.5rem;
 }
 
+.selectBox {
+  position: relative;
+  width: 160px;
+  /* 셀렉트와 동일 너비 */
+}
+
+/* ▼ 화살표는 여기서 그림 (사라지지 않음) */
+.selectBox::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  /* 클릭 방해 금지 */
+  background-repeat: no-repeat;
+  background-size: 12px 12px;
+  background-image: url("data:image/svg+xml,%3Csvg width='14' height='10' viewBox='0 0 14 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23666' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+}
+
 .statusSelect {
-  padding: 0.4rem 2rem 0.4rem 0.8rem; 
+  height: 40px;
+  width: 100%;
+  padding: 0 2rem 0 0.8rem;
   font-size: 0.95rem;
   border: 1px solid #ccc;
-  border-radius: 6px;
-  background: white;
+  background: #fff;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='14' height='10' viewBox='0 0 14 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23666' stroke-width='2' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.6rem center;
-  background-size: 12px 12px;
-  width: 160px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: none !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
   cursor: pointer;
-  margin-bottom: -10px;
+}
+
+.statusSelect:hover {
+  border-color: #cbd5e1;
+}
+
+.statusSelect:focus {
+  outline: 3px solid #e0efff;
+  border-color: #60a5fa;
+}
+
+.statusSelect::-ms-expand {
+  display: none;
 }
 
 .customReactSelect__control {

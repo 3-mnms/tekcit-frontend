@@ -8,7 +8,7 @@ import type { TicketListItem } from '@/models/my/ticket/ticketTypes';
 interface Props {
   startDate: Date | null;
   endDate: Date | null;
-  statusFilter: string; // '전체' | '예매 완료' | '취소 완료' ...
+  statusFilter: string; 
 }
 
 const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter }) => {
@@ -18,7 +18,6 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter })
   const filteredData = useMemo(() => {
     if (!data) return [];
     return data.filter((item) => {
-      // 예매일 필터 (item.date = 'yyyy.MM.dd')
       const reservationDate = new Date(item.date.replaceAll('.', '-'));
       if (startDate && reservationDate < startDate) return false;
       if (endDate && reservationDate > endDate) return false;
@@ -28,10 +27,7 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter })
   }, [data, startDate, endDate, statusFilter]);
 
   const handleRowClick = (row: TicketListItem) => {
-    // 디테일 API는 reservationNumber로 조회하므로 파라미터도 그것으로!
     navigate(`/mypage/ticket/detail/${row.reservationNumber}`);
-    // 만약 쿼리스트링으로 쓰고 싶다면:
-    // navigate(`/mypage/ticket/detail?reservationNumber=${row.reservationNumber}`);
   };
 
   return (

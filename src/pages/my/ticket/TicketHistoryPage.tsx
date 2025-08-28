@@ -29,25 +29,27 @@ const TicketHistoryPage: React.FC = () => {
       />
 
       <div className={styles.statusFilterWrapper}>
-        <select
-          id="statusFilter"
-          className={styles.statusSelect}
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="" disabled>
-            예매 상태
-          </option>{' '}
-          <option value="전체">전체</option>
-          <option value="결제 완료">결제 완료</option>
-          <option value="취소 완료">취소 완료</option>
-        </select>
+        <div className={styles.selectBox}>
+          <select
+            id="statusFilter"
+            className={styles.statusSelect}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="" disabled>
+              예매 상태
+            </option>
+            <option value="전체">전체</option>
+            <option value="예매 완료">예매 완료</option>
+            <option value="취소 완료">취소 완료</option>
+          </select>
+        </div>
       </div>
-
+      
       <ReservationTable
         startDate={filteredStartDate}
         endDate={filteredEndDate}
-        statusFilter={statusFilter} 
+        statusFilter={statusFilter}
       />
     </div>
   )
