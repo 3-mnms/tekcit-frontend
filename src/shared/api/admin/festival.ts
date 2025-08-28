@@ -1,4 +1,5 @@
 import type { Festival } from '@/models/admin/festival';
+// import type { Festival, StatsData } from '@/models/admin/festival';
 import type { TicketHolderType } from '@/models/admin/User';
 import { api } from '@/shared/config/axios';
 
@@ -72,4 +73,46 @@ export const getAttendeesByFestivalId = async (fid: string): Promise<TicketHolde
   });
   
   return response.data.data || [];
+};
+
+export interface StatsData {
+  ticketCount: number;
+  totalCapacity: number;
+  genderRatio: {
+    male: number;
+    female: number;
+  };
+  ageDistribution: {
+    '10s': number;
+    '20s': number;
+    '30s': number;
+    '40s': number;
+    '50s': number;
+  };
+}
+
+const mockStatsData: StatsData = {
+  ticketCount: 1234,
+  totalCapacity: 5000,
+  genderRatio: {
+    male: 0.348,
+    female: 0.652,
+  },
+  ageDistribution: {
+    '10s': 0.061,
+    '20s': 0.365,
+    '30s': 0.284,
+    '40s': 0.205,
+    '50s': 0.077,
+  },
+};
+
+// 삐약! 🐥 Mock 데이터를 반환하는 함수예요.
+// API가 완성되면 이 함수를 실제 API 호출 코드로 교체하면 돼요.
+export const getStatsData = async (): Promise<StatsData> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockStatsData);
+    }, 500); // 삐약! 🐥 실제 API 호출처럼 0.5초 지연을 줘서 로딩 상태를 볼 수 있게 했어요.
+  });
 };
