@@ -5,8 +5,9 @@ import ko from 'date-fns/locale/ko';
 import 'react-datepicker/dist/react-datepicker.css';
 import styles from './FestivalScheduleSection.module.css';
 
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useFestivalDetail } from '@/models/festival/tanstack-query/useFestivalDetail';
+import { useAuthStore } from '@/shared/storage/useAuthStore';
 
 /** YYYY-MM-DD */
 const ymd = (d: Date) => {
@@ -38,7 +39,7 @@ const toJsDow = (raw?: string): number | undefined => {
 };
 
 const openbookingPopup = (
-  fid: number,
+  fid: string | number,
   date: Date,
   time?: string | null,
   fdfrom?: string | null,
@@ -70,6 +71,10 @@ const FestivalScheduleSection: React.FC = () => {
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   /** 오늘 00:00 */
   const today = useMemo(() => {
@@ -284,9 +289,17 @@ const FestivalScheduleSection: React.FC = () => {
               className={styles.confirmBtn}
               disabled={confirmDisabled}
               onClick={() => {
-                if (!selectedDate) return;
+                // ✅ 로그인 가드: accessToken 없으면 로그인 유도
+                if (!accessToken) {
+                  alert('로그인이 필요한 서비스입니다.');
+                  const redirect = location.pathname + location.search;
+                  navigate(`/login?redirect=${encodeURIComponent(redirect)}`);
+                  return;
+                }
 
-                // ✅ start/end를 YYYY-MM-DD로 정규화해서 같이 넘김
+                // ✅ 로그인된 경우만 예매 팝업 열기
+                if (!selectedDate || !fid) return;
+
                 const fdfrom = startDate ? ymd(startDate) : null;
                 const fdto = endDate ? ymd(endDate) : null;
 
