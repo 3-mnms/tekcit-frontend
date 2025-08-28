@@ -52,7 +52,7 @@ const buildPosterUrl = (f: any): string => {
 };
 
 // 💡 카드/갭(⚠ CSS와 맞추기)
-const CARD_MAX = 220; // px
+const CARD_MAX = 220; // px (카드 최대폭)
 const GAP = 24;       // px (= 1.5rem)
 
 const CategorySection: React.FC = () => {
@@ -95,7 +95,7 @@ const CategorySection: React.FC = () => {
 
   // ✅ 칼럼 수 계산(상위 컨테이너 너비 기준, 1~5로 clamp)
   useEffect(() => {
-    const el = gridRef.current?.parentElement; // grid 자체보다 한 단계 위 컨테이너 기준으로 측정
+    const el = gridRef.current?.parentElement; // grid보다 한 단계 위 컨테이너 기준
     const measure = () => {
       const width =
         el?.getBoundingClientRect().width ??
@@ -164,8 +164,10 @@ const CategorySection: React.FC = () => {
     [finalList, isCategoryPage]
   );
 
-  // ✅ 유령 칼럼 방지: 실제 그릴 칼럼 수 = min(컨테이너 cols, 5, 아이템 수)
-  const effectiveCols = Math.max(1, Math.min(cols, 5, displayed.length));
+  const hasItems = displayed.length > 0;
+
+  // ✅ 실제 그릴 칼럼 수 = min(컨테이너 cols, 5, 아이템 수) — 최소 1칸은 유지(빈카드 자리)
+  const effectiveCols = Math.max(1, Math.min(cols, 5, hasItems ? displayed.length : 1));
 
   return (
     <section className={styles.section}>
@@ -205,80 +207,92 @@ const CategorySection: React.FC = () => {
         )}
       </div>
 
-      {/* ✅ 여러 줄 허용 · 한 줄 최대 5칸 · 가운데 정렬 */}
+      {/* ✅ 여러 줄 허용 · 한 줄 최대 5칸 · 가운데 정렬 + 빈 상태 오버레이 */}
       <div
         className={styles.cardSlider}
         ref={gridRef}
         style={{
-          ['--cols' as any]: effectiveCols, // 1~5 & 아이템 수에 맞춤
+          ['--cols' as any]: effectiveCols, // 1~5 & 아이템 수/자리 유지 반영
           ['--gap'  as any]: `${GAP}px`,
         }}
       >
-        {displayed.map((festival, idx) => {
-          const posterSrc = buildPosterUrl(festival);
-          const fid =
-            (festival as any).fid ??
-            (festival as any).mt20id ??
-            (festival as any).id ??
-            null;
+        {hasItems ? (
+          displayed.map((festival, idx) => {
+            const posterSrc = buildPosterUrl(festival);
+            const fid =
+              (festival as any).fid ??
+              (festival as any).mt20id ??
+              (festival as any).id ??
+              null;
 
-          const key = `${fid ?? 'unknown'}-${idx}`;
-          const title = festival.prfnm;
-          const poster = posterSrc || '/assets/placeholder-poster.png';
+            const key = `${fid ?? 'unknown'}-${idx}`;
+            const title = festival.prfnm;
+            const poster = posterSrc || '/assets/placeholder-poster.png';
 
-          return (
-            <div key={key} className={styles.card}>
-              {fid ? (
-                <Link
-                  to={`/festival/${fid}`}
-                  state={{ fid, title, poster }}
-                  className={styles.cardLink}
-                  aria-label={`${title} 상세보기`}
-                >
-                  <div className={styles.imageWrapper}>
-                    <img
-                      src={poster}
-                      alt={title}
-                      className={styles.image}
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = '/assets/placeholder-poster.png';
-                      }}
-                    />
+            return (
+              <div key={key} className={styles.card}>
+                {fid ? (
+                  <Link
+                    to={`/festival/${fid}`}
+                    state={{ fid, title, poster }}
+                    className={styles.cardLink}
+                    aria-label={`${title} 상세보기`}
+                  >
+                    <div className={styles.imageWrapper}>
+                      <img
+                        src={poster}
+                        alt={title}
+                        className={styles.image}
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = '/assets/placeholder-poster.png';
+                        }}
+                      />
+                    </div>
+                    <h3 className={styles.name}>{title}</h3>
+                    <p className={styles.date}>
+                      {festival.prfpdfrom === festival.prfpdto
+                        ? festival.prfpdfrom
+                        : `${festival.prfpdfrom} ~ ${festival.prfpdto}`}
+                    </p>
+                    <p className={styles.location}>{(festival as any).fcltynm}</p>
+                  </Link>
+                ) : (
+                  <div className={styles.cardStatic} title="상세 이동 불가: 식별자 없음">
+                    <div className={styles.imageWrapper}>
+                      <img
+                        src={poster}
+                        alt={title}
+                        className={styles.image}
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = '/assets/placeholder-poster.png';
+                        }}
+                      />
+                    </div>
+                    <h3 className={styles.name}>{title}</h3>
+                    <p className={styles.date}>
+                      {festival.prfpdfrom === festival.prfpdto
+                        ? festival.prfpdfrom
+                        : `${festival.prfpdfrom} ~ ${festival.prfpdto}`}
+                    </p>
+                    <p className={styles.location}>{(festival as any).fcltynm}</p>
                   </div>
-                  <h3 className={styles.name}>{title}</h3>
-                  <p className={styles.date}>
-                    {festival.prfpdfrom === festival.prfpdto
-                      ? festival.prfpdfrom
-                      : `${festival.prfpdfrom} ~ ${festival.prfpdto}`}
-                  </p>
-                  <p className={styles.location}>{(festival as any).fcltynm}</p>
-                </Link>
-              ) : (
-                <div className={styles.cardStatic} title="상세 이동 불가: 식별자 없음">
-                  <div className={styles.imageWrapper}>
-                    <img
-                      src={poster}
-                      alt={title}
-                      className={styles.image}
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = '/assets/placeholder-poster.png';
-                      }}
-                    />
-                  </div>
-                  <h3 className={styles.name}>{title}</h3>
-                  <p className={styles.date}>
-                    {festival.prfpdfrom === festival.prfpdto
-                      ? festival.prfpdfrom
-                      : `${festival.prfpdfrom} ~ ${festival.prfpdto}`}
-                  </p>
-                  <p className={styles.location}>{(festival as any).fcltynm}</p>
-                </div>
-              )}
+                )}
+              </div>
+            );
+          })
+        ) : (
+          <>
+            {/* 자리를 유지하는 투명 카드 1개 */}
+            <div className={`${styles.card} ${styles.emptyCard}`} aria-hidden />
+
+            {/* 전체 폭 중앙 한 줄 오버레이 문구 */}
+            <div className={styles.emptyOverlay} aria-live="polite">
+              <span className={styles.emptyOverlayText}>현재 예매 가능한 공연이 없습니다.</span>
             </div>
-          );
-        })}
+          </>
+        )}
       </div>
     </section>
   );
