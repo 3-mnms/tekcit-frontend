@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './HotSection.module.css';
-import type { Festival, FestivalWithViews } from '@/models/festival/festivalType';
-import { getFestivals, getFestivalViews } from '@/shared/api/festival/festivalApi';
-import { useParams, Link } from 'react-router-dom'; // ✅ 추가!
+import type { Festival } from '@/models/festival/festivalType';
+import { getFestivals } from '@/shared/api/festival/festivalApi';
+import { useParams, Link } from 'react-router-dom';
 
-// ✅ 라우트 슬러그 -> 그룹 카테고리
+// 라우트 슬러그 -> 그룹 카테고리
 const slugToCategory: Record<string, string> = {
   pop: '대중음악',
   dance: '무용',
@@ -14,7 +14,7 @@ const slugToCategory: Record<string, string> = {
   mix: '복합',
 };
 
-// ✅ 원본 카테고리 -> 그룹 카테고리
+// 원본 카테고리 -> 그룹 카테고리
 const CATEGORY_MAP: Record<string, string> = {
   '대중무용': '무용',
   '무용(서양/한국무용)': '무용',
@@ -26,12 +26,10 @@ const CATEGORY_MAP: Record<string, string> = {
   '서커스/마술': '서커스/마술',
 };
 
-const normalizeCategory = (original?: string): string => {
-  if (!original) return '복합';
-  return CATEGORY_MAP[original] ?? '복합';
-};
+const normalizeCategory = (original?: string): string =>
+  original ? (CATEGORY_MAP[original] ?? '복합') : '복합';
 
-// ✅ 포스터 URL 보정(절대경로/https 강제)
+// 포스터 URL 보정(절대경로/https 강제)
 const buildPosterUrl = (f: Partial<Festival>): string => {
   const raw =
     (f as any)?.poster ??
@@ -39,95 +37,93 @@ const buildPosterUrl = (f: Partial<Festival>): string => {
     (f as any)?.posterFile ??
     (f as any)?.posterUrl ??
     '';
-
   if (!raw) return '';
   if (raw.startsWith('http://') || raw.startsWith('https://')) {
-    // 혼합콘텐츠 방지: http → https
     return raw.replace(/^http:\/\//i, 'https://');
   }
   const path = raw.startsWith('/') ? raw : `/${raw}`;
   return `https://www.kopis.or.kr${encodeURI(path)}`;
 };
 
+// 카드 최대 너비(px) — CSS .card max-width 와 반드시 동일
+const CARD_MAX = 220;
+const GAP = 24; // 1.5rem
+
 const HotSection: React.FC = () => {
-  const { name: slug } = useParams<{ name?: string }>(); // ex) /category/theater
-  const [hotFestivals, setHotFestivals] = useState<FestivalWithViews[]>([]);
-  const [visibleCount, setVisibleCount] = useState(5);
+  const { name: slug } = useParams<{ name?: string }>();
+  const [festivals, setFestivals] = useState<Festival[]>([]);
+
+  // 🔑 칼럼 수는 section(상위 컨테이너)의 실제 너비로 계산
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const [cols, setCols] = useState(5);
 
   const selectedCategory = useMemo(
     () => (slug ? slugToCategory[slug] ?? null : null),
     [slug]
   );
 
-  // ✅ 반응형 카드 개수
+  // 상위 컨테이너 폭 기준으로 1~5 칼럼 산정 (겹침/유령칼럼 방지)
   useEffect(() => {
-    const handleResize = () => {
-      const ratio = window.innerWidth / window.innerHeight;
-      if (ratio < 0.7) setVisibleCount(2);      // 모바일 세로형
-      else if (ratio < 0.9) setVisibleCount(3); // 태블릿
-      else if (ratio < 1.2) setVisibleCount(4); // 노트북
-      else setVisibleCount(5);                  // 와이드
+    const el = sectionRef.current;
+    const updateCols = () => {
+      const width =
+        el?.getBoundingClientRect().width ??
+        document.documentElement.clientWidth ??
+        window.innerWidth;
+
+      // (cols * CARD_MAX) + (cols - 1) * GAP <= width
+      const possible = Math.floor((width + GAP) / (CARD_MAX + GAP));
+      const next = Math.max(1, Math.min(5, possible));
+      setCols(next);
     };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    updateCols();
+    const ro = new ResizeObserver(updateCols);
+    if (el) ro.observe(el);
+    window.addEventListener('resize', updateCols);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateCols);
+    };
   }, []);
 
+  // ✅ 데이터 로드 (/festival 자체가 조회수 내림차순 정렬)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const festivals: Festival[] = await getFestivals();
-
-        // ✅ 백엔드 카테고리 필드 (이제 genrenm이 표준)
-        const getOriginalCategory = (f: Festival): string =>
-          f.genrenm ??
-          (f as any).category ??
-          (f as any).genre ??
-          (f as any).fcategory ??
-          (f as any).fctg ??
-          '';
-
-        const filtered = selectedCategory
-          ? festivals.filter((f) => normalizeCategory(getOriginalCategory(f)) === selectedCategory)
-          : festivals;
-
-        // ✅ 조회수 가져와 랭킹 정렬 (상위 20개만 계산)
-        const withViewsPromises = filtered.slice(0, 20).map(async (festival) => {
-          const fid = festival.fid;
-          let views = 0;
-          if (fid) {
-            try {
-              views = await getFestivalViews(fid);
-            } catch {
-              views = 0;
-            }
-          }
-          return { ...festival, views } as FestivalWithViews;
-        });
-
-        const withViews = await Promise.all(withViewsPromises);
-        withViews.sort((a, b) => b.views - a.views);
-        setHotFestivals(withViews);
+        const list = await getFestivals();
+        setFestivals(list); // 이미 정렬돼서 옴!
       } catch (err) {
         console.error('🔥 Hot 공연 불러오기 실패', err);
-        setHotFestivals([]);
+        setFestivals([]);
       }
     };
-
     fetchData();
-  }, [selectedCategory]);
+  }, []);
+
+  // 카테고리 선택 시 필터 (정렬은 API 결과 유지)
+  const filtered = useMemo(() => {
+    if (!selectedCategory) return festivals;
+    return festivals.filter((f) => normalizeCategory((f as any).genrenm) === selectedCategory);
+  }, [festivals, selectedCategory]);
+
+  // 실제 렌더 개수 = min(계산된 칼럼 수, 데이터 수, 5)
+  const count = Math.min(cols, filtered.length, 5);
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} ref={sectionRef}>
       <h2 className={styles.title}>
         {selectedCategory ? `${selectedCategory} HOT 공연` : '오늘의 HOT 공연'}
       </h2>
 
-      <div className={styles.cardList}>
-        {hotFestivals.slice(0, visibleCount).map((festival, index) => {
+      {/* CSS 변수로 칼럼 수 동기화(유령 칼럼 방지 + 가운데 정렬) */}
+      <div
+        className={styles.cardList}
+        style={{ ['--cols' as any]: count }}
+      >
+        {filtered.slice(0, count).map((festival, index) => {
           const key = `${festival.fid || (festival as any).id || 'unknown'}-${index}`;
           const posterSrc = buildPosterUrl(festival);
-
           const to = festival.fid ? `/festival/${festival.fid}` : undefined;
 
           const CardInner = (
@@ -159,14 +155,12 @@ const HotSection: React.FC = () => {
           return (
             <div key={key} className={styles.card}>
               {to ? (
-                // ✅ 링크로 전체 카드 클릭 가능 + state로 3개(+) 전달
                 <Link
                   to={to}
                   state={{
-                    fid: festival.fid,            // ① fid (백업)
-                    title: festival.prfnm,        // ② 공연명
-                    poster: posterSrc || '/assets/placeholder-poster.png', // ③ 포스터
-                    // (보너스 프리뷰) UX 부드럽게
+                    fid: festival.fid,
+                    title: festival.prfnm,
+                    poster: posterSrc || '/assets/placeholder-poster.png',
                     prfpdfrom: festival.prfpdfrom,
                     prfpdto: festival.prfpdto,
                     fcltynm: festival.fcltynm,
@@ -177,7 +171,6 @@ const HotSection: React.FC = () => {
                   {CardInner}
                 </Link>
               ) : (
-                // fid 없으면 정적 카드
                 <div className={styles.cardStatic} title="상세 이동 불가: 식별자 없음">
                   {CardInner}
                 </div>

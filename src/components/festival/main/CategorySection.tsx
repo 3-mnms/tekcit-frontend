@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './CategorySection.module.css';
 import { getFestivals } from '@/shared/api/festival/festivalApi';
 import type { Festival } from '@/models/festival/festivalType';
@@ -11,7 +11,8 @@ const canon = (s?: string) =>
     .replace(/\s+/g, ' ')
     .replace(/[()（）]/g, (m) => (m === '(' || m === '（' ? '(' : ')'));
 
-const MAX_ITEMS = 6;
+// 💡 메인에서는 5개만!
+const MAX_MAIN_ITEMS = 5;
 
 /** 원본 -> 그룹 */
 const CATEGORY_MAP: Record<string, string> = {
@@ -39,7 +40,7 @@ const SLUG_TO_GROUP: Record<string, string> = {
   mix: '복합',
 };
 
-/** 🔧 포스터 URL 보정(키 통합 + http→https + 상대경로 보정) */
+/** 🔧 포스터 URL 보정 */
 const buildPosterUrl = (f: any): string => {
   const raw = f?.poster ?? f?.poster_file ?? f?.posterFile ?? f?.posterUrl ?? '';
   if (!raw) return '';
@@ -50,6 +51,10 @@ const buildPosterUrl = (f: any): string => {
   return `https://www.kopis.or.kr${encodeURI(path)}`;
 };
 
+// 💡 카드/갭(⚠ CSS와 맞추기)
+const CARD_MAX = 220; // px
+const GAP = 24;       // px (= 1.5rem)
+
 const CategorySection: React.FC = () => {
   const { slug, name, category } = useParams<{ slug?: string; name?: string; category?: string }>();
   const rawSlug = slug ?? name ?? category ?? null;
@@ -59,6 +64,10 @@ const CategorySection: React.FC = () => {
   const [festivals, setFestivals] = useState<Festival[]>([]);
   const [currentGroup, setCurrentGroup] = useState<string>(groupFromSlug || GROUP_TABS[0]);
   const [selectedChild, setSelectedChild] = useState<string | null>(null);
+
+  // ✅ 컨테이너 기준 칼럼 수(1~5) 계산
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const [cols, setCols] = useState<number>(5);
 
   useEffect(() => {
     (async () => {
@@ -83,6 +92,28 @@ const CategorySection: React.FC = () => {
     setCurrentGroup(g);
     setSelectedChild(null);
   };
+
+  // ✅ 칼럼 수 계산(상위 컨테이너 너비 기준, 1~5로 clamp)
+  useEffect(() => {
+    const el = gridRef.current?.parentElement; // grid 자체보다 한 단계 위 컨테이너 기준으로 측정
+    const measure = () => {
+      const width =
+        el?.getBoundingClientRect().width ??
+        document.documentElement.clientWidth ??
+        window.innerWidth;
+      const possible = Math.floor((width + GAP) / (CARD_MAX + GAP));
+      const next = Math.max(1, Math.min(5, possible));
+      setCols(next);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (el) ro.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
 
   // 1) 현재 그룹 데이터
   const inGroup = useMemo(
@@ -118,16 +149,23 @@ const CategorySection: React.FC = () => {
     }
   }, [isCategoryPage, showChildButtons, presentChildren, selectedChild]);
 
-  // 5) 최종 리스트
+  // 5) 최종 리스트 (카테고리 페이지에서만 하위 필터 적용)
   const finalList = useMemo(() => {
     const base =
-      showChildButtons && selectedChild
+      isCategoryPage && showChildButtons && selectedChild
         ? inGroup.filter((f) => canon((f as any).genrenm) === canon(selectedChild))
         : inGroup;
     return base;
-  }, [inGroup, showChildButtons, selectedChild]);
+  }, [inGroup, isCategoryPage, showChildButtons, selectedChild]);
 
-  const displayed = useMemo(() => finalList.slice(0, MAX_ITEMS), [finalList]);
+  // ✅ 메인(비카테고리)에서는 5개만, 카테고리 페이지에서는 전체
+  const displayed = useMemo(
+    () => (isCategoryPage ? finalList : finalList.slice(0, MAX_MAIN_ITEMS)),
+    [finalList, isCategoryPage]
+  );
+
+  // ✅ 유령 칼럼 방지: 실제 그릴 칼럼 수 = min(컨테이너 cols, 5, 아이템 수)
+  const effectiveCols = Math.max(1, Math.min(cols, 5, displayed.length));
 
   return (
     <section className={styles.section}>
@@ -167,11 +205,17 @@ const CategorySection: React.FC = () => {
         )}
       </div>
 
-      <div className={styles.cardSlider}>
+      {/* ✅ 여러 줄 허용 · 한 줄 최대 5칸 · 가운데 정렬 */}
+      <div
+        className={styles.cardSlider}
+        ref={gridRef}
+        style={{
+          ['--cols' as any]: effectiveCols, // 1~5 & 아이템 수에 맞춤
+          ['--gap'  as any]: `${GAP}px`,
+        }}
+      >
         {displayed.map((festival, idx) => {
           const posterSrc = buildPosterUrl(festival);
-
-          // ✅ fid 후보 통합 (kopis mt20id 포함)
           const fid =
             (festival as any).fid ??
             (festival as any).mt20id ??
@@ -186,12 +230,8 @@ const CategorySection: React.FC = () => {
             <div key={key} className={styles.card}>
               {fid ? (
                 <Link
-                  to={`/festival/${fid}`}           // ✅ 디테일에서 받는 1개(라우트 파라미터)
-                  state={{                          // ✅ 카드에서 넘기는 3개
-                    fid,                            // ① fid (state에도 백업)
-                    title,                          // ② 공연명
-                    poster,                         // ③ 포스터
-                  }}
+                  to={`/festival/${fid}`}
+                  state={{ fid, title, poster }}
                   className={styles.cardLink}
                   aria-label={`${title} 상세보기`}
                 >
