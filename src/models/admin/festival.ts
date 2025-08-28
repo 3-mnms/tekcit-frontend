@@ -59,8 +59,20 @@ export const initialProductData: Festival = {
     schedules: [],
 };
 
-export interface ApiResponse<T> {
-    data: T;
-    success: boolean;
-    message: string;
+export interface StatsData {
+  ticketCount: number; // 현재 예매 수
+  totalCapacity: number; // 총 목표 수
+  genderRatio: {
+    male: number; // 남성 비율 (0.0 ~ 1.0)
+    female: number; // 여성 비율 (0.0 ~ 1.0)
+  };
+  ageDistribution: {
+    '10s': number;
+    '20s': number;
+    '30s': number;
+    '40s': number;
+    '50s': number;
+  };
 }
+
+
