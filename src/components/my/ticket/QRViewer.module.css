@@ -1,0 +1,45 @@
+.root {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.viewport {
+  width: var(--qr-size);
+  height: var(--qr-size); /* ✅ QR 한 장 크기만큼 고정 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.captionRow { font-size: 0.85rem; }
+.caption { font-weight: 600; }
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+}
+
+.navBtn {
+  border: none;
+  background: #f1f5f9;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.navBtn:disabled { opacity: .4; cursor: default; }
+
+.dots { display: flex; gap: 6px; }
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 9999px;
+  background: #d1d5db;
+  border: none; cursor: pointer;
+}
+.activeDot { background: #4D9AFD; }
+
+.empty { padding: .5rem; color: #6b7280; }
