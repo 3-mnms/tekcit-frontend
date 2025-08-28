@@ -27,12 +27,11 @@ const UserDropdown: React.FC = () => {
     if (loading) return;
     setLoading(true);
     try {
-      await logoutApi(); // 서버 세션/쿠키 정리 시도
+      await logoutApi(); 
     } catch (e) {
       console.error('logout failed (server):', e);
-      // 서버 에러여도 클라 상태는 정리한다
     } finally {
-      logout(); // ✅ accessToken / user / isLoggedIn 모두 초기화
+      logout();
       setLoading(false);
       alert('로그아웃!');
       navigate('/login');
@@ -53,9 +52,9 @@ const UserDropdown: React.FC = () => {
 
       <PointBox />
 
-      <MenuItem label="내 정보 수정" />
-      <MenuItem label="내 티켓" />
-      <MenuItem label="북마크" />
+      <MenuItem label="내 정보 수정" onClick={() => navigate('/mypage/myinfo')} />
+      <MenuItem label="내 티켓"   onClick={() => navigate('/mypage/ticket')} />
+      <MenuItem label="북마크"     onClick={() => navigate('/mypage/bookmark')} />
 
       <button
         className={styles.logoutButton}

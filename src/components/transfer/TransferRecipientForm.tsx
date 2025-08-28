@@ -9,14 +9,11 @@ type Relation = 'FAMILY' | 'FRIEND' | null;
 const TransferRecipientForm: React.FC = () => {
   const [relation, setRelation] = useState<Relation>(null);
 
-  // ✅ 폼이 소유
   const [loginId, setLoginId] = useState('');  // readOnly 표시
   const [name, setName] = useState('');        // 항상 readOnly
 
-  // 모달 열림 상태(폼이 관리)
   const [searchOpen, setSearchOpen] = useState(false);
 
-  // 파일/미리보기 (그대로 유지)
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [tempFile, setTempFile] = useState<File | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -86,7 +83,6 @@ const TransferRecipientForm: React.FC = () => {
         </label>
       </div>
 
-      {/* ✅ 여기에서 라벨/인풋/버튼 직접 배치 */}
       <label className={styles.label}>
         전송할 EMAIL
         <div className={styles.idRow}>
@@ -108,7 +104,6 @@ const TransferRecipientForm: React.FC = () => {
         </div>
       </label>
 
-      {/* 이름(읽기전용) */}
       <label className={styles.label}>
         이름
         <input
