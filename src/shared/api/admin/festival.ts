@@ -78,6 +78,7 @@ export const getAttendeesByFestivalId = async (fid: string): Promise<TicketHolde
 export interface StatsData {
   ticketCount: number;
   totalCapacity: number;
+  fname: string;
   genderRatio: {
     male: number;
     female: number;
@@ -94,6 +95,7 @@ export interface StatsData {
 const mockStatsData: StatsData = {
   ticketCount: 1234,
   totalCapacity: 5000,
+  fname: "MockFestival",
   genderRatio: {
     male: 0.348,
     female: 0.652,
