@@ -1,32 +1,31 @@
+// src/components/transfer/TransferRecipientForm.tsx
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import styles from './TransferRecipientForm.module.css';
 import Button from '@/components/common/button/Button';
-import IdSearchPicker, { type AccountMini } from './IdSearchPicker';
+import IdSearchModal, { type AccountMini } from './IdSearchModal';
 
 type Relation = 'FAMILY' | 'FRIEND' | null;
 
 const TransferRecipientForm: React.FC = () => {
   const [relation, setRelation] = useState<Relation>(null);
 
-  const [loginId, setLoginId] = useState('');  // ✅ readOnly 표시 전용
-  const [name, setName] = useState('');        // ✅ 항상 readOnly
+  // ✅ 폼이 소유
+  const [loginId, setLoginId] = useState('');  // readOnly 표시
+  const [name, setName] = useState('');        // 항상 readOnly
 
-  // 확정된 파일
+  // 모달 열림 상태(폼이 관리)
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // 파일/미리보기 (그대로 유지)
   const [proofFile, setProofFile] = useState<File | null>(null);
-
-  // 모달 미리보기용 임시 상태
   const [tempFile, setTempFile] = useState<File | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
   const tempUrl = useMemo(() => (tempFile ? URL.createObjectURL(tempFile) : ''), [tempFile]);
 
-  useEffect(() => {
-    return () => { if (tempUrl) URL.revokeObjectURL(tempUrl); };
-  }, [tempUrl]);
+  useEffect(() => () => { if (tempUrl) URL.revokeObjectURL(tempUrl); }, [tempUrl]);
 
-  // 모달 열렸을 때 배경 스크롤 잠금
   useEffect(() => {
     const prev = document.body.style.overflow;
     if (modalOpen) document.body.style.overflow = 'hidden';
@@ -50,14 +49,8 @@ const TransferRecipientForm: React.FC = () => {
     setPreviewLoading(true);
   };
 
-  const confirmFile = () => {
-    setProofFile(tempFile);
-    setModalOpen(false);
-  };
-  const cancelFile = () => {
-    setTempFile(null);
-    setModalOpen(false);
-  };
+  const confirmFile = () => { setProofFile(tempFile); setModalOpen(false); };
+  const cancelFile = () => { setTempFile(null); setModalOpen(false); };
 
   return (
     <form
@@ -93,17 +86,29 @@ const TransferRecipientForm: React.FC = () => {
         </label>
       </div>
 
-      {/* 아이디는 검색으로만 입력 가능 */}
-      <IdSearchPicker
-        idValue={loginId}
-        onSelect={(acc: AccountMini) => {
-          setLoginId(acc.id);
-          setName(acc.name);
-        }}
-        buttonLabel="이메일 검색"
-      />
+      {/* ✅ 여기에서 라벨/인풋/버튼 직접 배치 */}
+      <label className={styles.label}>
+        전송할 EMAIL
+        <div className={styles.idRow}>
+          <input
+            className={styles.inputShort}
+            value={loginId}
+            placeholder="이메일 검색으로만 입력됩니다"
+            readOnly
+            aria-readonly="true"
+            onKeyDown={(e) => e.preventDefault()}
+          />
+          <Button
+            type="button"
+            className={styles.searchBtn}  // ⬅️ 버튼 크기/라운드 보정
+            onClick={() => setSearchOpen(true)}
+          >
+            이메일 검색
+          </Button>
+        </div>
+      </label>
 
-      {/* 이름은 항상 readOnly */}
+      {/* 이름(읽기전용) */}
       <label className={styles.label}>
         이름
         <input
@@ -116,12 +121,12 @@ const TransferRecipientForm: React.FC = () => {
         />
       </label>
 
+      {/* 가족 증빙 업로드 */}
       {relation === 'FAMILY' && (
         <>
           <div className={styles.proofWrap}>
             <span className={styles.proofLabel}>가족증명서</span>
 
-            {/* 숨겨진 input */}
             <input
               ref={fileInputRef}
               type="file"
@@ -129,7 +134,7 @@ const TransferRecipientForm: React.FC = () => {
               className={styles.fileInput}
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                e.currentTarget.value = ''; // 같은 파일 재선택 허용
+                e.currentTarget.value = '';
                 handleFileChange(f);
               }}
             />
@@ -161,7 +166,7 @@ const TransferRecipientForm: React.FC = () => {
         다음
       </Button>
 
-      {/* ===== 모달 ===== */}
+      {/* ===== 파일 미리보기 모달 ===== */}
       {modalOpen && (
         <div className={styles.modalBackdrop}>
           <div className={styles.modalCard}>
@@ -206,6 +211,16 @@ const TransferRecipientForm: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* ===== 이메일 검색 모달 ===== */}
+      <IdSearchModal
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onSelect={(acc: AccountMini) => {
+          setLoginId(acc.id);
+          setName(acc.name);
+        }}
+      />
     </form>
   );
 };

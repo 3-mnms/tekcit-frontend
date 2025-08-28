@@ -210,16 +210,16 @@ const ProductRegisterPage: React.FC = () => {
                             <div className={styles.formItem}>
                                 <label>5. 공연 시작일</label>
                                 <DatePicker 
-                                    name="fdto" 
-                                    value={productData.fdto} 
+                                    name="fdfrom" 
+                                    value={productData.fdfrom} 
                                     onChange={handleChange} 
                                 />
                             </div>
                             <div className={styles.formItem}>
                                 <label>종료일</label>
                                 <DatePicker 
-                                    name="fdfrom" 
-                                    value={productData.fdfrom} 
+                                    name="fdto" 
+                                    value={productData.fdto} 
                                     onChange={handleChange} 
                                 />
                             </div>

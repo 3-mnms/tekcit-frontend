@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import styles from './AnnouncementModal.module.css';
-import { useQuery } from '@tanstack/react-query';
-import { getProducts } from '@/shared/api/admin/festival';
 import Button from '@/components/common/button/Button';
-import type { Festival } from '@/models/admin/festival';
+import type { Announcement, NewAnnouncement } from '@/models/admin/Announcement';
+import type { DayOfWeek, Festival } from '@/models/admin/festival';
 
 // --- 작은 컴포넌트들 
 interface CalendarProps {
@@ -11,14 +11,16 @@ interface CalendarProps {
   onDateSelect: (date: Date) => void;
   minDate?: string;
   maxDate?: string;
+  availableDaysOfWeek?: DayOfWeek[];
 }
 
-const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, minDate, maxDate }) => {
+const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, minDate, maxDate, availableDaysOfWeek}) => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     useEffect(() => { if (minDate) setCurrentMonth(new Date(minDate)); }, [minDate]);
     const startDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
     const endDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
     const startDay = startDate.getDay();
+    const dayOfWeekMap: DayOfWeek[] = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const dates = [];
     for (let i = 0; i < startDay; i++) { dates.push(<div key={`empty-${i}`} className={styles.calendarDayEmpty}></div>); }
     for (let i = 1; i <= endDate.getDate(); i++) {
@@ -26,8 +28,20 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, minDate
         const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString();
         const minDateTime = minDate ? new Date(minDate).setHours(0,0,0,0) : 0;
         const maxDateTime = maxDate ? new Date(maxDate).setHours(0,0,0,0) : Infinity;
-        const isOutOfRange = date.getTime() < minDateTime || date.getTime() > maxDateTime;
-        dates.push(<button key={i} className={`${styles.calendarDay} ${isSelected ? styles.selected : ''} ${isOutOfRange ? styles.disabled : ''}`} onClick={() => !isOutOfRange && onDateSelect(date)} disabled={isOutOfRange}>{i}</button>);
+        const currentDayString = dayOfWeekMap[date.getDay()];
+        const isDayUnavailable = availableDaysOfWeek && availableDaysOfWeek.length > 0 && !availableDaysOfWeek.includes(currentDayString);
+        const isDisabled = date.getTime() < minDateTime || date.getTime() > maxDateTime || isDayUnavailable;
+
+        dates.push(
+            <button 
+                key={i} 
+                className={`${styles.calendarDay} ${isSelected ? styles.selected : ''} ${isDisabled ? styles.disabled : ''}`} 
+                onClick={() => !isDisabled && onDateSelect(date)} 
+                disabled={isDisabled}
+            >
+                {i}
+            </button>
+        );
     }
     const changeMonth = (amount: number) => { setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + amount, 1)); };
     return (<div className={styles.calendar}><div className={styles.calendarHeader}><button onClick={() => changeMonth(-1)}>&lt;</button><span>{`${currentMonth.getFullYear()}년 ${currentMonth.getMonth() + 1}월`}</span><button onClick={() => changeMonth(1)}>&gt;</button></div><div className={styles.calendarGrid}>{['일', '월', '화', '수', '목', '금', '토'].map(day => <div key={day} className={styles.calendarDayName}>{day}</div>)}{dates}</div></div>);
@@ -48,11 +62,12 @@ const TimeSelector: React.FC<TimeSelectorProps> = ({ selectedTime, onTimeSelect,
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newAnnouncement: any) => void;
-  editTarget?: any;
+  onSave: (data: Announcement | NewAnnouncement) => void; 
+  editTarget?: Announcement | null;
+  festivals: Festival[];
 }
 
-const AnnouncementModal: React.FC<Props> = ({ isOpen, onClose, onSave, editTarget }) => {
+const AnnouncementModal: React.FC<Props> = ({ isOpen, onClose, onSave, editTarget, festivals}) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [selectedFestivalId, setSelectedFestivalId] = useState<string>('');
@@ -61,24 +76,41 @@ const AnnouncementModal: React.FC<Props> = ({ isOpen, onClose, onSave, editTarge
   const [dispatchDate, setDispatchDate] = useState('');
   const [dispatchTime, setDispatchTime] = useState('');
 
-  const { data: festivals, isLoading: isLoadingFestivals } = useQuery({
-      queryKey: ['products'],
-      queryFn: () => getProducts(),
-      enabled: isOpen,
-      select: (response) => response.data,
-  });
+  const isLoadingFestivals = festivals.length === 0;
 
   const selectedFestival = useMemo(() => {
     return festivals?.find(f => f.fid === selectedFestivalId);
   }, [festivals, selectedFestivalId]);
 
-  const festivalTimes = useMemo(() => {
-    if (!selectedFestival) return [];
-    // TODO: API 응답 Festival 타입에 availableTimes: string[] 같은 속성이 필요해요!
-    if (selectedFestival.detail?.availableTimes) {
-        return selectedFestival.detail.availableTimes;
+  useEffect(() => {
+  if (selectedFestival) {
+    console.log("선택된 축제 정보:", selectedFestival);
+  }
+}, [selectedFestival]);
+
+  const availableTimes = useMemo(() => {
+    if (!selectedFestival || !selectedDate) {
+      return [];
     }
-    return ['14:00', '17:00', '19:30'];
+    const dayIndex = selectedDate.getDay();
+    const dayOfWeekMap: DayOfWeek[] = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const targetDayString = dayOfWeekMap[dayIndex];
+
+    const dailySchedules = selectedFestival.schedules.filter(
+    (item) => item.dayOfWeek === targetDayString
+    );
+    const times = dailySchedules.map((schedule) => schedule.time);
+
+    return times;
+    
+  }, [selectedFestival, selectedDate]);
+
+  const availableDaysOfWeek = useMemo(() => {
+    if (!selectedFestival) {
+      return []; // 축제가 없으면 빈 배열
+    }
+    const uniqueDays = new Set(selectedFestival.schedules.map(schedule => schedule.dayOfWeek));
+    return Array.from(uniqueDays);
   }, [selectedFestival]);
 
   useEffect(() => {
@@ -87,20 +119,30 @@ const AnnouncementModal: React.FC<Props> = ({ isOpen, onClose, onSave, editTarge
   }, [selectedFestivalId]);
 
   useEffect(() => {
-    if (editTarget && isOpen) {
-      setTitle(editTarget.title);
-      setContent(editTarget.content);
-      setSelectedFestivalId(editTarget.festivalId);
-    } else {
-      setTitle('');
-      setContent('');
-      setSelectedFestivalId('');
-      setSelectedDate(null);
-      setSelectedTime(null);
-      setDispatchDate('');
-      setDispatchTime('');
+    if (isOpen && editTarget) {
+        setTitle(editTarget.title);
+        setContent(editTarget.body);
+        setSelectedFestivalId(editTarget.fid);
+
+        const targetStartAt = new Date(editTarget.startAt);
+        setSelectedDate(targetStartAt);
+        setSelectedTime(targetStartAt.toTimeString().slice(0, 5));
+
+        const [dispatchDatePart, dispatchTimePart] = editTarget.sendTime.split('T');
+        setDispatchDate(dispatchDatePart);
+        // HH:MM 부분만 가져오기
+        setDispatchTime(dispatchTimePart.slice(0, 5));
+
+    } else if (isOpen) {
+        setTitle('');
+        setContent('');
+        setSelectedFestivalId('');
+        setSelectedDate(null);
+        setSelectedTime(null);
+        setDispatchDate('');
+        setDispatchTime('');
     }
-  }, [editTarget, isOpen]);
+}, [editTarget, isOpen]);
 
   if (!isOpen) return null;
 
@@ -109,23 +151,37 @@ const AnnouncementModal: React.FC<Props> = ({ isOpen, onClose, onSave, editTarge
       alert('모든 항목을 선택하고 입력해주세요!');
       return;
     }
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, '0'); // getMonth()는 0부터 시작하므로 +1, padStart로 09처럼 만들어줘요.
+    const day = String(selectedDate.getDate()).padStart(2, '0');
+    //    결과: "2025-09-15T18:00"
+    const startAtString = `${year}-${month}-${day}T${selectedTime}:00`;
+  
+    const sendTimeString = `${dispatchDate}T${dispatchTime}:00`;
 
-    const formattedDispatchDateTime = `${dispatchDate.replace(/-/g, '')} ${dispatchTime}`;
+    const saveData: NewAnnouncement = {
+    title,
+    body: content, // content -> body
+    fid: selectedFestivalId, // festivalId -> fid
+    fname: selectedFestival?.fname || '',
+    startAt: startAtString,
+    sendTime: sendTimeString,
+  };
+  console.log("서버로 전송하는 데이터:", saveData); 
 
-    const newAnnouncement = {
-      id: editTarget ? editTarget.id : Date.now(),
-      title,
-      content,
-      festivalId: selectedFestivalId,
-      festivalName: selectedFestival?.fname,
-      targetDate: selectedDate.toISOString().slice(0, 10),
-      targetTime: selectedTime,
-      dispatchDateTime: formattedDispatchDateTime, 
-      createdAt: new Date().toISOString(),
-    };
-    
-    onSave(newAnnouncement);
-    onClose();
+  if (editTarget) {
+    // 수정일 경우, scheduleId를 포함한 완전한 객체를 onSave로 넘겨줘요.
+    onSave({
+      ...saveData,
+      scheduleId: editTarget.scheduleId,
+      sent: editTarget.sent, // sent 같은 기존 상태도 함께 넘겨줘야 해요.
+    });
+  } else {
+    // 등록일 경우, NewAnnouncement 객체를 넘겨줘요.
+    onSave(saveData);
+  }
+
+  onClose();
   };
 
   return (
@@ -162,8 +218,9 @@ const AnnouncementModal: React.FC<Props> = ({ isOpen, onClose, onSave, editTarge
                             <Calendar 
                                 selectedDate={selectedDate}
                                 onDateSelect={setSelectedDate}
-                                minDate={selectedFestival?.prfpdfrom}
-                                maxDate={selectedFestival?.prfpdto}
+                                minDate={selectedFestival?.fdfrom}
+                                maxDate={selectedFestival?.fdto}
+                                availableDaysOfWeek={availableDaysOfWeek}
                             />
                         </div>
                         <div className={styles.formGroup}>
@@ -171,7 +228,7 @@ const AnnouncementModal: React.FC<Props> = ({ isOpen, onClose, onSave, editTarge
                             <TimeSelector 
                                 selectedTime={selectedTime} 
                                 onTimeSelect={setSelectedTime}
-                                availableTimes={festivalTimes}
+                                availableTimes={availableTimes}
                             />
                         </div>
                     </>

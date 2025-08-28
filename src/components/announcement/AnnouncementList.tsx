@@ -22,7 +22,7 @@ const AnnouncementList: React.FC<Props> = ({ announcements, onDelete, onEdit }) 
       </thead>
       <tbody>
         {announcements.map((a) => (
-          <tr key={a.fid}>
+          <tr key={a.scheduleId}>
             <td>{a.fname}</td>
             <td>{a.title}</td>
             <td>{a.sendTime}</td>
