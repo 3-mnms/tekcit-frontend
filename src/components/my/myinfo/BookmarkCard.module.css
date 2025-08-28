@@ -1,43 +1,70 @@
+/* 공용 토큰: 카드 폭, 제목 줄수 */
+:root {
+  --bookmark-card-w: 160px;   /* 카드 폭(=썸네일 폭) */
+  --title-lines: 3;           /* 제목 표시 줄 수 */
+}
 
 .card {
   position: relative;
+  box-sizing: border-box;
+  width: var(--bookmark-card-w);   /* ✅ 카드/썸네일 폭 통일 */
   border: 1px solid #ddd;
   border-radius: 1rem;
-  padding: 1rem;
-  width: 120px;
+  padding: 0.75rem;
   text-align: center;
   background-color: #f8f8f8;
 }
 
 .heartIcon {
   position: absolute;
-  top: -0.1rem;
-  right: 5%;
+  top: 6px;
+  right: 8px;
   background: none;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   cursor: pointer;
 }
 
+/* ✅ 썸네일은 카드 폭에 맞춰 100% */
 .thumbnail {
   width: 100%;
-  height: 100px;
-  background-color: #e0e0e0;
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 15%;
+  aspect-ratio: 5 / 7;       /* 150x210 비율 ≈ 5:7 */
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.thumbnail .img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .imagePlaceholder {
   font-size: 2rem;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
 }
 
+/* ✅ 제목: 고정 높이 + 멀티라인 말줄임 */
 .performanceName {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
+  margin-top: 8px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+
+  /* 멀티라인 말줄임 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--title-lines);
+  overflow: hidden;
+
+  /* 고정 높이 (줄수 × line-height) */
+  max-height: calc(var(--title-lines) * 1.4em);
+
+  /* 한글 줄바꿈 자연스럽게 */
+  word-break: keep-all;   /* 긴 영문이 섞이면 break-word로 바꾸세요 */
 }
 
 .removeBtn {

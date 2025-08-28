@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   apiGetMyPageUserInfo,
   apiUpdateUser,
-} from '@/shared/api/my/mypage';
+} from '@/shared/api/my/myPage';
 import type {
   MyPageUnionDTO,
   UpdateUserRequestDTO,
