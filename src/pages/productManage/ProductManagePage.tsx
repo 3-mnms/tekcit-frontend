@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import SearchBar from '@/components/common/SearchBox';
 import Table, {type Column} from '@/components/shared/Table';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 import styles from './ProductManagePage.module.css';
 
 import { getProducts } from '@/shared/api/admin/festival';

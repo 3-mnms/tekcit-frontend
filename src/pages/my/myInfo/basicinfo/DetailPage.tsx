@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 import DetailInfoField from '@/components/my/myinfo/DetailInfoField';
 import { useMyPageUserQuery } from '@/models/my/useMyPage';
 import { isUser, isHost } from '@/models/my/userTypes';

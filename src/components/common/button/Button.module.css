@@ -8,7 +8,8 @@
 }
 
 .button:hover {
-  background-color: #3585ea
+  background-color: #3585ea;
+   color: whitesmoke;
 }
 
 .button:focus {

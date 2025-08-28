@@ -64,5 +64,6 @@ input[type="date"] {
 }
 
 .searchBtn:hover {
-  background-color: #377fd0;
+  background-color: #3585ea;
+   color: whitesmoke;
 }

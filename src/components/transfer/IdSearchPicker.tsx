@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styles from './IdSearchPicker.module.css';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 
 export type AccountMini = { id: string; name: string };
 

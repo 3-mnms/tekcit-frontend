@@ -7,7 +7,7 @@ import AnnouncementModal from '@/components/announcement/AnnouncementModal';
 import styles from './AnnouncementListPage.module.css';
 import type { Announcement } from '@/models/admin/Announcement';
 import { getAnnouncements, updateAnnouncement, deleteAnnouncement, createAnnouncement } from '@/shared/api/admin/announcement';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 
 const AnnouncementListPage: React.FC = () => {
   const queryClient = useQueryClient();

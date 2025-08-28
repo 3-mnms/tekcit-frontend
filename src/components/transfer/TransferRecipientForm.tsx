@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import styles from './TransferRecipientForm.module.css';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 import IdSearchPicker, { type AccountMini } from './IdSearchPicker';
 
 type Relation = 'FAMILY' | 'FRIEND' | null;

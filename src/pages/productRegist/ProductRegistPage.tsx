@@ -4,7 +4,7 @@ import Layout from '@/components/layout/Layout';
 import { useMutation, useQueryClient, useQuery} from '@tanstack/react-query';
 import Input from '@/components/shared/Input';
 import DatePicker from '@components/shared/DatePicker';
-import Button from '@components/common/Button';
+import Button from '@components/common/button/Button';
 import PostcodeSearch from '@/components/product/PostcodeSearch';
 import ScheduleDropdown from '@/components/product/ScheduleDropdown';
 import {initialProductData, type Festival, type DayOfWeek} from '@/models/admin/festival';

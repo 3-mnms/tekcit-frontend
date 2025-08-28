@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 import Table from '@/components/shared/Table';
 import type { Column } from '@/components/shared/Table';
 import { getAttendeesByFestivalId } from '@/shared/api/admin/festival';
