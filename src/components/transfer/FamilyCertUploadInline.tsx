@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 import styles from './FamilyCertUploadInline.module.css';
 
 type Props = {
