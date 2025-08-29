@@ -15,11 +15,10 @@ type Props = {
   bookingId: string
   festivalId: string
   sellerId: number
-  userId: number
 }
 
 const PaymentSection = forwardRef<TossPaymentHandle, Props>(function PaymentMethods(
-  { openedMethod, onToggle, amount, orderName, errorMsg, bookingId, festivalId, sellerId, userId },
+  { openedMethod, onToggle, amount, orderName, errorMsg, bookingId, festivalId, sellerId },
   tossRef,
 ) {
   return (
@@ -71,7 +70,6 @@ const PaymentSection = forwardRef<TossPaymentHandle, Props>(function PaymentMeth
               bookingId={bookingId}
               festivalId={festivalId}
               sellerId={sellerId}
-              userId={userId}
             />
           </div>
         )}

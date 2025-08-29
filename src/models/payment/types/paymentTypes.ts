@@ -12,9 +12,17 @@ export type CheckoutState = {
   unitPrice: number
   quantity: number
   deliveryMethod: string
-  buyerName?: string
-  bookerName?: string
-  festivalId?: string
+  buyerName: string
+  bookerName: string
+  festivalId: string
+}
+
+export interface TossPaymentBody {
+  paymentId: string   // 결제 ID (프론트 생성)
+  bookingId: string   // 가예매 ID
+  festivalId: string  // 공연 ID
+  sellerId: number    // 판매자 ID (API 응답으로 확보)
+  amount: number      // 결제 금액
 }
 
 // ✅ 서버 세션 생성 응답 타입(백엔드 스펙에 맞게 조정)

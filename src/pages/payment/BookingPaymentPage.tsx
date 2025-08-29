@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
-import { type TossPaymentHandle } from '@/components/payment/pay/TossPayment'
+import type { TossPaymentHandle } from '@/components/payment/pay/TossPayment'
 import PaymentInfo from '@/components/payment/pay/PaymentInfo'
 import BookingPaymentHeader from '@/components/payment/pay/BookingPaymentHeader'
 import ReceiveInfo from '@/components/payment/delivery/ReceiveInfo'
@@ -13,88 +13,116 @@ import AlertModal from '@/components/common/modal/AlertModal'
 import PaymentSection from '@/components/payment/pay/PaymentSection'
 import type { CheckoutState, PaymentMethod } from '@/models/payment/types/paymentTypes'
 import { createPaymentId, getUserIdSafely } from '@/models/payment/utils/paymentUtils'
+import { saveBookingSession } from '@/shared/api/payment/paymentSession'
+import { fetchBookingDetail } from '@/shared/api/payment/bookingDetail'
 import styles from './BookingPaymentPage.module.css'
 
-// 5분
+// ⏱️ 결제 제한 시간(초) 멍
 const DEADLINE_SECONDS = 5 * 60
 
 const BookingPaymentPage: React.FC = () => {
+  // 0) 네비게이션/라우터 state 멍
   const navigate = useNavigate()
-
-  // (1) 라우터 state 획득 ─ 결제에 필요한 기본 정보
   const { state } = useLocation()
   const checkout = state as CheckoutState | undefined
 
-  // (2) 파생값 계산 — 클라이언트 백업용 금액/주문명
+  // 1) 파생값 계산 — 금액/주문명/공연ID 멍
   const unitPrice = checkout?.unitPrice ?? 0
   const quantity = checkout?.quantity ?? 0
-  const finalAmount = useMemo(() => unitPrice * quantity, [unitPrice, quantity])
-  const orderName = useMemo(() => checkout?.title || '티켓 예매', [checkout?.title])
+  const finalAmount = useMemo(() => unitPrice * quantity, [unitPrice, quantity]) // 결제 금액 멍
+  const orderName = useMemo(() => checkout?.title || '티켓 예매', [checkout?.title]) // 주문명 멍
+  const festivalIdVal = checkout?.festivalId // 가드/요청에서 사용 멍
 
-  // (3) 초기 진입 가드 ─ 필수 데이터 없으면 알림 후 이전 화면/홈으로 이동
-  useEffect(() => {
-    // 필수 값 체크
-    const hasEssential =
-      !!checkout &&
-      !!checkout.festivalId &&
-      !!checkout.bookingId &&
-      typeof checkout.sellerId === 'number' &&
-      checkout.sellerId > 0 &&
-      unitPrice > 0 &&
-      quantity > 0
+  // 3) 로그인 사용자 ID 상태 (훅 순서 보장을 위해 useEffect에서 세팅) 멍
+  const [buyerId, setBuyerId] = useState<number | null>(null)
+  const [sellerId, setSellerId] = useState<number | null>(null)
 
-    if (!hasEssential) {
-      alert('결제 정보가 유효하지 않습니다. 처음부터 다시 시도해주세요.')
-      navigate(-1) // 또는 navigate('/', { replace: true })
-    }
-  }, [checkout, unitPrice, quantity, navigate])
-
-  // (4) 로그인 가드 — 페이지 렌더 전에 구매자 ID 확보(없으면 로그인으로 이동)
-  let buyerId: number
-  try {
-    buyerId = getUserIdSafely()
-  } catch {
-    alert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.')
-    navigate('/login')
-    return null
-  }
-
-  const deliveryMethodRaw = checkout?.deliveryMethod
-
-  // (6) 페이지 상태
+  // 4) 결제/화면 상태 훅들 멍
   const tossRef = useRef<TossPaymentHandle>(null) // PaymentSection이 ref를 TossPayment로 전달
   const [openedMethod, setOpenedMethod] = useState<PaymentMethod | null>(null)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState(false)
   const [isPaying, setIsPaying] = useState(false)
   const [err, setErr] = useState<string | null>(null)
-
-  // 결제 트랜잭션 식별자 ─ 최초 1회 생성 후 유지 멍
   const [paymentId, setPaymentId] = useState<string | null>(null)
-  useEffect(() => {
-    if (!paymentId) setPaymentId(createPaymentId())
-  }, [paymentId])
-
-  // 헤더 타이머 관리 멍
   const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS)
+
+  // ✅ 로그인 가드 — 렌더 후 로그인 검사/리다이렉트
+  useEffect(() => {
+    try {
+      const id = getUserIdSafely()
+      setBuyerId(id)
+    } catch {
+      alert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.')
+      navigate('/login', { replace: true })
+    }
+  }, [navigate])
+
+  // ✅ 결제 트랜잭션 ID 최초 1회 생성 + 동시에 프론트 세션 저장
+  useEffect(() => {
+    // 주석: paymentId가 아직 없으면 생성
+    if (!paymentId) {
+      const id = createPaymentId()
+      setPaymentId(id)
+
+      // 주석: 결제에 필요한 컨텍스트를 프론트 세션스토리지에 저장
+      //       (백엔드 세션 API 대체)
+      if (checkout?.bookingId && checkout?.festivalId && sellerId) {
+        saveBookingSession({
+          paymentId: id,                         // 프론트에서 생성한 결제ID
+          bookingId: checkout.bookingId,         // 라우터 state
+          festivalId: checkout.festivalId,       // 라우터 state
+          sellerId: sellerId,           // 라우터 state (중요)
+          amount: finalAmount,                   // 프론트 계산 금액
+          createdAt: Date.now(),                 // 타임아웃 판단용
+        })
+      }
+    }
+  }, [paymentId, checkout, finalAmount, sellerId]) // 주석: finalAmount가 변하면 세션 갱신이 필요한지 정책에 따라 조정
+
+  useEffect(() => {
+    if (!checkout?.festivalId || !checkout?.performanceDate || !checkout?.bookingId) return
+
+      ; (async () => {
+        try {
+          // 주석: 서버가 요구하는 키로 그대로 전달 (reservationNumber!)
+          const res = await fetchBookingDetail({
+            festivalId: checkout.festivalId,
+            performanceDate: checkout.performanceDate, // 문자열(ISO 권장)
+            reservationNumber: checkout.bookingId,     // 예약번호 == bookingId
+          })
+
+          // 주석: 서버 스펙상 success=false일 수도 있으니 체크
+          if (!res.success) throw new Error(res.message || '상세 조회 실패')
+
+          setSellerId(res.data.sellerId) // 주석: 성공 시 sellerId 세팅
+        } catch (e) {
+          console.error('예매 상세 조회 실패', e)
+          alert('결제 정보를 불러오지 못했습니다.')
+          navigate(-1)
+        }
+      })()
+  }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate])
+
+  // 9) 타임업 모달 닫기 헬퍼 멍
   const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false)
 
-  // 결제 결과 라우팅 헬퍼 멍
+  // 10) 결과 라우팅 헬퍼 멍
   const routeToResult = (ok: boolean) => {
     const params = new URLSearchParams({ type: 'booking', status: ok ? 'success' : 'fail' })
     navigate(`/payment/result?${params.toString()}`)
   }
 
-  // 결제수단 토글 멍
+  // 11) 결제수단 토글 멍
   const toggleMethod = (m: PaymentMethod) => {
     if (isPaying || remainingSeconds <= 0) return
     setOpenedMethod((prev) => (prev === m ? null : m))
     setErr(null)
   }
 
-  // 결제 실행 핸들러 멍
+  // 12) 결제 실행 멍
   const handlePayment = async () => {
-    // 기본 검증
+    // 기본 검증 멍
     if (!checkout) {
       setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.')
       return
@@ -109,8 +137,8 @@ const BookingPaymentPage: React.FC = () => {
       return
     }
 
-    // 1) 필수 데이터 가드(라우터 state에 반드시 들어있어야 함)
-    if (!checkout.bookingId || !checkout.sellerId || !festivalIdVal) {
+    // 🔒 필수 데이터 가드: sellerId는 session에서, festivalId는 라우터 state에서 확인 멍
+    if (!checkout?.bookingId || !festivalIdVal || !sellerId) {
       alert('결제 정보가 부족해 결제를 진행할 수 없어요.')
       navigate(-1)
       return
@@ -119,7 +147,7 @@ const BookingPaymentPage: React.FC = () => {
     if (isPaying) return
     setErr(null)
 
-    // 테킷 페이 결제 경로 ─ 비번 모달 열기
+    // 지갑 결제 경로 ─ 비밀번호 모달 열기 멍
     if (openedMethod === 'wallet') {
       setIsPasswordModalOpen(true)
       return
@@ -132,16 +160,16 @@ const BookingPaymentPage: React.FC = () => {
 
       setIsPaying(true)
       try {
+        // ✅ TossPaymentHandle 타입에 userId 파라미터는 없음 (헤더로 전달되므로 여기선 필요 없음) 멍
         await tossRef.current?.requestPay({
           paymentId: ensuredId,
-          amount: finalAmount, // ✅ 실제 결제 금액(프론트 계산)
-          orderName,
-          userId: buyerId, // ✅ X-User-Id 헤더에 들어갈 값
-          bookingId: checkout.bookingId, // ✅ 예매 단계에서 확보된 값
-          festivalId: festivalIdVal,
-          sellerId: checkout.sellerId, // ✅ 예매 단계에서 확보된 값
+          amount: finalAmount,             // 프론트 계산 금액
+          orderName,                       // 주문명
+          bookingId: checkout.bookingId,   // 라우터 state
+          festivalId: festivalIdVal,       // 라우터 state
+          sellerId: sellerId,     // ✅ session.sellerId → checkout.sellerId 로 변경
         })
-        // 필요 시 결과 라우팅/검증 추가
+        // PG 리다이렉트 이후 결과 페이지에서 처리 멍
       } catch (e) {
         console.error(e)
         setErr('결제 요청 중 오류가 발생했어요.')
@@ -156,16 +184,25 @@ const BookingPaymentPage: React.FC = () => {
     !!openedMethod &&
     !isPaying &&
     remainingSeconds > 0 &&
-    !!checkout?.bookingId && // ✅ 필수 데이터 존재해야 버튼 활성
-    typeof checkout?.sellerId === 'number' &&
-    checkout!.sellerId! > 0
+    !!checkout?.bookingId &&
+    !!sellerId &&
+    sellerId > 0
 
+  if (!checkout?.bookingId) {
+    return <div className={styles.page}>잘못된 접근입니다. 이전 화면으로 돌아갑니다…</div>
+  }
+
+  if (!sellerId) {
+    return <div className={styles.page}>결제 정보를 준비 중입니다…</div>
+  }
+
+  // 15) 메인 렌더 멍
   return (
     <div className={styles.page}>
       <BookingPaymentHeader
         initialSeconds={DEADLINE_SECONDS}
-        onTick={(sec) => setRemainingSeconds(sec)} // 매초 남은 시간 반영
-        onExpire={() => setIsTimeUpModalOpen(true)} // 만료 시 모달 열기
+        onTick={(sec) => setRemainingSeconds(sec)} // 매초 남은 시간 반영 멍
+        onExpire={() => setIsTimeUpModalOpen(true)} // 만료 시 모달 열기 멍
       />
 
       <div className={styles.container} role="main">
@@ -174,7 +211,7 @@ const BookingPaymentPage: React.FC = () => {
           <div className={styles.sectionContainer}>
             <div className={styles.receiveSection}>
               <h2 className={styles.sectionTitle}>수령 방법</h2>
-              <ReceiveInfo rawValue={checkout?.deliveryMethod} />
+              <ReceiveInfo rawValue={checkout.deliveryMethod} />
             </div>
 
             <div>
@@ -186,10 +223,9 @@ const BookingPaymentPage: React.FC = () => {
                 amount={finalAmount}
                 orderName={orderName}
                 errorMsg={err}
-                bookingId={checkout!.bookingId}
-                festivalId={checkout!.festivalId!}
-                sellerId={checkout!.sellerId!}
-                userId={buyerId}
+                bookingId={checkout.bookingId}
+                festivalId={checkout.festivalId}
+                sellerId={sellerId}
               />
             </div>
           </div>
@@ -222,7 +258,7 @@ const BookingPaymentPage: React.FC = () => {
           onComplete={async () => {
             setIsPaying(true)
             try {
-              // TODO: 지갑 결제 API 연동
+              // TODO: 지갑 결제 API 연동 멍
               await new Promise((r) => setTimeout(r, 700))
               routeToResult(true)
             } finally {

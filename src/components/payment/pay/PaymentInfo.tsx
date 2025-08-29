@@ -1,10 +1,10 @@
 import { useLocation } from 'react-router-dom'
 import styles from './PaymentInfo.module.css'
 
-// 예매 페이지에서 넘겨주는 payload 타입 멍
+// 예매 페이지에서 넘겨주는 payload 타입
 interface PaymentInfoState {
-  bookingId?: string
-  festivalId?: string
+  bookingId: string
+  festivalId: string
   posterUrl?: string
   title: string
   performanceDate: string
@@ -27,7 +27,7 @@ const PaymentInfo: React.FC = () => {
   const { posterUrl, title, performanceDate, unitPrice, quantity, bookerName, deliveryMethod } =
     state
 
-  // ✅ 총 결제 금액 계산 멍
+  // ✅ 총 결제 금액 계산
   const total = unitPrice * quantity
 
   return (
@@ -35,11 +35,11 @@ const PaymentInfo: React.FC = () => {
       <div className={styles.header}>
         <div className={styles.posterBox}>
           {posterUrl ? (
-            // ✅ 포스터 이미지 표시 멍
+            // ✅ 포스터 이미지 표시
             <img src={posterUrl} alt="poster" className={styles.poster} />
           ) : (
-            // ✅ 포스터가 없을 때 대체 영역 멍
-            <div className={styles.poster}>???</div>
+            // ✅ 포스터가 없을 때 대체 영역
+            <div className={styles.poster}></div>
           )}
         </div>
 
