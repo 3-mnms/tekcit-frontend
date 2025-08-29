@@ -8,18 +8,19 @@
   font-weight: bold;
   color: white;
   margin-bottom: 1.5rem;
+  margin-left: 5rem;
 }
 
 /* ✅ 한 줄 그리드 + 가운데 정렬 + 실제 렌더 개수 기준 max-width */
 .cardList {
   --cols: 5;
   --count: var(--cols);
-  --gap: 40px; /* ← 기본값, TSX에서 덮어씀 */
+  --gap: 30px; /* ← 기본값, TSX에서 덮어씀 */
   display: grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   gap: var(--gap);            /* ← 이것만 바꿔주면 OK */
   /* ... */
-  max-width: calc(var(--count) * 220px + (var(--count) - 1) * var(--gap));
+  max-width: calc(var(--count) * 240px + (var(--count) - 1) * var(--gap));
   margin-left: auto;
   margin-right: auto;
   position: relative;
@@ -34,7 +35,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
   width: 100%;
-  max-width: 220px; /* JS MIN_CARD와 일치 */
+  max-width: 240px; /* JS MIN_CARD와 일치 */
   min-width: 160px;
   margin: 0 auto; /* 칼럼 내부 수평 중앙 */
 }
@@ -46,7 +47,8 @@
   position: relative;
   aspect-ratio: 2 / 3;
   width: 100%;
-  max-width: 180px;
+  max-width: 200px;
+  height: 270px;
   border-radius: 12px;
   overflow: hidden;
   background-color: #eee;

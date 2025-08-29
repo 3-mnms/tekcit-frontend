@@ -53,7 +53,7 @@ const buildPosterUrl = (f: any): string => {
 
 // 💡 카드/갭(⚠ CSS와 맞추기)
 const CARD_MAX = 220; // px (카드 최대폭)
-const GAP = 24;       // px (= 1.5rem)
+const GAP = 45;       // px (= 1.5rem)
 
 const CategorySection: React.FC = () => {
   const { slug, name, category } = useParams<{ slug?: string; name?: string; category?: string }>();
