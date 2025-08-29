@@ -4,25 +4,16 @@ import { FaChartBar } from 'react-icons/fa';
 
 type Datum = { label: string; value: number };
 
-const genderData: Datum[] = [
-  { label: '남', value: 120 },
-  { label: '여', value: 180 },
-];
+interface Props {
+    genderData: Datum[];
+    ageData: Datum[];
+}
 
-const ageData: Datum[] = [
-  { label: '10대 미만', value: 30 },
-  { label: '10대', value: 70 },
-  { label: '20대', value: 150 },
-  { label: '30대', value: 100 },
-  { label: '40대', value: 60 },
-  { label: '50대 이상', value: 40 },
-];
-
-const FestivalStatisticsSection: React.FC = () => {
+const FestivalStatisticsSection: React.FC<Props> = ({ genderData, ageData }) => {
   const genderTotal = useMemo(
-    () => genderData.reduce((s, d) => s + d.value, 0),
-    []
-  );
+        () => genderData.reduce((s, d) => s + d.value, 0),
+        [genderData]
+    );
 
   const genderPercent = useMemo(() => {
     const p = genderData.map((d) =>
@@ -31,7 +22,7 @@ const FestivalStatisticsSection: React.FC = () => {
     const diff = 100 - p.reduce((a, b) => a + b, 0);
     if (diff !== 0 && p.length > 0) p[p.length - 1] += diff;
     return p;
-  }, [genderTotal]);
+  }, [genderData, genderTotal]);
 
   const genderGradient = useMemo(() => {
     const colors = ['#4D9AFD', '#FF7EB9'];
@@ -47,7 +38,7 @@ const FestivalStatisticsSection: React.FC = () => {
 
   const ageTotal = useMemo(
     () => ageData.reduce((s, d) => s + d.value, 0),
-    []
+    [ageData]
   );
 
   return (
