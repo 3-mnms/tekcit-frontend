@@ -7,7 +7,8 @@ import StatisticsContent from '@/components/operatManage/statistics/StatisticsSe
 import EntranceCount from '@/components/operatManage/statistics/EntranceCount'; 
 import styles from './StatisticsPage.module.css';
 import TicketProgressGraph from '@/components/operatManage/statistics/TicketProgressGraph';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import Button from '@/components/common/Button';
 
 type TabType = '통계' | '입장 인원 수 조회';
 
@@ -15,6 +16,7 @@ const StatisticsPage: React.FC = () => {
   const { fid } = useParams<{ fid: string }>(); 
   const [activeTab, setActiveTab] = useState<TabType>('통계');
   const [selectedSchedule, setSelectedSchedule] = useState<string | null>(null);
+  const navigate = useNavigate();
   
   const { data: festival } = useQuery({
     queryKey: ['festival', fid],
@@ -47,7 +49,7 @@ const StatisticsPage: React.FC = () => {
   const { data: entranceStatsData } = useQuery({
     queryKey: ['entranceStatsData', fid, selectedSchedule],
     queryFn: () => getEntranceCount(fid!, selectedSchedule!),
-    enabled: !!fid && !!selectedSchedule && activeTab === '입장 인원 수 조회', // 삐약! 🐥 탭이 활성화될 때만 호출해요.
+    enabled: !!fid && !!selectedSchedule && activeTab === '입장 인원 수 조회',
   });
 
   const selectedBookingData = useMemo(() => {
@@ -62,6 +64,34 @@ const StatisticsPage: React.FC = () => {
   const handleScheduleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedSchedule(e.target.value);
   };
+
+
+  const isLoading = [festival, schedules, bookingStatsData, userStatsData, entranceStatsData].some(q => q?.isLoading);
+  const isError = [festival, schedules, bookingStatsData, userStatsData, entranceStatsData].some(q => q?.isError);
+
+  if (!fid) {
+    return (
+      <Layout subTitle="통계 조회">
+        <div>공연 ID가 유효하지 않습니다.</div>
+      </Layout>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Layout subTitle="통계 조회">
+        <div>데이터를 불러오는 중...</div>
+      </Layout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Layout subTitle="통계 조회">
+        <div>데이터 로딩 실패!</div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout subTitle="통계 조회">
@@ -91,14 +121,13 @@ const StatisticsPage: React.FC = () => {
           </select>
         </div>
       </div>
-      {activeTab === '통계' && userStatsData  && (
+      {activeTab === '통계' && selectedSchedule && userStatsData && (
         <>
-          {selectedBookingData && (
-            <TicketProgressGraph
-              currentTickets={selectedBookingData.bookingCount}
-              totalCapacity={selectedBookingData.availableNOP}
-            />
-          )}
+          <TicketProgressGraph
+            currentTickets={selectedBookingData?.bookingCount ?? 0}
+            totalCapacity={selectedBookingData?.availableNOP ?? 0}
+          />
+  
           <StatisticsContent
             data={userStatsData.data}
           />
@@ -111,6 +140,9 @@ const StatisticsPage: React.FC = () => {
           title={festival?.fname || ''}
         />
       )}
+      <div className={styles.buttonWrapper}>
+        <Button onClick={() => navigate(-1)}>뒤로가기</Button>
+      </div>
     </Layout>
   );
 };

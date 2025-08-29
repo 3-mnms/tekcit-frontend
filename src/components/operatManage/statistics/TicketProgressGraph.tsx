@@ -10,7 +10,7 @@ interface Props {
 }
 
 const TicketProgressGraph: React.FC<Props> = ({ currentTickets, totalCapacity }) => {
-  const progress = totalCapacity > 0 ? (currentTickets / totalCapacity) * 100 : 0;
+  const progress = (currentTickets === 0 || totalCapacity === 0) ? 0 : (currentTickets / totalCapacity) * 100;
   const progressPercentage = Math.min(progress, 100); 
 
   return (
