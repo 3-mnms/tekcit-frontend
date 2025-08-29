@@ -44,7 +44,6 @@
   border-radius: 999px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #333;
   background: #f9fafb;
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
@@ -55,30 +54,32 @@
   border-color: #bbb;
 }
 
-.likeBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
+/* 눌린 상태 */
 .likeBtnLiked {
-  background: #fee2e2;      /* 연한 빨강 */
-  border-color: #fca5a5;    /* 조금 더 진한 빨강 */
-  color: #b91c1c;           /* 진한 빨강 글자색 */
+  background: #fee2e2;      /* 연분홍 */
+  border-color: #fca5a5;
 }
 
 .likeBtnLiked:hover {
-  background: #fecaca;      /* hover시 더 진하게 */
+  background: #fecaca;
   border-color: #f87171;
 }
 
+/* 아이콘 색상은 버튼 상태와 무관하게 지정 */
 .likeBtn i {
-  font-size: 1.2rem; /* 하트 아이콘 크기 살짝 키움 */
+  font-size: 1.2rem;
   line-height: 1;
+  color: #555; /* 기본 회색 */
+}
+
+.likeBtnLiked i {
+  color: #e11d48; /* 진한 빨강 */
 }
 
 .likeCount {
   min-width: 1.5em;
   text-align: right;
+  color: #333;
 }
 
 .right {

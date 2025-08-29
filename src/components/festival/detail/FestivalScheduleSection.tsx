@@ -4,6 +4,7 @@ import { isSameDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
 import styles from './FestivalScheduleSection.module.css';
+import Button from '@/components/common/button/Button';
 
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useFestivalDetail } from '@/models/festival/tanstack-query/useFestivalDetail';
@@ -335,13 +336,13 @@ const FestivalScheduleSection: React.FC = () => {
               <p className={styles.label}>시간</p>
               <div className={styles.timeGroup}>
                 {timesToShow.map((time) => (
-                  <button
+                  <Button
                     key={time}
                     className={`${styles.timeBtn} ${selectedTime === time ? styles.selectedBtn : ''}`}
                     onClick={() => setSelectedTime(time)}
                   >
                     {time}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -352,7 +353,7 @@ const FestivalScheduleSection: React.FC = () => {
       {detail && (
         <div className={styles.section}>
           <div className={styles.actionsRow}>
-            <button
+            <Button
               className={styles.confirmBtn}
               disabled={confirmDisabled}
               onClick={async () => {                    // ✅ async로 변경
@@ -398,7 +399,7 @@ const FestivalScheduleSection: React.FC = () => {
               }}
             >
               예매하기
-            </button>
+            </Button>
           </div>
         </div>
       )}
