@@ -1,4 +1,4 @@
-// src/shared/api/notification/notificationApi.ts
+// src/shared/api/my/notice.ts
 import { api } from '@/shared/config/axios';
 
 export type NotificationListDTO = {
@@ -22,15 +22,20 @@ export type NotificationResponseDTO = {
 type SuccessEnvelope<T> = { success: true; data: T; message?: string };
 type ApiResponse<T> = SuccessEnvelope<T> | T;
 
-function unwrap<T>(res: ApiResponse<T>): T {
-  if (res && typeof res === 'object' && 'success' in (res as any)) {
-    const env = res as SuccessEnvelope<T>;
-    if (env.success) return env.data;
-  }
-  return res as T;
-}
+const unwrap = <T,>(res: ApiResponse<T>): T =>
+  (res && typeof res === 'object' && 'success' in (res as any))
+    ? (res as SuccessEnvelope<T>).data
+    : (res as T);
 
 export async function fetchNotificationHistory(): Promise<NotificationListDTO[]> {
   const { data } = await api.get('/users/notice/history');
   return unwrap<NotificationListDTO[]>(data);
+}
+
+export async function fetchNotificationDetail(nid: number): Promise<NotificationResponseDTO> {
+  if (!Number.isFinite(nid)) {
+    throw new Error('fetchNotificationDetail: invalid nid'); // ✅ 잘못된 호출 방지
+  }
+  const { data } = await api.get(`/users/notice/history/${nid}`);
+  return unwrap<NotificationResponseDTO>(data);
 }

@@ -20,33 +20,21 @@ export function timeAgoKorean(iso: string): string {
   return `${d}일전`;
 }
 
-const makeId = (x: NotificationListDTO, idx: number) =>
-  `${x.sentAt}__${x.title}__${idx}`;
-
-const mapToItem = (x: NotificationListDTO, idx: number): NotificationList => ({
-  id: makeId(x, idx),
+const mapToItem = (x: NotificationListDTO): NotificationList => ({
+  id: x.nid,
   title: x.title,
-  message: x.fname,        // 상세 본문은 없어서 공연명으로 보조 텍스트 구성
+  message: x.fname,
   time: timeAgoKorean(x.sentAt),
-  read: x.isRead,          // ✅ isRead → read로 변환
+  read: x.isRead,
 });
 
 export function useHydrateNotifications(enabled = true) {
-  const setFromServer = useNotificationStore((s) => s.setFromServer);
-
-  const q = useQuery({
-    queryKey: ['notifications', 'history'],
-    queryFn: fetchNotificationHistory,
-    enabled,
-    staleTime: 60_000,
-  });
+  const setFromServer = useNotificationStore(s => s.setFromServer);
+  const q = useQuery({ queryKey: ['notifications','history'], queryFn: fetchNotificationHistory, enabled, staleTime: 60_000 });
 
   useEffect(() => {
-    if (q.data) {
-      const list = q.data.map(mapToItem);
-      setFromServer(list);
-    }
+    if (q.data) setFromServer(q.data.map(mapToItem));    // ✅ 스토어가 readIds와 합칩
   }, [q.data, setFromServer]);
 
-  return q; // loading / error 상태를 컴포넌트에서 사용할 수 있게 반환
+  return q;
 }
