@@ -20,12 +20,6 @@ const StatisticsSection: React.FC<Props> = ({ data }) => {
 
   return (
     <div className={styles.container}>
-        {/* <div className={styles.controls}> 
-          <TicketProgressGraph 
-            currentTickets={data.ticketCount} 
-            totalCapacity={data.totalCapacity} 
-            />
-        </div>   */}
         <div className={styles.statsSection}>  
           <Statistics
             genderData={genderData}
