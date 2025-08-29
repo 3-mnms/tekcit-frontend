@@ -17,9 +17,10 @@
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* ✅ 50:50 + 축소 허용 */
   gap: 1.2rem;
   width: 100%;
+  align-items: start; /* 카드 내용 위로 붙이기 */
 }
 
 @media (max-width: 900px) {
@@ -28,21 +29,31 @@
 
 .card {
   width: 100%;
+  min-width: 0;  /* ✅ 그리드 셀 내부에서 내용이 넘쳐 밀어내는 것 방지 */
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 1rem;
   padding: 1rem 1.25rem;
   display: grid;
   gap: 1rem;
+  align-content: start; /* 제목을 좌상단에 딱 붙게 */
+  height: 100%;
 }
 
 .cardHead {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+  align-items: center;   /* ✅ baseline → center */
+  gap: 0.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem; /* 필요하다면 살짝만 여백 */
+  min-height: unset;     /* 혹시 브라우저 기본 라인 높이가 과하게 잡히는 경우 */
 }
 
-.sub { color: #6b7280; font-size: 0.9rem; }
+.sub {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-left: auto; /* 필요할 때만 오른쪽 밀어주기 */
+}
 
 /* 성별 도넛 */
 .genderWrap {
@@ -98,6 +109,14 @@
   padding: 0;
   display: grid;
   gap: 0.5rem;
+  justify-self: start; /* ✅ 셀 안에서 내용 폭만큼만 */
+  width: 100%;
+  max-width: 320px;     /* ✅ 필요시 상한 */
+}
+
+/* 6) 반응형: 아주 좁아지면 세로 스택 */
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
 }
 
 .legendItem {
@@ -117,13 +136,18 @@
 .legendValue { color: #374151; }
 
 /* 연령대 막대 */
-.ageBars { display: grid; gap: 0.6rem; }
+.ageBars {
+  display: grid; 
+  gap: 1.7rem; 
+  margin-top: 1rem;
+}
 
 .ageRow {
   display: grid;
-  grid-template-columns: 24% 1fr auto;
+  grid-template-columns: 70px 1fr 4ch;
   gap: 0.6rem;
   align-items: center;
+  text-align: center;
 }
 
 @media (max-width: 640px) {
