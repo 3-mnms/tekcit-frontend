@@ -8,7 +8,7 @@ import AlertModal from '@/components/common/modal/AlertModal'
 import PasswordInputModal from '@/components/payment/modal/PasswordInputModal'
 import WalletPayment from '@/components/payment/pay/WalletPayment'
 
-import styles from './TransferPaymentPage.module.css' // ✅ CSS 모듈
+import styles from './TransferPaymentPage.module.css' 
 
 type Method = '킷페이' | '토스'
 
@@ -22,7 +22,7 @@ const TransferPaymentPage: React.FC = () => {
   const [isAlertOpen, setIsAlertOpen] = useState(false)         // 안내 모달
   const [isPwModalOpen, setIsPwModalOpen] = useState(false)     // 비번 입력 모달
 
-  const amount = 190000 // ✅ 총 결제금액(예시)
+  const amount = 220000 // ✅ 총 결제금액
 
   // ✅ 다음 버튼 비활성 조건 계산
   const disabledNext = useMemo(

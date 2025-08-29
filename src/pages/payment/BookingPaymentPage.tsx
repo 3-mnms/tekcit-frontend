@@ -65,8 +65,6 @@ const BookingPaymentPage: React.FC = () => {
       const id = createPaymentId()
       setPaymentId(id)
 
-      // 주석: 결제에 필요한 컨텍스트를 프론트 세션스토리지에 저장
-      //       (백엔드 세션 API 대체)
       if (checkout?.bookingId && checkout?.festivalId && sellerId) {
         saveBookingSession({
           paymentId: id,                         // 프론트에서 생성한 결제ID
@@ -80,29 +78,31 @@ const BookingPaymentPage: React.FC = () => {
     }
   }, [paymentId, checkout, finalAmount, sellerId]) // 주석: finalAmount가 변하면 세션 갱신이 필요한지 정책에 따라 조정
 
+  // 주석: buyerId가 준비되기 전에는 서버 호출 금지 (X-User-Id 누락 방지)
   useEffect(() => {
+    // 주석: 필수 파라미터 가드
     if (!checkout?.festivalId || !checkout?.performanceDate || !checkout?.bookingId) return
 
-      ; (async () => {
-        try {
-          // 주석: 서버가 요구하는 키로 그대로 전달 (reservationNumber!)
-          const res = await fetchBookingDetail({
-            festivalId: checkout.festivalId,
-            performanceDate: checkout.performanceDate, // 문자열(ISO 권장)
-            reservationNumber: checkout.bookingId,     // 예약번호 == bookingId
-          })
+    (async () => {
+      try {
+        // 주석: 서버 스펙과 키 일치 (reservationNumber)
+        const res = await fetchBookingDetail({
+          festivalId: checkout.festivalId,
+          performanceDate: checkout.performanceDate,
+          reservationNumber: checkout.bookingId,
+        })
 
-          // 주석: 서버 스펙상 success=false일 수도 있으니 체크
-          if (!res.success) throw new Error(res.message || '상세 조회 실패')
-
-          setSellerId(res.data.sellerId) // 주석: 성공 시 sellerId 세팅
-        } catch (e) {
-          console.error('예매 상세 조회 실패', e)
-          alert('결제 정보를 불러오지 못했습니다.')
-          navigate(-1)
-        }
-      })()
-  }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate])
+        if (!res.success) throw new Error(res.message || '상세 조회 실패')
+        const sid = (res.data?.sellerId ?? res.data?.seller_id) as number | undefined
+        if (!sid || sid <= 0) throw new Error('sellerId 누락')
+        setSellerId(sid)
+      } catch (e) {
+        console.error('예매 상세 조회 실패', e)
+        alert('결제 정보를 불러오지 못했습니다.')
+        navigate(-1)
+      }
+    })()
+  }, [buyerId, checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate])
 
   // 9) 타임업 모달 닫기 헬퍼 멍
   const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false)
@@ -192,8 +192,8 @@ const BookingPaymentPage: React.FC = () => {
     return <div className={styles.page}>잘못된 접근입니다. 이전 화면으로 돌아갑니다…</div>
   }
 
-  if (!sellerId) {
-    return <div className={styles.page}>결제 정보를 준비 중입니다…</div>
+  if (sellerId == null) {
+    return <div className={styles.page}>sellerId가 null이면 이 문구가 뜹니다</div>
   }
 
   // 15) 메인 렌더 멍
