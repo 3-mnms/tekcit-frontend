@@ -108,13 +108,22 @@ const mockStatsData: StatsData = {
     '50s': 0.077,
   },
 };
+interface ScheduleResponse {
+  success: boolean;
+  data: string[]; // 날짜-시간 문자열 배열
+  message: string;
+}
+
+export const getFestivalSchedules = async (festivalId: string): Promise<ScheduleResponse> => {
+  const response = await api.get<ScheduleResponse>(`/statistics/schedules/${festivalId}`);
+  return response.data;
+};
 
 // 삐약! 🐥 Mock 데이터를 반환하는 함수예요.
 // API가 완성되면 이 함수를 실제 API 호출 코드로 교체하면 돼요.
-export const getStatsData = async (): Promise<StatsData> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(mockStatsData);
-    }, 500); // 삐약! 🐥 실제 API 호출처럼 0.5초 지연을 줘서 로딩 상태를 볼 수 있게 했어요.
-  });
+export const getStatsData = async (fid: string | null, scheduleId: string | null): Promise<StatsData> => {
+    // 삐약! 🐥 API 엔드포인트에 fid와 scheduleId를 포함시켜 요청을 보냅니다.
+    // 백엔드 API 명세에 맞춰서 URL을 구성해야 해요.
+    const response = await api.get<StatsData>(`/stats?fid=${fid}&scheduleId=${scheduleId}`);
+    return response.data;
 };

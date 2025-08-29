@@ -1,58 +1,99 @@
-import React, { useState } from 'react';
+import React, {useState } from 'react';
 import Layout from '@components/layout/Layout';
 import { useQuery } from '@tanstack/react-query';
-import { getStatsData } from '@/shared/api/admin/festival'; 
+import { getStatsData, getProducts, getFestivalSchedules  } from '@/shared/api/admin/festival'; 
 import StatisticsContent from '@/components/operatManage/statistics/StatisticsSection';
 import EntranceCount from '@/components/operatManage/statistics/EntranceCount'; 
-
-// import { useNavigate, useParams } from 'react-router-dom';
 import styles from './StatisticsPage.module.css';
 
 type TabType = '통계' | '입장 인원 수 조회';
 
 const StatisticsPage: React.FC = () => {
-  // 삐약! 🐥 현재 선택된 탭의 상태를 관리해요. 초기값은 '통계'로 설정해요.
   const [activeTab, setActiveTab] = useState<TabType>('통계');
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['statsData'],
-    queryFn: getStatsData,
+  const [selectedFid, setSelectedFid] = useState<string | null>(null);
+  const [selectedSchedule, setSelectedSchedule] = useState<string | null>(null);
+  
+  const { data: festivals } = useQuery({
+    queryKey: ['festivals'],
+    queryFn: getProducts,
+    select: (response) => response.data || [],
   });
+
+  const { data: schedules } = useQuery({
+    queryKey: ['schedules', selectedFid],
+    queryFn: () => getFestivalSchedules(selectedFid!),
+    enabled: !!selectedFid,
+  });
+
+  const { data: statsData, isLoading, isError } = useQuery({
+    queryKey: ['statsData', selectedFid, selectedSchedule],
+    queryFn: () => getStatsData(selectedFid, selectedSchedule),
+    enabled: !!selectedFid && !!selectedSchedule, // 삐약! 🐥 두 값이 있을 때만 쿼리 실행
+  });
+
+  const handleFestivalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedFid(e.target.value);
+  };
+
+  const handleScheduleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedSchedule(e.target.value);
+  };
+
+  if (isLoading || isError) {
+    return (
+      <Layout subTitle="통계 조회">
+        <div>{isLoading ? '통계 데이터를 불러오는 중...' : '통계 데이터 로딩 실패!'}</div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout subTitle="통계 조회">
-      <div className={styles.tabContainer}>
-        {/* 삐약! 🐥 탭 버튼들을 만들어요. */}
-        <button 
-          className={`${styles.tabButton} ${activeTab === '통계' ? styles.active : ''}`}
-          onClick={() => setActiveTab('통계')}
-        >
-          통계
-        </button>
-        <button 
-          className={`${styles.tabButton} ${activeTab === '입장 인원 수 조회' ? styles.active : ''}`}
-          onClick={() => setActiveTab('입장 인원 수 조회')}
-        >
-          입장 인원 수 조회
-        </button>
+      <div className={styles.topBar}>
+        <div className={styles.tabs}>
+          <button 
+            className={`${styles.tabButton} ${activeTab === '통계' ? styles.active : ''}`}
+            onClick={() => setActiveTab('통계')}
+          >
+            통계
+          </button>
+          <button 
+            className={`${styles.tabButton} ${activeTab === '입장 인원 수 조회' ? styles.active : ''}`}
+            onClick={() => setActiveTab('입장 인원 수 조회')}
+          >
+            입장 인원 수 조회
+          </button>
+        </div>
+        <div className={styles.dropdowns}>
+          <select value={selectedFid || ''} onChange={handleFestivalChange}>
+            <option value="">공연 선택</option>
+            {festivals?.map(f => (
+                <option key={f.fid} value={f.fid}>{f.fname}</option>
+            ))}
+          </select>
+          <select value={selectedSchedule || ''} onChange={handleScheduleChange} disabled={!selectedFid || !schedules || schedules.data.length === 0}>
+            <option value="">날짜 및 시간 선택</option>
+            {schedules?.data.map(s => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
-
-      {/* 삐약! 🐥 activeTab 상태에 따라 다른 컴포넌트를 조건부로 렌더링해요. */}
-      {activeTab === '통계' && (
+      {activeTab === '통계' && statsData && (
         <StatisticsContent
-          data={data || null}
+          data={statsData}
           isLoading={isLoading}
           isError={isError}
         />
       )}
-      {activeTab === '입장 인원 수 조회' && (
-        // 삐약! 🐥 입장 인원 수 조회 컴포넌트를 여기에 넣으면 돼요.
-        // 현재는 EntranceCount라는 가상의 컴포넌트를 사용했어요.
+      {activeTab === '입장 인원 수 조회' && statsData && (
         <EntranceCount
-          // 삐약! 🐥 데이터 필드 이름에 맞춰서 props를 전달해요.
-          count={data.ticketCount} 
-          totalCount={data.totalCapacity} 
-          title={data.fname}
+
+          count={statsData.ticketCount} 
+          totalCount={statsData.totalCapacity} 
+          title={statsData.fname}
         />
       )}
     </Layout>

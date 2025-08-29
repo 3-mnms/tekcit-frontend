@@ -36,3 +36,14 @@
 .tabButton.active::after {
   background-color: #4d9afd;
 }
+
+.dropdowns {
+  display: flex;
+  gap: 1rem;
+}
+
+.dropdowns select {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
