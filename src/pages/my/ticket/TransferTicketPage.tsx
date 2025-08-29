@@ -1,92 +1,81 @@
-import React from 'react'
-import styles from './TransferTicketPage.module.css'
-import { useNavigate } from 'react-router-dom'
+// src/pages/mypage/ticket/transfer/TransferTicketPage.tsx
+import React, { useEffect, useMemo, useState } from 'react';
+import styles from './TransferTicketPage.module.css';
+import { useNavigate } from 'react-router-dom';
+import { useTicketsQuery } from '@/models/my/ticket/tanstack-query/useTickets'; 
+import type { TicketListItem } from '@/models/my/ticket/ticketTypes';
 
-interface Ticket {
-  id: number
-  date: string
-  number: string
-  title: string
-  time: string
-  count: number
-  status: '결제 완료' | '결제 대기' | '취소 완료'
-  imageUrl: string
-  isTransferred: boolean
-}
-
-const dummyTickets: Ticket[] = [
-  {
-    id: 1,
-    date: '2025.07.01',
-    number: 'A123456',
-    title: 'GMF 2025',
-    time: '2025.10.18 17:00',
-    count: 2,
-    status: '결제 완료',
-    imageUrl: 'https://images.unsplash.com/photo-1497032205916-ac775f0649ae?w=200&h=280&fit=crop',
-    isTransferred: false,
-  },
-  {
-    id: 2,
-    date: '2025.07.02',
-    number: 'B987654',
-    title: '뮤지컬 캣츠',
-    time: '2025.11.10 19:30',
-    count: 1,
-    status: '결제 완료',
-    imageUrl: 'https://images.unsplash.com/photo-1497032205916-ac775f0649ae?w=200&h=280&fit=crop',
-    isTransferred: true,
-  },
-]
+export const TRANSFER_DONE_EVENT = 'ticket:transferred';
 
 const TransferTicketPage: React.FC = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { data } = useTicketsQuery();
 
-  // ✅ 양도하기 클릭 시 /mypage/ticket/transfer/test 로 이동 + state 전달
-  const handleTransfer = (ticket: Ticket) => {
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const onDone = (ev: Event) => {
+      const num = (ev as CustomEvent<string>).detail; 
+      setHidden(prev => {
+        const next = new Set(prev);
+        next.add(num);
+        return next;
+      });
+    };
+    window.addEventListener(TRANSFER_DONE_EVENT, onDone as EventListener);
+    return () => window.removeEventListener(TRANSFER_DONE_EVENT, onDone as EventListener);
+  }, []);
+
+  const visibleTickets = useMemo(() => {
+    const list = data ?? [];
+    return list.filter(t =>
+      t.rawStatus === 'CONFIRMED' && !hidden.has(t.reservationNumber)
+    );
+  }, [data, hidden]);
+
+  const handleTransfer = (row: TicketListItem) => {
     navigate('/mypage/ticket/transfer/test', {
       state: {
-        ticketId: ticket.id,
-        ticket, // Transfer 대상 페이지에서 바로 사용 가능
+        reservationNumber: row.reservationNumber,
+        ticket: row, 
       },
-    })
-  }
-
-  const visibleTickets = dummyTickets.filter((t) => t.status === '결제 완료')
+    });
+  };
 
   return (
     <div className={styles.page}>
       <h2 className={styles.title}>티켓 양도</h2>
+
       <div className={styles.list}>
-        {visibleTickets.map((ticket) => (
-          <div key={ticket.id} className={styles.card}>
-            <img src={ticket.imageUrl} alt={`${ticket.title} 포스터`} className={styles.poster} />
+        {visibleTickets.map((t) => (
+          <div key={t.reservationNumber} className={styles.card}>
+            <img
+              src={'/dummy-poster.jpg'}
+              alt={`${t.title} 포스터`} className={styles.poster}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/dummy-poster.jpg'; }}
+            />
             <div className={styles.details}>
               <div className={styles.info}>
-                <p><strong>예매일</strong>: {ticket.date}</p>
-                <p><strong>예매번호</strong>: {ticket.number}</p>
-                <p><strong>공연명</strong>: {ticket.title}</p>
-                <p><strong>일시</strong>: {ticket.time}</p>
-                <p><strong>매수</strong>: {ticket.count}</p>
+                <p><strong>예매일</strong>: {t.date}</p>
+                <p><strong>예매번호</strong>: {t.number}</p>
+                <p><strong>공연명</strong>: {t.title}</p>
+                <p><strong>일시</strong>: {t.dateTime}</p>
+                <p><strong>매수</strong>: {t.count}</p>
               </div>
               <div className={styles.buttonWrapper}>
-                {ticket.isTransferred ? (
-                  <span className={styles.transferredBadge}>양도 완료됨</span>
-                ) : (
-                  <button
-                    className={styles.transferBtn}
-                    onClick={() => handleTransfer(ticket)}
-                  >
-                    양도하기
-                  </button>
-                )}
+                <button className={styles.transferBtn} onClick={() => handleTransfer(t)}>
+                  양도하기
+                </button>
               </div>
             </div>
           </div>
         ))}
+        {visibleTickets.length === 0 && (
+          <div className={styles.empty}>양도 가능한 티켓이 없어요.</div>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default TransferTicketPage
+export default TransferTicketPage;
