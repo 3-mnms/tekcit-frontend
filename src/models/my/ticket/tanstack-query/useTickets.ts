@@ -42,6 +42,7 @@ const mapToListItem = (t: TicketResponseDTO): TicketListItem => ({
     count: t.selectedTicketCount,
     statusLabel: statusToLabel(t.reservationStatus),
     rawStatus: t.reservationStatus,
+    festivalId: t.festivalId,
 });
 
 export const useTicketsQuery = () => {
