@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import styles from './FestivalInfoSection.module.css';
 import type { FestivalDetail } from '@/models/festival/festivalType';
+import { useIsFavorite, useFavoriteCount, useCreateFavoriteMutation, useDeleteFavoriteMutation } from '@/models/festival/tanstack-query/useFavoritesDetail';
+import { useAuthStore } from '@/shared/storage/useAuthStore';
 
 type Props = {
   detail?: FestivalDetail;
@@ -16,12 +18,43 @@ const formatPrice = (n?: number) =>
   typeof n === 'number' ? n.toLocaleString() + '원' : '';
 
 const FestivalInfoSection: React.FC<Props> = ({ detail, loading }) => {
+  // ✅ fid 안전 추출 (프로젝트 DTO에 맞게 필요하면 수정!)
+  const fid = useMemo(() => {
+    const raw = (detail as any)?.fid ?? (detail as any)?.mt20id ?? (detail as any)?.id;
+    return raw ? String(raw) : undefined;
+  }, [detail]);
+
+  // ✅ 로그인 토큰
+  const accessToken = useAuthStore((s) => s.accessToken);
+
+  // ✅ 찜 상태/카운트 + 토글 뮤테이션
+  const { data: likedData } = useIsFavorite(fid, Boolean(accessToken)); // 내 찜 여부(로그인 필요)
+  const { data: countData } = useFavoriteCount(fid); // 공개
+  const createMut = useCreateFavoriteMutation(fid || '');
+  const deleteMut = useDeleteFavoriteMutation(fid || '');
+
+  const liked = likedData?.liked ?? false;
+  const count = countData?.count ?? 0;
+  const toggling = createMut.isPending || deleteMut.isPending;
+
+  const onToggleLike = () => {
+    if (!fid) return;
+    if (!accessToken) {
+      alert('로그인이 필요해요!');
+      return;
+    }
+    if (liked) deleteMut.mutate();
+    else createMut.mutate();
+  };
+
   if (loading && !detail) {
     return (
       <section className={styles.container}>
         <div className={styles.left}>
           <div className={styles.posterPlaceholder}>Loading…</div>
-          <button className={styles.likeBtn}><i className="fa-heart fa-regular" /> 0</button>
+          <button className={styles.likeBtn} type="button" disabled>
+            <i className="fa-heart fa-regular" /> 0
+          </button>
         </div>
         <div className={styles.right}>
           <h1 className={styles.title}>로딩 중…</h1>
@@ -52,8 +85,18 @@ const FestivalInfoSection: React.FC<Props> = ({ detail, loading }) => {
         ) : (
           <div className={styles.posterPlaceholder}>No Image</div>
         )}
-        <button className={styles.likeBtn} type="button">
-          <i className="fa-heart fa-regular" /> 0
+
+        <button
+          className={`${styles.likeBtn} ${liked ? styles.likeBtnLiked : ''}`}
+          type="button"
+          aria-pressed={liked}
+          aria-label={liked ? '관심 해제' : '관심 추가'}
+          onClick={onToggleLike}
+          disabled={toggling || !fid}
+        >
+          {/* Font Awesome: 채움/비채움 */}
+          <i className={`fa-heart ${liked ? 'fa-solid' : 'fa-regular'}`} />
+          <span className={styles.likeCount}>{count}</span>
         </button>
       </div>
 
@@ -69,7 +112,9 @@ const FestivalInfoSection: React.FC<Props> = ({ detail, loading }) => {
           <div className={styles.infoRow}>
             <span className={styles.label}>공연기간</span>
             <span className={styles.value}>
-              {formatDate(detail.prfpdfrom)} ~ {formatDate(detail.prfpdto)}
+              {detail.prfpdfrom === detail.prfpdto
+                ? formatDate(detail.prfpdfrom)
+                : `${formatDate(detail.prfpdfrom)} ~ ${formatDate(detail.prfpdto)}`}
             </span>
           </div>
           {detail.runningTime && (

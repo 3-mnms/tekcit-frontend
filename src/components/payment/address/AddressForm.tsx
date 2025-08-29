@@ -134,7 +134,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
           <span className={styles['header-title']}>배송지 선택</span>
         </div>
 
-        {/* ✅ 배송지 관리 모달 오픈 버튼 */}
         <button
           type="button"
           className={`${styles['btn']} ${styles['btn-outline']}`}

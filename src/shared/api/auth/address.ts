@@ -1,7 +1,6 @@
 // src/shared/api/user/address.ts
 import { api } from '@/shared/config/axios'
 
-/** 서버 응답 공통 래퍼 */
 type ApiResponse<T> = {
   success: boolean
   data: T
@@ -27,9 +26,11 @@ export type AddressRequestDTO = {
   zipCode: string
   name: string
   phone: string
+  isDefault: boolean
 }
 
 export type AddressDTO = {
+  id: number
   name: string
   phone: string
   address: string
@@ -37,30 +38,58 @@ export type AddressDTO = {
   isDefault: boolean
 }
 
+const normalizeAddress = (raw: any): AddressDTO => ({
+  id: raw.id,
+  name: raw.name,
+  phone: raw.phone,
+  address: raw.address,
+  zipCode: raw.zipCode,
+  isDefault: typeof raw?.isDefault === 'boolean' ? raw.isDefault : Boolean(raw?.default),
+})
+
+/** ⬇️ 전송 정규화: 서버가 기대하는 키 이름으로 변경 */
+const toServerPayload = (p: AddressRequestDTO) => ({
+  name: p.name,
+  phone: p.phone,
+  zipCode: p.zipCode,
+  address: p.address,
+  isDefault: p.isDefault,
+  default: p.isDefault,
+})
+
 export const getAddresses = async (): Promise<AddressDTO[]> => {
-  const { data } = await api.get('/addresses/allAddress')
-  if (!data || typeof data !== 'object') return []
-  return unwrap<AddressDTO[]>(data, [])
+  const { data } = await api.get<ApiResponse<any[]>>('/addresses/allAddress')
+  const list = unwrap<any[]>(data, [])
+  return list.map(normalizeAddress)
+}
+
+export const getDefaultAddress = async (): Promise<AddressDTO | null> => {
+  const { data } = await api.get<ApiResponse<any | null>>('/addresses/defaultAddress')
+  const raw = unwrap<any | null>(data, null)
+  return raw ? normalizeAddress(raw) : null
+}
+
+export const getAddressById = async (addressId: number): Promise<AddressDTO> => {
+  const { data } = await api.get<ApiResponse<any>>(`/addresses/${addressId}`)
+  return normalizeAddress(unwrap<any>(data))
 }
 
 export const addAddress = async (payload: AddressRequestDTO): Promise<AddressDTO> => {
-  const { data } = await api.post<ApiResponse<AddressDTO>>('/addresses', payload)
-  return unwrap(data)
+  const { data } = await api.post<ApiResponse<any>>('/addresses', toServerPayload(payload))
+  return normalizeAddress(data?.data ?? data)
 }
 
 export const updateAddress = async (addressId: number, payload: AddressRequestDTO): Promise<AddressDTO> => {
-  const { data } = await api.patch<ApiResponse<AddressDTO>>(
+  const { data } = await api.patch<ApiResponse<any>>(
     `/addresses/updateAddress/${addressId}`,
-    payload
+    toServerPayload(payload)
   )
-  return unwrap(data)
+  return normalizeAddress(data?.data ?? data)
 }
 
 export const changeDefaultAddress = async (addressId: number): Promise<AddressDTO> => {
-  const { data } = await api.patch<ApiResponse<AddressDTO>>(
-    `/addresses/changeDefault/${addressId}`
-  )
-  return unwrap(data)
+  const { data } = await api.patch<ApiResponse<any>>(`/addresses/changeDefault/${addressId}`)
+  return normalizeAddress(unwrap<any>(data))
 }
 
 export const deleteAddress = async (addressId: number): Promise<void> => {

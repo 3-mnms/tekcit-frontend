@@ -1,12 +1,15 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import { isSameDay } from 'date-fns';
-import ko from 'date-fns/locale/ko';
+import { ko } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
 import styles from './FestivalScheduleSection.module.css';
+import Button from '@/components/common/button/Button';
 
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useFestivalDetail } from '@/models/festival/tanstack-query/useFestivalDetail';
+import { useAuthStore } from '@/shared/storage/useAuthStore';
+import { useUserAgeQuery } from '@/models/festival/tanstack-query/useUserAgeDetail';
 
 /** YYYY-MM-DD */
 const ymd = (d: Date) => {
@@ -38,7 +41,7 @@ const toJsDow = (raw?: string): number | undefined => {
 };
 
 const openbookingPopup = (
-  fid: number,
+  fid: string | number,
   date: Date,
   time?: string | null,
   fdfrom?: string | null,
@@ -64,12 +67,87 @@ const openbookingPopup = (
   );
 };
 
+/* =========================
+   ✅ 연령 체크 유틸들
+   ========================= */
+
+/** 관람연령 문자열에서 최소 나이 추출 (없으면 null, 전체관람가/전연령 등은 0) */
+function parseMinAge(raw?: string | null): number | null {
+  if (!raw) return null;
+  const s = String(raw).replace(/\s+/g, '');
+  // 전체/전연령
+  if (/(전체관람가|전연령|ALL)/i.test(s)) return 0;
+
+  // "만7세이상" / "7세이상" / "만 12세 이상" 등
+  const m = s.match(/(?:만)?(\d+)\s*세\s*이상?/);
+  if (m && m[1]) {
+    const n = parseInt(m[1], 10);
+    if (!isNaN(n)) return n;
+  }
+
+  // 기타 케이스는 해석 불가 → null (차단하지 않음)
+  return null;
+}
+
+/** YYYY-MM-DD/YYYY.MM.DD/yyyymmdd 등에서 YYYY-MM-DD로 정규화 */
+function normalizeBirthYmd(raw?: string | null): string | null {
+  if (!raw) return null;
+  const s = String(raw).trim();
+  if (!s) return null;
+
+  // 8자리 숫자 → yyyymmdd
+  if (/^\d{8}$/.test(s)) {
+    return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+  }
+  // YYYY.MM.DD / YYYY/MM/DD / YYYY-MM-DD
+  const cleaned = s.replace(/[./]/g, '-');
+  const m = cleaned.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+
+  return null;
+}
+
+/** 기준일(onDate) 기준 만 나이 계산 */
+function calcAgeOn(birthYmd: string, onDate: Date): number {
+  const [by, bm, bd] = birthYmd.split('-').map((v) => parseInt(v, 10));
+  if (!by || !bm || !bd) return NaN;
+  const y = onDate.getFullYear();
+  const m = onDate.getMonth() + 1;
+  const d = onDate.getDate();
+
+  let age = y - by;
+  if (m < bm || (m === bm && d < bd)) age -= 1;
+  return age;
+}
+
+/** 여러 스토어 키 후보에서 생년월일을 안전히 끌어오기 */
+function getBirthYmdFromStore(store: any): string | null {
+  const candidates = [
+    store?.profile?.birthDate,
+    store?.user?.birthDate,
+    store?.user?.birth,
+    store?.member?.birthDate,
+    store?.birthDate,
+    store?.birth, // 혹시나
+  ];
+  for (const c of candidates) {
+    const norm = normalizeBirthYmd(c);
+    if (norm) return norm;
+  }
+  return null;
+}
+
 const FestivalScheduleSection: React.FC = () => {
   const { fid } = useParams<{ fid: string }>();
   const { data: detail, isLoading, isError, status } = useFestivalDetail(fid ?? '');
+  const { refetch: refetchAge } = useUserAgeQuery({ enabled: false });
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   /** 오늘 00:00 */
   const today = useMemo(() => {
@@ -155,8 +233,7 @@ const FestivalScheduleSection: React.FC = () => {
           .filter(Boolean)
       )
     );
-    // "HH:mm" 레क्स 정렬 → 시간 오름차순
-    unique.sort();
+    unique.sort(); // "HH:mm" 문자열 정렬 → 시간 오름차순
     return unique;
   }, [detail?.times]);
 
@@ -176,7 +253,7 @@ const FestivalScheduleSection: React.FC = () => {
   useEffect(() => {
     if (!selectedDate) return;
     if (availableTimes.length > 0) {
-      const first = availableTimes[0]; // 이미 정렬되어 있음
+      const first = availableTimes[0];
       setSelectedTime(first);
     } else {
       setSelectedTime(null);
@@ -186,15 +263,13 @@ const FestivalScheduleSection: React.FC = () => {
   /** 최초 로딩 시: 오늘 기준 가장 빠른 선택 가능 날짜 + 그 날의 가장 빠른 시간 자동 선택 */
   useEffect(() => {
     if (!detail) return;
-    // 이미 사용자가 선택한 상태면 건드리지 않음
     if (selectedDate && selectedTime) return;
 
     // 1) 가장 빠른 선택 가능 날짜 찾기
     let initialDate: Date | null = null;
     if (isSingleDay && endDate) {
-      initialDate = endDate; // 단일 일자는 그 날로
+      initialDate = endDate;
     } else {
-      // 기간 안에서 오늘부터 앞으로 스캔
       if (endDate) {
         const startScan = new Date(effectiveMinDate ?? today);
         for (let i = 0; i < 730 && startScan <= endDate; i++) {
@@ -202,12 +277,11 @@ const FestivalScheduleSection: React.FC = () => {
           startScan.setDate(startScan.getDate() + 1);
         }
       } else if (effectiveMinDate) {
-        // endDate가 없다면 최소일만 후보
         initialDate = effectiveMinDate;
       }
     }
 
-    // 2) 시간 선택: dedupe+정렬 된 baseTimes의 첫 번째(있을 경우)
+    // 2) 시간 선택
     const initialTime = (baseTimes.length > 0) ? baseTimes[0] : null;
 
     // 3) 상태 반영
@@ -240,7 +314,6 @@ const FestivalScheduleSection: React.FC = () => {
                 selected={selectedDate}
                 onChange={(d) => {
                   setSelectedDate(d);
-                  // 시간은 useEffect에서 첫 시간 자동 선택
                 }}
                 minDate={minNavDate}
                 maxDate={maxNavDate}
@@ -263,13 +336,13 @@ const FestivalScheduleSection: React.FC = () => {
               <p className={styles.label}>시간</p>
               <div className={styles.timeGroup}>
                 {timesToShow.map((time) => (
-                  <button
+                  <Button
                     key={time}
                     className={`${styles.timeBtn} ${selectedTime === time ? styles.selectedBtn : ''}`}
                     onClick={() => setSelectedTime(time)}
                   >
                     {time}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -280,21 +353,53 @@ const FestivalScheduleSection: React.FC = () => {
       {detail && (
         <div className={styles.section}>
           <div className={styles.actionsRow}>
-            <button
+            <Button
               className={styles.confirmBtn}
               disabled={confirmDisabled}
-              onClick={() => {
-                if (!selectedDate) return;
+              onClick={async () => {                    // ✅ async로 변경
+                // 1) ✅ 로그인 가드
+                if (!accessToken) {
+                  alert('로그인이 필요한 서비스입니다.');
+                  const redirect = location.pathname + location.search;
+                  navigate(`/login?redirect=${encodeURIComponent(redirect)}`);
+                  return;
+                }
 
-                // ✅ start/end를 YYYY-MM-DD로 정규화해서 같이 넘김
+                // 2) ✅ 관람연령 가드 (필요할 때만 서버 호출)
+                const ageText =
+                  (detail as any)?.prfage ??
+                  (detail as any)?.age ??
+                  (detail as any)?.ageLimit ??
+                  null;
+
+                const minAge = parseMinAge(ageText);
+                if (minAge !== null && minAge > 0) {
+                  try {
+                    const { data: userAge } = await refetchAge(); // GET /api/users/checkAge
+                    if (userAge == null) {
+                      alert('나이 확인에 실패했어요. 잠시 후 다시 시도해 주세요.');
+                      return;
+                    }
+                    if (userAge < minAge) {
+                      alert('관람연령 이상만 예매 가능한 공연입니다.');
+                      return;
+                    }
+                  } catch (e) {
+                    console.error(e);
+                    alert('나이 확인에 실패했어요. 잠시 후 다시 시도해 주세요.');
+                    return;
+                  }
+                }
+
+                // 3) ✅ 예매 팝업
+                if (!selectedDate || !fid) return;
                 const fdfrom = startDate ? ymd(startDate) : null;
                 const fdto = endDate ? ymd(endDate) : null;
-
                 openbookingPopup(fid, selectedDate, selectedTime, fdfrom, fdto);
               }}
             >
               예매하기
-            </button>
+            </Button>
           </div>
         </div>
       )}

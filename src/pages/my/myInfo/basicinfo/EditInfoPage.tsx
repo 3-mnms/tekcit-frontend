@@ -1,80 +1,132 @@
-import React, { useState } from 'react'
-import Button from '@/components/common/button/Button'
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useForm, Controller } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import Button from '@/components/common/Button'
 import Input from '@/components/common/input/Input'
 import styles from './EditInfoPage.module.css'
 
+import { isUser, type UpdateUserRequestDTO } from '@/models/my/userTypes'
+import { useMyPageUserQuery, useUpdateUserMutation } from '@/models/my/useMyPage'
+
+const schema = z.object({
+  name: z.string().min(1, '이름은 필수입니다.'),
+  phone: z
+    .string()
+    .regex(/^01[016789]-\d{3,4}-\d{4}$/, '전화번호 형식이 올바르지 않습니다. 예: 010-1234-5678'),
+  residentNum: z
+    .string()
+    .regex(/^\d{6}-[1-4]$/, '주민번호 형식은 6자리-성별코드(1~4)입니다. 예: 990101-1'),
+})
+
+type FormValues = z.infer<typeof schema>
+
 const EditInfoPage: React.FC = () => {
-  const [isChangingEmail, setIsChangingEmail] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(false)
-  const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
+  const nav = useNavigate()
+  const { data, isLoading, isError } = useMyPageUserQuery()
+  const { mutateAsync, isPending } = useUpdateUserMutation()
 
-  const handleEmailChangeClick = () => {
-    setIsChangingEmail(true)
+  const { control, handleSubmit, reset } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      name: '',
+      phone: '',
+      residentNum: '',
+    },
+  })
+
+  React.useEffect(() => {
+    if (!data) return
+    reset({
+      name: data.name ?? '',
+      phone: data.phone ?? '',
+      residentNum: isUser(data) ? data.residentNum ?? '' : '',
+    })
+  }, [data, reset])
+
+  if (isLoading) {
+    return (
+      <section className={styles.container}>
+        <div className={styles.card}>불러오는 중…</div>
+      </section>
+    )
+  }
+  if (isError || !data) {
+    return (
+      <section className={styles.container}>
+        <div className={styles.card}>불러오기에 실패했어요.</div>
+      </section>
+    )
   }
 
-  const handleSendCode = () => {
-    if (!email) return alert('이메일을 입력해주세요!')
-    // TODO: 이메일로 인증 코드 전송 API 호출
-    setIsVerifying(true)
-  }
+  const onSubmit = async (vals: FormValues) => {
+    const payload: UpdateUserRequestDTO = {
+      name: vals.name,
+      phone: vals.phone,
+      residentNum: vals.residentNum,
+    }
 
-  const handleVerifyCode = () => {
-    if (!code) return alert('인증 코드를 입력해주세요!')
-    // TODO: 인증 코드 검증 API 호출
-    alert('인증 완료!')
+    try {
+      await mutateAsync(payload)          
+      alert('저장되었습니다.');  
+      nav('/mypage/myinfo/detail')
+    } catch (err) {
+      console.error('[EditInfo] update failed:', err)
+      alert('저장 중 오류가 발생했어요.')
+    }
   }
 
   return (
     <section className={styles.container}>
       <h2 className={styles.title}>정보 수정</h2>
 
-      <Input label="이름" defaultValue="홍길동" />
-      <Input label="생년월일" type="date" defaultValue="2025-07-28" />
-      <Input label="성별" type="select" defaultValue="여성" options={['여성', '남성', '기타']} />
-
-      {!isChangingEmail ? (
-        <Input
-          label="이메일"
-          value="a@example.com"
-          disabled
-          rightElement={
-            <Button className={styles.emailButton} onClick={handleEmailChangeClick}>
-              이메일 변경
-            </Button>
-          }
-        />
-      ) : (
-        <>
-          <Input
-            label="변경할 이메일"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            rightElement={
-              <Button className={styles.emailButton} onClick={handleSendCode}>
-                인증 코드 전송
-              </Button>
-            }
+      <form className={styles.card} onSubmit={handleSubmit(onSubmit)} noValidate>
+        <div className={`${styles.formGrid} ${styles.compact}`}>
+          <Controller
+            name="name"
+            control={control}
+            render={({ field }) => <Input label="이름" {...field} />}
           />
-          {isVerifying && (
-            <div className={styles.authCodeRow}>
-              <Input
-                placeholder="인증코드를 입력해주세요"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                rightElement={
-                  <Button className={styles.emailButton} onClick={handleVerifyCode}>
-                    인증하기
-                  </Button>
-                }
-              />
-            </div>
-          )}
-        </>
-      )}
 
-      <Button className={styles.submitButton}>수정 완료</Button>
+          <Controller
+            name="phone"
+            control={control}
+            render={({ field }) => (
+              <Input label="전화번호" placeholder="010-1234-5678" {...field} />
+            )}
+          />
+
+          <Controller
+            name="residentNum"
+            control={control}
+            render={({ field }) => (
+              <Input label="주민번호(앞6+뒤1)" placeholder="YYMMDD-#" {...field} />
+            )}
+          />
+        </div>
+
+        <div className={`${styles.card} ${styles.actionsCard}`}>
+          <div className={styles.actions}>
+            <Button
+              className={styles.btnPrimary}
+              type="button"
+              onClick={() => nav('/mypage/myinfo/detail')}
+              disabled={isPending}
+            >
+              취소
+            </Button>
+            <Button
+              className={styles.btnPrimary}
+              type="submit"
+              disabled={isPending}
+              aria-busy={isPending}
+            >
+              {isPending ? '저장 중…' : '저장'}
+            </Button>
+          </div>
+        </div>
+      </form>
     </section>
   )
 }

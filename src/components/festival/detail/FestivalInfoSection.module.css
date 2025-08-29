@@ -36,10 +36,49 @@
 }
 
 .likeBtn {
-  background: none;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: #f9fafb;
   cursor: pointer;
-  font-size: 1rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+}
+
+.likeBtn:hover {
+  background: #f3f4f6;
+  border-color: #bbb;
+}
+
+/* 눌린 상태 */
+.likeBtnLiked {
+  background: #fee2e2;      /* 연분홍 */
+  border-color: #fca5a5;
+}
+
+.likeBtnLiked:hover {
+  background: #fecaca;
+  border-color: #f87171;
+}
+
+/* 아이콘 색상은 버튼 상태와 무관하게 지정 */
+.likeBtn i {
+  font-size: 1.2rem;
+  line-height: 1;
+  color: #555; /* 기본 회색 */
+}
+
+.likeBtnLiked i {
+  color: #e11d48; /* 진한 빨강 */
+}
+
+.likeCount {
+  min-width: 1.5em;
+  text-align: right;
   color: #333;
 }
 

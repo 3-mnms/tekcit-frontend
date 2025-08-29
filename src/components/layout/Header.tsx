@@ -1,4 +1,3 @@
-// src/components/admin/layout/Header.tsx (예시 경로)
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './Header.module.css'
@@ -25,6 +24,11 @@ const AdminHeader: React.FC<HeaderProps> = ({ userName, onLogout, ...props }) =>
     navigate('/login', { replace: true })
   }
 
+  const handleLogoClick = () => {
+    navigate('/') // ✅ 메인 화면 경로
+  }
+
+
   const { timeLeft, extendSession } = useSessionTimer({ onExpire: handleLogout })
 
   const sessionTimeStyle =
@@ -35,7 +39,7 @@ const AdminHeader: React.FC<HeaderProps> = ({ userName, onLogout, ...props }) =>
   return (
     <header className={styles.header} {...props}>
       <div className={styles.left}>
-        <img src={logo} alt="tekcit logo" className={styles.logo} />
+        <img src={logo} alt="tekcit logo" className={styles.logo} onClick={handleLogoClick} style={{ cursor: 'pointer' }}  />
       </div>
 
       <div className={styles.right}>

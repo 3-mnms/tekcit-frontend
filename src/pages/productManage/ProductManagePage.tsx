@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query'; 
 import Layout from '@/components/layout/Layout';
@@ -15,7 +15,7 @@ const ProductManagePage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const { 
-        data: products, 
+        data: allProducts,
         isLoading, 
         isError,
     } = useQuery({
@@ -35,19 +35,28 @@ const ProductManagePage: React.FC = () => {
         }
     });
 
-    // 삐약! 이 부분에서 상품 클릭 시 상세 페이지로 이동합니다!
+    const filteredProducts = useMemo(() => {
+        const lowercasedTerm = searchTerm.toLowerCase();
+        if (!allProducts) return [];
+        if (!lowercasedTerm) return allProducts; 
+
+        return allProducts.filter(product =>
+            product.fname?.toLowerCase().includes(lowercasedTerm) ||
+            product.detail?.entrpsnmH?.toLowerCase().includes(lowercasedTerm)
+        );
+    }, [allProducts, searchTerm]);
+
     const handleRowClick = (item: Festival) => {
         navigate(`/admin/product-detail/${item.fid}`);
     };
 
-    // 삐약! 버튼 클릭 핸들러를 따로 만듭니다!
     const handleViewTicketHolderList = (e: React.MouseEvent, fid: string) => {
         e.stopPropagation(); // 삐약! 행 클릭 이벤트가 발생하는 것을 막아줍니다!
-        navigate(`/admin/productManage/${fid}/TicketHolderList`);
+        navigate(`/admin/productManage/TicketHolderList/${fid}`);
     };
 
     const handleViewStats = (e: React.MouseEvent, fid: string) => {
-        e.stopPropagation(); // 삐약! 행 클릭 이벤트가 발생하는 것을 막아줍니다!
+        e.stopPropagation();
         navigate(`/admin/productManage/Statistics/${fid}`);
     };
 
@@ -55,6 +64,7 @@ const ProductManagePage: React.FC = () => {
         { columnId: 'fid', label: 'id' },
         { columnId: 'fname', label: '상품명' },
         { columnId: 'genrenm', label: '장르' },
+        { columnId: 'fcltynm', label: '공연장 이름'},
         {
           columnId: 'entrpsnmH',
           label: '주최자명',
@@ -72,7 +82,6 @@ const ProductManagePage: React.FC = () => {
         },
     ];
 
-    // 삐약! 로딩 및 에러 상태를 처리하는 UI를 추가합니다!
     if (isLoading) {
         return <Layout subTitle="상품 관리"><div>삐약! 상품 목록을 불러오는 중...</div></Layout>;
     }
@@ -80,7 +89,6 @@ const ProductManagePage: React.FC = () => {
     if (isError) {
         return <Layout subTitle="상품 관리"><div>삐약! 오류가 발생했어요. 다시 시도해 주세요.</div></Layout>;
     }
-
 
     return (
         <Layout subTitle="상품 관리 ">
@@ -93,7 +101,7 @@ const ProductManagePage: React.FC = () => {
                 </div>
                 <Table 
                     columns={columns} 
-                    data={products || []}
+                    data={filteredProducts}
                     onRowClick={handleRowClick}
                     getUniqueKey={(item) => item.fid}
                 />

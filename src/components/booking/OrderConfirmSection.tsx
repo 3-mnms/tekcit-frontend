@@ -1,7 +1,7 @@
 // src/components/booking/OrderConfirmSection.tsx
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '@/components/common/Button';
+import Button from '@/components/common/button/Button';
 import type { DeliveryMethod } from '@/components/booking/TicketDeliverySelectSection';
 import styles from './OrderConfirmSection.module.css';
 

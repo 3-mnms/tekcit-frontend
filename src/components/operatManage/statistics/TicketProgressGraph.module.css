@@ -1,0 +1,94 @@
+.graphContainer {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 항목 사이의 간격을 줘요 */
+  padding: 1rem 1.25rem;
+  background-color: #fff;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+}
+
+.container {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 10px;
+}
+
+
+.title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.icon { color: #4d9afd; }
+
+.labelWrapper {
+  display: flex;
+  justify-content: space-between; /* 예매 수와 퍼센트를 양쪽 끝으로 보내요 */
+  align-items: center;
+  width: 100%;
+}
+
+.label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.labelWrapper{
+  margin-bottom: 12px;
+}
+
+.percentage {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.progressBar {
+  width: 100%;
+  height: 2.5rem;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden; /* 진행 바가 밖으로 튀어나가지 않게 해요 */
+}
+
+.progressFill {
+  height: 100%;
+  background-color: #64b5f6; /* 밝은 파란색 */
+  transition: width 0.5s ease-in-out; /* 너비가 부드럽게 변하도록 애니메이션을 줘요 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.ticketCountWrapper {
+  display: flex;
+  justify-content: flex-end; /* 숫자를 오른쪽으로 정렬해요. */
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-size: 1.2rem;
+}
+
+.currentTickets {
+  font-weight: 700; /* 삐약! 🐥 폰트 굵기를 통일시켰어요. */
+  color: #374151; 
+  font-size: 1rem;
+}
+
+.totalCapacity {
+ color: #6b7280;  
+ font-size: 1rem;
+}

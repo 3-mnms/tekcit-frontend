@@ -21,16 +21,19 @@ type ApiResponse<T> = {
   message?: string
 }
 
-function unwrap<T>(res: ApiResponse<T>): T {
-  if (res?.success && res?.data) return res.data
-  throw new Error(res?.message || 'API response invalid')
+const unwrap = <T,>(res: any): T => {
+  if (!res) throw new Error('empty response')
+  // axios.response.data 가 res로 들어왔다면
+  if (res.success === true || res.status === 'SUCCESS') return (res.data ?? res) as T
+  // 백엔드가 래퍼 없이 바로 DTO를 줄 때
+  if (res.accessToken) return res as T
+  // axios 원본 Response를 그대로 받은 경우
+  if (res.data) return unwrap<T>(res.data)
+  throw new Error('unexpected response format')
 }
-
-export const login = async (payload: LoginPayload): Promise<LoginResponseDTO> => {
-  const { data } = await api.post<ApiResponse<LoginResponseDTO>>('/users/login', payload)
-  const body = unwrap(data)
-  if (!body.accessToken) throw new Error('No accessToken in response')
-  return body
+export const login = async (payload: { loginId: string; loginPw: string }): Promise<LoginResponseDTO> => {
+  const { data } = await api.post('/users/login', payload)
+  return unwrap<LoginResponseDTO>(data)
 }
 
 export const logout = async (): Promise<void> => {
@@ -38,8 +41,7 @@ export const logout = async (): Promise<void> => {
 }
 
 export const reissue = async (): Promise<ReissueResponseDTO> => {
-  const { data } = await api.post<ApiResponse<ReissueResponseDTO>>('/users/reissue')
-  const body = unwrap(data)
-  if (!body.accessToken) throw new Error('No accessToken in reissue')
-  return body
+  const { data } = await api.post('/users/reissue', {})   // withCredentials=true 이므로 쿠키 전송
+  return unwrap<ReissueResponseDTO>(data)
 }
+

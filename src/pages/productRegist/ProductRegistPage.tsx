@@ -4,7 +4,7 @@ import Layout from '@/components/layout/Layout';
 import { useMutation, useQueryClient, useQuery} from '@tanstack/react-query';
 import Input from '@/components/shared/Input';
 import DatePicker from '@components/shared/DatePicker';
-import Button from '@components/common/Button';
+import Button from '@components/common/button/Button';
 import PostcodeSearch from '@/components/product/PostcodeSearch';
 import ScheduleDropdown from '@/components/product/ScheduleDropdown';
 import {initialProductData, type Festival, type DayOfWeek} from '@/models/admin/festival';
@@ -210,16 +210,16 @@ const ProductRegisterPage: React.FC = () => {
                             <div className={styles.formItem}>
                                 <label>5. 공연 시작일</label>
                                 <DatePicker 
-                                    name="fdto" 
-                                    value={productData.fdto} 
+                                    name="fdfrom" 
+                                    value={productData.fdfrom} 
                                     onChange={handleChange} 
                                 />
                             </div>
                             <div className={styles.formItem}>
                                 <label>종료일</label>
                                 <DatePicker 
-                                    name="fdfrom" 
-                                    value={productData.fdfrom} 
+                                    name="fdto" 
+                                    value={productData.fdto} 
                                     onChange={handleChange} 
                                 />
                             </div>

@@ -3,7 +3,6 @@ export interface FestivalScheduleDTO {
     time: string;
 }
 export type DayOfWeek = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
-
 export interface FestivalDetail {
     fcast: string[]; // 출연진
     ticketPrice: number; // 티켓 가격
@@ -19,7 +18,6 @@ export interface FestivalDetail {
     entrpsnmH: string; //기획사
     runningTime: string; 
 }
-
 export interface Festival {
     fid: string;
     fname: string;
@@ -31,7 +29,6 @@ export interface Festival {
     detail: FestivalDetail; //
     schedules: FestivalScheduleDTO[]; // 스케줄 정보
 }
-
 
 export const initialProductData: Festival = {
     fid: '',
@@ -59,8 +56,3 @@ export const initialProductData: Festival = {
     schedules: [],
 };
 
-export interface ApiResponse<T> {
-    data: T;
-    success: boolean;
-    message: string;
-}

@@ -1,11 +1,11 @@
 import React from 'react';
 import styles from './AnnouncementList.module.css';
 import type { Announcement } from '@/models/admin/Announcement';
-import Button from '../common/Button';
+import Button from '../common/button/Button';
 
 interface Props {
   announcements: Announcement[];
-  onDelete: (id: number) => void;
+  onDelete: (fid: string) => void;
   onEdit: (announcement: Announcement) => void;
 }
 
@@ -22,13 +22,13 @@ const AnnouncementList: React.FC<Props> = ({ announcements, onDelete, onEdit }) 
       </thead>
       <tbody>
         {announcements.map((a) => (
-          <tr key={a.id}>
-            <td>{a.genre}</td>
+          <tr key={a.scheduleId}>
+            <td>{a.fname}</td>
             <td>{a.title}</td>
-            <td>{a.createdAt}</td>
+            <td>{a.sendTime}</td>
             <td className={styles.actions}>
               <Button onClick={() => onEdit(a)}>수정</Button>
-              <Button onClick={() => onDelete(a.id)}>삭제</Button>
+              <Button onClick={() => onDelete(a.fid)}>삭제</Button>
             </td>
           </tr>
         ))}

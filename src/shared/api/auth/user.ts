@@ -36,3 +36,11 @@ export async function deleteMyAccount() {
   const res = await api.delete('/users');
   return res.status;
 }
+
+export const postCheckPassword = async (pw: string): Promise<void> => {
+  await api.post('/myPage/checkPassword', { loginPw: pw })
+}
+
+export const patchResetPassword = async (pw: string): Promise<void> => {
+  await api.patch('/myPage/resetPassword', { loginPw: pw })
+}

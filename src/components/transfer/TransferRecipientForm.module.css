@@ -1,3 +1,4 @@
+/* 기존 유지 */
 .card {
   width: 100%;
   background: #fff;
@@ -7,7 +8,6 @@
   display: grid;
   gap: 0.9rem;
 }
-
 .title { font-weight: 700; }
 
 .fieldset { border: 0; padding: 0; margin: 0; }
@@ -16,17 +16,71 @@
 
 .grid { display: grid; gap: 0.8rem; }
 .label { display: grid; gap: 0.35rem; font-weight: 500; }
-.idRow { display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; }
 
+/* ⬇️ 여기 수정: 칸 없이 딱 붙이기 + 가득 채우기 */
+.idRow {
+  display: flex;
+  align-items: stretch;
+  width: max-content;   /* 내용만큼만 */
+  gap: 0;               /* 틈 제거 */
+  position: relative;
+}
+
+/* ⬇️ 인풋을 전역 100%로 (기존 40% 제거) */
 .input {
   width: 40%;
   border: 1px solid #d1d5db;
   border-radius: 0.6rem;
   padding: 0.6rem 0.8rem;
   background: #fff;
+  height: 48px;                    /* 크게 */
+  box-sizing: border-box;
 }
 
-/* 가족증명서 */
+.inputShort,
+.inputShortAttached {    /* 둘 중 쓰는 클래스에 맞춰서 */
+  width: 280px;          /* 원하는 짧은 폭 (200~320px 조절) */
+  height: 44px;
+  border: 1px solid #d1d5db;
+  border-right: 0;
+  border-radius: 0.6rem 0 0 0.6rem;
+  padding: 0.6rem 0.8rem;
+  box-sizing: border-box;
+}
+
+/* ⬇️ 버튼과 붙는 인풋 보정 */
+.inputAttached {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;              /* 중간 선 제거 */
+}
+
+/* ⬇️ 검색 버튼 스타일 (Button에 className으로 적용) */
+.searchBtn {
+  height: 44px;
+  border-radius: 0 0.6rem 0.6rem 0;
+  white-space: nowrap;
+  /* 버튼 자체 테두리는 없이 파란 배경일 테니, 인풋 테두리와 1px 겹치기 */
+  margin-left: -1px;        /* ← seam 제거 핵심 */
+  position: relative;
+  z-index: 1;
+}
+
+.idRow:focus-within::after {
+  content: "";
+  position: absolute;
+  inset: -3px;              /* 링 두께 */
+  border-radius: 0.8rem;    /* 인풋/버튼 합친 반경보다 살짝 크게 */
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.35); /* 파란 포커스 링 */
+  pointer-events: none;
+}
+
+/* 반응형에서 버튼 폭 살짝 줄이기 */
+@media (max-width: 520px) {
+  .searchBtn { width: 108px; }
+}
+
+/* --- 아래는 기존(가족증명서/모달/프리뷰 등) 그대로 --- */
 .proofWrap { display: grid; gap: 0.4rem; }
 .dropzone {
   display: grid;
@@ -50,11 +104,7 @@
   margin-top: 5px;
 }
 .fileHelp { color: #6b7280; font-size: 0.875rem; }
-.fileMeta {
-  grid-column: 1 / -1;
-  display: flex; justify-content: space-between; align-items: center;
-  margin-top: 0.4rem;
-}
+.fileMeta { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem; }
 .fileName { font-size: 0.875rem; color: #374151; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .clearBtn { background: transparent; border: 0; color: #6b7280; cursor: pointer; text-decoration: underline; }
 
@@ -62,68 +112,21 @@
 .noticeSmall { color: #6b7280; font-size: 0.8rem; }
 .helper { color: #6b7280; font-size: 0.875rem; text-align: center; }
 
-/* ========== 모달 크게 ========== */
-.modalBackdrop {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.40);
-  display: grid; place-items: center;
-  z-index: 60;
-}
-.modalCard {
-  width: 72vw;
-  max-width: 960px;
-  background: #fff;
-  border-radius: 1rem;
-  border: 1px solid #e5e7eb;
-  padding: 1rem 1.25rem;
-  box-shadow: 0 12px 36px rgba(0,0,0,0.2);
-}
+.modalBackdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.40); display: grid; place-items: center; z-index: 60; }
+.modalCard { width: 72vw; max-width: 960px; background: #fff; border-radius: 1rem; border: 1px solid #e5e7eb; padding: 1rem 1.25rem; box-shadow: 0 12px 36px rgba(0,0,0,0.2); }
 .modalTitle { font-weight: 700; margin-bottom: 0.6rem; }
 .modalBtns { margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px; }
 
-/* 미리보기 */
-.previewBox {
-  position: relative;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.8rem;
-  overflow: hidden;
-}
-.previewArea {
-  height: 70vh;
-  min-height: 420px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.previewImg {
-  max-height: calc(70vh - 20px);
-  width: 100%;
-  object-fit: contain;
-}
-.previewPdf {
-  width: 100%;
-  height: 70vh;
-  border: 0;
-}
+.previewBox { position: relative; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.8rem; overflow: hidden; }
+.previewArea { height: 70vh; min-height: 420px; display: flex; align-items: center; justify-content: center; }
+.previewImg { max-height: calc(70vh - 20px); width: 100%; object-fit: contain; }
+.previewPdf { width: 100%; height: 70vh; border: 0; }
 .previewFallback { text-align: center; padding: 12px; }
 .previewFilename { margin-top: 4px; font-size: 12px; color: #6b7280; }
 
-/* 로딩 */
-.loadingOverlay {
-  position: absolute; inset: 0;
-  background: rgba(0,0,0,0.3);
-  display: flex; align-items: center; justify-content: center;
-}
-.loadingBadge {
-  background: #fff;
-  border-radius: 12px;
-  padding: 8px 16px;
-  font-size: 14px; font-weight: 600;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-}
+.loadingOverlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
+.loadingBadge { background: #fff; border-radius: 12px; padding: 8px 16px; font-size: 14px; font-weight: 600; box-shadow: 0 6px 18px rgba(0,0,0,0.18); }
 
-/* 반응형 */
 @media (max-width: 960px) {
   .modalCard { width: 88vw; max-width: 88vw; }
 }
