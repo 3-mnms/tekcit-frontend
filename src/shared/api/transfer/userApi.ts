@@ -23,3 +23,23 @@ export async function fetchTransferor(): Promise<AssignmentDTO> {
   const { data } = await api.get('/users/transferor');
   return unwrap<AssignmentDTO>(data as any);
 }
+
+export function normalizeRrn7(input?: string | number | null): string {
+  const raw = (input ?? '').toString().trim()
+  if (!raw) return ''
+
+  // 1) 숫자만 추출
+  const digits = raw.replace(/\D/g, '')
+
+  // 2) 7자리 이상이면 앞 6 + 7번째 한 자리로 'YYMMDD-#'
+  if (digits.length >= 7) {
+    return `${digits.slice(0, 6)}-${digits.charAt(6)}`
+  }
+
+  // 3) 이미 7자리 포맷(하이픈 유무)인 경우 커버
+  const m = raw.match(/^(\d{6})-?(\d)$/)
+  if (m) return `${m[1]}-${m[2]}`
+
+  // 그 외는 부족/불명확 → 빈 문자열
+  return ''
+}
