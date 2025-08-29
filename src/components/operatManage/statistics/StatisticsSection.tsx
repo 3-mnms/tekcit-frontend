@@ -1,37 +1,38 @@
-// src/components/operatManage/statistics/StatisticsContent.tsx
-
 import React from 'react';
-import styles from './StatisticsSection.module.css'; // 삐약! 🐥 기존 스타일을 그대로 사용해요.
-import TicketProgressGraph from '@/components/operatManage/statistics/TicketProgressGraph';
+import styles from './StatisticsSection.module.css';
+// import TicketProgressGraph from '@/components/operatManage/statistics/TicketProgressGraph';
 import Statistics from '@/components/festival/detail/FestivalStatisticsSection';
-import { getStatsData } from '@/shared/api/admin/festival'; 
-import { useQuery } from '@tanstack/react-query';
+import type { UserStatsResponse  } from '@/models/admin/statistics'; 
 
-const StatisticsContent: React.FC = () => {
-    const { data, isLoading, isError } = useQuery({
-    queryKey: ['statsData'],
-    queryFn: getStatsData, // 예시 API 함수
-  });
-  if (isLoading) {
-    return <div>통계 데이터를 불러오는 중...</div>;
-  }
-  if (isError || !data) {
-    return <div>통계 데이터 로딩 실패!</div>;
-  }
+interface Props {
+  data: UserStatsResponse['data'] | null;
+}
+
+const StatisticsSection: React.FC<Props> = ({ data }) => {
+  if (!data) return null;
+
+  // 삐약! 🐥 API 응답에 맞춰서 데이터를 매핑해야 해요.
+  const genderData = [
+      { label: '남', value: data.genderCount.male },
+      { label: '여', value: data.genderCount.female },
+  ];
+  const ageData = Object.entries(data.ageGroupCount).map(([label, value]) => ({ label, value }));
 
   return (
     <div className={styles.container}>
-        <div className={styles.controls}> 
+        {/* <div className={styles.controls}> 
           <TicketProgressGraph 
             currentTickets={data.ticketCount} 
             totalCapacity={data.totalCapacity} 
             />
-        </div>  
+        </div>   */}
         <div className={styles.statsSection}>  
-          <Statistics/>
+          <Statistics
+            genderData={genderData}
+            ageData={ageData}/>
         </div>
     </div>
   );
 };
 
-export default StatisticsContent;
+export default StatisticsSection;

@@ -183,7 +183,7 @@ export const router = createBrowserRouter([
       { path: 'productManage', element: <ProductManagePage /> },
       { path: 'product-detail/:fid', element: <ProductDetailPage /> },
       { path: 'productManage/TicketHolderList/:fid', element: <TicketHolderListPage /> },
-      { path: 'productManage/Statistics/:id', element: <StatisticsPage /> },
+      { path: 'productManage/Statistics/:fid', element: <StatisticsPage /> },
 
       { path: 'button', element: <HomePage /> },
       { path: 'layout', element: <Layout /> },

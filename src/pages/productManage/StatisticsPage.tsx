@@ -1,60 +1,148 @@
-import React, { useState } from 'react';
+import React, {useEffect, useMemo, useState } from 'react';
 import Layout from '@components/layout/Layout';
 import { useQuery } from '@tanstack/react-query';
-import { getStatsData } from '@/shared/api/admin/festival'; 
+import { getProducts as getProductsAdmin } from '@/shared/api/admin/festival'; 
+import { getFestivalSchedules, getBookingStatsData, getUserStatsData, getEntranceCount  } from '@/shared/api/admin/statistics'; 
 import StatisticsContent from '@/components/operatManage/statistics/StatisticsSection';
 import EntranceCount from '@/components/operatManage/statistics/EntranceCount'; 
-
-// import { useNavigate, useParams } from 'react-router-dom';
 import styles from './StatisticsPage.module.css';
+import TicketProgressGraph from '@/components/operatManage/statistics/TicketProgressGraph';
+import { useNavigate, useParams } from 'react-router-dom';
+import Button from '@/components/common/Button';
 
 type TabType = '통계' | '입장 인원 수 조회';
 
 const StatisticsPage: React.FC = () => {
-  // 삐약! 🐥 현재 선택된 탭의 상태를 관리해요. 초기값은 '통계'로 설정해요.
+  const { fid } = useParams<{ fid: string }>(); 
   const [activeTab, setActiveTab] = useState<TabType>('통계');
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['statsData'],
-    queryFn: getStatsData,
+  const [selectedSchedule, setSelectedSchedule] = useState<string | null>(null);
+  const navigate = useNavigate();
+  
+  const { data: festival } = useQuery({
+    queryKey: ['festival', fid],
+    queryFn: getProductsAdmin,
+    select: (response) => response.data.find(f => f.fid === fid),
+    enabled: !!fid,
   });
+
+    const { data: schedules } = useQuery({
+    queryKey: ['schedules', fid],
+    queryFn: () => getFestivalSchedules(fid!),
+    enabled: !!fid,
+  });
+
+  // 목표 달성 그래프
+  const { data: bookingStatsData } = useQuery({
+    queryKey: ['bookingStatsData', fid],
+    queryFn: () => getBookingStatsData(fid!),
+    enabled: !!fid,
+  });
+
+  // 성별/ 연령 그래프
+  const { data: userStatsData } = useQuery({
+    queryKey: ['userStatsData', fid],
+    queryFn: () => getUserStatsData(fid!),
+    enabled: !!fid,
+  });
+
+  // 인원수 조회
+  const { data: entranceStatsData } = useQuery({
+    queryKey: ['entranceStatsData', fid, selectedSchedule],
+    queryFn: () => getEntranceCount(fid!, selectedSchedule!),
+    enabled: !!fid && !!selectedSchedule && activeTab === '입장 인원 수 조회',
+  });
+
+  const selectedBookingData = useMemo(() => {
+    if (!bookingStatsData || !selectedSchedule) return null;
+    return bookingStatsData.data.find(d => d.performanceDate === selectedSchedule);
+  }, [bookingStatsData, selectedSchedule]);
+
+  useEffect(() => {
+    setSelectedSchedule(null);
+  }, [fid]);
+
+  const handleScheduleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedSchedule(e.target.value);
+  };
+
+
+  const isLoading = [festival, schedules, bookingStatsData, userStatsData, entranceStatsData].some(q => q?.isLoading);
+  const isError = [festival, schedules, bookingStatsData, userStatsData, entranceStatsData].some(q => q?.isError);
+
+  if (!fid) {
+    return (
+      <Layout subTitle="통계 조회">
+        <div>공연 ID가 유효하지 않습니다.</div>
+      </Layout>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Layout subTitle="통계 조회">
+        <div>데이터를 불러오는 중...</div>
+      </Layout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Layout subTitle="통계 조회">
+        <div>데이터 로딩 실패!</div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout subTitle="통계 조회">
-      <div className={styles.tabContainer}>
-        {/* 삐약! 🐥 탭 버튼들을 만들어요. */}
-        <button 
-          className={`${styles.tabButton} ${activeTab === '통계' ? styles.active : ''}`}
-          onClick={() => setActiveTab('통계')}
-        >
-          통계
-        </button>
-        <button 
-          className={`${styles.tabButton} ${activeTab === '입장 인원 수 조회' ? styles.active : ''}`}
-          onClick={() => setActiveTab('입장 인원 수 조회')}
-        >
-          입장 인원 수 조회
-        </button>
+      <div className={styles.topBar}>
+        <div className={styles.tabs}>
+          <button 
+            className={`${styles.tabButton} ${activeTab === '통계' ? styles.active : ''}`}
+            onClick={() => setActiveTab('통계')}
+          >
+            통계
+          </button>
+          <button 
+            className={`${styles.tabButton} ${activeTab === '입장 인원 수 조회' ? styles.active : ''}`}
+            onClick={() => setActiveTab('입장 인원 수 조회')}
+          >
+            입장 인원 수 조회
+          </button>
+        </div>
+        <div className={styles.dropdowns}>
+          <select value={selectedSchedule || ''} onChange={handleScheduleChange} disabled={!schedules?.data || schedules.data.length === 0}>
+            <option value="">날짜 및 시간 선택</option>
+            {schedules?.data.map(s => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
-
-      {/* 삐약! 🐥 activeTab 상태에 따라 다른 컴포넌트를 조건부로 렌더링해요. */}
-      {activeTab === '통계' && (
-        <StatisticsContent
-          data={data || null}
-          isLoading={isLoading}
-          isError={isError}
-        />
+      {activeTab === '통계' && selectedSchedule && userStatsData && (
+        <>
+          <TicketProgressGraph
+            currentTickets={selectedBookingData?.bookingCount ?? 0}
+            totalCapacity={selectedBookingData?.availableNOP ?? 0}
+          />
+  
+          <StatisticsContent
+            data={userStatsData.data}
+          />
+        </>
       )}
-      {activeTab === '입장 인원 수 조회' && (
-        // 삐약! 🐥 입장 인원 수 조회 컴포넌트를 여기에 넣으면 돼요.
-        // 현재는 EntranceCount라는 가상의 컴포넌트를 사용했어요.
+      {activeTab === '입장 인원 수 조회' && entranceStatsData  && (
         <EntranceCount
-          // 삐약! 🐥 데이터 필드 이름에 맞춰서 props를 전달해요.
-          count={data.ticketCount} 
-          totalCount={data.totalCapacity} 
-          title={data.fname}
+          count={entranceStatsData.data.checkedInCount} 
+          totalCount={entranceStatsData.data.availableNOP} 
+          title={festival?.fname || ''}
         />
       )}
+      <div className={styles.buttonWrapper}>
+        <Button onClick={() => navigate(-1)}>뒤로가기</Button>
+      </div>
     </Layout>
   );
 };

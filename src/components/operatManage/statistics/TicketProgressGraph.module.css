@@ -4,9 +4,10 @@
   flex-direction: column;
   gap: 0.5rem; /* 항목 사이의 간격을 줘요 */
   padding: 1rem 1.25rem;
-  /* background-color: #fff; */
+  background-color: #fff;
   border-radius: 1rem;
   border: 1px solid #e5e7eb;
+  margin-bottom: 10px;
 }
 
 .title {
@@ -30,6 +31,10 @@
   font-size: 1rem;
   font-weight: 700;
   color: #374151;
+}
+
+.labelWrapper{
+  margin-bottom: 12px;
 }
 
 .percentage {
