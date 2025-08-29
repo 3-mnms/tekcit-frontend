@@ -36,11 +36,49 @@
 }
 
 .likeBtn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: #333;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+}
+
+.likeBtn:hover {
+  background: #f3f4f6;
+  border-color: #bbb;
+}
+
+.likeBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.likeBtnLiked {
+  background: #fee2e2;      /* 연한 빨강 */
+  border-color: #fca5a5;    /* 조금 더 진한 빨강 */
+  color: #b91c1c;           /* 진한 빨강 글자색 */
+}
+
+.likeBtnLiked:hover {
+  background: #fecaca;      /* hover시 더 진하게 */
+  border-color: #f87171;
+}
+
+.likeBtn i {
+  font-size: 1.2rem; /* 하트 아이콘 크기 살짝 키움 */
+  line-height: 1;
+}
+
+.likeCount {
+  min-width: 1.5em;
+  text-align: right;
 }
 
 .right {
