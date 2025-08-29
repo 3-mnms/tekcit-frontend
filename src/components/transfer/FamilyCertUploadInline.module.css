@@ -1,0 +1,166 @@
+/* 컨테이너 */
+.container {
+  width: 100%;
+}
+
+/* 한 줄 레이아웃 */
+.row {
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  align-items: center;
+  gap: 0.5rem; /* 8px */
+}
+
+/* 라벨 */
+.label {
+  font-size: 0.875rem; /* text-sm */
+  color: #4b5563;      /* text-gray-600 */
+}
+
+/* 읽기 전용 인풋 */
+.readonlyInput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;       /* px-3 py-2 */
+  border: 1px solid #d1d5db;     /* border */
+  border-radius: 0.375rem;       /* rounded-md */
+  background-color: #f3f4f6;     /* bg-gray-100 */
+  cursor: not-allowed;
+  font-size: 0.875rem;
+}
+
+/* 버튼 영역 */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* 숨김 파일 인풋 */
+.hiddenInput {
+  display: none;
+}
+
+/* 버튼 프리셋 (Button 컴포넌트 className로 스타일 보강) */
+.primaryBtn {
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+}
+
+.neutralBtn {
+  padding: 0.5rem 0.75rem;       /* px-3 py-2 */
+  background-color: #e5e7eb;     /* bg-gray-300 */
+  transition: background-color 0.2s ease;
+}
+.neutralBtn:hover {
+  background-color: #9ca3af;     /* hover:bg-gray-400 */
+}
+
+/* 모달 오버레이 */
+.dialogOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.4);
+}
+
+/* 모달 박스 */
+.dialog {
+  position: relative;
+  background: #ffffff;
+  border-radius: 1rem; /* rounded-2xl */
+  padding: 1rem;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+}
+
+/* 헤더 안내 텍스트 */
+.header {
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  color: #6b7280; /* text-gray-500 */
+}
+
+/* 프리뷰 박스 */
+.previewBox {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem; /* rounded-xl */
+  overflow: hidden;
+  background: #f9fafb;   /* bg-gray-50 */
+}
+
+/* 프리뷰 영역 */
+.previewArea {
+  position: relative;
+  height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 이미지 프리뷰 */
+.previewImg {
+  max-height: 340px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* PDF 프리뷰 */
+.pdfFrame {
+  width: 100%;
+  height: 360px;
+  border: 0;
+}
+
+/* 미지원 포맷 안내 */
+.previewUnsupported {
+  text-align: center;
+  padding: 0 1rem;
+  color: #374151; /* text-gray-700 */
+  font-size: 0.875rem;
+}
+.previewUnsupportedName {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;    /* text-xs */
+  color: #6b7280;
+}
+
+/* 로딩 오버레이 */
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 로딩 카드 */
+.loadingCard {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.5rem; /* px-6 py-3 */
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* 푸터 버튼 영역 */
+.footer {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* 반응형 보정 */
+@media (max-width: 480px) {
+  .row {
+    grid-template-columns: 80px 1fr auto;
+    gap: 0.5rem;
+  }
+}
