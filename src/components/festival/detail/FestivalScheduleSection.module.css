@@ -32,28 +32,57 @@
   font-size: 0.9rem;
 }
 
-/* ====== 시간 버튼 그룹 ====== */
+/* 시간 버튼 래퍼 */
 .timeGroup {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: flex-start;
-  width: 100%;
+  gap: 8px;
 }
 
+/* 기본 시간 버튼 (공통 Button 위에 얹는 스타일) */
 .timeBtn {
-  border: 1px solid #ccc;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  background-color: #f8f8f8;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  /* 크기/여백 */
+  min-width: 84px;
+  height: 38px;
+  padding: 0 12px;
+
+  /* 테두리/배경/글자 */
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+
+  /* 효과 */
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
 }
-.timeBtn:hover { background-color: #e0eaff; }
+
+/* 호버는 살짝만 강조 (채우지 않음) */
+.timeBtn:hover {
+  background: #f5f9ff;         /* 아주 연한 파랑 톤 */
+  border-color: #c7d2fe;        /* 연보라 테두리 */
+  color: #111;                  /* 글자 색 유지 */
+  box-shadow: 0 0 0 2px rgba(77,154,253,0.08) inset; /* 은은한 인셋 링 */
+}
+
+/* 선택된 버튼만 진하게! */
 .selectedBtn {
-  background-color: #4D9AFD;
+  background: #4D9AFD;   /* Tekcit 블루 */
+  border-color: #4D9AFD;
   color: #fff;
-  border: none;
+}
+
+/* 선택 상태에서의 호버/포커스도 색 유지 */
+.selectedBtn:hover,
+.selectedBtn:focus-visible {
+  background: #3c86e6;
+  border-color: #3c86e6;
+  color: #fff;
+}
+
+/* 접근성: 키보드 포커스 링 */
+.timeBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(77,154,253,0.25);
 }
 
 /* ====== 액션 버튼 ====== */
