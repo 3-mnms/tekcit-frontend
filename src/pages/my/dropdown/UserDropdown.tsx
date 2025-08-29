@@ -14,8 +14,6 @@ import NotificationDetailDropdown from '@/pages/my/dropdown/NotificationDetailDr
 import { useNotificationStore } from '@/models/dropdown/NotificationStore'
 import { useHydrateNotifications } from '@/models/dropdown/useNotificationQuery'
 
-type Panel = 'root' | 'notifications' | 'notificationDetail'
-
 const UserDropdown: React.FC = () => {
   const navigate = useNavigate()
   const logout = useAuthStore((s) => s.logout)

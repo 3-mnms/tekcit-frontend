@@ -2,11 +2,12 @@
 import React, { useMemo, useState } from 'react'
 import styles from './TicketInfoCard.module.css'
 import Modal from './QRModal'
-import EntranceCheckModal from '@/components/my/ticket/EntranceCheckModal'
+import EntranceCheckModalLoader from '@/components/my/ticket/EntranceCheckModalLoader' 
 import { format } from 'date-fns'
 import QRViewer from './QRViewer'
 
 type Props = {
+  festivalId: string;            
   reservationNumber: string
   title: string
   place: string
@@ -16,13 +17,14 @@ type Props = {
   address?: string
   posterFile?: string
   reserverName?: string
-  selectedTicketCount?: number
-  totalCountForGauge?: number
+  selectedTicketCount?: number       
+  totalCountForGauge?: number        
 }
 
 const deliveryLabel = (t: 'MOBILE' | 'PAPER') => (t === 'MOBILE' ? '모바일 티켓' : '지류 티켓')
 
 const TicketInfoCard: React.FC<Props> = ({
+  festivalId,
   reservationNumber,
   title,
   place,
@@ -32,8 +34,6 @@ const TicketInfoCard: React.FC<Props> = ({
   address,
   posterFile,
   reserverName,
-  selectedTicketCount = 1,
-  totalCountForGauge,
 }) => {
   const [showQR, setShowQR] = useState(false)
   const [showEntrance, setShowEntrance] = useState(false)
@@ -47,8 +47,6 @@ const TicketInfoCard: React.FC<Props> = ({
     const d = new Date(performanceDateISO)
     return isNaN(d.getTime()) ? '' : format(d, 'HH:mm')
   }, [performanceDateISO])
-
-  const gaugeTotal = totalCountForGauge ?? selectedTicketCount
 
   const posterSrc = useMemo(() => {
     const src = (posterFile ?? '').trim()
@@ -65,9 +63,7 @@ const TicketInfoCard: React.FC<Props> = ({
             className={styles.poster}
             loading="lazy"
             referrerPolicy="no-referrer"
-            onError={(e) => {
-              ;(e.currentTarget as HTMLImageElement).src = '/dummy-poster.jpg'
-            }} 
+            onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/dummy-poster.jpg' }}
           />
         </div>
 
@@ -83,12 +79,7 @@ const TicketInfoCard: React.FC<Props> = ({
           <div className={styles.row}>
             <span className={styles.label}>일시</span>
             <span className={styles.value}>
-              {ymd}{' '}
-              {hm && (
-                <>
-                  ({/* 요일 필요시 로직 추가 */}) {hm}
-                </>
-              )}
+              {ymd} {hm && <>({/* 요일 필요시 */}) {hm}</>}
             </span>
           </div>
           <div className={styles.row}>
@@ -132,14 +123,13 @@ const TicketInfoCard: React.FC<Props> = ({
         <QRViewer ids={qrIds} size={180} />
       </Modal>
 
-      <EntranceCheckModal
+      {/* ⬇️ 여기서 실데이터 조회 후 기존 모달에 주입 */}
+      <EntranceCheckModalLoader
         isOpen={showEntrance}
         onClose={() => setShowEntrance(false)}
-        count={selectedTicketCount}
-        totalCount={gaugeTotal}
+        festivalId={festivalId}
+        performanceDateISO={performanceDateISO}
         title={title}
-        date={ymd}
-        time={`${ymd} ${hm}`}
       />
     </>
   )
