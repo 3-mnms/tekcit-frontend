@@ -66,3 +66,7 @@
 .logoutButton:hover {
   color: #555;
 }
+
+/* UserDropdown.module.css */
+.alarmWrap { position: relative; display: inline-flex; }
+.alarmDot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; border-radius: 9999px; background: #ef4444; }

@@ -1,56 +1,72 @@
+// src/models/dropdown/NotificationStore.ts
 import { create } from 'zustand';
-import type { NotificationItem } from '@/models/dropdown/NotificationItem';
+import { persist, createJSONStorage } from 'zustand/middleware';
+
+export interface NotificationList {
+  id: number;
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+}
 
 interface NotificationStore {
-  notifications: NotificationItem[];
+  notifications: NotificationList[];
+  readIds: Record<number, true>;               // ✅ 읽은 nid를 영구 저장
   isDropdownOpen: boolean;
   toggleDropdown: () => void;
   markAsRead: (id: number) => void;
   markAllAsRead: () => void;
   unreadCount: () => number;
+  setFromServer: (list: NotificationList[]) => void;
+  clearLocalRead: () => void;                   // (옵션) 로그아웃 시 초기화용
 }
 
-export const useNotificationStore = create<NotificationStore>((set, get) => ({
-  notifications: [
+export const useNotificationStore = create<NotificationStore>()(
+  persist(
+    (set, get) => ({
+      notifications: [],
+      readIds: {},                               // ✅ 초기값
+
+      isDropdownOpen: false,
+      toggleDropdown: () => set(s => ({ isDropdownOpen: !s.isDropdownOpen })),
+
+      // 서버 목록 + 로컬 읽음 기록을 OR로 합치기
+      setFromServer: (list) =>
+        set((state) => ({
+          notifications: list.map(n => ({
+            ...n,
+            read: n.read || !!state.readIds[n.id],
+          })),
+        })),
+
+      // 상세 진입 시 로컬에도 기록
+      markAsRead: (id) =>
+        set((state) => ({
+          readIds: { ...state.readIds, [id]: true },
+          notifications: state.notifications.map(n =>
+            n.id === id ? { ...n, read: true } : n
+          ),
+        })),
+
+      markAllAsRead: () =>
+        set((state) => {
+          const next = { ...state.readIds };
+          state.notifications.forEach(n => { next[n.id] = true; });
+          return {
+            readIds: next,
+            notifications: state.notifications.map(n => ({ ...n, read: true })),
+          };
+        }),
+
+      unreadCount: () => get().notifications.filter(n => !n.read).length,
+
+      clearLocalRead: () => set({ readIds: {} }),
+    }),
     {
-      id: 1,
-      title: '< 공연 이름 >',
-      message: '공지 내용',
-      time: '1분전',
-      read: false,
-    },
-    {
-      id: 2,
-      title: '< 공연 이름 >',
-      message: '공지 내용',
-      time: '1일전',
-      read: true,
-    },
-    {
-      id: 3,
-      title: '< 공연 이름 >',
-      message: '공지 내용',
-      time: '2일전',
-      read: false,
-    },
-  ],
-  isDropdownOpen: false,
-
-  toggleDropdown: () =>
-    set((state) => ({ isDropdownOpen: !state.isDropdownOpen })),
-
-  markAsRead: (id) =>
-    set((state) => ({
-      notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      ),
-    })),
-
-  markAllAsRead: () =>
-    set((state) => ({
-      notifications: state.notifications.map((n) => ({ ...n, read: true })),
-    })),
-
-  unreadCount: () =>
-    get().notifications.filter((n) => !n.read).length,
-}));
+      name: 'notification-read',                         // ✅ localStorage key
+      storage: createJSONStorage(() => localStorage),
+      partialize: (s) => ({ readIds: s.readIds }),       // ✅ readIds만 저장
+    }
+  )
+);

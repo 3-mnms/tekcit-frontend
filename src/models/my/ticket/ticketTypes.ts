@@ -35,6 +35,7 @@ export type TicketDetailResponseDTO = {
   qrId: string[];            
   address?: string | null;    
   posterFile: string;
+  festivalId: string;
   fname: string;              
   fcltynm: string;           
 };
