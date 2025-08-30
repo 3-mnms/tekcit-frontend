@@ -1,30 +1,34 @@
 // src/pages/festival/FestivalDetailPage.tsx
-import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
-import Header from '@components/common/header/Header';
-import Info from '@/components/festival/detail/FestivalInfoSection';
-import Scheduler from '@/components/festival/detail/FestivalScheduleSection';
-import InfoDetail from '@/components/festival/detail/FestivalInfoDetailSection';
-import Statistics from '@/components/festival/detail/FestivalStatisticsSection';
+import Header from '@components/common/header/Header'
+import Info from '@/components/festival/detail/FestivalInfoSection'
+import Scheduler from '@/components/festival/detail/FestivalScheduleSection'
+import InfoDetail from '@/components/festival/detail/FestivalInfoDetailSection'
+import Statistics from '@/components/festival/detail/FestivalStatisticsSection'
+import Review from '@/components/festival/review/FestivalReviewSection';
 
-import { useFestivalDetail, useIncreaseViews } from '@/models/festival/tanstack-query/useFestivalDetail';
-import styles from './FestivalDetailPage.module.css';
+import {
+  useFestivalDetail,
+  useIncreaseViews,
+} from '@/models/festival/tanstack-query/useFestivalDetail'
+import styles from './FestivalDetailPage.module.css'
 
 const FestivalDetailPage: React.FC = () => {
-  const { fid } = useParams<{ fid: string }>();
-  const { data: detail, isLoading, isError } = useFestivalDetail(fid ?? '');
+  const { fid } = useParams<{ fid: string }>()
+  const { data: detail, isLoading, isError } = useFestivalDetail(fid ?? '')
 
-  const { mutate: increaseViews } = useIncreaseViews();
-  const firedRef = useRef(false);
+  const { mutate: increaseViews } = useIncreaseViews()
+  const firedRef = useRef(false)
   useEffect(() => {
-    if (!fid) return;
-    if (firedRef.current) return;
-    firedRef.current = true;
-    increaseViews(fid);
-  }, [fid, increaseViews]);
+    if (!fid) return
+    if (firedRef.current) return
+    firedRef.current = true
+    increaseViews(fid)
+  }, [fid, increaseViews])
 
-  const [activeTab, setActiveTab] = useState<'info' | 'sale' | 'review'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'sale' | 'review'>('info')
 
   if (!fid) {
     return (
@@ -32,7 +36,7 @@ const FestivalDetailPage: React.FC = () => {
         <Header />
         <div className={styles.singleColumn}>잘못된 접근이에요(식별자 없음) 😿</div>
       </div>
-    );
+    )
   }
 
   if (isError) {
@@ -43,7 +47,7 @@ const FestivalDetailPage: React.FC = () => {
           상세 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요 😿
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -85,7 +89,9 @@ const FestivalDetailPage: React.FC = () => {
             </div>
 
             <div className={styles.tabContent}>
-              {activeTab === 'info' ? <InfoDetail /> : <Statistics fid={fid} />}
+              {activeTab === 'info' && <InfoDetail />}
+              {activeTab === 'sale' && <Statistics fid={fid} />}
+              {activeTab === 'review' && <Review fid={fid} />}
             </div>
           </div>
         </div>
@@ -98,7 +104,7 @@ const FestivalDetailPage: React.FC = () => {
         </aside>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default FestivalDetailPage;
+export default FestivalDetailPage

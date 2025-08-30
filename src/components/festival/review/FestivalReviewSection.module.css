@@ -1,0 +1,179 @@
+.wrap {
+    display: grid;
+    gap: 1rem;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.select {
+    height: 36px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0 0.5rem;
+    background: #fff;
+}
+
+.editor {
+    display: grid;
+    gap: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.75rem;
+    background: #fafafa;
+}
+
+.textarea {
+    width: 100%;
+    min-height: 88px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.75rem;
+    resize: vertical;
+}
+
+.editorFooter {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.submitBtn {
+    height: 40px;
+    padding: 0 1rem;
+}
+
+.loginHint {
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+.list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.item {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.75rem 0.9rem;
+    background: #fff;
+}
+
+.meta {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.user {
+    font-weight: 600;
+    color: #374151;
+}
+
+.time {
+    margin-left: auto;
+}
+
+.content {
+    margin-top: 0.35rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.skeleton {
+    color: #6b7280;
+}
+
+.error {
+    color: #ef4444;
+}
+
+.empty {
+    color: #6b7280;
+}
+
+.pager {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    justify-content: center;
+    padding-top: 0.25rem;
+}
+
+.pageBtn {
+    height: 34px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0 0.8rem;
+    background: #fff;
+}
+
+.pageBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pageInfo {
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.analyzeBox {
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    padding: 1rem;
+    background: #f9fafb;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.analyzeContent {
+    font-weight: 500;
+    color: #374151;
+}
+
+.analyzeBars {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.label {
+    width: 2.5rem;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.bar progress {
+    flex: 1;
+    height: 10px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.percent {
+    width: 3rem;
+    font-size: 0.85rem;
+    text-align: right;
+}
