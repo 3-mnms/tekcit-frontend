@@ -34,7 +34,7 @@ const BookingPaymentPage: React.FC = () => {
   const festivalIdVal = checkout?.festivalId // 가드/요청에서 사용 멍
 
   // 3) 로그인 사용자 ID 상태 (훅 순서 보장을 위해 useEffect에서 세팅) 멍
-  const [buyerId, setBuyerId] = useState<number | null>(null)
+  // const [setBuyerId] = useState<number | null>(null)
   const [sellerId, setSellerId] = useState<number | null>(null)
 
   // 4) 결제/화면 상태 훅들 멍
@@ -51,7 +51,7 @@ const BookingPaymentPage: React.FC = () => {
   useEffect(() => {
     try {
       const id = getUserIdSafely()
-      setBuyerId(id)
+      // setBuyerId(id)
     } catch {
       alert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.')
       navigate('/login', { replace: true })
@@ -102,7 +102,7 @@ const BookingPaymentPage: React.FC = () => {
         navigate(-1)
       }
     })()
-  }, [buyerId, checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate])
+  }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate])
 
   // 9) 타임업 모달 닫기 헬퍼 멍
   const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false)

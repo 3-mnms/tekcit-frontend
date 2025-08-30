@@ -57,19 +57,11 @@ export function getUserIdForHeader(): string {
 
 /** ✅ POST 호출 시 X-User-Id 헤더 자동 부착 (+ baseURL 중복 방지) */
 export async function postWithUserId<T = any>(url: string, body: any) {
-  let userIdHeader: string
-  try {
-    userIdHeader = getUserIdForHeader()
-  } catch {
-    // 주석: 여기서 명시 코드로 재던지기 → 호출부에서 로그인 안내 처리 가능
-    const err: any = new Error('NO_USER_ID')
-    err.code = 'NO_USER_ID'
-    throw err
-  }
+  console.log(`#!@#! url : ${url}}, body : ${body}`);
+  
 
   const res = await api.post<T>(url, body, {
     headers: {
-      'X-User-Id': userIdHeader,          // 주석: 문자열 명시
       'Content-Type': 'application/json',
     },
   })

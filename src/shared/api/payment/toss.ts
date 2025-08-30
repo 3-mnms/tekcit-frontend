@@ -12,6 +12,7 @@ export const paymentRequest = async (
   amount: number, // 금액
   // buyerId가 userId로 되기 때문에 따로 안적음, X-User-Id 헤더로 덮어씌워짐
 ) => {
+  
   const payload = {
     paymentId,
     bookingId,
@@ -20,9 +21,11 @@ export const paymentRequest = async (
     amount,
     currency: 'KRW',
     payMethod: 'CARD',
-    eventType: 'Payment_Requested',
     paymentRequestType: 'GENERAL_PAYMENT_REQUESTED',
   }
+
+    console.log(payload);
+
   return postWithUserId('/payments/request', payload)
 }
 
@@ -35,7 +38,6 @@ export interface TossConfirmBody {
 export async function paymentConfirm(body: TossConfirmBody) {
   const payload = {
     ...body,
-    eventType: 'Payment_Confirmed',                // 백엔드 enum에 맞춰 사용
     paymentRequestType: 'GENERAL_PAYMENT_CONFIRMED', // 백엔드 구분용
   }
   return postWithUserId('/payments/confirm', payload)
@@ -47,9 +49,10 @@ export async function requestTossBookingPayment(body: TossPaymentBody) {
     ...body,
     currency: 'KRW',
     payMethod: 'CARD',
-    eventType: 'Payment_Requested',
     paymentRequestType: 'GENERAL_PAYMENT_REQUESTED',
   }
+  console.log(payload);
+  
   return postWithUserId('/payments/request', payload)
 }
 
