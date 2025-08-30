@@ -35,27 +35,36 @@ export function useCreateFestivalReview(fid: string) {
   return useMutation({
     mutationFn: (payload: FestivalReviewRequestDTO) => createFestivalReview(fid, payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: reviewKeys.all(fid) });
+      // fid 관련 리뷰 쿼리 전부 무효화
+      qc.invalidateQueries({
+        predicate: (q) => Array.isArray(q.queryKey) && q.queryKey[0] === 'reviews' && q.queryKey[1] === fid,
+      });
     },
   });
 }
 
+// ✅ 리팩토링: 삭제는 vars로 fid/rId를 받아 유연하게
+export function useDeleteFestivalReview() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ fid, rId }: { fid: string; rId: number }) => deleteFestivalReview(fid, rId),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({
+        predicate: (q) => Array.isArray(q.queryKey) && q.queryKey[0] === 'reviews' && q.queryKey[1] === vars.fid,
+      });
+    },
+  });
+}
+
+// (선택) 수정 훅도 동일 패턴으로
 export function useUpdateFestivalReview(fid: string, rId: number) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: FestivalReviewRequestDTO) => updateFestivalReview(fid, rId, payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: reviewKeys.all(fid) });
-    },
-  });
-}
-
-export function useDeleteFestivalReview(fid: string, rId: number) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: () => deleteFestivalReview(fid, rId),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: reviewKeys.all(fid) });
+      qc.invalidateQueries({
+        predicate: (q) => Array.isArray(q.queryKey) && q.queryKey[0] === 'reviews' && q.queryKey[1] === fid,
+      });
     },
   });
 }

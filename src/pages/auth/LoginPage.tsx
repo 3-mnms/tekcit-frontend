@@ -13,19 +13,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, type LoginForm } from '@/models/auth/schema/loginSchema'
 import { useLoginMutation } from '@/models/auth/tanstack-query/useLogin'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
-import { parseJwt, type JwtRole, type JwtPayloadBase } from '@/shared/storage/jwt'
 import { getAndSaveFcmToken } from '@/shared/api/auth/fcrmToken'
-
-type JwtPayload = JwtPayloadBase & {
-  userId: number
-  role: JwtRole
-  name: string
-}
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate()
-  const { setUser } = useAuthStore()
-  const isPopup = !!window.opener;
+  const isPopup = !!window.opener
+  const { setAccessToken } = useAuthStore.getState()
 
   const {
     register,
@@ -40,19 +33,16 @@ const LoginPage: React.FC = () => {
 
   const onSubmit = (form: LoginForm) => {
     loginMut.mutate(form, {
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
         if (data.accessToken) {
-          const decoded = parseJwt<JwtPayload>(data.accessToken)
-          if (decoded) {
-            setUser({
-              userId: decoded.userId,
-              role: decoded.role,
-              name: decoded.name,
-              loginId: decoded.sub,
-            })
-          }
+          // ✅ 이 한 줄로 Authorization 헤더 설정 + user 세팅까지 자동
+          setAccessToken(data.accessToken)
         }
-        void getAndSaveFcmToken();
+
+        // 🔔 FCM 토큰 발급/저장 + 콘솔 출력
+        const fcmToken = await getAndSaveFcmToken()
+        if (fcmToken) console.log('[FCM] 로그인 후 토큰:', fcmToken)
+
         alert('로그인이 완료되었습니다!')
         navigate('/')
       },
@@ -70,7 +60,7 @@ const LoginPage: React.FC = () => {
     <div className={styles.page}>
       {isPopup && <KakaoPopupBridge status="existing" />}
       <div className={styles.card}>
-        <img src={Logo} alt="tekcit logo" className={styles.logo} onClick={() => navigate('/')}/>
+        <img src={Logo} alt="tekcit logo" className={styles.logo} onClick={() => navigate('/')} />
 
         <form onSubmit={handleSubmit(onSubmit)} className="w-full">
           <LoginInput

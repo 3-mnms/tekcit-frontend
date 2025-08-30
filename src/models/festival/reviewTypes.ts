@@ -5,6 +5,7 @@ export interface FestivalReviewRequestDTO {
 }
 
 export interface FestivalReviewResponseDTO {
+  reviewId: number;  
   reviewContent: string;
   userId: number;
   createdAt: string;  // ISO (백엔드 LocalDateTime 직렬화)

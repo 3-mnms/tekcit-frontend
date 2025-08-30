@@ -134,6 +134,21 @@
     color: #374151;
 }
 
+.delBtn {
+    margin-left: 0.5rem;
+    height: 28px;
+    padding: 0 0.6rem;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    background: #fff;
+    border-radius: 6px;
+}
+
+.delBtn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
 .analyzeBox {
     border: 1px solid #d1d5db;
     border-radius: 12px;

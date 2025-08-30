@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import styles from './FestivalReviewSection.module.css'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 import {
   useFestivalReviews,
   useMyFestivalReview,
   useCreateFestivalReview,
+  useDeleteFestivalReview,
 } from '@/models/festival/tanstack-query/useFestivalReview'
 import type { ReviewSort } from '@/models/festival/reviewTypes'
 import { z } from 'zod'
@@ -23,17 +24,17 @@ const reviewSchema = z.object({
 })
 type ReviewForm = z.infer<typeof reviewSchema>
 
-const PAGE_SIZE = 10
-
 const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
   const [sort, setSort] = useState<ReviewSort>('desc')
   const [page, setPage] = useState(0)
 
   const { data, isLoading, isError } = useFestivalReviews(fid, sort, page)
-  const myReviewQ = useMyFestivalReview(fid)
+  useMyFestivalReview(fid) // 추후 "내 리뷰" 편집 UI에 활용
   const createMut = useCreateFestivalReview(fid)
+  const deleteMut = useDeleteFestivalReview()
 
-  const { accessToken } = useAuthStore()
+  const myUserId = useAuthStore((s) => s.user?.userId ?? null)
+  const accessToken = useAuthStore((s) => s.accessToken)
 
   // 작성 폼
   const {
@@ -57,6 +58,23 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
         alert(msg)
       },
     })
+  }
+
+  const onClickDelete = (rId: number) => {
+    if (!confirm('정말 삭제할까요? 삭제 후 되돌릴 수 없어요.')) return
+    deleteMut.mutate(
+      { fid, rId },
+      {
+        onSuccess: () => alert('삭제되었습니다.'),
+        onError: (e: any) => {
+          const msg =
+            e?.response?.data?.errorMessage ??
+            e?.response?.data?.message ??
+            '삭제에 실패했어요. 잠시 후 다시 시도해 주세요.'
+          alert(msg)
+        },
+      },
+    )
   }
 
   const items = data?.reviews?.content ?? []
@@ -107,7 +125,6 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
         </div>
       )}
 
-      {/* 작성 박스 (로그인 시에만) */}
       {accessToken ? (
         <form onSubmit={handleSubmit(onSubmit)} className={styles.editor}>
           <textarea
@@ -142,15 +159,33 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
           <div className={styles.empty}>아직 기대평이 없어요.</div>
         )}
 
-        {items.map((rev, idx) => (
-          <article key={`${rev.userId}-${rev.createdAt}-${idx}`} className={styles.item}>
-            <div className={styles.meta}>
-              <span className={styles.user}>USER #{rev.userId}</span>
-              <time className={styles.time}>{new Date(rev.createdAt).toLocaleString()}</time>
-            </div>
-            <p className={styles.content}>{rev.reviewContent}</p>
-          </article>
-        ))}
+        {items.map((rev, idx) => {
+          const safeKey =
+            (rev.reviewId != null ? `rid-${rev.reviewId}` : `u-${rev.userId}-t-${rev.createdAt}`) +
+            `#${idx}`
+
+          return (
+            <article key={safeKey} className={styles.item}>
+              <div className={styles.meta}>
+                <span className={styles.user}>USER #{rev.userId}</span>
+                <time className={styles.time}>{new Date(rev.createdAt).toLocaleString()}</time>
+
+                {myUserId === rev.userId && (
+                  <button
+                    type="button"
+                    className={styles.delBtn}
+                    onClick={() => onClickDelete(rev.reviewId!)}
+                    disabled={deleteMut.isPending}
+                    title="기대평 삭제"
+                  >
+                    {deleteMut.isPending ? '삭제 중...' : '삭제'}
+                  </button>
+                )}
+              </div>
+              <p className={styles.content}>{rev.reviewContent}</p>
+            </article>
+          )
+        })}
       </div>
 
       {/* 페이지네이션 */}
