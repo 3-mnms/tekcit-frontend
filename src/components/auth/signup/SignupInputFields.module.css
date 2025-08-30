@@ -52,6 +52,11 @@
   color: #9ca3af;
 }
 
+.input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 .eyeIcon {
   position: absolute;
   right: 10px;

@@ -1,6 +1,6 @@
+// src/components/festival/review/FestivalReviewSection.tsx
 import React, { useMemo, useState } from 'react';
 import styles from './FestivalReviewSection.module.css';
-import { useAuthStore } from '@/shared/storage/useAuthStore';
 import {
   useFestivalReviews,
   useMyFestivalReview,
@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Button from '@/components/common/button/Button';
+import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'; // ✅ 토큰 파싱 API
 
 type Props = { fid: string };
 
@@ -38,10 +39,12 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
   const [editOpen, setEditOpen] = useState(false);
   const [editRid, setEditRid] = useState<number | null>(null);
   const [editValue, setEditValue] = useState<string>('');
-  const updateMut = useUpdateFestivalReview(fid, editRid ?? 0); // rId가 바뀌면 훅도 재설정됨
+  const updateMut = useUpdateFestivalReview(fid, editRid ?? 0); // rId가 바뀌면 훅 재설정
 
-  const myUserId = useAuthStore((s) => s.user?.userId ?? null);
-  const accessToken = useAuthStore((s) => s.accessToken);
+  // ✅ 서버에서 토큰을 파싱해 { userId, role, name } 확보
+  const { data: tokenInfo } = useTokenInfoQuery();
+  const myUserId = tokenInfo?.userId ?? null;
+  const isLoggedIn = !!tokenInfo;
 
   // 작성 폼
   const {
@@ -169,7 +172,7 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
       )}
 
       {/* 작성 박스 (로그인 시에만) */}
-      {accessToken ? (
+      {isLoggedIn ? (
         <form onSubmit={handleSubmit(onSubmit)} className={styles.editor}>
           <textarea
             className={styles.textarea}
@@ -204,11 +207,13 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
         )}
 
         {items.map((rev, idx) => {
+          // ✅ 안전 키
           const safeKey =
             (rev.reviewId != null ? `rid-${rev.reviewId}` : `u-${rev.userId}-t-${rev.createdAt}`) +
             `#${idx}`;
 
-          const isMine = myUserId === rev.userId;
+          // ✅ tokenInfo 기반으로 "내 리뷰" 판별 (숫자 비교)
+          const isMine = myUserId != null && Number(myUserId) === Number(rev.userId);
 
           return (
             <article key={safeKey} className={styles.item}>
@@ -222,7 +227,7 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
                     <button
                       type="button"
                       className={styles.editBtn}
-                      onClick={() => openEditModal(rev.reviewId!, rev.reviewContent)}
+                      onClick={() => openEditModal(Number(rev.reviewId), rev.reviewContent)}
                       title="기대평 수정"
                     >
                       수정
@@ -230,7 +235,7 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
                     <button
                       type="button"
                       className={styles.delBtn}
-                      onClick={() => onClickDelete(rev.reviewId!)}
+                      onClick={() => onClickDelete(Number(rev.reviewId))}
                       disabled={deleteMut.isPending}
                       title="기대평 삭제"
                     >

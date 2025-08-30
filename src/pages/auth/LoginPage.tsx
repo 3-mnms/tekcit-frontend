@@ -35,13 +35,9 @@ const LoginPage: React.FC = () => {
     loginMut.mutate(form, {
       onSuccess: async (data) => {
         if (data.accessToken) {
-          // ✅ 이 한 줄로 Authorization 헤더 설정 + user 세팅까지 자동
           setAccessToken(data.accessToken)
         }
-
-        // 🔔 FCM 토큰 발급/저장 + 콘솔 출력
-        const fcmToken = await getAndSaveFcmToken()
-        if (fcmToken) console.log('[FCM] 로그인 후 토큰:', fcmToken)
+        void getAndSaveFcmToken()
 
         alert('로그인이 완료되었습니다!')
         navigate('/')
