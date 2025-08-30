@@ -14,7 +14,6 @@ export async function getAndSaveFcmToken(): Promise<string | null> {
       serviceWorkerRegistration: registration,
     });
     if (!token) return null;
-    console.log("[FCM] 발급된 토큰:", token);
 
     await api.post("/users/fcm-token", { token });
     return token;
