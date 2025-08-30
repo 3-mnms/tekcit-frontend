@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Button from '@/components/common/button/Button';
-import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'; // ✅ 토큰 파싱 API
+import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery';
 
 type Props = { fid: string };
 
@@ -31,17 +31,16 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
   const [page, setPage] = useState(0);
 
   const { data, isLoading, isError } = useFestivalReviews(fid, sort, page);
-  useMyFestivalReview(fid); // (선택) 내 리뷰 디스패치 용
+  useMyFestivalReview(fid); // (선택) 내 리뷰 캐시 갱신용
   const createMut = useCreateFestivalReview(fid);
   const deleteMut = useDeleteFestivalReview();
 
-  // 🔧 수정 모달 상태
-  const [editOpen, setEditOpen] = useState(false);
-  const [editRid, setEditRid] = useState<number | null>(null);
-  const [editValue, setEditValue] = useState<string>('');
-  const updateMut = useUpdateFestivalReview(fid, editRid ?? 0); // rId가 바뀌면 훅 재설정
+  // 🔧 인라인 수정 상태
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingValue, setEditingValue] = useState<string>('');
+  const updateMut = useUpdateFestivalReview(fid, editingId ?? 0); // editingId가 바뀌면 훅 재설정
 
-  // ✅ 서버에서 토큰을 파싱해 { userId, role, name } 확보
+  // ✅ 서버에서 토큰 파싱해 { userId, role, name } 확보
   const { data: tokenInfo } = useTokenInfoQuery();
   const myUserId = tokenInfo?.userId ?? null;
   const isLoggedIn = !!tokenInfo;
@@ -87,45 +86,56 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
     );
   };
 
-  // ✏️ 수정 버튼 → 모달 오픈
-  const openEditModal = (rId: number, currentText: string) => {
-    setEditRid(rId);
-    setEditValue(currentText);
-    setEditOpen(true);
+  // ✏️ 수정 시작(인라인)
+  const startInlineEdit = (rId: number, currentText: string) => {
+    setEditingId(rId);
+    setEditingValue(currentText);
   };
-  const closeEditModal = () => {
-    setEditOpen(false);
-    setEditRid(null);
-    setEditValue('');
+  const cancelInlineEdit = () => {
+    setEditingId(null);
+    setEditingValue('');
   };
 
-  // ✏️ 수정 제출
   const canEditSave = useMemo(() => {
-    const t = editValue.trim();
+    const t = editingValue.trim();
     return t.length >= 1 && t.length <= 512 && !updateMut.isPending;
-  }, [editValue, updateMut.isPending]);
+  }, [editingValue, updateMut.isPending]);
 
-  const onSubmitEdit = () => {
-    if (!editRid) return;
-    const payload = { reviewContent: editValue.trim() };
-    updateMut.mutate(payload, {
-      onSuccess: () => {
-        alert('수정되었습니다.');
-        closeEditModal();
-      },
-      onError: (e: any) => {
-        const msg =
-          e?.response?.data?.errorMessage ??
-          e?.response?.data?.message ??
-          '수정에 실패했어요. 잠시 후 다시 시도해 주세요.';
-        alert(msg);
-      },
-    });
+  const saveInlineEdit = () => {
+    if (!editingId) return;
+    updateMut.mutate(
+      { reviewContent: editingValue.trim() },
+      {
+        onSuccess: () => {
+          alert('수정되었습니다.');
+          cancelInlineEdit();
+        },
+        onError: (e: any) => {
+          const msg =
+            e?.response?.data?.errorMessage ??
+            e?.response?.data?.message ??
+            '수정에 실패했어요. 잠시 후 다시 시도해 주세요.';
+          alert(msg);
+        },
+      }
+    );
   };
 
+  // 목록/페이지 정보
   const items = data?.reviews?.content ?? [];
   const totalPages = data?.reviews?.totalPages ?? 0;
   const analyze = data?.analyze;
+
+  // ✅ 현재 페이지에서 "내가 쓴 리뷰"를 최상단으로 재정렬
+  const orderedItems = useMemo(() => {
+    if (!items.length || myUserId == null) return items;
+    const mine: typeof items = [];
+    const others: typeof items = [];
+    items.forEach((it) =>
+      Number(it.userId) === Number(myUserId) ? mine.push(it) : others.push(it)
+    );
+    return [...mine, ...others];
+  }, [items, myUserId]);
 
   return (
     <section className={styles.wrap}>
@@ -202,32 +212,39 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
         {isError && (
           <div className={styles.error}>목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>
         )}
-        {!isLoading && !isError && items.length === 0 && (
+        {!isLoading && !isError && orderedItems.length === 0 && (
           <div className={styles.empty}>아직 기대평이 없어요.</div>
         )}
 
-        {items.map((rev, idx) => {
-          // ✅ 안전 키
+        {orderedItems.map((rev, idx) => {
           const safeKey =
             (rev.reviewId != null ? `rid-${rev.reviewId}` : `u-${rev.userId}-t-${rev.createdAt}`) +
             `#${idx}`;
 
-          // ✅ tokenInfo 기반으로 "내 리뷰" 판별 (숫자 비교)
           const isMine = myUserId != null && Number(myUserId) === Number(rev.userId);
+          const isEditingThis = editingId != null && rev.reviewId === editingId;
+
+          const created = new Date(rev.createdAt);
+          const updated = rev.updatedAt ? new Date(rev.updatedAt) : null;
+          const isEdited = !!(updated && updated.getTime() !== created.getTime());
+          const displayTime = isEdited && updated ? updated : created;
 
           return (
             <article key={safeKey} className={styles.item}>
               <div className={styles.meta}>
                 <span className={styles.user}>USER #{rev.userId}</span>
-                <time className={styles.time}>{new Date(rev.createdAt).toLocaleString()}</time>
+                <time className={styles.time}>
+                  {displayTime.toLocaleString()}
+                  {isEdited && <span className={styles.edited}> (수정됨)</span>}
+                </time>
 
-                {/* ✏️ 수정 / 🗑️ 삭제 : 본인 것만 */}
-                {isMine && (
+                {/* 내 댓글 + 편집중이 아닐 때만 액션 노출 */}
+                {isMine && !isEditingThis && rev.reviewId != null && (
                   <>
                     <button
                       type="button"
                       className={styles.editBtn}
-                      onClick={() => openEditModal(Number(rev.reviewId), rev.reviewContent)}
+                      onClick={() => startInlineEdit(rev.reviewId!, rev.reviewContent)}
                       title="기대평 수정"
                     >
                       수정
@@ -235,7 +252,7 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
                     <button
                       type="button"
                       className={styles.delBtn}
-                      onClick={() => onClickDelete(Number(rev.reviewId))}
+                      onClick={() => onClickDelete(rev.reviewId!)}
                       disabled={deleteMut.isPending}
                       title="기대평 삭제"
                     >
@@ -244,7 +261,38 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
                   </>
                 )}
               </div>
-              <p className={styles.content}>{rev.reviewContent}</p>
+
+              {/* 인라인 편집 영역 vs 보기 영역 */}
+              {isEditingThis ? (
+                <div className={styles.inlineEditor}>
+                  <textarea
+                    className={styles.textarea}
+                    value={editingValue}
+                    onChange={(e) => setEditingValue(e.target.value)}
+                    placeholder="내용을 수정하세요 (최대 512자)"
+                  />
+                  <div className={styles.editorFooter}>
+                    <button
+                      type="button"
+                      className={styles.modalCancel}
+                      onClick={cancelInlineEdit}
+                      disabled={updateMut.isPending}
+                    >
+                      취소
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.modalSave}
+                      onClick={saveInlineEdit}
+                      disabled={!canEditSave}
+                    >
+                      {updateMut.isPending ? '저장 중...' : '저장'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className={styles.content}>{rev.reviewContent}</p>
+              )}
             </article>
           );
         })}
@@ -273,34 +321,6 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
             다음
           </button>
         </nav>
-      )}
-
-      {/* ✏️ 수정 모달 */}
-      {editOpen && (
-        <div className={styles.backdrop} onClick={closeEditModal} aria-hidden="true">
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h3 className={styles.modalTitle}>기대평 수정</h3>
-            <textarea
-              className={styles.modalTextarea}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              placeholder="내용을 수정하세요 (최대 512자)"
-            />
-            <div className={styles.modalFooter}>
-              <button type="button" className={styles.modalCancel} onClick={closeEditModal}>
-                취소
-              </button>
-              <button
-                type="button"
-                className={styles.modalSave}
-                onClick={onSubmitEdit}
-                disabled={!canEditSave}
-              >
-                {updateMut.isPending ? '저장 중...' : '저장'}
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </section>
   );
