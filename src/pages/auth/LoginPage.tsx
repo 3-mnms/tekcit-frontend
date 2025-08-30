@@ -12,9 +12,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, type LoginForm } from '@/models/auth/schema/loginSchema'
 import { useLoginMutation } from '@/models/auth/tanstack-query/useLogin'
-
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 import { parseJwt, type JwtRole, type JwtPayloadBase } from '@/shared/storage/jwt'
+import { getAndSaveFcmToken } from '@/shared/api/auth/fcrmToken'
 
 type JwtPayload = JwtPayloadBase & {
   userId: number
@@ -52,6 +52,7 @@ const LoginPage: React.FC = () => {
             })
           }
         }
+        void getAndSaveFcmToken();
         alert('로그인이 완료되었습니다!')
         navigate('/')
       },

@@ -10,7 +10,7 @@ export type PaymentOrderDTO = {
 };
 
 export async function getPaymentOrdersByFestivalId(festivalId: string) {
-  const { data } = await api.get(`/api/payments/${festivalId}`);
+  const { data } = await api.get(`/payments/${festivalId}`);
   // { success, data, message } 형태일 가능성 → envelope 처리
   return (data?.data ?? data) as PaymentOrderDTO[];
 }
