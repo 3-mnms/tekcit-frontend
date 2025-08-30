@@ -134,8 +134,18 @@
     color: #374151;
 }
 
-.delBtn {
+.editBtn {
     margin-left: 0.5rem;
+    height: 28px;
+    padding: 0 0.6rem;
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+    background: #fff;
+    border-radius: 6px;
+}
+
+.delBtn {
+    margin-left: 0.4rem;
     height: 28px;
     padding: 0 0.6rem;
     border: 1px solid #ef4444;
@@ -192,3 +202,32 @@
     font-size: 0.85rem;
     text-align: right;
 }
+
+.modal {
+  width: min(560px, 92vw);
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  display: grid; gap: .75rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+.modalTitle { font-weight: 700; font-size: 1.05rem; color: #111827; }
+.modalTextarea {
+  width: 100%;
+  min-height: 120px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.75rem;
+  resize: vertical;
+}
+.modalFooter {
+  display: flex; justify-content: flex-end; gap: .5rem;
+}
+.modalCancel, .modalSave {
+  height: 38px; padding: 0 .9rem; border-radius: 8px;
+  border: 1px solid transparent; background: #eee; color: #111827;
+}
+.modalSave {
+  background: #3b82f6; color: #fff;
+}
+.modalSave:disabled { opacity: .6; cursor: not-allowed; }
