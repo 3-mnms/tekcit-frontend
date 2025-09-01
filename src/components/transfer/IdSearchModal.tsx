@@ -57,7 +57,6 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
             }];
 
             setResults(list);
-            console.log("불러온 값", list);
             setSel(list.length ? 0 : -1);
             if (!list.length) alert('일치하는 결과가 없습니다');
         } catch (e: any) {

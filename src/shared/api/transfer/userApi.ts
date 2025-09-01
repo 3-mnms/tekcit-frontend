@@ -14,7 +14,6 @@ function unwrap<T>(payload: ApiEnvelope<T>): T {
 /** 양수자(받는 사람) 정보 조회: GET /api/users/transferee?email=... */
 export async function fetchTransfereeByEmail(email: string): Promise<AssignmentDTO> {
   const { data } = await api.get('/users/transferee', { params: { email } });
-  console.log(data);
   return unwrap<AssignmentDTO>(data as any);
 }
 
