@@ -1,5 +1,5 @@
 // src/components/my/dropdown/PointBox.tsx
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './PointBox.module.css';
 import { getTekcitPayAccount } from '@/shared/api/my/tekcitPay';
@@ -7,12 +7,30 @@ import { getTekcitPayAccount } from '@/shared/api/my/tekcitPay';
 const PointBox: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [balance, setBalance] = useState<number | null>(null);
+
+  const fetchBalance = useCallback(async () => {
+    try {
+      const account = await getTekcitPayAccount();
+      setBalance(account.availableBalance ?? 0);
+    } catch (e: any) {
+      const code = e?.response?.data?.errorCode;
+      if (code === 'NOT_FOUND_TEKCIT_PAY_ACCOUNT') {
+        setBalance(null); // 계정 없으면 null 유지
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBalance();
+  }, [fetchBalance]);
 
   const goByAccount = useCallback(async () => {
     if (loading) return;
     setLoading(true);
     try {
-      await getTekcitPayAccount();
+      const account = await getTekcitPayAccount();
+      setBalance(account.availableBalance ?? 0); // ✅ 조회 시 갱신
       navigate('/payment/wallet-point/');
     } catch (e: any) {
       const code = e?.response?.data?.errorCode;
@@ -38,11 +56,17 @@ const PointBox: React.FC = () => {
     >
       <span className={styles.label}>포인트</span>
       <div className={styles.right}>
-        <span className={styles.amount}>{loading ? '0P' : '0P'}</span>
+        <span className={styles.amount}>
+          {loading
+            ? '0P'
+            : balance !== null
+              ? `${balance.toLocaleString('ko-KR')}P`
+              : '0P'}
+        </span>
         <button
           className={styles.charge}
           onClick={(e) => {
-            e.stopPropagation(); 
+            e.stopPropagation();
             goByAccount();
           }}
           disabled={loading}

@@ -13,19 +13,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, type LoginForm } from '@/models/auth/schema/loginSchema'
 import { useLoginMutation } from '@/models/auth/tanstack-query/useLogin'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
-import { parseJwt, type JwtRole, type JwtPayloadBase } from '@/shared/storage/jwt'
 import { getAndSaveFcmToken } from '@/shared/api/auth/fcrmToken'
-
-type JwtPayload = JwtPayloadBase & {
-  userId: number
-  role: JwtRole
-  name: string
-}
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate()
-  const { setUser } = useAuthStore()
-  const isPopup = !!window.opener;
+  const isPopup = !!window.opener
+  const { setAccessToken } = useAuthStore.getState()
 
   const {
     register,
@@ -40,19 +33,12 @@ const LoginPage: React.FC = () => {
 
   const onSubmit = (form: LoginForm) => {
     loginMut.mutate(form, {
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
         if (data.accessToken) {
-          const decoded = parseJwt<JwtPayload>(data.accessToken)
-          if (decoded) {
-            setUser({
-              userId: decoded.userId,
-              role: decoded.role,
-              name: decoded.name,
-              loginId: decoded.sub,
-            })
-          }
+          setAccessToken(data.accessToken)
         }
-        void getAndSaveFcmToken();
+        void getAndSaveFcmToken()
+
         alert('로그인이 완료되었습니다!')
         navigate('/')
       },
@@ -70,7 +56,7 @@ const LoginPage: React.FC = () => {
     <div className={styles.page}>
       {isPopup && <KakaoPopupBridge status="existing" />}
       <div className={styles.card}>
-        <img src={Logo} alt="tekcit logo" className={styles.logo} onClick={() => navigate('/')}/>
+        <img src={Logo} alt="tekcit logo" className={styles.logo} onClick={() => navigate('/')} />
 
         <form onSubmit={handleSubmit(onSubmit)} className="w-full">
           <LoginInput

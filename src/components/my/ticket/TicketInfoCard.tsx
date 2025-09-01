@@ -5,6 +5,7 @@ import Modal from './QRModal'
 import EntranceCheckModalLoader from '@/components/my/ticket/EntranceCheckModalLoader' 
 import { format } from 'date-fns'
 import QRViewer from './QRViewer'
+import KakaoMapModal from '@/components/shared/kakao/KakaoMapModal'
 
 type Props = {
   festivalId: string;            
@@ -53,6 +54,8 @@ const TicketInfoCard: React.FC<Props> = ({
     return src.length > 0 ? src : '/dummy-poster.jpg'
   }, [posterFile])
 
+  const [showMap, setShowMap] = useState(false)  
+
   return (
     <>
       <div className={styles.card}>
@@ -86,7 +89,7 @@ const TicketInfoCard: React.FC<Props> = ({
             <span className={styles.label}>장소</span>
             <span className={styles.value}>
               {place}
-              <button className={styles.subBtn}>지도보기</button>
+              <button className={styles.subBtn} onClick={() => setShowMap(true)}>지도보기</button>
             </span>
           </div>
           <div className={styles.row}>
@@ -130,6 +133,12 @@ const TicketInfoCard: React.FC<Props> = ({
         festivalId={festivalId}
         performanceDateISO={performanceDateISO}
         title={title}
+      />
+
+      <KakaoMapModal
+        isOpen={showMap}
+        onClose={() => setShowMap(false)}
+        query={place}
       />
     </>
   )

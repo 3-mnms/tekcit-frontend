@@ -93,6 +93,17 @@
   border-radius: 12px;
   animation: pulse 1.6s ease-in-out infinite;
 }
+
+input:disabled {
+  background: #f3f4f6; /* 기본 회색 */
+  color: #6b7280;
+}
+
+.editing input:disabled {
+  background: #fff !important;  /* 수정 모드일 땐 흰색으로 강제 */
+  color: #111;
+}
+
 @keyframes pulse {
   0% { opacity: 0.55; }
   50% { opacity: 1; }

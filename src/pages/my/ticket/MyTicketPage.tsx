@@ -11,14 +11,14 @@ const MyTicketPage: React.FC = () => {
 
       <div className="flex flex-col">
         <MyInfoCardItem
-          label="예매 확인/취소"
+          label="예매 / 취소 내역"
           onClick={() => navigate('/mypage/ticket/history')}
         />
-        <MyInfoCardItem label="양도하기" onClick={() => navigate('/mypage/ticket/transfer')} />
-        <MyInfoCardItem
+        <MyInfoCardItem label="티켓 양도" onClick={() => navigate('/mypage/ticket/transfer')} />
+        {/* <MyInfoCardItem
           label="입장 인원 수 조회"
           onClick={() => navigate('/mypage/ticket/entry-check')}
-        />
+        /> */}
       </div>
     </div>
   )

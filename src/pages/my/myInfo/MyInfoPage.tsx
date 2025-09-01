@@ -10,7 +10,7 @@ const MyInfoPage: React.FC = () => {
     <section className={styles.container}>
       <h2 className={styles.title}>내 정보</h2>
 
-      <MyInfoCardItem label="사용자명(기본정보)" onClick={() => navigate('/mypage/myinfo/detail')} />
+      <MyInfoCardItem label="기본정보" onClick={() => navigate('/mypage/myinfo/detail')} />
 
       <div className={styles.group}>
         <MyInfoCardItem label="비밀번호 변경" onClick={() => navigate('/mypage/myinfo/changepassword')} />
