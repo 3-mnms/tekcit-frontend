@@ -49,8 +49,8 @@ export default function ResultPage() {
   if (!view) {
     return (
       <ResultLayout
-        title="결제 확인 중"
-        message="결제 상태를 확인하고 있어요… 잠시만요"
+        title="성공"
+        message="결제가 완료되었습니다."
         primary={{ label: '메인으로', to: '/' }}
       />
     )
