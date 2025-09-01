@@ -1,0 +1,197 @@
+/* ✅ 대표색: #4D9AFD 사용
+   - :root, @media 미사용(요청 준수)
+   - 접근성: 포커스, aria-invalid 에러 표시
+*/
+
+.page {
+  min-height: 100dvh;
+  background: #f7f9fc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 16px;
+  box-sizing: border-box;
+}
+
+.header {
+  width: 100%;
+  max-width: 640px;
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.card {
+  width: 100%;
+  max-width: 640px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(17, 24, 39, 0.06);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.profileBox {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 12px;
+  border: 1px dashed #d1d5db;
+  border-radius: 12px;
+  background: #fafafa;
+  margin-bottom: 16px;
+}
+
+.pair {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pairKey {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.pairVal {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 600;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.label {
+  font-size: 13px;
+  color: #374151;
+  font-weight: 600;
+}
+
+.input {
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input:focus {
+  border-color: #4D9AFD;
+  box-shadow: 0 0 0 3px rgba(77, 154, 253, 0.2);
+}
+
+.error {
+  margin: 4px 2px 0;
+  font-size: 12px;
+  color: #dc2626;
+}
+
+.agreeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #4D9AFD; /* 지원 브라우저에서 체크 컬러 */
+}
+
+.agreeLabel {
+  font-size: 13px;
+  color: #374151;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.primaryButton {
+  height: 46px;
+  border: 0;
+  border-radius: 12px;
+  background: #4D9AFD;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform 0.05s ease, box-shadow 0.15s ease, opacity 0.2s ease;
+  box-shadow: 0 6px 14px rgba(77, 154, 253, 0.35);
+}
+
+.primaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.primaryButton:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.secondaryButton {
+  height: 46px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #374151;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.secondaryButton:hover {
+  border-color: #9ca3af;
+  background: #f9fafb;
+}
+
+.serverError {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+/* 스켈레톤 로딩 박스 */
+.skeleton {
+  height: 160px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #eef2ff, #f8fafc, #eef2ff);
+  background-size: 200% 100%;
+  animation: shine 1.2s infinite linear;
+}
+
+@keyframes shine {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

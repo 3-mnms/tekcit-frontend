@@ -10,6 +10,29 @@ import AfterTransferTicket from '@/components/my/ticket/AfterTransferTicket';
 
 export const TRANSFER_DONE_EVENT = 'ticket:transferred';
 
+/** ✅ 포스터만 가져오는 얇은 컴포넌트 */
+const TicketPoster: React.FC<{
+  reservationNumber: string;
+  alt: string;
+  className?: string;
+}> = ({ reservationNumber, alt, className }) => {
+  const { data } = useTicketDetailQuery(reservationNumber);
+  // 상세에 posterFile(string)이 들어옴
+  const src = data?.posterFile || '/dummy-poster.jpg';
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      decoding="async"
+      onError={(e) => {
+        (e.currentTarget as HTMLImageElement).src = '/dummy-poster.jpg';
+      }}
+    />
+  );
+};
+
 const TransferTicketPage: React.FC = () => {
   const navigate = useNavigate();
   const { data } = useTicketsQuery();

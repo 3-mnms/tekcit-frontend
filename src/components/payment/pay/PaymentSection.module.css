@@ -1,0 +1,73 @@
+/* 결제 수단 박스 전체 */
+.paymentBox {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+/* 개별 결제수단 카드 */
+.methodCard {
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #fff;
+  transition: border-color 0.2s ease;
+}
+
+.methodCard:has(.radioOn) {
+  border-color: #4D9AFD;
+}
+
+/* 카드 헤더 (버튼 영역) */
+.methodHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fafafa;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.methodHeader:hover {
+  background: #f0f6ff;
+}
+
+/* 라디오 아이콘 */
+.radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #bbb;
+  display: inline-block;
+  position: relative;
+}
+
+.radioOn {
+  border-color: #4D9AFD;
+  background-color: #4D9AFD;
+}
+
+/* 결제수단 텍스트 */
+.methodText {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* 펼쳐진 본문 영역 */
+.methodBody {
+  padding: 16px;
+  border-top: 1px solid #e2e2e2;
+  background-color: #fff;
+}
+
+/* 에러 메시지 */
+.errorMsg {
+  margin-top: 8px;
+  color: #e63946;
+  font-size: 14px;
+}
