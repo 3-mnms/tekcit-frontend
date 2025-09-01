@@ -1,0 +1,104 @@
+.card {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background-color: #fff;
+  border: 1px solid #b4b4b4;
+  align-items: flex-start;
+  max-width: 640px;
+}
+
+.poster {
+  width: 100px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ⬇️ 제목과 상태를 같은 줄에 */
+.topRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title {
+  flex: 1;                 /* 남은 공간을 공연명이 차지 */
+  font-size: 0.95rem;
+  color: #222;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* 상태 뱃지 */
+.badge {
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.pending { background-color: #fff8e1; color: #a67c00; border: 1px solid #ffd54f; }
+.approved { background-color: #e6f7ef; color: #117a37; border: 1px solid #b2dfdb; }
+.rejected { background-color: #fdecea; color: #c62828; border: 1px solid #f5c6cb; }
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.priceRow { 
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.priceRowHidden {
+  visibility: hidden;   /* 공간은 유지하되 텍스트는 보이지 않음 */
+  line-height: 1.5;
+  min-height: 1.5em;
+}
+
+.buttonWrapper {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.5rem 1.3rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.accept { background-color: #4d9afd; color: #fff; }
+.accept:hover { background-color: #3585ea; }
+
+.reject { background-color: #eee; color: #333; }
+.reject:hover { background-color: #ddd; }
+
+@media (max-width: 768px) {
+  .card { flex-direction: column; }
+  .poster { width: 100%; height: auto; }
+  .topRow { align-items: flex-start; }
+  .btn, .badge { align-self: flex-end; }
+}

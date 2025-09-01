@@ -2,8 +2,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styles from './TransferTicketPage.module.css';
 import { useNavigate } from 'react-router-dom';
-import { useTicketsQuery, useTicketDetailQuery } from '@/models/my/ticket/tanstack-query/useTickets';
+import { useTicketsQuery } from '@/models/my/ticket/tanstack-query/useTickets';
 import type { TicketListItem } from '@/models/my/ticket/ticketTypes';
+
+import BeforeTransferTicket from '@/components/my/ticket/BeforeTransferTicket';
+import AfterTransferTicket from '@/components/my/ticket/AfterTransferTicket';
 
 export const TRANSFER_DONE_EVENT = 'ticket:transferred';
 
@@ -49,12 +52,20 @@ const TransferTicketPage: React.FC = () => {
     return () => window.removeEventListener(TRANSFER_DONE_EVENT, onDone as EventListener);
   }, []);
 
+  // ✅ 양도할 수 있는 내 티켓
   const visibleTickets = useMemo(() => {
     const list = data ?? [];
-    return list.filter(
-      (t) => t.rawStatus === 'CONFIRMED' && !hidden.has(t.reservationNumber)
-    );
+    return list.filter((t) => t.rawStatus === 'CONFIRMED' && !hidden.has(t.reservationNumber));
   }, [data, hidden]);
+
+  // ✅ 양도받을 티켓 (예시 데이터 — 추후 API 연결)
+  const receivedTicket = {
+    title: '그랜드 민트 페스티벌 2025',
+    date: '2025-10-18',
+    time: '17:00',
+    relation: '지인' as const,
+    status: 'PENDING' as const,
+  };
 
   const handleTransfer = (row: TicketListItem) => {
     navigate('/mypage/ticket/transfer/test', {
@@ -69,42 +80,30 @@ const TransferTicketPage: React.FC = () => {
     <div className={styles.page}>
       <h2 className={styles.title}>티켓 양도</h2>
 
+      {/* ✅ 양도받을 티켓이 있을 때만 보여줌 */}
+      {receivedTicket && (
+        <div className={styles.receivedSection}>
+          <AfterTransferTicket
+            title={receivedTicket.title}
+            date={receivedTicket.date}
+            time={receivedTicket.time}
+            relation={receivedTicket.relation}
+            status={receivedTicket.status}
+            onAccept={() => alert('수락')}
+            onReject={() => alert('거절')}
+          />
+        </div>
+      )}
+
       <div className={styles.list}>
         {visibleTickets.map((t) => (
-          <div key={t.reservationNumber} className={styles.card}>
-            {/* ✅ 상세 API에서 posterFile을 불러와 썸네일로 사용 */}
-            <TicketPoster
-              reservationNumber={t.reservationNumber}
-              alt={`${t.title} 포스터`}
-              className={styles.poster}
-            />
-
-            <div className={styles.details}>
-              <div className={styles.info}>
-                <p>
-                  <strong>예매일</strong>: {t.date}
-                </p>
-                <p>
-                  <strong>예매번호</strong>: {t.number}
-                </p>
-                <p>
-                  <strong>공연명</strong>: {t.title}
-                </p>
-                <p>
-                  <strong>일시</strong>: {t.dateTime}
-                </p>
-                <p>
-                  <strong>매수</strong>: {t.count}
-                </p>
-              </div>
-              <div className={styles.buttonWrapper}>
-                <button className={styles.transferBtn} onClick={() => handleTransfer(t)}>
-                  양도하기
-                </button>
-              </div>
-            </div>
-          </div>
+          <BeforeTransferTicket
+            key={t.reservationNumber}
+            item={t}
+            onTransfer={handleTransfer}
+          />
         ))}
+
         {visibleTickets.length === 0 && (
           <div className={styles.empty}>양도 가능한 티켓이 없어요.</div>
         )}
