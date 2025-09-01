@@ -1,16 +1,16 @@
 // src/components/transfer/TransferRecipientForm.tsx
 import React, { useMemo, useRef, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './TransferRecipientForm.module.css';
 import Button from '@/components/common/button/Button';
 import IdSearchModal, { type AccountMini } from './IdSearchModal';
-import { useExtractPersonInfo, useTransferor } from '@/models/transfer/tanstack-query/useTransfer';
+import { useVerifyFamilyCert, useTransferor } from '@/models/transfer/tanstack-query/useTransfer';
 import { normalizeRrn7 } from '@/shared/api/transfer/userApi';
 import type { PersonInfo } from '@/models/transfer/transferTypes';
 
 // ⬇️ 추가: 테킷페이 훅/유틸
 import {
   useTekcitPayAccountQuery,
-  useCreateTekcitPayAccountMutation,
 } from '@/models/transfer/tanstack-query/useTekcitPay';
 import { isNoTekcitPayAccountError } from '@/shared/api/transfer/tekcitPay';
 
@@ -70,6 +70,7 @@ type Props = {
 const TransferRecipientForm: React.FC<Props> = (props) => {
   const propName = props.currentName?.trim();
   const propRrn7 = props.currentRrn7?.trim();
+  const navigate = useNavigate();
 
   const needFetchMe = !(propName && propRrn7);
   const { data: me, isLoading: meLoading, isError: meError, error: meErr } = useTransferor({ enabled: needFetchMe });
@@ -105,11 +106,10 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
   const [hintMsg, setHintMsg] = useState<string | null>(null);      // 논리적 실패(부분일치 등) 안내
   const [errorMsg, setErrorMsg] = useState<string | null>(null);    // 네트워크/서버 에러만
 
-  const { mutateAsync: extract } = useExtractPersonInfo();
+  const { mutateAsync: verifyFamily } = useVerifyFamilyCert();
 
   // ⬇️ 테킷페이 쿼리/뮤테이션 (제출 시에만 조회)
   const { refetch: refetchAccount } = useTekcitPayAccountQuery(false);
-  const { mutateAsync: createAccount, isPending: creatingAccount } = useCreateTekcitPayAccountMutation();
 
   useEffect(() => () => { if (tempUrl) URL.revokeObjectURL(tempUrl); }, [tempUrl]);
 
@@ -126,7 +126,7 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
   const safeLoginId = loginId ?? '';
   const safeName = name ?? '';
   const baseValid = safeLoginId.trim().length > 0 && safeName.trim().length > 0;
-  const canSubmit = baseValid && relation !== null && (!needProof || !!proofFile) && !creatingAccount;
+  const canSubmit = baseValid && relation !== null && (!needProof || !!proofFile);
 
   const handleFileChange = (f?: File) => {
     if (!f) return;
@@ -190,37 +190,21 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
           setProgress((prev) => (prev < 94 ? prev + 2 : prev));
         }, 120);
 
-        const meR = parseRrn7(donorRrn7);
-        const otherR = parseRrn7(recipientRrn7);
-
         const dict: Record<string, string> = {
           [donorName]: toRrn7WithHyphen(donorRrn7),
           [name]: toRrn7WithHyphen(recipientRrn7),
         };
 
         // === 실제 호출 ===
-        const people = await extract({ file: tempFile!, targetInfo: dict });
-
+        const result = await verifyFamily({ file: tempFile!, targetInfo: dict });
         if (cancelled) return;
 
-        const okMe = hasMatch(people, donorName, meR);
-        const okOther = hasMatch(people, name, otherR);
-        const ok = okMe && okOther;
-
+        const ok = !!result?.success;
         setVerifyOk(ok);
         setVerifyDone(true);
         setProgress(100);
 
-        if (!ok) {
-          const msg = okMe && !okOther
-            ? '양도자는 확인되었지만, 양수자가 문서에서 확인되지 않았어요.'
-            : (!okMe && okOther
-                ? '양수자는 확인되었지만, 양도자가 문서에서 확인되지 않았어요.'
-                : '일치하는 인원을 찾지 못했어요');
-          setHintMsg(msg);
-        } else {
-          setHintMsg(null);
-        }
+        setHintMsg(ok ? null : (result?.message ?? '인증에 실패했어요.'));
       } catch (err: any) {
         if (!cancelled) {
           setErrorMsg(err?.message || 'OCR 인증 실패');
@@ -239,7 +223,7 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
       cancelled = true;
       if (intervalId) clearInterval(intervalId);
     };
-  }, [modalOpen, previewLoading, relation, tempFile, donorName, donorRrn7, name, recipientRrn7, extract]);
+  }, [modalOpen, previewLoading, relation, tempFile, donorName, donorRrn7, name, recipientRrn7, verifyFamily]);
 
   // 양도자 정보 로딩/에러 처리
   if (needFetchMe) {
@@ -258,39 +242,27 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
     if (!canSubmit) return;
 
     if (relation === 'FAMILY') {
-      // OCR 통과 시 confirmFile 에서 proofFile 세팅됨 → 여기서는 바로 다음 단계
       alert('가족 OCR 인증 통과 → 다음 단계!');
       props.onNext?.();
       return;
     }
 
-    // FRIEND: 테킷페이 존재 확인 → 없으면 생성 후 진행
-    try {
-      const res = await refetchAccount(); // enabled=false로 둔 쿼리 한 번 실행
-      if (!res?.data) {
-        // 데이터 없음: 에러를 확인
-        if (isNoTekcitPayAccountError(res.error as any)) {
-          // 간단 생성 플로우 (임시 비밀번호 입력)
-          const input = window.prompt('테킷페이 계정이 없습니다.\n생성할 결제 비밀번호(숫자 4~6자리)를 입력하세요');
-          if (!input) return;
-          const pw = Number(input);
-          if (!Number.isFinite(pw)) {
-            alert('숫자만 입력할 수 있어요.');
-            return;
-          }
-          await createAccount(pw);
-          alert('생성되었습니다.');
-          props.onNext?.();
-          return;
-        }
-        // 그 외 에러
-        throw res.error || new Error('계정 조회 실패');
-      }
-      // 계정 이미 있음 → 다음 단계
+    // FRIEND: 테킷페이 존재 확인 → 없으면 가입 페이지로 이동
+    const res = await refetchAccount(); // Promise<QueryObserverResult<...>>
+    if (res?.data) {
+      // 계정 이미 있음 → 다음 단계로
       props.onNext?.();
-    } catch (err: any) {
-      alert(err?.message ?? '테킷페이 확인/생성 중 오류가 발생했어요.');
+      return;
     }
+
+    if (isNoTekcitPayAccountError(res.error as any)) {
+      // ✅ 계정 없음 → 가입 플로우로 보냄
+      navigate('/payment/wallet/join'); // 필요하면 { state: {...} } 넣어도 OK
+      return;
+    }
+
+    // 기타 에러
+    throw (res.error || new Error('계정 조회 실패'));
   };
 
   return (
@@ -403,7 +375,7 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
         className={`${styles.submitBtn} ${canSubmit ? '' : styles.submitBtnDisabled}`}
         disabled={!canSubmit}
       >
-        {creatingAccount ? '계정 생성 중…' : '다음'}
+        다음
       </Button>
 
       {/* ===== 파일 미리보기 + OCR 검사 모달 ===== */}
