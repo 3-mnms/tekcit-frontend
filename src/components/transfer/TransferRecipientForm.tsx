@@ -67,6 +67,9 @@ type Props = {
   onNext?: () => void;
 };
 
+const POPUP_WIDTH = 520;
+const POPUP_HEIGHT = 720;
+
 const TransferRecipientForm: React.FC<Props> = (props) => {
   const propName = props.currentName?.trim();
   const propRrn7 = props.currentRrn7?.trim();
@@ -110,6 +113,10 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
 
   // ⬇️ 테킷페이 쿼리/뮤테이션 (제출 시에만 조회)
   const { refetch: refetchAccount } = useTekcitPayAccountQuery(false);
+
+  // ⬇️ 팝업 레퍼런스 & 폴링 타이머
+  const popupRef = useRef<Window | null>(null);
+  const pollTimerRef = useRef<number | null>(null);
 
   useEffect(() => () => { if (tempUrl) URL.revokeObjectURL(tempUrl); }, [tempUrl]);
 
@@ -225,6 +232,75 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
     };
   }, [modalOpen, previewLoading, relation, tempFile, donorName, donorRrn7, name, recipientRrn7, verifyFamily]);
 
+  // ===== 팝업 메시지 수신(완료 시) + 정리 =====
+  useEffect(() => {
+    const onMessage = async (ev: MessageEvent) => {
+      // 동일 오리진만 신뢰 (필요시 조건 강화)
+      if (ev.origin !== window.location.origin) return;
+      if (!ev.data || typeof ev.data !== 'object') return;
+
+      if (ev.data.type === 'TEKCIT_PAY_ACCOUNT_CREATED') {
+        // 팝업에서 계정 생성 완료 시
+        try {
+          const res = await refetchAccount();
+          if (res?.data) {
+            // 완료 → 다음 단계
+            if (popupRef.current && !popupRef.current.closed) popupRef.current.close();
+            if (pollTimerRef.current) window.clearInterval(pollTimerRef.current);
+            props.onNext?.();
+          }
+        } catch {
+          // 무시 (다음 폴링 사이클에서 다시 체크)
+        }
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [refetchAccount, props]);
+
+  // 팝업 열기 + 폴링
+  const openTekcitPayJoinPopup = () => {
+    // 중앙 정렬
+    const dualScreenLeft = window.screenLeft ?? window.screenX ?? 0;
+    const dualScreenTop = window.screenTop ?? window.screenY ?? 0;
+    const width = window.innerWidth ?? document.documentElement.clientWidth ?? screen.width;
+    const height = window.innerHeight ?? document.documentElement.clientHeight ?? screen.height;
+
+    const left = dualScreenLeft + Math.max(0, (width - POPUP_WIDTH) / 2);
+    const top = dualScreenTop + Math.max(0, (height - POPUP_HEIGHT) / 2);
+
+    // 같은 오리진 라우트로 열면 localStorage/Zustand 공유 → 토큰 자동 전파됨.
+    // 다른 오리진이라면 ?token=... 등으로 전달하거나, open 후 postMessage로 토큰 전달 로직 추가.
+    const url = `/payment/wallet/join?popup=1`; // 팝업 전용 UI 분기용 쿼리
+    const features = `width=${POPUP_WIDTH},height=${POPUP_HEIGHT},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+
+    popupRef.current = window.open(url, 'tekcitpay_join', features);
+
+    // 폴링: 2초 간격으로 계정 생성 여부 확인, 팝업 닫히면 중단
+    if (pollTimerRef.current) window.clearInterval(pollTimerRef.current);
+    pollTimerRef.current = window.setInterval(async () => {
+      const popup = popupRef.current;
+      if (!popup || popup.closed) {
+        window.clearInterval(pollTimerRef.current!);
+        pollTimerRef.current = null;
+        return;
+      }
+      try {
+        const res = await refetchAccount();
+        if (res?.data) {
+          // 계정 생김 → 팝업 닫고 다음으로
+          popup.close();
+          window.clearInterval(pollTimerRef.current!);
+          pollTimerRef.current = null;
+          props.onNext?.();
+        }
+      } catch (e) {
+        // 계정 없음 or 오류 → 계속 대기
+      }
+    }, 2000);
+  };
+
   // 양도자 정보 로딩/에러 처리
   if (needFetchMe) {
     if (meLoading) return <div className={styles.card}>내 정보(양도자) 불러오는 중…</div>;
@@ -247,8 +323,8 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
       return;
     }
 
-    // FRIEND: 테킷페이 존재 확인 → 없으면 가입 페이지로 이동
-    const res = await refetchAccount(); // Promise<QueryObserverResult<...>>
+    // FRIEND: 테킷페이 존재 확인 → 없으면 "팝업"으로 가입 플로우
+    const res = await refetchAccount();
     if (res?.data) {
       // 계정 이미 있음 → 다음 단계로
       props.onNext?.();
@@ -256,8 +332,8 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
     }
 
     if (isNoTekcitPayAccountError(res.error as any)) {
-      // ✅ 계정 없음 → 가입 플로우로 보냄
-      navigate('/payment/wallet/join'); // 필요하면 { state: {...} } 넣어도 OK
+      // ✅ 계정 없음 → 팝업 오픈
+      openTekcitPayJoinPopup();
       return;
     }
 
