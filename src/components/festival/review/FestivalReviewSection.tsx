@@ -222,6 +222,9 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
             `#${idx}`;
 
           const isMine = myUserId != null && Number(myUserId) === Number(rev.userId);
+          console.log("내 아이디: ",myUserId);
+          console.log("유저 아이디: ",rev.userId);
+           console.log("리뷰 아이디: ",Number(rev.reviewId));
           const isEditingThis = editingId != null && rev.reviewId === editingId;
 
           const created = new Date(rev.createdAt);

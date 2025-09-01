@@ -53,6 +53,7 @@ const Step2Form: React.FC<Props> = ({ acc, onPrev, onNext, updateAcc }) => {
         icon={<FaUser />}
         placeholder="이름"
         error={errors.name?.message}
+        touched={!!touchedFields.name}
       />
 
       <SignupInputField

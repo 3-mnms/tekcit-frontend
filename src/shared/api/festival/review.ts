@@ -30,6 +30,7 @@ export async function getFestivalReviews(
 export async function getMyFestivalReview(fId: string): Promise<FestivalReviewResponseDTO | null> {
   const { data } = await api.get(`/festival/review/${encodeURIComponent(fId)}/myReview`);
   // 본인 리뷰가 없을 때 200 + null 로 온다고 가정
+  console.log("dto", data)
   return unwrap<FestivalReviewResponseDTO | null>(data);
 }
 
