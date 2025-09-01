@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styles from './TransferTicketPage.module.css';
 import { useNavigate } from 'react-router-dom';
-import { useTicketsQuery } from '@/models/my/ticket/tanstack-query/useTickets';
+import { useTicketsQuery, useTicketDetailQuery } from '@/models/my/ticket/tanstack-query/useTickets';
 import type { TicketListItem } from '@/models/my/ticket/ticketTypes';
 
 import BeforeTransferTicket from '@/components/my/ticket/BeforeTransferTicket';
@@ -67,13 +67,8 @@ const TransferTicketPage: React.FC = () => {
     status: 'PENDING' as const,
   };
 
-  const handleTransfer = (row: TicketListItem) => {
-    navigate('/mypage/ticket/transfer/test', {
-      state: {
-        reservationNumber: row.reservationNumber,
-        ticket: row,
-      },
-    });
+  const handleTransfer = (reservationNumber: string) => {
+    navigate(`/mypage/ticket/transfer/${encodeURIComponent(reservationNumber)}`);
   };
 
   return (
@@ -100,9 +95,9 @@ const TransferTicketPage: React.FC = () => {
           <BeforeTransferTicket
             key={t.reservationNumber}
             item={t}
-            onTransfer={handleTransfer}
+            onTransfer={handleTransfer} // string 받는 핸들러로 변경
           />
-        ))}
+        ))} 
 
         {visibleTickets.length === 0 && (
           <div className={styles.empty}>양도 가능한 티켓이 없어요.</div>

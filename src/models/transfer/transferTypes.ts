@@ -1,3 +1,14 @@
+// 추가: 양도 타입
+export type TransferType = 'FAMILY' | 'OTHERS';
+
+// 추가: 양도 요청 DTO (백엔드 TicketTransferRequestDTO 매칭)
+export type TicketTransferRequest = {
+  reservationNumber: string;
+  recipientId: number;    // 양수자(가족/지인) ID
+  transferType: TransferType;
+  senderName: string;
+};
+
 /** 백엔드 PersonInfoResponseDTO 대응 */
 export type PersonInfo = {
   name: string;

@@ -5,7 +5,7 @@ import type { TicketListItem } from '@/models/my/ticket/ticketTypes';
 
 type Props = {
   item: TicketListItem;
-  onTransfer: (item: TicketListItem) => void;
+  onTransfer: (reservationNumber: string) => void; // ⬅️ 변경: string만 넘김
 };
 
 const BeforeTransferTicket: React.FC<Props> = ({ item, onTransfer }) => {
@@ -33,7 +33,7 @@ const BeforeTransferTicket: React.FC<Props> = ({ item, onTransfer }) => {
         <div className={styles.buttonWrapper}>
           <button
             className={styles.transferBtn}
-            onClick={() => onTransfer(item)}
+            onClick={() => onTransfer(item.reservationNumber)} // ⬅️ 예매번호만 전달!
             aria-label="티켓 양도하기"
           >
             양도하기

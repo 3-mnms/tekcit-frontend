@@ -10,6 +10,7 @@ import {
 
 import {
   apiUpdateFamilyTransfer,
+  apiRequestTransfer,
 } from '@/shared/api/transfer/transferApi';
 import {
   fetchTransfereeByEmail,
@@ -20,6 +21,7 @@ import {
 import type {
   UpdateTicketRequest,
   PersonInfo,
+  TicketTransferRequest,
 } from '@/models/transfer/transferTypes';
 
 /* ===========================
@@ -165,4 +167,18 @@ export function ensureTransferor(qc: QueryClient, staleTime = 5 * 60 * 1000) {
 
 export function useTransferQueryClient() {
   return useQueryClient();
+}
+
+export function useRequestTransfer() {
+  const qc = useQueryClient();
+
+  return useMutation<void, Error, TicketTransferRequest>({
+    mutationKey: ['transfer', 'request'],
+    mutationFn: (body) => apiRequestTransfer(body),
+    onSuccess: async () => {
+      // 성공 시, 관련 목록 무효화(있다면)
+      qc.invalidateQueries({ queryKey: TRANSFER_OUTBOX_QK });
+      qc.invalidateQueries({ queryKey: TRANSFER_INBOX_QK });
+    },
+  });
 }
