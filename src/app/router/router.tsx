@@ -50,7 +50,8 @@ import TransferFeePaymentPage from '@/pages/payment/transfer/TransferFeePaymentP
 import RefundPage from '@/pages/payment/refund/RefundPage'
 import WalletPointPage from '@/pages/payment/pay/WalletPointPage'
 import WalletChargePage from '@/pages/payment/pay/WalletChargePage'
-import ResultPage from '@/pages/payment/result/ResultPage' 
+import ResultPage from '@/pages/payment/result/ResultPage'
+import TeckitJoinPage from '@/pages/payment/pay/TeckitJoinPage'
 
 // admin & host
 import HomePage from '@/pages/home/HomePage'
@@ -79,7 +80,7 @@ export const router = createBrowserRouter([
   { path: '/find-id', element: <FindIdPage /> },
   { path: '/find-password', element: <FindPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
-  
+
 
   {
     path: '/mypage',
@@ -115,8 +116,8 @@ export const router = createBrowserRouter([
           { 
             path: 'transfer', 
             children: [
-                { path: '', element: <TransferTicketPage /> },
-                { path: 'test', element: <TransferPage /> },
+              { path: '', element: <TransferTicketPage /> },
+              { path: 'test', element: <TransferPage /> },
             ],
           },
           { path: 'entrancecheck', element: <EntranceCheckPage /> },
@@ -136,7 +137,7 @@ export const router = createBrowserRouter([
   {
     path: '/booking',
     children: [
-      { path: ':fid/queue', element: <QueuePage />},
+      { path: ':fid/queue', element: <QueuePage /> },
       { path: ':fid', element: <OrderPage /> },
       { path: ':fid/order-info', element: <OrderInfoPage /> },
     ]
@@ -146,13 +147,19 @@ export const router = createBrowserRouter([
   {
     path: '/payment',
     children: [
-      { path: '', element: <BookingPaymentPage /> }, 
+      { path: '', element: <BookingPaymentPage /> },
       { path: 'result', element: <ResultPage /> },
+      {
+        path: 'wallet/join', // 최종 경로: /payment/wallet/join
+        element: (
+            <TeckitJoinPage />
+        ),
+      },
       {
         path: 'transfer',
         children: [
           { path: '', element: <TransferPaymentPage /> },
-          { path: 'transfer-fee', element: <TransferFeePaymentPage /> },  
+          { path: 'transfer-fee', element: <TransferFeePaymentPage /> },
         ],
       },
       {
@@ -174,11 +181,11 @@ export const router = createBrowserRouter([
   {
     path: '/admin',
     children: [
-      { path: '', element: <ProductRegisterPage /> }, 
+      { path: '', element: <ProductRegisterPage /> },
       { path: 'operatManage/user', element: <OperatManageUserPage /> },
       { path: 'operatManage/host', element: <OperatManageHostPage /> },
       { path: 'productRegist', element: <ProductRegisterPage /> },
-      { path: 'productRegist/:fid', element: <ProductRegisterPage />},
+      { path: 'productRegist/:fid', element: <ProductRegisterPage /> },
       { path: 'announcement', element: <AnnouncementListPage /> },
       { path: 'productManage', element: <ProductManagePage /> },
       { path: 'product-detail/:fid', element: <ProductDetailPage /> },

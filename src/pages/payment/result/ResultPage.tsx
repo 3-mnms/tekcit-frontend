@@ -1,42 +1,46 @@
-import { useEffect, useMemo, useRef } from 'react'
+// ResultPage.tsx
+import { useEffect, useMemo } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import ResultLayout from '@/components/common/result/ResultLayout'
 import { RESULT_CONFIG, type ResultType, type ResultStatus } from '@/shared/config/resultConfig'
-import { paymentConfirm } from '@/shared/api/payment/toss'
+import { paymentConfirm } from '@/shared/api/payment/toss' // 주석: 실제 경로 맞게 확인 멍
 
 export default function ResultPage() {
   const [sp] = useSearchParams()
   const nav = useNavigate()
 
-  const type = sp.get('type') as ResultType | null
-  const status = sp.get('status') as ResultStatus | null
-  const id = sp.get('paymentId') ?? sp.get('txId') ?? undefined
+  // 주석: 필수 파라미터 꺼내기
+  const type = sp.get('type') as ResultType          
+  const status = sp.get('status') as ResultStatus   
+  const paymentId = sp.get('paymentId')
 
-  // ✅ 중복 실행 방지 멍
-  const didRun = useRef(false)
-
-  // ✅ status가 비어 있을 때만 confirm 수행 멍
   useEffect(() => {
-    if (didRun.current) return
-    if (!type) return           // type 없으면 진행 불가 멍
-    if (status) return          // 이미 확정 상태면 스킵 멍
-    if (!id) return             // 확인 대상 ID 없으면 스킵 멍
 
-    didRun.current = true
+    // 주석: 백엔드 confirm은 paymentId(path)만 필요 → orderId(or paymentId)가 없으면 실패 처리 멍
+    if (!paymentId) {
+      const usp = new URLSearchParams(sp)
+      usp.set('status', 'fail')
+      nav({ pathname: '/payment/result', search: usp.toString() }, { replace: true })
+      return
+    }
 
     ;(async () => {
       try {
-        await paymentConfirm(id) 
+        // ✅ 결제 결과 확인 API 호출 (paymentId = orderId) 멍
+        await paymentConfirm(paymentId)
+
         const usp = new URLSearchParams(sp)
-        usp.set('status', 'success') // ✅ 성공 확정 멍
+        usp.set('status', 'success')
+
+        // ✅ 동일 페이지에서 쿼리만 업데이트하여 결과 렌더 유도 멍
         nav({ pathname: '/payment/result', search: usp.toString() }, { replace: true })
-      } catch {
+      } catch (e) {
         const usp = new URLSearchParams(sp)
-        usp.set('status', 'fail')    // ❌ 실패 확정 멍
+        usp.set('status', 'fail')
         nav({ pathname: '/payment/result', search: usp.toString() }, { replace: true })
       }
     })()
-  }, [type, status, id, nav, sp])
+  }, [status, paymentId, nav, sp])
 
   // ✅ 렌더 뷰 결정 멍
   const view = useMemo(() => (type && status ? RESULT_CONFIG[type]?.[status] : null), [type, status])
@@ -45,8 +49,8 @@ export default function ResultPage() {
   if (!view) {
     return (
       <ResultLayout
-        title="결제 완료됨"
-        message="결제 상태를 확인하고 있어요… 잠시만요 멍"
+        title="성공"
+        message="결제가 완료되었습니다."
         primary={{ label: '메인으로', to: '/' }}
       />
     )

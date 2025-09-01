@@ -10,7 +10,7 @@ import TransferFeeInfo from '@/components/payment/transfer/TransferFeeInfo'
 import TicketInfoSection from '@/components/payment/transfer/TicketInfoSection'
 import { bookingTransfer } from '@/models/payment/bookingTransfer'
 import { transferFee } from '@/models/payment/TransferFee'
-import WalletPayment from '@/components/payment/pay/WalletPayment'
+import WalletPayment from '@/components/payment/pay/TekcitPay'
 
 const TransferFeePaymentPage: React.FC = () => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)

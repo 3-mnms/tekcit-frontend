@@ -1,126 +1,148 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
-// ── 결제 섹션 컴포넌트들 멍
-import WalletPayment from '@/components/payment/pay/WalletPayment'
-import TossPayment, { type TossPaymentHandle } from '@/components/payment/pay/TossPayment'
+import type { TossPaymentHandle } from '@/components/payment/pay/TossPayment'
 import PaymentInfo from '@/components/payment/pay/PaymentInfo'
 import BookingPaymentHeader from '@/components/payment/pay/BookingPaymentHeader'
-import ReceiveInfo, { type ReceiveType } from '@/components/payment/delivery/ReceiveInfo'
+import ReceiveInfo from '@/components/payment/delivery/ReceiveInfo'
 
-// ── 공통 UI 멍
 import Button from '@/components/common/button/Button'
 import PasswordInputModal from '@/components/payment/modal/PasswordInputModal'
 import AlertModal from '@/components/common/modal/AlertModal'
 
-// ── 스타일 멍
+import { useAuthStore } from '@/shared/storage/useAuthStore'
+import PaymentSection from '@/components/payment/pay/PaymentSection'
+import type { CheckoutState, PaymentMethod } from '@/models/payment/types/paymentTypes'
+import { createPaymentId } from '@/models/payment/utils/paymentUtils'
+import { saveBookingSession } from '@/shared/api/payment/paymentSession'
+import { fetchBookingDetail } from '@/shared/api/payment/bookingDetail'
+import { requestTekcitPayment, verifyTekcitPassword } from '@/shared/api/payment/tekcit'
+
 import styles from './BookingPaymentPage.module.css'
 
-// ✅ 결제수단 타입 멍
-type PaymentMethod = 'wallet' | 'Toss'
+function getNameFromJwt(): string | undefined {
+  try {
+    const raw = localStorage.getItem('accessToken') || ''
+    const token = raw.startsWith('Bearer ') ? raw.slice(7) : raw
+    if (!token) return undefined
+    const part = token.split('.')[1] ?? ''
+    const safe = part.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = safe + '='.repeat((4 - (safe.length % 4)) % 4)
+    const payload = JSON.parse(atob(padded))
+    const name =
+      payload?.name
+    return typeof name === 'string' && name.trim() ? name.trim() : undefined
+  } catch {
+    return undefined
+  }
+}
 
-// ✅ 결제 타이머(초) 멍
+// ⏱️ 결제 제한 시간(초) 멍
 const DEADLINE_SECONDS = 5 * 60
 
-// ✅ 접근성: 페이지 타이틀 id 멍
-const PAGE_TITLE_ID = 'bookingPaymentMainTitle'
-
-// ✅ 고유 결제 ID 생성 유틸(프론트 생성 전략) 멍
-function createPaymentId(): string {
-  const c = globalThis.crypto as Crypto | undefined
-  if (c?.randomUUID) return c.randomUUID()
-  const buf = c?.getRandomValues
-    ? c.getRandomValues(new Uint32Array(2))
-    : new Uint32Array([Date.now() & 0xffffffff, (Math.random() * 1e9) | 0])
-  return `pay_${Array.from(buf).join('')}`
-}
-
-// ✅ (예시) 로그인 사용자 ID를 안전히 얻는 헬퍼 멍
-// - 실제 프로젝트에선 auth store/context/cookie 등으로 교체 멍
-function getUserIdSafely(): number {
-  const v = Number(localStorage.getItem('userId') ?? NaN)
-  return Number.isFinite(v) ? v : 1001 // 연동안이면 목값 1001 멍
-}
-
 const BookingPaymentPage: React.FC = () => {
+  // 0) 네비게이션/라우터 state 멍
   const navigate = useNavigate()
+  const { state } = useLocation()
+  const checkout = state as CheckoutState
 
-  // ✅ 토스 결제 ref (자식 컴포넌트에 결제 명령 내릴 때 사용) 멍
-  const tossRef = useRef<TossPaymentHandle>(null)
+  // 1) 파생값 계산 — 금액/주문명/공연ID 멍
+  const unitPrice = checkout?.unitPrice ?? 0
+  const quantity = checkout?.quantity ?? 0
+  const finalAmount = useMemo(() => unitPrice * quantity, [unitPrice, quantity]) // 결제 금액 멍
+  const orderName = useMemo(() => checkout?.title, [checkout?.title]) // 주문명 멍
+  const festivalIdVal = checkout?.festivalId // 가드/요청에서 사용 멍
 
-  // ✅ UI/상태 멍
+  // 3) 로그인 사용자 ID 상태 (훅 순서 보장을 위해 useEffect에서 세팅) 멍
+  // const [setBuyerId] = useState<number | null>(null)
+  const [sellerId, setSellerId] = useState<number | null>(null)
+  const storeName = useAuthStore((s) => s.user?.name) || undefined
+  const userName = useMemo(() => storeName ?? getNameFromJwt(), [storeName])
+
+  // 4) 결제/화면 상태 훅들 멍
+  const tossRef = useRef<TossPaymentHandle>(null) // PaymentSection이 ref를 TossPayment로 전달
   const [openedMethod, setOpenedMethod] = useState<PaymentMethod | null>(null)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+  const [ensuredPaymentId, setEnsuredPaymentId] = useState<string | null>(null)
+
+  const openPasswordModal = () => {
+    setEnsuredPaymentId((prev) => prev ?? createPaymentId()) // paymentId 확정
+    setIsPasswordModalOpen(true)
+  }
+
+  const amountToPay = finalAmount ?? checkout.amount
+
   const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState(false)
   const [isPaying, setIsPaying] = useState(false)
   const [err, setErr] = useState<string | null>(null)
-
-  // ✅ 수령방법(ReceiveInfo가 onChange 미지원 → 고정값) 멍
-  const [receiveType] = useState<ReceiveType>('QR')
-
-  // ✅ 목데이터(연동 전) 멍
-  const buyerName = '홍길동'
-  const festivalId = 'FSTV-2025-0921-001'
-  const posterUrl = 'https://placehold.co/150x200?text=%ED%8F%AC%EC%8A%A4%ED%84%B0' // via.placeholder 대체
-  const title = '2025 변진섭 전국투어 콘서트 : 변천 시 시즌2 -'
-  const dateTimeLabel = '2025.09.21 (일) 17:00'
-  const unitPrice = 1
-  const quantity = 1
-
-  // ✅ 배송비 계산 멍
-  const isCourier =
-    (receiveType as unknown as string) === 'DELIVERY' ||
-    (receiveType as unknown as string) === 'COURIER'
-  const shippingFee = isCourier ? 3_200 : 0
-
-  // ✅ 총 결제금액/주문명 메모이제이션 멍
-  const amount = useMemo(
-    () => unitPrice * quantity + shippingFee,
-    [unitPrice, quantity, shippingFee],
-  )
-  const orderName = useMemo(() => '티켓 예매', []) // 필요 시 상세명으로 치환 멍
-
-  // ✅ paymentId는 진입 시 1회 생성해 보관 멍
   const [paymentId, setPaymentId] = useState<string | null>(null)
-  useEffect(() => {
-    if (!paymentId) setPaymentId(createPaymentId())
-  }, [paymentId])
-
-  // ✅ 타이머 상태 및 동작 멍
   const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS)
-  useEffect(() => {
-    const id = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          clearInterval(id)
-          setIsTimeUpModalOpen(true) // ⏰ 시간 만료 시 모달 오픈
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-    return () => clearInterval(id)
-  }, [])
 
-  // ✅ 시간만료 모달 확인: 모달만 닫기 멍
+  // ✅ 결제 트랜잭션 ID 최초 1회 생성 + 동시에 프론트 세션 저장
+  useEffect(() => {
+    // 주석: paymentId가 아직 없으면 생성
+    if (!paymentId) {
+      const id = createPaymentId()
+      setPaymentId(id)
+
+      if (checkout?.bookingId && checkout?.festivalId && sellerId) {
+        saveBookingSession({
+          paymentId: id,                         // 프론트에서 생성한 결제ID
+          bookingId: checkout.bookingId,         // 라우터 state
+          festivalId: checkout.festivalId,       // 라우터 state
+          sellerId: sellerId,           // 라우터 state (중요)
+          amount: finalAmount,                   // 프론트 계산 금액
+          createdAt: Date.now(),                 // 타임아웃 판단용
+        })
+      }
+    }
+  }, [paymentId, checkout, finalAmount, sellerId]) // 주석: finalAmount가 변하면 세션 갱신이 필요한지 정책에 따라 조정
+
+  // 주석: buyerId가 준비되기 전에는 서버 호출 금지 (X-User-Id 누락 방지)
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetchBookingDetail({
+          festivalId: checkout.festivalId,
+          performanceDate: checkout.performanceDate,
+          reservationNumber: checkout.bookingId,
+        })
+
+        if (!res.success) throw new Error(res.message || '상세 조회 실패')
+        const sid = (res.data?.sellerId ?? res.data?.seller_id) as number | undefined
+        if (!sid || sid <= 0) throw new Error('sellerId 누락')
+        setSellerId(sid)
+      } catch (e) {
+        console.error('예매 상세 조회 실패', e)
+        alert('결제 정보를 불러오지 못했습니다.')
+        navigate(-1)
+      }
+    })()
+  }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate])
+
+  // 9) 타임업 모달 닫기 헬퍼 멍
   const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false)
 
-  // ✅ 결과 페이지 이동 헬퍼 멍
+  // 10) 결과 라우팅 헬퍼 멍
   const routeToResult = (ok: boolean) => {
     const params = new URLSearchParams({ type: 'booking', status: ok ? 'success' : 'fail' })
     navigate(`/payment/result?${params.toString()}`)
   }
 
-  // ✅ 결제수단 아코디언 토글 멍
+  // 11) 결제수단 토글 멍
   const toggleMethod = (m: PaymentMethod) => {
     if (isPaying || remainingSeconds <= 0) return
     setOpenedMethod((prev) => (prev === m ? null : m))
     setErr(null)
   }
 
-  // ✅ 결제 실행 멍
+  // 12) 결제 실행 멍
   const handlePayment = async () => {
-    // 1) 선행 검증 멍
+    // 기본 검증 멍
+    if (!checkout) {
+      setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.')
+      return
+    }
     if (!openedMethod) {
       setErr('결제 수단을 선택해주세요.')
       return
@@ -130,44 +152,36 @@ const BookingPaymentPage: React.FC = () => {
       setIsTimeUpModalOpen(true)
       return
     }
-    if (isPaying) return
-    setErr(null)
 
-    // 2) 킷페이(지갑) 멍
+    if (isPaying) return
+
+    // 지갑 결제 경로 ─ 비밀번호 모달 열기 멍
     if (openedMethod === 'wallet') {
-      setIsPasswordModalOpen(true)
+      openPasswordModal()
       return
     }
 
-    // 3) 토스 멍
+    // 토스 결제 경로 멍
     if (openedMethod === 'Toss') {
-      // paymentId 보장(없으면 즉시 생성해서 상태 반영) 멍
       const ensuredId = paymentId ?? createPaymentId()
       if (!paymentId) setPaymentId(ensuredId)
 
-      // ── 서버 사전요청에 필요한 도메인 값들(연동안 전 목데이터) 멍
-      const userId = getUserIdSafely()       // X-User-Id 헤더로 전달될 값 멍
-      const bookingId = 'BKG-20250822-01'    // 가예매/주문 ID(목) 멍
-      const sellerId = 2002                  // 판매자 ID(목) 멍
-
       setIsPaying(true)
       try {
-        // ✅ TossPayment로 백엔드 API에 필요한 모든 인자를 전달 멍
+        // ✅ TossPaymentHandle 타입에 userId 파라미터는 없음 (헤더로 전달되므로 여기선 필요 없음) 멍
         await tossRef.current?.requestPay({
           paymentId: ensuredId,
-          amount,
-          orderName,
-          userId,         // ✅ X-User-Id 헤더용
-          bookingId,      // ✅ 백엔드 DTO 필수 필드
-          festivalId,     // ✅ 백엔드 DTO 필수 필드  
-          sellerId,       // ✅ 백엔드 DTO 필수 필드
-        })
+          amount: finalAmount,             
+          orderName,                       
+          bookingId: checkout.bookingId,   
+          festivalId: festivalIdVal,      
+          sellerId: sellerId,
 
-        // NOTE:
-        // - PortOne.requestPayment 이후에는 리다이렉트 플로우가 동작
-        // - 승인확인은 결과 페이지(/payment/result)에서 paymentConfirm 호출로 처리하는 패턴 권장 멍
+          successUrl: `${window.location.origin}/payment/result?type=booking`,
+          failUrl: `${window.location.origin}/payment/result?type=booking`,
+        })
+        // PG 리다이렉트 이후 결과 페이지에서 처리 멍
       } catch (e) {
-        console.error(e)
         setErr('결제 요청 중 오류가 발생했어요.')
         routeToResult(false)
       } finally {
@@ -176,103 +190,49 @@ const BookingPaymentPage: React.FC = () => {
     }
   }
 
-  // ✅ 결제 버튼 활성 조건/타이머 표시 멍
-  const canPay = !!openedMethod && !isPaying && remainingSeconds > 0
-  const timeString = `${String(Math.floor(remainingSeconds / 60)).padStart(2, '0')}:${String(
-    remainingSeconds % 60,
-  ).padStart(2, '0')}`
+  if (sellerId == null) {
+    return <div className={styles.page}>sellerId가 null입니다</div>
+  }
 
+  // 15) 메인 렌더 멍
   return (
     <div className={styles.page}>
-      {/* 상단 타이머/헤더 멍 */}
-      <BookingPaymentHeader timeString={timeString} />
+      <BookingPaymentHeader
+        initialSeconds={DEADLINE_SECONDS}
+        onTick={(sec) => setRemainingSeconds(sec)} // 매초 남은 시간 반영 멍
+        onExpire={() => setIsTimeUpModalOpen(true)} // 만료 시 모달 열기 멍
+      />
 
-      <div className={styles.container} role="main" aria-labelledby={PAGE_TITLE_ID}>
-        <h1 id={PAGE_TITLE_ID} className="sr-only">
-          예매 결제
-        </h1>
-
-        {/* 좌측: 수령방법 + 결제수단 멍 */}
+      <div className={styles.container} role="main">
+        {/* 좌측: 수령 방법 + 결제 수단 멍 */}
         <section className={styles.left}>
           <div className={styles.sectionContainer}>
-            {/* 수령 방법 섹션 멍 */}
             <div className={styles.receiveSection}>
               <h2 className={styles.sectionTitle}>수령 방법</h2>
-              <ReceiveInfo value={receiveType} />
+              <ReceiveInfo rawValue={checkout.deliveryMethod} />
             </div>
 
-            {/* 결제 수단 섹션 멍 */}
             <div>
               <h2 className={styles.sectionTitle}>결제 수단</h2>
-
-              <section className={styles.paymentBox}>
-                {/* ── 킷페이 멍 */}
-                <div className={styles.methodCard}>
-                  <button
-                    className={styles.methodHeader}
-                    onClick={() => toggleMethod('wallet')}
-                    aria-expanded={openedMethod === 'wallet'}
-                    type="button"
-                  >
-                    <span className={styles.radio + (openedMethod === 'wallet' ? ` ${styles.radioOn}` : '')} />
-                    <span className={styles.methodText}>킷페이 (포인트 결제)</span>
-                  </button>
-
-                  {openedMethod === 'wallet' && (
-                    <div className={styles.methodBody}>
-                      <WalletPayment isOpen onToggle={() => toggleMethod('wallet')} dueAmount={amount} />
-                    </div>
-                  )}
-                </div>
-
-                {/* ── 토스 멍 */}
-                <div className={styles.methodCard}>
-                  <button
-                    className={styles.methodHeader}
-                    onClick={() => toggleMethod('Toss')}
-                    aria-expanded={openedMethod === 'Toss'}
-                    type="button"
-                  >
-                    <span className={styles.radio + (openedMethod === 'Toss' ? ` ${styles.radioOn}` : '')} />
-                    <span className={styles.methodText}>토스페이먼츠 (신용/체크)</span>
-                  </button>
-
-                  {openedMethod === 'Toss' && (
-                    <div className={styles.methodBody}>
-                      <TossPayment
-                        ref={tossRef}
-                        isOpen
-                        onToggle={() => toggleMethod('Toss')}
-                        amount={amount}               // 표시/디폴트용 멍
-                        orderName={orderName}         // 표시/디폴트용 멍
-                        redirectUrl={`${window.location.origin}/payment/result?type=booking`} // 리다이렉트 베이스 멍
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* 에러 메시지 멍 */}
-                {err && <p className={styles.errorMsg}>{err}</p>}
-              </section>
+              <PaymentSection
+                ref={tossRef}
+                openedMethod={openedMethod}
+                onToggle={toggleMethod}
+                amount={finalAmount}
+                orderName={orderName}
+                errorMsg={err}
+                bookingId={checkout.bookingId}
+                festivalId={checkout.festivalId}
+                sellerId={sellerId}
+              />
             </div>
           </div>
         </section>
 
-        {/* 우측 요약 멍 */}
+        {/* 우측: 결제 요약/버튼 멍 */}
         <aside className={styles.right}>
           <div className={styles.summaryCard}>
-            <PaymentInfo
-              posterUrl={posterUrl}
-              title={title}
-              dateTimeLabel={dateTimeLabel}
-              unitPrice={unitPrice}
-              quantity={quantity}
-              shippingFee={shippingFee}
-              receiveType={receiveType}
-              buyerName={buyerName}
-              festivalId={festivalId}
-              showFestivalId={false}
-            />
+            <PaymentInfo />
           </div>
 
           <div className={styles.buttonWrapper}>
@@ -280,7 +240,6 @@ const BookingPaymentPage: React.FC = () => {
               type="button"
               className={styles.payButton}
               onClick={handlePayment}
-              disabled={!canPay}
               aria-busy={isPaying}
             >
               {isPaying ? '결제 중...' : '결제하기'}
@@ -289,16 +248,19 @@ const BookingPaymentPage: React.FC = () => {
         </aside>
       </div>
 
-      {/* 비밀번호 모달(지갑 결제) 멍 */}
-      {isPasswordModalOpen && (
+      {/* 지갑 비밀번호 모달 멍 */}
+      {isPasswordModalOpen && ensuredPaymentId && (
         <PasswordInputModal
+          amount={amountToPay}              // finalAmount 기반 확정 금액
+          paymentId={ensuredPaymentId}      // 모달/서버/리다이렉트 모두 동일한 ID
+          userName={userName}
           onClose={() => setIsPasswordModalOpen(false)}
-          onComplete={async () => {
+          onComplete={(pwd) => {
             setIsPaying(true)
             try {
-              // ✅ 목 결제 지연 멍
-              await new Promise((r) => setTimeout(r, 700))
-              routeToResult(true)
+              navigate(`/payment/result?type=booking&status=success&paymentId=${ensuredPaymentId}`)
+            } catch {
+              navigate(`/payment/result?type=booking&status=fail`)
             } finally {
               setIsPaying(false)
               setIsPasswordModalOpen(false)
