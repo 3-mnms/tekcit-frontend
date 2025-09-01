@@ -1,0 +1,47 @@
+// src/components/my/ticket/transfer/BeforeTransferTicket.tsx
+import React from 'react';
+import styles from './BeforeTransferTicket.module.css';
+import type { TicketListItem } from '@/models/my/ticket/ticketTypes';
+
+type Props = {
+  item: TicketListItem;
+  onTransfer: (item: TicketListItem) => void;
+};
+
+const BeforeTransferTicket: React.FC<Props> = ({ item, onTransfer }) => {
+  const fallbackPoster = '/dummy-poster.jpg';
+  const posterSrc = '/dummy-poster.jpg'; // 서버 포스터 있으면 교체
+
+  return (
+    <div className={styles.card}>
+      <img
+        src={posterSrc}
+        alt={`${item.title} 포스터`}
+        className={styles.poster}
+        onError={(e) => {
+          (e.currentTarget as HTMLImageElement).src = fallbackPoster;
+        }}
+      />
+      <div className={styles.details}>
+        <div className={styles.info}>
+          <p><strong>예매일</strong>: {item.date}</p>
+          <p><strong>예매번호</strong>: {item.number}</p>
+          <p><strong>공연명</strong>: {item.title}</p>
+          <p><strong>일시</strong>: {item.dateTime}</p>
+          <p><strong>매수</strong>: {item.count}</p>
+        </div>
+        <div className={styles.buttonWrapper}>
+          <button
+            className={styles.transferBtn}
+            onClick={() => onTransfer(item)}
+            aria-label="티켓 양도하기"
+          >
+            양도하기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BeforeTransferTicket;
