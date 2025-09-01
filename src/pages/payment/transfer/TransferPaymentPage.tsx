@@ -6,7 +6,7 @@ import BookingProductInfo from '@/components/payment/BookingProductInfo'
 import Button from '@/components/common/button/Button'
 import AlertModal from '@/components/common/modal/AlertModal'
 import PasswordInputModal from '@/components/payment/modal/PasswordInputModal'
-import WalletPayment from '@/components/payment/pay/WalletPayment'
+import WalletPayment from '@/components/payment/pay/TekcitPay'
 
 import styles from './TransferPaymentPage.module.css' 
 

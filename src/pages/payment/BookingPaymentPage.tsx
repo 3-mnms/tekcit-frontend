@@ -10,12 +10,32 @@ import Button from '@/components/common/button/Button'
 import PasswordInputModal from '@/components/payment/modal/PasswordInputModal'
 import AlertModal from '@/components/common/modal/AlertModal'
 
+import { useAuthStore } from '@/shared/storage/useAuthStore'
 import PaymentSection from '@/components/payment/pay/PaymentSection'
 import type { CheckoutState, PaymentMethod } from '@/models/payment/types/paymentTypes'
-import { createPaymentId, getUserIdSafely } from '@/models/payment/utils/paymentUtils'
+import { createPaymentId } from '@/models/payment/utils/paymentUtils'
 import { saveBookingSession } from '@/shared/api/payment/paymentSession'
 import { fetchBookingDetail } from '@/shared/api/payment/bookingDetail'
+import { requestTekcitPayment, verifyTekcitPassword } from '@/shared/api/payment/tekcit'
+
 import styles from './BookingPaymentPage.module.css'
+
+function getNameFromJwt(): string | undefined {
+  try {
+    const raw = localStorage.getItem('accessToken') || ''
+    const token = raw.startsWith('Bearer ') ? raw.slice(7) : raw
+    if (!token) return undefined
+    const part = token.split('.')[1] ?? ''
+    const safe = part.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = safe + '='.repeat((4 - (safe.length % 4)) % 4)
+    const payload = JSON.parse(atob(padded))
+    const name =
+      payload?.name
+    return typeof name === 'string' && name.trim() ? name.trim() : undefined
+  } catch {
+    return undefined
+  }
+}
 
 // ⏱️ 결제 제한 시간(초) 멍
 const DEADLINE_SECONDS = 5 * 60
@@ -24,39 +44,39 @@ const BookingPaymentPage: React.FC = () => {
   // 0) 네비게이션/라우터 state 멍
   const navigate = useNavigate()
   const { state } = useLocation()
-  const checkout = state as CheckoutState | undefined
+  const checkout = state as CheckoutState
 
   // 1) 파생값 계산 — 금액/주문명/공연ID 멍
   const unitPrice = checkout?.unitPrice ?? 0
   const quantity = checkout?.quantity ?? 0
   const finalAmount = useMemo(() => unitPrice * quantity, [unitPrice, quantity]) // 결제 금액 멍
-  const orderName = useMemo(() => checkout?.title || '티켓 예매', [checkout?.title]) // 주문명 멍
+  const orderName = useMemo(() => checkout?.title, [checkout?.title]) // 주문명 멍
   const festivalIdVal = checkout?.festivalId // 가드/요청에서 사용 멍
 
   // 3) 로그인 사용자 ID 상태 (훅 순서 보장을 위해 useEffect에서 세팅) 멍
   // const [setBuyerId] = useState<number | null>(null)
   const [sellerId, setSellerId] = useState<number | null>(null)
+  const storeName = useAuthStore((s) => s.user?.name) || undefined
+  const userName = useMemo(() => storeName ?? getNameFromJwt(), [storeName])
 
   // 4) 결제/화면 상태 훅들 멍
   const tossRef = useRef<TossPaymentHandle>(null) // PaymentSection이 ref를 TossPayment로 전달
   const [openedMethod, setOpenedMethod] = useState<PaymentMethod | null>(null)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+  const [ensuredPaymentId, setEnsuredPaymentId] = useState<string | null>(null)
+
+  const openPasswordModal = () => {
+    setEnsuredPaymentId((prev) => prev ?? createPaymentId()) // paymentId 확정
+    setIsPasswordModalOpen(true)
+  }
+
+  const amountToPay = finalAmount ?? checkout.amount
+
   const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState(false)
   const [isPaying, setIsPaying] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [paymentId, setPaymentId] = useState<string | null>(null)
   const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS)
-
-  // ✅ 로그인 가드 — 렌더 후 로그인 검사/리다이렉트
-  useEffect(() => {
-    try {
-      const id = getUserIdSafely()
-      // setBuyerId(id)
-    } catch {
-      alert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.')
-      navigate('/login', { replace: true })
-    }
-  }, [navigate])
 
   // ✅ 결제 트랜잭션 ID 최초 1회 생성 + 동시에 프론트 세션 저장
   useEffect(() => {
@@ -80,12 +100,8 @@ const BookingPaymentPage: React.FC = () => {
 
   // 주석: buyerId가 준비되기 전에는 서버 호출 금지 (X-User-Id 누락 방지)
   useEffect(() => {
-    // 주석: 필수 파라미터 가드
-    if (!checkout?.festivalId || !checkout?.performanceDate || !checkout?.bookingId) return
-
     (async () => {
       try {
-        // 주석: 서버 스펙과 키 일치 (reservationNumber)
         const res = await fetchBookingDetail({
           festivalId: checkout.festivalId,
           performanceDate: checkout.performanceDate,
@@ -137,19 +153,11 @@ const BookingPaymentPage: React.FC = () => {
       return
     }
 
-    // 🔒 필수 데이터 가드: sellerId는 session에서, festivalId는 라우터 state에서 확인 멍
-    if (!checkout?.bookingId || !festivalIdVal || !sellerId) {
-      alert('결제 정보가 부족해 결제를 진행할 수 없어요.')
-      navigate(-1)
-      return
-    }
-
     if (isPaying) return
-    setErr(null)
 
     // 지갑 결제 경로 ─ 비밀번호 모달 열기 멍
     if (openedMethod === 'wallet') {
-      setIsPasswordModalOpen(true)
+      openPasswordModal()
       return
     }
 
@@ -163,15 +171,17 @@ const BookingPaymentPage: React.FC = () => {
         // ✅ TossPaymentHandle 타입에 userId 파라미터는 없음 (헤더로 전달되므로 여기선 필요 없음) 멍
         await tossRef.current?.requestPay({
           paymentId: ensuredId,
-          amount: finalAmount,             // 프론트 계산 금액
-          orderName,                       // 주문명
-          bookingId: checkout.bookingId,   // 라우터 state
-          festivalId: festivalIdVal,       // 라우터 state
-          sellerId: sellerId,     // ✅ session.sellerId → checkout.sellerId 로 변경
+          amount: finalAmount,             
+          orderName,                       
+          bookingId: checkout.bookingId,   
+          festivalId: festivalIdVal,      
+          sellerId: sellerId,
+
+          successUrl: `${window.location.origin}/payment/result?type=booking`,
+          failUrl: `${window.location.origin}/payment/result?type=booking`,
         })
         // PG 리다이렉트 이후 결과 페이지에서 처리 멍
       } catch (e) {
-        console.error(e)
         setErr('결제 요청 중 오류가 발생했어요.')
         routeToResult(false)
       } finally {
@@ -180,20 +190,8 @@ const BookingPaymentPage: React.FC = () => {
     }
   }
 
-  const canPay =
-    !!openedMethod &&
-    !isPaying &&
-    remainingSeconds > 0 &&
-    !!checkout?.bookingId &&
-    !!sellerId &&
-    sellerId > 0
-
-  if (!checkout?.bookingId) {
-    return <div className={styles.page}>잘못된 접근입니다. 이전 화면으로 돌아갑니다…</div>
-  }
-
   if (sellerId == null) {
-    return <div className={styles.page}>sellerId가 null이면 이 문구가 뜹니다</div>
+    return <div className={styles.page}>sellerId가 null입니다</div>
   }
 
   // 15) 메인 렌더 멍
@@ -242,7 +240,6 @@ const BookingPaymentPage: React.FC = () => {
               type="button"
               className={styles.payButton}
               onClick={handlePayment}
-              disabled={!canPay}
               aria-busy={isPaying}
             >
               {isPaying ? '결제 중...' : '결제하기'}
@@ -252,15 +249,18 @@ const BookingPaymentPage: React.FC = () => {
       </div>
 
       {/* 지갑 비밀번호 모달 멍 */}
-      {isPasswordModalOpen && (
+      {isPasswordModalOpen && ensuredPaymentId && (
         <PasswordInputModal
+          amount={amountToPay}              // finalAmount 기반 확정 금액
+          paymentId={ensuredPaymentId}      // 모달/서버/리다이렉트 모두 동일한 ID
+          userName={userName}
           onClose={() => setIsPasswordModalOpen(false)}
-          onComplete={async () => {
+          onComplete={(pwd) => {
             setIsPaying(true)
             try {
-              // TODO: 지갑 결제 API 연동 멍
-              await new Promise((r) => setTimeout(r, 700))
-              routeToResult(true)
+              navigate(`/payment/result?type=booking&status=success&paymentId=${ensuredPaymentId}`)
+            } catch {
+              navigate(`/payment/result?type=booking&status=fail`)
             } finally {
               setIsPaying(false)
               setIsPasswordModalOpen(false)

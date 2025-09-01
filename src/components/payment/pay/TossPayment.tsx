@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import PortOne, { Currency, PayMethod } from '@portone/browser-sdk/v2'
 import styles from './TossPayment.module.css'
 import { paymentRequest } from '@/shared/api/payment/toss'
+import { api } from '@/shared/config/axios'
+import { paymentConfirm } from '@/shared/api/payment/confirm'
 
 // ✅ props 타입: UI 표시에 필요한 값 + 페이지에서 내려준 컨텍스트
 export interface TossPaymentProps {
@@ -34,14 +36,14 @@ const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY?.trim()
 
 const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
   (
-    { isOpen, onToggle, amount, orderName, redirectUrl},
+    { isOpen, onToggle, amount, orderName, redirectUrl },
     ref,
   ) => {
     const navigate = useNavigate()
 
     // ✅ 페이지에서 ref로 호출할 requestPay 구현을 노출
     useImperativeHandle(ref, () => ({
-      async requestPay({ paymentId, amount, orderName, bookingId, festivalId, sellerId }) {
+      async requestPay({ paymentId, amount, orderName, bookingId, festivalId, sellerId, successUrl }) {
         // 1) 필수 키 체크
         if (!STORE_ID || !CHANNEL_KEY) {
           alert('결제 설정이 올바르지 않습니다. 관리자에게 문의하세요.')
@@ -54,11 +56,13 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
         }
 
         // 2) 리다이렉트 URL 구성(paymentId 쿼리 포함)
-        const base = redirectUrl ?? `${window.location.origin}/payment/result?type=booking`
         const finalRedirect = (() => {
-          // 안전하게 URL을 합성 (이미 ?가 있으면 &를 붙임)
-          const hasQuery = base.includes('?')
-          return `${base}${hasQuery ? '&' : '?'}paymentId=${encodeURIComponent(paymentId)}`
+          const base = redirectUrl ??
+            successUrl ??
+            `${window.location.origin}/payment/result?type=booking`
+          const finalRedirect =
+            `${base}${base.includes('?') ? '&' : '?'}paymentId=${encodeURIComponent(paymentId)}`
+
         })()
 
         // 3) 백엔드 사전요청 (구매자/판매자/주문 컨텍스트 저장)
@@ -66,8 +70,8 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
 
         // 4) PortOne SDK 호출(리디렉트)
         await PortOne.requestPayment({
-          storeId: STORE_ID!,
-          channelKey: CHANNEL_KEY!,
+          storeId: STORE_ID,
+          channelKey: CHANNEL_KEY,
           paymentId,
           orderName,
           totalAmount: amount,
@@ -75,8 +79,23 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           payMethod: PayMethod.CARD,
           redirectUrl: finalRedirect,
         })
+        try{
+            const result=await paymentConfirm(paymentId);
+            
+
+        // ✅ 동일 페이지에서 쿼리만 업데이트하여 결과 렌더 유도 멍
+      
+            if(result.success){
+              navigate(`/payment/result?paymentId=${paymentId}`)
+            }else{
+              navigate(`/payments/result`)
+            }
+
+        }catch(err){
+            console.error("에러")
+        }
       },
-    })) // ← 🔒 useImperativeHandle 닫기 중요!
+    }))
 
     // ✅ forwardRef 콜백은 반드시 JSX(ReactNode)를 반환해야 함
     return (

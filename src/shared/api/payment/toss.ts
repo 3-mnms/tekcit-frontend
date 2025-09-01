@@ -12,7 +12,6 @@ export const paymentRequest = async (
   amount: number, // 금액
   // buyerId가 userId로 되기 때문에 따로 안적음, X-User-Id 헤더로 덮어씌워짐
 ) => {
-  
   const payload = {
     paymentId,
     bookingId,
@@ -23,24 +22,12 @@ export const paymentRequest = async (
     payMethod: 'CARD',
     paymentRequestType: 'GENERAL_PAYMENT_REQUESTED',
   }
-
-    console.log(payload);
-
   return postWithUserId('/payments/request', payload)
 }
 
-export interface TossConfirmBody {
-  paymentKey: string  // Toss에서 리다이렉트로 돌려준 paymentKey 멍
-  orderId: string     // 우리 시스템의 paymentId (= orderId) 멍
-  amount: number      // 결제 금액 멍
-}
-
-export async function paymentConfirm(body: TossConfirmBody) {
-  const payload = {
-    ...body,
-    paymentRequestType: 'GENERAL_PAYMENT_CONFIRMED', // 백엔드 구분용
-  }
-  return postWithUserId('/payments/confirm', payload)
+// 결제 결과 확인 API
+export async function paymentConfirm(paymentId: string) {
+  return postWithUserId(`/payments/complete/${paymentId}`, {})
 }
 
 /** ✅ 예매 결제(토스) */
@@ -51,32 +38,8 @@ export async function requestTossBookingPayment(body: TossPaymentBody) {
     payMethod: 'CARD',
     paymentRequestType: 'GENERAL_PAYMENT_REQUESTED',
   }
-  console.log(payload);
-  
+
   return postWithUserId('/payments/request', payload)
 }
 
-/** ✅ 양도 결제(토스) — bookingId/festivalId/sellerId/amount만 다르게 넣어 호출 */
-export async function requestTossTransferPayment(body: TossPaymentBody) {
-  const payload = {
-    ...body,
-    currency: 'KRW',
-    payMethod: 'CARD',
-    eventType: 'Payment_Requested',
-    paymentRequestType: 'GENERAL_PAYMENT_REQUESTED',
-  }
-  return postWithUserId('/payments/request', payload)
-}
-
-/** ✅ 양도 수수료 결제(토스) — 동일 엔드포인트, amount만 수수료 기준으로 설정 */
-export async function requestTossTransferFeePayment(body: TossPaymentBody) {
-  const payload = {
-    ...body,
-    currency: 'KRW',
-    payMethod: 'CARD',
-    eventType: 'Payment_Requested',
-    paymentRequestType: 'GENERAL_PAYMENT_REQUESTED',
-  }
-  return postWithUserId('/payments/request', payload)
-}
-
+// 테킷 페이 충전할 때 토스 페이먼츠 사용 (추가해야 함)

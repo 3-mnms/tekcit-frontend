@@ -1,34 +1,39 @@
-// ✅ TeckitJoinPage.tsx — 로그인 없이도 진입 가능하게 수정 (리다이렉트 제거)
-//    - 프로필 호출 실패 → 게스트 모드로 표시
-//    - 제출 시 401이면 에러 메시지 노출만 하고 페이지 유지
+// src/pages/payment/TeckitJoinPage.tsx
+// ✅ 테킷 페이 계좌 개설 페이지 (로그인 필수 + 백엔드 스펙 맞춤) 멍
+//    - 진입 가드: 로그인 안 되어 있으면 /login 으로 이동
+//    - 프로필은 로그인 전제에서만 조회(401 나오면 로그인 만료로 간주 → /login)
+//    - 계좌 개설 API: POST /tekcitpay/create-account (Body=Long JSON, Header=X-User-Id)
+//    - axios 인터셉터에서 Authorization, X-User-Id 자동 부착된다고 가정
 
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import styles from './TeckitJoinPage.module.css'
 
 import { api } from '@/shared/config/axios'
+import { useAuthStore } from '@/shared/storage/useAuthStore'
 
-// ✅ 내 프로필 조회 (로그인 안 되어 있으면 401 날 수 있음)
+// 🔹 프로필 조회: 로그인 전제. 401이면 토큰 만료/미로그인으로 보고 리다이렉트 멍
 async function fetchMyProfile() {
-  const { data } = await api.get('/api/users/me')
-  // 기대되는 형태 예시: { name: '홍길동' }
+  // 주석: baseURL이 http://localhost:10000/api 라면, 여기엔 /api를 다시 붙이지 않습니다 멍
+  const { data } = await api.get('/users/me')
+  // 주석: 응답 예시 { name: '홍길동' } 형태를 기대 멍
   return data as { name?: string }
 }
 
-// ✅ 테킷페이 계정 개설 API
-async function createTeckitPayAccount(payload: {
-  payPin: string // 6자리 숫자 문자열
-  agree: boolean
-}) {
-  const { data } = await api.post('/api/teckitpay/accounts', payload)
+// 🔹 계좌 개설 API: 서버는 Long(JSON number)을 기대하므로 숫자 전송 멍
+async function createTeckitPayAccountByPin(pin: string) {
+  const numericPin = Number(pin) // 주석: 문자열 → 숫자 변환 (문자열로 보내면 400 가능) 멍
+  const { data } = await api.post('/tekcitpay/create-account', numericPin, {
+    headers: { 'Content-Type': 'application/json' }, // 주석: 숫자를 JSON number로 전송 멍
+  })
   return data
 }
 
-// ✅ zod 유효성 검사 스키마 (PIN 일치 포함)
+// 🔹 폼 검증 스키마: 숫자 6자리 + 일치 검사 + 약관 동의 멍
 const joinSchema = z
   .object({
     payPin: z.string().regex(/^\d{6}$/, '결제 PIN은 숫자 6자리여야 합니다'),
@@ -40,30 +45,51 @@ const joinSchema = z
     path: ['payPinConfirm'],
   })
 
-// ✅ 타입 자동 추론
 type JoinFormValues = z.infer<typeof joinSchema>
 
 export default function TeckitJoinPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { authReady, isLoggedIn } = useAuthStore()
 
-  // ✅ 프로필 로드 (실패해도 리다이렉트하지 않음! → 게스트 모드로 폴백)
+  // ✅ 1) 라우트 가드: 스토어 복원 후 비로그인 → /login 으로 이동 멍
+  useEffect(() => {
+    if (!authReady) return
+    if (!isLoggedIn) {
+      // 주석: from에 현재 페이지를 넣어 로그인 후 돌아올 수 있게 함 멍
+      navigate('/login', { replace: true, state: { from: location.pathname } })
+    }
+  }, [authReady, isLoggedIn, navigate, location.pathname])
+
+  // 주석: 스토어 복원 전/비로그인 중엔 렌더 방지 (깜빡임 최소화) 멍
+  if (!authReady || !isLoggedIn) return null
+
+  // ✅ 2) 로그인 전제에서 프로필 가져오기 (401이면 로그인 만료로 보고 /login) 멍
   const profileQuery = useQuery({
     queryKey: ['me'],
     queryFn: fetchMyProfile,
-    retry: false, // 401 등 실패 시 재시도 X (게스트 모드 바로 전환)
+    retry: false,
   })
 
-  // ✅ RHF 초기값 (프로필 여부와 무관)
+  useEffect(() => {
+    // 주석: 인증 만료 등으로 401이 떨어졌다면 로그인 페이지로 이동 멍
+    const status = (profileQuery.error as any)?.response?.status
+    if (status === 401) {
+      navigate('/login', { replace: true, state: { from: location.pathname } })
+    }
+  }, [profileQuery.error, navigate, location.pathname])
+
+  // 🔹 RHF 초기값 (프로필과 무관, 단순 폼 값) 멍
   const defaultValues = useMemo<Partial<JoinFormValues>>(
     () => ({
       payPin: '',
       payPinConfirm: '',
       agree: false,
     }),
-    [profileQuery.data]
+    []
   )
 
-  // ✅ RHF 훅
+  // 🔹 RHF 훅 셋업 멍
   const {
     register,
     handleSubmit,
@@ -74,69 +100,62 @@ export default function TeckitJoinPage() {
     defaultValues,
   })
 
-  // ✅ 개설 뮤테이션 (401 등 에러는 화면에 안내만)
+  // ✅ 3) 계좌 개설 뮤테이션: 409(이미 있음), 기타 에러 분기 멍
   const createMutation = useMutation({
-    mutationFn: createTeckitPayAccount,
+    mutationFn: async (payload: { payPin: string; agree: boolean }) => {
+      // 주석: 서버는 PIN만 필요(약관은 프론트에서 이미 검증). 필요 시 서버에도 agree 전달로 변경 가능 멍
+      return createTeckitPayAccountByPin(payload.payPin)
+    },
     onSuccess: () => {
-      // 성공 시 지갑 포인트 페이지로 이동
+      // 주석: 성공 시 지갑/포인트 화면으로 이동 (경로는 프로젝트 정책에 맞게 수정 가능) 멍
       navigate('/payment/wallet-point', { replace: true })
     },
   })
 
-  // ✅ 표시용 이름: 로그인 실패(또는 미로그인) 시 "게스트"로 폴백
-  const name =
+  // 🔹 표시용 이름: 로그인 전제라 에러가 아니면 서버 값, 로딩/오류면 임시 표기 멍
+  const displayName =
     (profileQuery.isSuccess && (profileQuery.data?.name || '사용자')) ||
-    (profileQuery.isError ? '게스트' : '사용자') // 로딩 중이면 임시 '사용자'
+    '사용자'
 
-  // ✅ 로딩 상태 UI (선호에 따라 바로 폼을 보여줘도 됨)
-  //    - "로그인 안 해도 들어가게" 조건만 보면, 로딩 중에도 바로 폼 렌더 가능
-  //    - 여기선 기존 UX 유지: 짧은 스켈레톤 후 폼 렌더
+  // 🔹 프로필 로딩 스켈레톤 (UX용): 오래 걸리지 않는다면 바로 폼을 보여줘도 무방 멍
   if (profileQuery.isLoading) {
     return (
       <main className={styles.page}>
         <section className={styles.header}>
           <h1 className={styles.title}>테킷 페이 계정 개설</h1>
-          <p className={styles.subtitle}>사용자 정보를 확인하는 중...</p>
+          <p className={styles.subtitle}>사용자 정보를 불러오는 중...</p>
         </section>
         <section className={styles.card}><div className={styles.skeleton} /></section>
       </main>
     )
   }
 
-  // ✅ 제출 핸들러
+  // 🔹 제출 핸들러 멍
   const onSubmit = (v: JoinFormValues) => {
-    // 주의: 미로그인 상태라면 서버가 401을 응답할 수 있음
-    // → 아래 createMutation.isError 블록에서 사용자에게 안내
-    createMutation.mutate({
-      payPin: v.payPin,
-      agree: v.agree,
-    })
+    createMutation.mutate({ payPin: v.payPin, agree: v.agree })
   }
 
   return (
     <main className={styles.page}>
-      {/* 상단 안내영역 */}
+      {/* 상단 안내 영역 — 대표색 포인트는 CSS에서 #4D9AFD로 스타일링 가정 멍 */}
       <section className={styles.header}>
         <h1 className={styles.title}>테킷 페이 계정 개설</h1>
         <p className={styles.subtitle}>
-          {profileQuery.isError
-            ? '로그인 없이 게스트로 진행 중입니다. 일부 기능이 제한될 수 있어요.'
-            : '로그인한 계정으로 테킷 페이를 시작해보세요. 결제 PIN은 꼭 기억해두세요.'}
+          결제 PIN은 꼭 기억해두세요. 분실 시 본인 확인 절차가 필요할 수 있어요.
         </p>
       </section>
 
-      {/* 카드 레이아웃 */}
+      {/* 카드 레이아웃 멍 */}
       <section className={styles.card}>
-        {/* 읽기 전용 프로필 정보 */}
+        {/* 읽기 전용 프로필 박스 멍 */}
         <div className={styles.profileBox}>
-          {/* 이름 (게스트 가능) */}
           <div className={styles.pair}>
             <span className={styles.pairKey}>이름</span>
-            <span className={styles.pairVal}>{name}</span>
+            <span className={styles.pairVal}>{displayName}</span>
           </div>
         </div>
 
-        {/* 개설 폼 */}
+        {/* 개설 폼 멍 */}
         <form className={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
           {/* 결제 PIN */}
           <div className={styles.field}>
@@ -188,7 +207,6 @@ export default function TeckitJoinPage() {
             <button
               type="submit"
               className={styles.primaryButton}
-              // ✅ 로그인 여부와 무관하게 제출 가능 (서버가 권한 체크)
               disabled={!isValid || isSubmitting || createMutation.isPending}
               aria-busy={isSubmitting || createMutation.isPending}
             >
@@ -203,13 +221,14 @@ export default function TeckitJoinPage() {
             </button>
           </div>
 
-          {/* 서버 에러 노출(401 등) */}
+          {/* 서버 에러 노출(401/409/기타) */}
           {createMutation.isError && (
             <p className={styles.serverError}>
-              {/* ✅ 401이면 로그인 필요 문구를 좀 더 친절히 안내 */}
               {(createMutation.error as any)?.response?.status === 401
-                ? '로그인이 필요합니다. 상단 메뉴에서 로그인 후 다시 시도해주세요.'
-                : '계정 개설 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'}
+                ? '세션이 만료되었어요. 다시 로그인해 주세요.'
+                : (createMutation.error as any)?.response?.status === 409
+                ? '이미 테킷 페이 계정이 존재합니다.'
+                : '계정 개설 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'}
             </p>
           )}
         </form>
@@ -217,4 +236,3 @@ export default function TeckitJoinPage() {
     </main>
   )
 }
-
