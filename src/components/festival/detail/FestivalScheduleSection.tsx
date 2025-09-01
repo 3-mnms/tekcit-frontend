@@ -336,13 +336,15 @@ const FestivalScheduleSection: React.FC = () => {
               <p className={styles.label}>시간</p>
               <div className={styles.timeGroup}>
                 {timesToShow.map((time) => (
-                  <Button
+                  <button
                     key={time}
+                    type="button"
+                    aria-pressed={selectedTime === time}
                     className={`${styles.timeBtn} ${selectedTime === time ? styles.selectedBtn : ''}`}
                     onClick={() => setSelectedTime(time)}
                   >
                     {time}
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>

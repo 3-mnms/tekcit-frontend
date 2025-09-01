@@ -24,7 +24,7 @@ const FestivalDetailPage: React.FC = () => {
     increaseViews(fid);
   }, [fid, increaseViews]);
 
-  const [activeTab, setActiveTab] = useState<'info' | 'sale'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'sale' | 'review'>('info');
 
   if (!fid) {
     return (
@@ -73,6 +73,14 @@ const FestivalDetailPage: React.FC = () => {
                 className={`${styles.tab} ${activeTab === 'sale' ? styles.active : ''}`}
               >
                 예매자통계
+              </div>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setActiveTab('review')}
+                className={`${styles.tab} ${activeTab === 'review' ? styles.active : ''}`}
+              >
+                관람평
               </div>
             </div>
 
