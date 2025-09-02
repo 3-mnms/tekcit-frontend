@@ -3,6 +3,8 @@ import type {
   ExtractPayload,
   ExtractResponse,
   UpdateTicketRequest,
+  TicketTransferRequest,
+  TransferWatchItem,
   ApiEnvelope,
   ApiOk,
   ApiErr,
@@ -12,6 +14,8 @@ import type {
 const PATH = {
   extract: '/transfer/extract',
   update: (id: number | string) => `/transfer/${id}`,
+  request: '/transfer/request',
+  watch: '/transfer/watch',
 };
 
 /** 안전 언랩: Ok/Err 래퍼 또는 생데이터 모두 대응 */
@@ -71,4 +75,39 @@ export async function apiUpdateFamilyTransfer(
     throw new Error(`${res.status} ${msg}`);
   }
   unwrap<null>(res.data ?? null);
+}
+
+export async function apiRequestTransfer(body: TicketTransferRequest): Promise<void> {
+  const res = await api.post<ApiEnvelope<null> | null>(PATH.request, body, {
+    validateStatus: () => true,
+  });
+
+  if (res.status === 404) {
+    throw new Error('404 Not Found: /transfer/request 라우팅을 확인해 주세요.');
+  }
+  if (res.status >= 400) {
+    const msg =
+      (res.data as any)?.message ||
+      (res.data as any)?.errorMessage ||
+      res.statusText ||
+      '요청 실패';
+    throw new Error(`${res.status} ${msg}`);
+  }
+
+  // 백엔드가 SuccessResponse<Void>를 주므로 data는 null일 수 있음
+  unwrap<null>(res.data ?? null);
+}
+
+export async function apiWatchTransfer(): Promise<TransferWatchItem[]> {
+  const res = await api.get<ApiEnvelope<TransferWatchItem[]> | TransferWatchItem[]>(
+    PATH.watch,
+    { validateStatus: () => true }
+  );
+
+  if (res.status >= 400) {
+    const msg = (res.data as any)?.message ?? res.statusText ?? '요청 실패';
+    throw new Error(`${res.status} ${msg}`);
+  }
+
+  return unwrap<TransferWatchItem[]>(res.data);
 }

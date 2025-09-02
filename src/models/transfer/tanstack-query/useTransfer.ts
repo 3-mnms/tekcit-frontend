@@ -1,4 +1,6 @@
-// src/models/transfer/tanstack-query/userTransfer.ts
+// src/models/transfer/tanstack-query/useTransfer.ts
+import axiosBase from 'axios';
+import { api } from '@/shared/config/axios';
 import {
   useMutation,
   useQuery,
@@ -7,8 +9,9 @@ import {
 } from '@tanstack/react-query';
 
 import {
-  apiExtractPersonInfo,
   apiUpdateFamilyTransfer,
+  apiRequestTransfer,
+  apiWatchTransfer,
 } from '@/shared/api/transfer/transferApi';
 import {
   fetchTransfereeByEmail,
@@ -17,15 +20,53 @@ import {
 } from '@/shared/api/transfer/userApi';
 
 import type {
-  ExtractPayload,
-  ExtractResponse,
   UpdateTicketRequest,
+  PersonInfo,
+  TicketTransferRequest,
+  TransferWatchItem,           
 } from '@/models/transfer/transferTypes';
 
 /* ===========================
  *  Query Keys
  * =========================== */
 export const TRANSFEROR_QK = ['transfer', 'transferor', 'me'] as const;
+export const TRANSFER_OUTBOX_QK = ['transfer', 'requests', 'outbox'] as const;
+export const TRANSFER_INBOX_QK  = ['transfer', 'requests', 'inbox', 'watch'] as const;
+
+type ExtractParams = {
+  file: File;
+  targetInfo: Record<string, string>;
+};
+
+/* ===========================
+ *  Axios (인터셉터 우회 인스턴스)
+ * =========================== */
+const apiRaw = axiosBase.create({
+  baseURL: api.defaults.baseURL,
+  withCredentials: (api.defaults as any)?.withCredentials ?? false,
+});
+
+/* ===========================
+ *  응답 정규화
+ * =========================== */
+function normalizePeopleResponse(raw: any): PersonInfo[] {
+  try {
+    if (typeof raw === 'string') {
+      const t = raw.trim();
+      if (!t) return [];
+      const parsed = JSON.parse(t);
+      return normalizePeopleResponse(parsed);
+    }
+  } catch {
+    return [];
+  }
+
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw as PersonInfo[];
+  if (Array.isArray(raw.data)) return raw.data as PersonInfo[];
+  if (Array.isArray(raw.result)) return raw.result as PersonInfo[];
+  return [];
+}
 
 /* ===========================
  *  OCR / Update (가족 양도)
@@ -33,9 +74,43 @@ export const TRANSFEROR_QK = ['transfer', 'transferor', 'me'] as const;
 
 /** 가족관계증명서 OCR 인증 */
 export function useExtractPersonInfo() {
-  return useMutation<ExtractResponse, Error, ExtractPayload>({
-    mutationKey: ['transfer', 'extract'],
-    mutationFn: (payload) => apiExtractPersonInfo(payload),
+  return useMutation<PersonInfo[], Error, ExtractParams>({
+    mutationFn: async ({ file, targetInfo }) => {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('targetInfo', JSON.stringify(targetInfo));
+
+      const res = await apiRaw.post('/transfer/extract', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        validateStatus: (s) => s >= 200 && s < 300,
+        transformResponse: [(data) => data], // 전역 transform/인터셉터 무력화
+      });
+
+      return normalizePeopleResponse(res.data);
+    },
+  });
+}
+
+export function useVerifyFamilyCert() {
+  return useMutation<{ success: boolean; message?: string }, Error, ExtractParams>({
+    mutationFn: async ({ file, targetInfo }) => {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('targetInfo', JSON.stringify(targetInfo));
+
+      // 인터셉터/transform 우회: 빈 바디/문자열도 그대로 받기
+      const res = await apiRaw.post('/transfer/extract', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        validateStatus: (s) => s >= 200 && s < 300,
+        transformResponse: [(data) => data],
+      });
+
+      let body: any = res.data;
+      if (typeof body === 'string') {
+        try { body = JSON.parse(body); } catch { body = {}; }
+      }
+      return { success: body?.success === true, message: body?.message };
+    },
   });
 }
 
@@ -60,7 +135,7 @@ export function useUpdateFamilyTransfer(ticketId?: number | string) {
 export function useSearchTransferee() {
   return useMutation<AssignmentDTO, Error, string>({
     mutationKey: ['transfer', 'transferee', 'search'],
-    mutationFn: (email: string) => fetchTransfereeByEmail(email),
+    mutationFn: (email) => fetchTransfereeByEmail(email),
   });
 }
 
@@ -78,7 +153,6 @@ export function useTransferor(options?: { enabled?: boolean; staleTime?: number 
  *  Prefetch / Ensure Helpers
  * =========================== */
 
-/** 페이지 입장 전/직후 미리 받아오기 */
 export function prefetchTransferor(qc: QueryClient, staleTime = 5 * 60 * 1000) {
   return qc.prefetchQuery({
     queryKey: TRANSFEROR_QK,
@@ -87,7 +161,6 @@ export function prefetchTransferor(qc: QueryClient, staleTime = 5 * 60 * 1000) {
   });
 }
 
-/** 필요 시 즉시 확보(있으면 재사용, 없으면 fetch) */
 export function ensureTransferor(qc: QueryClient, staleTime = 5 * 60 * 1000) {
   return qc.ensureQueryData({
     queryKey: TRANSFEROR_QK,
@@ -96,7 +169,28 @@ export function ensureTransferor(qc: QueryClient, staleTime = 5 * 60 * 1000) {
   });
 }
 
-/** 훅 내부에서 QueryClient 쓰고 싶을 때 */
 export function useTransferQueryClient() {
   return useQueryClient();
+}
+
+export function useRequestTransfer() {
+  const qc = useQueryClient();
+
+  return useMutation<void, Error, TicketTransferRequest>({
+    mutationKey: ['transfer', 'request'],
+    mutationFn: (body) => apiRequestTransfer(body),
+    onSuccess: async () => {
+      // 성공 시, 관련 목록 무효화(있다면)
+      qc.invalidateQueries({ queryKey: TRANSFER_OUTBOX_QK });
+      qc.invalidateQueries({ queryKey: TRANSFER_INBOX_QK });
+    },
+  });
+}
+
+export function useWatchTransferQuery() {
+  return useQuery<TransferWatchItem[], Error>({
+    queryKey: TRANSFER_INBOX_QK,
+    queryFn: apiWatchTransfer,
+    staleTime: 30_000,
+  });
 }

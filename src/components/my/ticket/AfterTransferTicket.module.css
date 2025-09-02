@@ -1,6 +1,6 @@
 .card {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   padding: 1.5rem;
   border-radius: 12px;
   background-color: #fff;
@@ -21,21 +21,37 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  min-width: 58px;       /* 일시/매수/가격/관계와 폭 통일 */
+  font-weight: 600;
+  color: #111;
+}
+
+.value {
+  flex: 1;
+  font-weight: 400;
+  color: #222;
+  line-height: 1.4;
 }
 
 /* ⬇️ 제목과 상태를 같은 줄에 */
 .topRow {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  margin-bottom: -0.3rem;
 }
+.topRow .badge { margin-left: auto; }
 
 .title {
-  flex: 1;                 /* 남은 공간을 공연명이 차지 */
+  flex: 1;
   font-size: 0.95rem;
   color: #222;
   line-height: 1.4;
   margin: 0;
+  font-weight: 400;      /* 굵기 낮춤 */
 }
 
 /* 상태 뱃지 */
@@ -59,10 +75,8 @@
   color: #333;
 }
 
-.priceRow { 
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.priceRow {
+  display: block;        /* 혹은 display:flex; align-items:center; 로 쓰면 됨 */
   font-size: 0.95rem;
   color: #333;
 }

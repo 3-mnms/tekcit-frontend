@@ -2,8 +2,7 @@
 
 .tabContainer {
   display: flex;
-  margin-top: 0.3rem;
-  margin-bottom: 1rem;
+  /* margin-bottom: 1rem; */
   /* border-bottom: 1px solid #ddd; */
   background-color: #D9D9D9;
 }

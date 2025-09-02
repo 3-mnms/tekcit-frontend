@@ -1,16 +1,20 @@
 // src/components/transfer/TransferRecipientForm.tsx
 import React, { useMemo, useRef, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './TransferRecipientForm.module.css';
 import Button from '@/components/common/button/Button';
 import IdSearchModal, { type AccountMini } from './IdSearchModal';
-import { useExtractPersonInfo, useTransferor } from '@/models/transfer/tanstack-query/useTransfer';
+import { useVerifyFamilyCert, useTransferor, useRequestTransfer } from '@/models/transfer/tanstack-query/useTransfer';
 import { normalizeRrn7 } from '@/shared/api/transfer/userApi';
 import type { PersonInfo } from '@/models/transfer/transferTypes';
-import { api } from '@/shared/config/axios';
+
+// ⬇️ 테킷페이
+import { useTekcitPayAccountQuery } from '@/models/transfer/tanstack-query/useTekcitPay';
+import { isNoTekcitPayAccountError } from '@/shared/api/transfer/tekcitPay';
 
 type Relation = 'FAMILY' | 'FRIEND' | null;
 
-/** 'YYMMDD-#' 또는 'YYMMDD#' → {front6, back1} (안전 가드) */
+/** 'YYMMDD-#' 또는 'YYMMDD#' → {front6, back1} */
 function parseRrn7(input?: string): { front6?: string; back1?: string } {
   const raw = (input ?? '').toString().trim();
   const m = raw.match(/^(\d{6})-?(\d)$/);
@@ -25,13 +29,13 @@ function toRrn7WithHyphen(input?: string): string {
   return m ? `${m[1]}-${m[2]}` : '';
 }
 
-/** 이름 정규화: NFC + 공백/중점/하이픈/괄호·내용/문장부호 제거 + 소문자 */
+/** 이름 정규화 */
 function normName(s?: string) {
   return (s ?? '')
     .normalize('NFC')
-    .replace(/\(.*?\)/g, '')                 // 괄호 속 설명 제거 (예: (본인))
-    .replace(/[\s·・\-\u00B7]/g, '')        // 공백/중점류 제거
-    .replace(/[^\p{L}]/gu, '')               // 문자(Letters) 외 제거
+    .replace(/\(.*?\)/g, '')
+    .replace(/[\s·・\-\u00B7]/g, '')
+    .replace(/[^\p{L}]/gu, '')
     .toLowerCase();
 }
 
@@ -41,7 +45,7 @@ function onlyFront6Digits(s?: string) {
   return d.slice(0, 6);
 }
 
-/** OCR 응답에서 '이름 + YYMMDD(앞6자리)' 일치 여부 — 이름/숫자 모두 정규화 후 비교 */
+/** OCR 응답에서 '이름 + YYMMDD(앞6자리)' 일치 여부 */
 function hasMatch(people: PersonInfo[], name: string, rrn7: { front6?: string; back1?: string }) {
   const nm = normName(name);
   const front6 = rrn7.front6 ?? '';
@@ -54,57 +58,22 @@ function hasMatch(people: PersonInfo[], name: string, rrn7: { front6?: string; b
   });
 }
 
-/** 콘솔 프리뷰(사람 정보) */
-function logPreview(tag: string, donorName: string, donorRrn7: string, recipName: string, recipRrn7: string) {
-  const me = parseRrn7(donorRrn7);
-  const other = parseRrn7(recipRrn7);
-  console.group(tag);
-  console.table({
-    '양도자(나)': { name: donorName ?? '', rrn7: donorRrn7 ?? '', front6: me.front6 ?? '', back1: me.back1 ?? '' },
-    '양수자(상대)': { name: recipName ?? '', rrn7: recipRrn7 ?? '', front6: other.front6 ?? '', back1: other.back1 ?? '' },
-  });
-  console.groupEnd();
-}
-
-/** HTTP 미리보기 유틸 */
-function logFormData(fd: FormData) {
-  console.group('[HTTP PREVIEW] FormData');
-  for (const [k, v] of (fd.entries() as any)) {
-    if (v instanceof File) {
-      console.log(k, `(File) name=${v.name}, type=${v.type || 'n/a'}, size=${v.size}B`);
-    } else if (v instanceof Blob) {
-      console.log(k, `(Blob) type=${(v as Blob).type || 'n/a'}`);
-    } else {
-      console.log(k, String(v));
-    }
-  }
-  console.groupEnd();
-}
-function buildCurl(url: string, fd: FormData, headers: Record<string, string> = {}) {
-  const parts: string[] = [`curl -i -X POST '${url}'`];
-  for (const [hk, hv] of Object.entries(headers)) {
-    if (/^content-type$/i.test(hk)) continue; // boundary는 curl이 자동
-    parts.push(`-H '${hk}: ${hv}'`);
-  }
-  for (const [k, v] of (fd.entries() as any)) {
-    if (v instanceof File) {
-      parts.push(`-F '${k}=@${v.name};type=${v.type || 'application/octet-stream'}'`);
-    } else {
-      const val = String(v).replace(/'/g, `'\\''`);
-      parts.push(`-F '${k}=${val}'`);
-    }
-  }
-  return parts.join(' \\\n  ');
-}
-
 type Props = {
   currentName?: string;
   currentRrn7?: string;
+  /** ⬇️ 추가: 양도 요청에 필요한 예약번호 (필수) */
+  reservationNumber: string;
+  /** 선택 완료 후 다음 단계로 이동시키고 싶다면 주입 (선택) */
+  onNext?: () => void;
 };
+
+const POPUP_WIDTH = 520;
+const POPUP_HEIGHT = 720;
 
 const TransferRecipientForm: React.FC<Props> = (props) => {
   const propName = props.currentName?.trim();
   const propRrn7 = props.currentRrn7?.trim();
+  const navigate = useNavigate();
 
   const needFetchMe = !(propName && propRrn7);
   const { data: me, isLoading: meLoading, isError: meError, error: meErr } = useTransferor({ enabled: needFetchMe });
@@ -115,9 +84,10 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
   const [relation, setRelation] = useState<Relation>(null);
 
   // 상대(수신자)
-  const [loginId, setLoginId] = useState<string>(''); // readOnly
-  const [name, setName] = useState<string>('');       // readOnly
+  const [loginId, setLoginId] = useState<string>(''); // readOnly (이메일)
+  const [name, setName] = useState<string>('');       // readOnly (이름)
   const [recipientRrn7, setRecipientRrn7] = useState<string>(''); // 하이픈 포함
+  const [recipientId, setRecipientId] = useState<number | null>(null); // ⬅️ 추가: 양수자 ID
 
   // 이메일 검색 모달
   const [searchOpen, setSearchOpen] = useState(false);
@@ -137,10 +107,21 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
   const [verifyOk, setVerifyOk] = useState(false);
 
   // 메시지
-  const [hintMsg, setHintMsg] = useState<string | null>(null);      // 논리적 실패(부분일치 등) 안내
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);    // 네트워크/서버 에러만
+  const [hintMsg, setHintMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const { mutateAsync: extract } = useExtractPersonInfo();
+  const { mutateAsync: verifyFamily } = useVerifyFamilyCert();
+
+  // 테킷페이 (제출 시에만 조회)
+  const { refetch: refetchAccount } = useTekcitPayAccountQuery(false);
+
+  // 양도요청 API 뮤테이션
+  const { mutateAsync: requestTransfer, isPending: isRequesting } = useRequestTransfer();
+
+  // 팝업/폴링
+  const popupRef = useRef<Window | null>(null);
+  const pollTimerRef = useRef<number | null>(null);
+  const submittedRef = useRef(false); // 중복 요청 방지
 
   useEffect(() => () => { if (tempUrl) URL.revokeObjectURL(tempUrl); }, [tempUrl]);
 
@@ -156,8 +137,8 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
 
   const safeLoginId = loginId ?? '';
   const safeName = name ?? '';
-  const baseValid = safeLoginId.trim().length > 0 && safeName.trim().length > 0;
-  const canSubmit = baseValid && relation !== null && (!needProof || !!proofFile);
+  const baseValid = safeLoginId.trim().length > 0 && safeName.trim().length > 0 && recipientId !== null;
+  const canSubmit = baseValid && relation !== null && (!needProof || !!proofFile) && !isRequesting;
 
   const handleFileChange = (f?: File) => {
     if (!f) return;
@@ -221,94 +202,23 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
           setProgress((prev) => (prev < 94 ? prev + 2 : prev));
         }, 120);
 
-        const meR = parseRrn7(donorRrn7);
-        const otherR = parseRrn7(recipientRrn7);
-
-        // 호출 직전 프리뷰
-        logPreview('🟨 [OCR 호출 직전] 가족관계 확인 파라미터 미리보기', donorName, donorRrn7, name, recipientRrn7);
-
-        // 서버 요구 딕셔너리
         const dict: Record<string, string> = {
           [donorName]: toRrn7WithHyphen(donorRrn7),
           [name]: toRrn7WithHyphen(recipientRrn7),
         };
-        console.log('[REQ targetInfo]', JSON.stringify(dict));
 
-        // HTTP 미리보기
-        const fd = new FormData();
-        fd.append('file', tempFile!);
-        fd.append('targetInfo', JSON.stringify(dict));
-
-        const base = api.defaults.baseURL?.replace(/\/+$/, '') ?? '';
-        const endpoint = '/transfer/extract';
-        const fullUrl = `${base}${endpoint}`;
-
-        const defaults: any = (api.defaults.headers as any) || {};
-        const common: Record<string, any> = defaults.common ?? {};
-        const headersPreview: Record<string, string> = {};
-        Object.keys(common).forEach((k) => {
-          const v = String(common[k]);
-          headersPreview[k] = /^authorization$/i.test(k) ? 'Bearer *****' : v;
-        });
-
-        console.groupCollapsed('[HTTP PREVIEW] POST /transfer/extract');
-        console.log('URL:', fullUrl);
-        console.log('Method:', 'POST (multipart/form-data; boundary=*)');
-        console.log('Headers (approx):', headersPreview);
-        logFormData(fd);
-        console.log('cURL:\n' + buildCurl(fullUrl, fd, headersPreview));
-        console.groupEnd();
-
-        // === 실제 호출 ===
-        const people = await extract({ file: tempFile!, targetInfo: dict });
-
-        // 응답 확인
-        console.groupCollapsed('🟩 [OCR 응답 people]');
-        console.table(people);
-        console.groupEnd();
-
-        // 개별 매칭 사유 로깅
-        const explain = (label: string, expectName: string, expectFront6?: string) => {
-          const n = normName(expectName);
-          const rows = people.map(p => ({
-            name: p.name,
-            rrnFront: p.rrnFront,
-            normalizedNameEq: normName(p.name) === n,
-            front6Eq: onlyFront6Digits(p.rrnFront) === (expectFront6 ?? ''),
-          }));
-          console.groupCollapsed(`🔎 match check: ${label}`);
-          console.table(rows);
-          console.groupEnd();
-        };
-        if (!cancelled) {
-          explain('양도자', donorName, meR.front6);
-          explain('양수자', name, otherR.front6);
-        }
-
+        // 실제 호출
+        const result = await verifyFamily({ file: tempFile!, targetInfo: dict });
         if (cancelled) return;
 
-        const okMe = hasMatch(people, donorName, meR);
-        const okOther = hasMatch(people, name, otherR);
-        const ok = okMe && okOther;
-
+        const ok = !!result?.success;
         setVerifyOk(ok);
         setVerifyDone(true);
         setProgress(100);
 
-        // ❗️논리적 불일치(부분일치 포함): 빨간 경고로 중복 출력하지 말고 hint만
-        if (!ok) {
-          const msg = okMe && !okOther
-            ? '양도자는 확인되었지만, 양수자가 문서에서 확인되지 않았어요.'
-            : (!okMe && okOther
-                ? '양수자는 확인되었지만, 양도자가 문서에서 확인되지 않았어요.'
-                : '일치하는 인원을 찾지 못했어요');
-          setHintMsg(msg);
-        } else {
-          setHintMsg(null);
-        }
+        setHintMsg(ok ? null : (result?.message ?? '인증에 실패했어요.'));
       } catch (err: any) {
         if (!cancelled) {
-          // ⛔️ 통신/서버 에러만 errorMsg로 (붉은 경고)
           setErrorMsg(err?.message || 'OCR 인증 실패');
           setVerifyOk(false);
           setVerifyDone(true);
@@ -321,12 +231,98 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
     };
 
     run();
-
     return () => {
       cancelled = true;
       if (intervalId) clearInterval(intervalId);
     };
-  }, [modalOpen, previewLoading, relation, tempFile, donorName, donorRrn7, name, recipientRrn7, extract]);
+  }, [modalOpen, previewLoading, relation, tempFile, donorName, donorRrn7, name, recipientRrn7, verifyFamily]);
+
+  /** ⬇️ 양도요청 실제 호출 (중복방지) */
+  const submitRequest = async () => {
+    if (submittedRef.current) return;
+    if (!props.reservationNumber) {
+      alert('reservationNumber가 없습니다. 상위 컴포넌트에서 전달해 주세요.');
+      return;
+    }
+    if (recipientId == null || !relation) {
+      alert('수신자 정보 또는 관계가 누락되었습니다.');
+      return;
+    }
+
+    const transferType = relation === 'FAMILY' ? 'FAMILY' : 'OTHERS';
+    await requestTransfer({
+      reservationNumber: props.reservationNumber,
+      recipientId,
+      transferType,
+      senderName: donorName || '',
+    });
+    submittedRef.current = true;
+  };
+
+  // ===== 팝업 메시지 수신(완료 시) + 정리 =====
+  useEffect(() => {
+    const onMessage = async (ev: MessageEvent) => {
+      if (ev.origin !== window.location.origin) return;
+      if (!ev.data || typeof ev.data !== 'object') return;
+
+      if (ev.data.type === 'TEKCIT_PAY_ACCOUNT_CREATED') {
+        try {
+          const res = await refetchAccount();
+          if (res?.data) {
+            if (popupRef.current && !popupRef.current.closed) popupRef.current.close();
+            if (pollTimerRef.current) window.clearInterval(pollTimerRef.current);
+            // 🔔 계정 생성 확인되면 곧장 양도요청 → 다음 단계
+            await submitRequest();
+            props.onNext?.();
+          }
+        } catch {
+          // 무시
+        }
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [refetchAccount, props]); // submitRequest는 안정적 참조(closure 내 사용 변수만)
+
+  // 팝업 열기 + 폴링
+  const openTekcitPayJoinPopup = () => {
+    const dualScreenLeft = window.screenLeft ?? window.screenX ?? 0;
+    const dualScreenTop = window.screenTop ?? window.screenY ?? 0;
+    const width = window.innerWidth ?? document.documentElement.clientWidth ?? screen.width;
+    const height = window.innerHeight ?? document.documentElement.clientHeight ?? screen.height;
+
+    const left = dualScreenLeft + Math.max(0, (width - POPUP_WIDTH) / 2);
+    const top = dualScreenTop + Math.max(0, (height - POPUP_HEIGHT) / 2);
+
+    const url = `/payment/wallet/join?popup=1`;
+    const features = `width=${POPUP_WIDTH},height=${POPUP_HEIGHT},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+
+    popupRef.current = window.open(url, 'tekcitpay_join', features);
+
+    // 폴링: 2초 간격으로 계정 생성 여부 확인
+    if (pollTimerRef.current) window.clearInterval(pollTimerRef.current);
+    pollTimerRef.current = window.setInterval(async () => {
+      const popup = popupRef.current;
+      if (!popup || popup.closed) {
+        window.clearInterval(pollTimerRef.current!);
+        pollTimerRef.current = null;
+        return;
+      }
+      try {
+        const res = await refetchAccount();
+        if (res?.data) {
+          popup.close();
+          window.clearInterval(pollTimerRef.current!);
+          pollTimerRef.current = null;
+          await submitRequest();
+          props.onNext?.();
+        }
+      } catch (e) {
+        // keep polling
+      }
+    }, 2000);
+  };
 
   // 양도자 정보 로딩/에러 처리
   if (needFetchMe) {
@@ -339,15 +335,38 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
       );
   }
 
+  // 제출 처리
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+
+    try {
+      if (relation === 'FAMILY') {
+        // OCR까지 통과했다고 가정(파일 선택/확인 플로우)
+        await submitRequest();
+        props.onNext?.();
+        return;
+      }
+
+      // FRIEND: 테킷페이 계정 확인 → 없으면 팝업 가입 후 자동 진행
+      const res = await refetchAccount();
+      if (res?.data) {
+        await submitRequest();
+        props.onNext?.();
+        return;
+      }
+      if (isNoTekcitPayAccountError(res.error as any)) {
+        openTekcitPayJoinPopup();
+        return;
+      }
+      throw (res.error || new Error('계정 조회 실패'));
+    } catch (err: any) {
+      alert(err?.message || '양도 요청 중 오류가 발생했어요.');
+    }
+  };
+
   return (
-    <form
-      className={styles.card}
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (!canSubmit) return;
-        alert(relation === 'FAMILY' ? '가족 OCR 인증 통과 → 다음 단계!' : '결제 단계로 이동!');
-      }}
-    >
+    <form className={styles.card} onSubmit={handleSubmit}>
       <h2 className={styles.title}>양도자 선택</h2>
 
       <div className={styles.radioRow}>
@@ -456,7 +475,7 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
         className={`${styles.submitBtn} ${canSubmit ? '' : styles.submitBtnDisabled}`}
         disabled={!canSubmit}
       >
-        다음
+        {isRequesting ? '전송 중…' : '다음'}
       </Button>
 
       {/* ===== 파일 미리보기 + OCR 검사 모달 ===== */}
@@ -511,14 +530,14 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
               />
             </div>
 
-            {/* 상태 텍스트 — 한 줄만 (중복 제거) */}
+            {/* 상태 텍스트 */}
             <div style={{ marginTop: 4, fontSize: 12, color: '#6b7280' }} aria-live="polite">
               {verifyDone
                 ? (verifyOk ? '두 인원 매칭 완료' : (hintMsg ?? '일치하는 인원을 찾지 못했어요'))
                 : (extracting ? '인증 중…' : '로딩 중…')}
             </div>
 
-            {/* 통신/서버 에러만 붉은 경고로 별도 표기 */}
+            {/* 통신/서버 에러만 붉은 경고 */}
             {!!errorMsg && (
               <div className={styles.progressText} style={{ color: '#b91c1c', marginTop: 6 }} role="alert">
                 {errorMsg}
@@ -546,13 +565,21 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
         open={searchOpen}
         onClose={() => setSearchOpen(false)}
         onSelect={(acc: AccountMini) => {
-          setLoginId(acc?.id ?? '');
-          setName(acc?.name ?? '');
+          // 이메일/이름 세팅
+          setLoginId((acc as any)?.id ?? '');
+          setName((acc as any)?.name ?? '');
 
+          // 숫자형 userId 추출
+          const rawUserId =
+            (acc as any)?.userId ??
+            (acc as any)?.uid ??
+            (acc as any)?.idNumeric ??
+            null;
+          setRecipientId(typeof rawUserId === 'number' ? rawUserId : Number.isFinite(Number(rawUserId)) ? Number(rawUserId) : null);
+
+          // 주민번호 앞자리
           const rrn7Raw = (acc as any)?.rrn7 ?? (acc as any)?.residentNum ?? '';
           setRecipientRrn7(toRrn7WithHyphen(rrn7Raw));
-
-          logPreview('🟦 [선택 직후] 양도/양수 정보 미리보기', donorName, donorRrn7, acc?.name ?? '', toRrn7WithHyphen(rrn7Raw));
         }}
       />
     </form>

@@ -25,7 +25,7 @@ const StatisticsPage: React.FC = () => {
     enabled: !!fid,
   });
 
-    const { data: schedules } = useQuery({
+  const { data: schedules } = useQuery({
     queryKey: ['schedules', fid],
     queryFn: () => getFestivalSchedules(fid!),
     enabled: !!fid,
@@ -97,6 +97,8 @@ const StatisticsPage: React.FC = () => {
     <Layout subTitle="통계 조회">
       <div className={styles.topBar}>
         <div className={styles.tabs}>
+          <p style={{ color: 'red', fontSize: 10, textAlign: 'right'}}>
+          입장 인원 수와 공연 판매율은 날짜와 시간을 선택해야 확인 가능합니다.</p>
           <button 
             className={`${styles.tabButton} ${activeTab === '통계' ? styles.active : ''}`}
             onClick={() => setActiveTab('통계')}
@@ -121,7 +123,7 @@ const StatisticsPage: React.FC = () => {
           </select>
         </div>
       </div>
-      {activeTab === '통계' && selectedSchedule && userStatsData && (
+      {activeTab === '통계' && userStatsData && (
         <>
           <TicketProgressGraph
             currentTickets={selectedBookingData?.bookingCount ?? 0}
