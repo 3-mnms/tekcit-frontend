@@ -237,6 +237,16 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
     };
   }, [modalOpen, previewLoading, relation, tempFile, donorName, donorRrn7, name, recipientRrn7, verifyFamily]);
 
+  function pickErr(e: any) {
+    const status = e?.response?.status ?? e?.status;
+    const code = e?.response?.data?.errorCode || e?.response?.data?.code;
+    const message =
+      e?.response?.data?.message ||
+      e?.message ||
+      '';
+    return { status, code, message };
+  }
+
   /** ⬇️ 양도요청 실제 호출 (중복방지) */
   const submitRequest = async () => {
     if (submittedRef.current) return;
@@ -250,13 +260,61 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
     }
 
     const transferType = relation === 'FAMILY' ? 'FAMILY' : 'OTHERS';
-    await requestTransfer({
+
+    const payload = {
       reservationNumber: props.reservationNumber,
       recipientId,
       transferType,
       senderName: donorName || '',
-    });
-    submittedRef.current = true;
+    };
+
+    console.groupCollapsed(
+      '%c[TransferRecipientForm] Request → /api/transfer/request',
+      'color:#2563eb;font-weight:700'
+    );
+    console.log('timestamp:', new Date().toISOString());
+    console.log('payload:', payload);
+    console.groupEnd();
+
+    try {
+      await requestTransfer(payload);
+      submittedRef.current = true;
+
+      // ✅ 성공 알림
+      alert('양도요청 되었습니다.');
+
+      console.info(
+        '%c[TransferRecipientForm] ✅ requestTransfer success',
+        'color:#16a34a;font-weight:700',
+        { reservationNumber: props.reservationNumber, recipientId, transferType }
+      );
+    } catch (e: any) {
+      const { status, code, message } = pickErr(e);
+
+      const msgHasTransferOnce =
+        typeof message === 'string' &&
+        (message.includes('양도 1회') ||
+          message.includes('이미 양도') ||
+          message.includes('진행되고 있는 양도'));
+
+      if (
+        status === 409 ||
+        code === 'ALREADY_TRANSFERRED' ||
+        code === 'TRANSFER_ALREADY_COMPLETED' ||
+        msgHasTransferOnce
+      ) {
+        alert('이미 양도처리된 티켓입니다.');
+        console.warn('%c[TransferRecipientForm] 409 handled: already transferred', 'color:#f59e0b');
+        return;
+      }
+
+      console.error(
+        '%c[TransferRecipientForm] ❌ requestTransfer failed',
+        'color:#b91c1c;font-weight:700',
+        e
+      );
+      throw e;
+    }
   };
 
   // ===== 팝업 메시지 수신(완료 시) + 정리 =====

@@ -21,6 +21,7 @@ export type AssignmentDTO = {
   name: string;
   /** 주민번호 앞자리 + 뒷자리 첫 자리 (마스킹/가공된 값) */
   residentNum: string;
+  userId: number;
 };
 
 /** ===== 요청 파라미터 ===== */

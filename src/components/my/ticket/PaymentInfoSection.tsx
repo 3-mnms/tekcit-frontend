@@ -2,6 +2,8 @@
 import React, { useMemo } from 'react'
 import { usePaymentOrdersQuery } from '@/models/my/ticket/tanstack-query/usePaymentOrders'
 import styles from './PaymentInfoSection.module.css'
+import { useNavigate } from 'react-router-dom'
+import Button from '@/components/common/button/Button' 
 
 type Props = {
   festivalId: string
@@ -38,6 +40,7 @@ const toDotYMD = (iso?: string) => {
 }
 
 const PaymentInfoSection: React.FC<Props> = ({ festivalId, reservationNumber }) => {
+  const navigate = useNavigate()
   const { data: list, isLoading, isError, error } = usePaymentOrdersQuery(festivalId)
 
   const order = useMemo(() => {
@@ -53,6 +56,10 @@ const PaymentInfoSection: React.FC<Props> = ({ festivalId, reservationNumber }) 
   const delivery = 0
   const subtotal = order?.amount ?? 0
   const total = subtotal + fee + delivery
+
+  const goRefund = () => {
+    navigate('/payment/refund')
+  }
 
   return (
     <div>
@@ -72,44 +79,42 @@ const PaymentInfoSection: React.FC<Props> = ({ festivalId, reservationNumber }) 
         <div className={styles.wrapper}>
           <table className={styles.sharedTable}>
             <colgroup>
-              <col style={{ width: '16.6%' }} />
-              <col style={{ width: '16.6%' }} />
-              <col style={{ width: '16.6%' }} />
-              <col style={{ width: '16.6%' }} />
-              <col style={{ width: '16.6%' }} />
-              <col style={{ width: '16.6%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '20%' }} />
             </colgroup>
             <thead>
               <tr>
                 <th>예매일</th>
                 <th>결제수단</th>
-                <th>현재상태</th>
-                <th>결제상태</th>
                 <th>예매번호</th>
                 <th>가격</th>
+                <th>환불</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td>{toDotYMD(order.payTime as unknown as string)}</td>
                 <td>{methodLabel(order.payMethod as unknown as string)}</td>
-                <td>-</td>
-                <td>-</td>
                 <td>{reservationNumber}</td>
                 <td>{krw(order.amount, order.currency)}</td>
+                <td>
+                  <Button
+                    type="button"
+                    onClick={goRefund}
+                    className={styles.refundBtn} 
+                  >
+                    환불하기
+                  </Button>
+                </td>
               </tr>
             </tbody>
           </table>
 
           <div className={styles.paymentSummary}>
-            <div className={styles.row}>
-              <span>예매 수수료</span>
-              <span>{krw(fee, order.currency)}</span>
-            </div>
-            <div className={styles.row}>
-              <span>배송비</span>
-              <span>{krw(delivery, order.currency)}</span>
-            </div>
+            
             <div className={`${styles.row} ${styles.total}`}>
               <span>총 결제금액</span>
               <span>{krw(total, order.currency)}</span>
