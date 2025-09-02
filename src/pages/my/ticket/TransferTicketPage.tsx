@@ -1,4 +1,3 @@
-// src/pages/mypage/ticket/transfer/TransferTicketPage.tsx
 import React, { useEffect, useMemo, useState } from 'react';
 import styles from './TransferTicketPage.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -44,6 +43,19 @@ const fmtTime = (iso?: string) => {
   return `${hh}:${mm}`;
 };
 
+/** 서버 transferType → '가족' | '지인' 라벨로 변환 (transferType만 사용) */
+const toRelationLabel = (transferType: unknown): '가족' | '지인' => {
+  if (typeof transferType === 'number') {
+    return transferType === 0 ? '가족' : '지인';
+  }
+  if (typeof transferType === 'string') {
+    const v = transferType.trim().toUpperCase();
+    if (v === 'FAMILY' || v === '0') return '가족';
+    if (v === 'OTHERS' || v === '1') return '지인';
+  }
+  return '지인';
+};
+
 const TransferTicketPage: React.FC = () => {
   const navigate = useNavigate();
 
@@ -87,31 +99,37 @@ const TransferTicketPage: React.FC = () => {
           </div>
         )}
 
-        {!inboxLoading && !inboxError && (inbox?.length ?? 0) === 0 && (
-          <div className={styles.empty}>받은 양도요청이 없어요.</div>
-        )}
+        {(() => {
+          const inboxItems = Array.isArray(inbox) ? inbox.filter(Boolean) : [];
+          const hasInbox = !inboxLoading && !inboxError && inboxItems.length > 0;
 
-        {!inboxLoading && !inboxError && (inbox?.length ?? 0) > 0 && (
-          <div className={styles.receivedList}>
-            {inbox!.map((it, idx) => (
-              <AfterTransferTicket
-                key={`${it.senderId}-${it.createdAt}-${idx}`}
-                title={it.fname}
-                date={fmtDate(it.performanceDate)}
-                time={fmtTime(it.performanceDate)}
-                relation={it.type === 'FAMILY' ? '가족' : '지인'}
-                status={it.status as any}  // 컴포넌트 enum/type에 맞춰 캐스팅
-                posterUrl={it.posterFile}
-                price={it.ticketPrice}
-                count={it.selectedTicketCount}
-                venue={it.fcltynm}
-                onAccept={() => alert('수락 기능 연결 예정')}
-                onReject={() => alert('거절 기능 연결 예정')}
-              />
-            ))}
-            <hr />
-          </div>
-        )}
+          if (!hasInbox) return null; // ✅ 요청 없으면 아무것도 렌더 X
+
+          return (
+            <>
+              <div className={styles.receivedList}>
+                {inboxItems.map((it, idx) => (
+                  <AfterTransferTicket
+                    key={`${it.senderId}-${it.createdAt}-${idx}`}
+                    title={it.fname}
+                    date={fmtDate(it.performanceDate)}
+                    time={fmtTime(it.performanceDate)}
+                    relation={toRelationLabel((it as any).transferType)} // ✅ transferType만 사용
+                    status={String(it.status)}
+                    posterUrl={it.posterFile}
+                    price={it.ticketPrice}
+                    count={it.selectedTicketCount}
+                    onAccept={() => alert('수락 기능 연결 예정')}
+                    onReject={() => alert('거절 기능 연결 예정')}
+                  />
+                ))}
+              </div>
+
+              {/* ✅ 요청이 있을 때만 구분선 */}
+              <hr className={styles.sectionDivider} />
+            </>
+          );
+        })()}
       </div>
 
       {/* === 내가 보유한 티켓(양도하기) === */}
