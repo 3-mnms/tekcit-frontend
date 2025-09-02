@@ -15,6 +15,21 @@ export type PersonInfo = {
   rrnFront: string;   // 앞 6자리 (YYMMDD)
 };
 
+// 서버 TicketTransferResponseDTO 대응
+export type TransferWatchItem = {
+  senderId: number;
+  senderName: string;
+  type: TransferType;         // FAMILY | OTHERS
+  createdAt: string;          // LocalDateTime -> ISO string
+  status: string;             // e.g. PENDING, ...
+  fname: string;              // 공연명
+  posterFile: string;         // 포스터 URL
+  fcltynm: string;            // 공연 시설명
+  ticketPrice: number;
+  performanceDate: string;    // LocalDateTime -> ISO string
+  selectedTicketCount: number;
+};
+
 /** extract 요청 payload (프론트 내부 표현) */
 export type ExtractPayload = {
   file: File;

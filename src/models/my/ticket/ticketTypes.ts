@@ -35,7 +35,7 @@ export type TicketDetailResponseDTO = {
   reservationNumber: string;   
   performanceDate: string;  
   deliveryMethod: TicketType;
-  qrId: string[];            
+  qrId: string[];
   address?: string | null;    
   posterFile: string;
   festivalId: string;

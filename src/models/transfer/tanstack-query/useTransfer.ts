@@ -11,6 +11,7 @@ import {
 import {
   apiUpdateFamilyTransfer,
   apiRequestTransfer,
+  apiWatchTransfer,
 } from '@/shared/api/transfer/transferApi';
 import {
   fetchTransfereeByEmail,
@@ -22,12 +23,15 @@ import type {
   UpdateTicketRequest,
   PersonInfo,
   TicketTransferRequest,
+  TransferWatchItem,           
 } from '@/models/transfer/transferTypes';
 
 /* ===========================
  *  Query Keys
  * =========================== */
 export const TRANSFEROR_QK = ['transfer', 'transferor', 'me'] as const;
+export const TRANSFER_OUTBOX_QK = ['transfer', 'requests', 'outbox'] as const;
+export const TRANSFER_INBOX_QK  = ['transfer', 'requests', 'inbox', 'watch'] as const;
 
 type ExtractParams = {
   file: File;
@@ -180,5 +184,13 @@ export function useRequestTransfer() {
       qc.invalidateQueries({ queryKey: TRANSFER_OUTBOX_QK });
       qc.invalidateQueries({ queryKey: TRANSFER_INBOX_QK });
     },
+  });
+}
+
+export function useWatchTransferQuery() {
+  return useQuery<TransferWatchItem[], Error>({
+    queryKey: TRANSFER_INBOX_QK,
+    queryFn: apiWatchTransfer,
+    staleTime: 30_000,
   });
 }
