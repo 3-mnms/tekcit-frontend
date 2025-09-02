@@ -3,7 +3,7 @@ import styles from './IdSearchModal.module.css';
 import Button from '@/components/common/button/Button';
 import { useSearchTransferee } from '@/models/transfer/tanstack-query/useTransfer';
 
-export type AccountMini = { id: string; name: string; residentNum?: string };
+export type AccountMini = { id: string; name: string; residentNum?: string; userId: number };
 
 type Props = {
     open: boolean;
@@ -54,6 +54,7 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
                 id: email,
                 name: dto?.name ?? '',
                 residentNum: dto?.residentNum ?? '',
+                userId: dto?.userId ?? '',
             }];
 
             setResults(list);

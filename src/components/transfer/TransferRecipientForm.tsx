@@ -250,13 +250,41 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
     }
 
     const transferType = relation === 'FAMILY' ? 'FAMILY' : 'OTHERS';
-    await requestTransfer({
+
+    // 👇 콘솔에서 확인할 수 있도록 payload를 먼저 구성
+    const payload = {
       reservationNumber: props.reservationNumber,
-      recipientId,
-      transferType,
+      recipientId,          // number
+      transferType,         // 'FAMILY' | 'OTHERS'
       senderName: donorName || '',
-    });
-    submittedRef.current = true;
+    };
+
+    // 보기 좋게 그룹으로 로그 출력
+    console.groupCollapsed(
+      '%c[TransferRecipientForm] Request → /api/transfer/request',
+      'color:#2563eb;font-weight:700'
+    );
+    console.log('timestamp:', new Date().toISOString());
+    console.log('payload:', payload);
+    console.groupEnd();
+
+    try {
+      await requestTransfer(payload);
+      submittedRef.current = true;
+
+      console.info(
+        '%c[TransferRecipientForm] ✅ requestTransfer success',
+        'color:#16a34a;font-weight:700',
+        { reservationNumber: props.reservationNumber, recipientId, transferType }
+      );
+    } catch (e) {
+      console.error(
+        '%c[TransferRecipientForm] ❌ requestTransfer failed',
+        'color:#b91c1c;font-weight:700',
+        e
+      );
+      throw e; // 상위에서 alert 처리
+    }
   };
 
   // ===== 팝업 메시지 수신(완료 시) + 정리 =====
