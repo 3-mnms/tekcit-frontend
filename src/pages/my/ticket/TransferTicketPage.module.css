@@ -1,6 +1,9 @@
 .page {
   width: 100%;
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* ✅ 중앙 정렬 */
 }
 
 .title {
@@ -8,14 +11,19 @@
   font-weight: 700;
   margin-bottom: 2rem;
   color: #222;
+  width: 100%;
+  max-width: 720px;   /* ✅ 본문 컨텐츠 폭 통일 */
 }
 
 /* ✅ 양도받을 티켓 영역 */
 .receivedSection {
-  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 720px;   /* ✅ 카드 폭 고정 */
 }
 
 .list {
+  width: 100%;
+  max-width: 720px;   /* ✅ 카드 폭 고정 */
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -24,4 +32,30 @@
 .empty {
   margin-top: 0.5rem;
   color: #444;
+}
+
+.receivedList {
+  display: grid;
+  gap: 1.5rem; /* 카드 사이 간격 */
+}
+
+/* ✅ hr도 카드 폭과 동일하게 */
+.sectionDivider {
+  width: 100%;
+  max-width: 720px;
+  margin: 2rem 0;                     /* 여백 여유 있게 */
+  border: 0;
+  border-top: 2px solid #94a3b8;      /* 좀 더 진한 회색 */
+  opacity: 1;
+  border-radius: 2px;
+}
+
+/* ✅ 반응형: 모바일에서는 100% 꽉 채우기 */
+@media (max-width: 768px) {
+  .title,
+  .receivedSection,
+  .list,
+  .sectionDivider {
+    max-width: 100%;
+  }
 }
