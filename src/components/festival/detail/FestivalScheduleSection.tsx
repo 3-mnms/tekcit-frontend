@@ -10,6 +10,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useFestivalDetail } from '@/models/festival/tanstack-query/useFestivalDetail';
 import { useAuthStore } from '@/shared/storage/useAuthStore';
 import { useUserAgeQuery } from '@/models/festival/tanstack-query/useUserAgeDetail';
+import { useEnterWaitingMutation } from '@/models/waiting/tanstack-query/useWaiting';
 
 /** YYYY-MM-DD */
 const ymd = (d: Date) => {
@@ -40,26 +41,19 @@ const toJsDow = (raw?: string): number | undefined => {
   return map[three];
 };
 
-const openbookingPopup = (
-  fid: string | number,
-  date: Date,
-  time?: string | null,
-  fdfrom?: string | null,
-  fdto?: string | null
-) => {
+/** "HH:mm"를 로컬 ISO(초 포함)로 */
+const hhmmToIsoLocal = (date: Date, hhmm?: string | null) => {
+  const base = ymd(date);
+  const time = /^\d{2}:\d{2}$/.test(hhmm ?? '') ? `${hhmm}:00` : '00:00:00';
+  return `${base}T${time}`; // 예: 2025-10-18T18:00:00
+};
+
+/** 팝업 열기 (공용) */
+const openBookingPopupUrl = (url: string) => {
   const width = 1000;
   const height = 600;
   const left = window.screenX + (window.outerWidth - width) / 2;
   const top = window.screenY + (window.outerHeight - height) / 2;
-
-  const params = new URLSearchParams();
-  params.set('date', ymd(date));
-  if (time) params.set('time', time);
-  if (fdfrom) params.set('fdfrom', fdfrom);
-  if (fdto) params.set('fdto', fdto);
-
-  const url = `/booking/${fid}?${params.toString()}`;
-
   window.open(
     url,
     '_blank',
@@ -148,6 +142,8 @@ const FestivalScheduleSection: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const accessToken = useAuthStore((s) => s.accessToken);
+
+  const enterMut = useEnterWaitingMutation(); // ✅ 대기열 enter API 훅
 
   /** 오늘 00:00 */
   const today = useMemo(() => {
@@ -357,8 +353,8 @@ const FestivalScheduleSection: React.FC = () => {
           <div className={styles.actionsRow}>
             <Button
               className={styles.confirmBtn}
-              disabled={confirmDisabled}
-              onClick={async () => {                    // ✅ async로 변경
+              disabled={confirmDisabled || enterMut.isPending}
+              onClick={async () => {
                 // 1) ✅ 로그인 가드
                 if (!accessToken) {
                   alert('로그인이 필요한 서비스입니다.');
@@ -393,14 +389,46 @@ const FestivalScheduleSection: React.FC = () => {
                   }
                 }
 
-                // 3) ✅ 예매 팝업
+                // 3) ✅ 대기열 enter 호출 → 팝업 분기
                 if (!selectedDate || !fid) return;
-                const fdfrom = startDate ? ymd(startDate) : null;
-                const fdto = endDate ? ymd(endDate) : null;
-                openbookingPopup(fid, selectedDate, selectedTime, fdfrom, fdto);
+                const reservationDateISO = hhmmToIsoLocal(selectedDate, selectedTime);
+
+                try {
+                  const res = await enterMut.mutateAsync({
+                    festivalId: String(fid),
+                    reservationDate: reservationDateISO,
+                  });
+
+                  // 공통 쿼리스트링(원래 쓰던 date/time/기간)
+                  const fdfrom = startDate ? ymd(startDate) : null;
+                  const fdto = endDate ? ymd(endDate) : null;
+                  const common = new URLSearchParams();
+                  common.set('date', ymd(selectedDate));
+                  if (selectedTime) common.set('time', selectedTime);
+                  if (fdfrom) common.set('fdfrom', fdfrom);
+                  if (fdto) common.set('fdto', fdto);
+
+                  if (res.immediateEntry) {
+                    // ✅ 바로 주문 페이지 팝업
+                    openBookingPopupUrl(`/booking/${fid}?${common.toString()}`);
+                  } else {
+                    // ⏳ 대기열 페이지 팝업 (대기번호/예약시각도 전달)
+                    const qs = new URLSearchParams(common);
+                    qs.set('rd', reservationDateISO);
+                    qs.set('wn', String(res.waitingNumber));
+                    openBookingPopupUrl(`/booking/${fid}/queue?${qs.toString()}`);
+                  }
+                } catch (err: any) {
+                  console.error('[enterWaiting] failed:', err);
+                  const msg =
+                    err?.response?.data?.message ||
+                    err?.message ||
+                    '대기열 진입에 실패했어요.';
+                  alert(msg);
+                }
               }}
             >
-              예매하기
+              {enterMut.isPending ? '진입 중…' : '예매하기'}
             </Button>
           </div>
         </div>
