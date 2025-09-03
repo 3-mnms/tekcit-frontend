@@ -4,7 +4,7 @@ import {
   enterWaiting,
   releaseUser,
   exitWaitingUser,
-} from '@/shared/api/waiting/WaitingApi';
+} from '@/shared/api/waiting/aitingApi';
 import type {
   EnterWaitingParams,
   ExitOrReleaseParams,
