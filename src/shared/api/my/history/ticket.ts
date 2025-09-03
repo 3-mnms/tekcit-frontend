@@ -24,3 +24,14 @@ export const getTicketDetail = async (reservationNumber: string): Promise<Ticket
   }
   throw new Error('Invalid ticket detail response');
 };
+
+export const getTransferTickets = async (): Promise<TicketResponseDTO[]> => {
+  const { data } = await api.get('/transfer/transferor');
+  if (data && typeof data === 'object') {
+    if ('success' in data && data.success === true && 'data' in data) {
+      return data.data as TicketResponseDTO[];
+    }
+    if (Array.isArray(data)) return data as TicketResponseDTO[];
+  }
+  throw new Error('Invalid ticket list response');
+};

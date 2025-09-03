@@ -48,16 +48,6 @@ const isAuthPath = (url: string) =>
 const isFormData = (data: unknown) =>
   typeof FormData !== 'undefined' && data instanceof FormData
 
-const isExpAuth = (err: AxiosError) => {
-  const st = err.response?.status;
-  if (st === 401 || st === 403 || st === 419 || st === 440 || st === 498) return true;
-  const code = (err.response?.data as any)?.errorCode || (err.response?.data as any)?.code;
-  const msg  = (err.response?.data as any)?.message;
-  // 백엔드 에러코드/메시지에 맞춰 보완
-  return ['TOKEN_EXPIRED','EXPIRED_ACCESS_TOKEN','AUTH_EXPIRED'].includes(code)
-      || /token.*expired/i.test(String(msg||''));
-};
-
 // ===== 요청 인터셉터: 토큰 + FormData 멀티파트 처리 =====
 api.interceptors.request.use((cfg) => {
   const url = cfg.url ?? ''
@@ -91,7 +81,7 @@ api.interceptors.response.use(
   (res) => res,
   async (error: AxiosError) => {
     const original = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined
-    if (!original || !isExpAuth(error)) throw error
+    if (!original || error.response?.status !== 401) throw error
 
     const url = original.url ?? ''
     if (original._retry || isAuthPath(url)) throw error
@@ -109,7 +99,7 @@ api.interceptors.response.use(
       }
 
       const token = await refreshPromise
-      if (!token) { throw error }
+      if (!token) { clearAuthHeaderToken(); throw error }
 
       setBearer(original, token)
       return api(original)
