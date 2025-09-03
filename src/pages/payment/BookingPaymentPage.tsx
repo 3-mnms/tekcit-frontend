@@ -47,7 +47,7 @@ function getNameFromJwt(): string | undefined {
 }
 
 // 결제 제한 시간(초)
-const DEADLINE_SECONDS = 120 * 60
+const DEADLINE_SECONDS = 5 * 60
 
 const BookingPaymentPage: React.FC = () => {
   /* ───────────────────────── 라우터/상태 기본 ───────────────────────── */
