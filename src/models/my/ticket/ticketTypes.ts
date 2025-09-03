@@ -25,6 +25,7 @@ export type TicketListItem = {
   statusLabel: string;   
   rawStatus: ReservationStatus;
   reservationNumber: string;
+  posterFile: string;
   festivalId: string;
 };
 
