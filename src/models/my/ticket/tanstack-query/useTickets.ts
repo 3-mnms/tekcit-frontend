@@ -42,6 +42,7 @@ const mapToListItem = (t: TicketResponseDTO): TicketListItem => ({
     count: t.selectedTicketCount,
     statusLabel: statusToLabel(t.reservationStatus),
     rawStatus: t.reservationStatus,
+    posterFile: t.posterFile,
     festivalId: t.festivalId,
 });
 

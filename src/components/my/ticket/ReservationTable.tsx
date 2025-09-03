@@ -68,7 +68,7 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter })
                 className={styles.clickableRow}
               >
                 <td data-label="예매일">{item.date}</td>
-                <td data-label="예매번호" className={styles.mono}>
+                <td data-label="예매번호" className={`${styles.mono} ${styles.ellipsis}`}>
                   {item.number}
                 </td>
                 <td data-label="공연명" className={`${styles.left} ${styles.ellipsis}`}>
