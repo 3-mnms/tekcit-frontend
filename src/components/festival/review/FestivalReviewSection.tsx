@@ -137,12 +137,11 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
     return [...mine, ...others]
   }, [items, myUserId])
 
-  // 유저 이름 마스킹 함수
   const maskUserName = (name: string) => {
     if (!name) return ''
-    if (name.length === 1) return name // 한 글자면 그대로
-    if (name.length === 2) return name[0] + '*' // 두 글자면 마지막만 *
-    return name[0] + '*' + name.slice(2) // 세 글자 이상이면 두 번째 글자만 *
+    if (name.length === 1) return name 
+    if (name.length === 2) return name[0] + '*' 
+    return name[0] + '*' + name.slice(2) 
   }
 
   return (

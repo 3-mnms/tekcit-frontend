@@ -6,7 +6,8 @@ export type PaymentOrderDTO = {
   amount: number;
   currency: string;
   payMethod: 'CARD' | 'BANK_TRANSFER' | 'KAKAO_PAY' | 'POINT'; // enum 매핑
-  payTime: string; // ISO (LocalDateTime)
+  payTime: string; 
+  paymentStatus: string;
 };
 
 export async function getPaymentOrdersByFestivalId(festivalId: string) {
