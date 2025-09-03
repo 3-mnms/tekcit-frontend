@@ -4,7 +4,7 @@ import styles from './BeforeTransferTicket.module.css';
 import type { TransferListItem } from '@/models/my/ticket/ticketTypes';
 
 type Props = {
-  item: TransferListItem;
+  item: TransferListㅋItem;
   onTransfer: (reservationNumber: string) => void; // ⬅️ 변경: string만 넘김
 };
 
