@@ -338,7 +338,7 @@ const ProductRegisterPage: React.FC = () => {
                                     <label>14-3. 상세 정보 이미지</label>
                                     <Input 
                                         type="file"
-                                        name="contentFile"
+                                        name="contentFiles"
                                         onChange={handleFileChange}
                                         multiple // 삐약! 여러 파일을 받을 수 있게 합니다!
                                     />
