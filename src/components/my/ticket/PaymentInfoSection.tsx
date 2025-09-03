@@ -11,9 +11,11 @@ type Props = {
 }
 
 const methodLabel = (m?: string) => {
+  // 주석: 서버 enum과 매칭 주의 — 필요 시 'POINT' → '포인트 결제'로 보정 멍
   switch (m) {
     case 'CARD':
       return '신용/체크카드'
+    case 'POINT':
     case 'POINT_PAYMENT':
       return '포인트 결제'
     case 'POINT_CHARGE':
@@ -24,12 +26,14 @@ const methodLabel = (m?: string) => {
 }
 
 const krw = (n?: number | null, currency?: string) => {
+  // 주석: KRW면 '원' 붙이고, 아니면 통화 코드 그대로 표시 멍
   if (typeof n !== 'number') return '-'
   if (currency && currency !== 'KRW') return `${n.toLocaleString('ko-KR')} ${currency}`
   return n.toLocaleString('ko-KR') + '원'
 }
 
 const toDotYMD = (iso?: string) => {
+  // 주석: ISO → yyyy.MM.dd 변환 멍
   if (!iso) return '-'
   const d = new Date(iso)
   if (isNaN(d.getTime())) return iso
@@ -44,6 +48,7 @@ const PaymentInfoSection: React.FC<Props> = ({ festivalId, reservationNumber }) 
   const { data: list, isLoading, isError, error } = usePaymentOrdersQuery(festivalId)
 
   const order = useMemo(() => {
+    // 주석: 결제내역 최신 1건 선택 — 필요 시 예약번호로 필터링하는 로직으로 바꿔도 됨 멍
     if (!list || list.length === 0) return undefined
     return [...list].sort((a, b) => {
       const ta = new Date(a.payTime as unknown as string).getTime()
@@ -57,8 +62,28 @@ const PaymentInfoSection: React.FC<Props> = ({ festivalId, reservationNumber }) 
   const subtotal = order?.amount ?? 0
   const total = subtotal + fee + delivery
 
+  // ✅ 환불 버튼 활성화 조건: paymentId가 있어야 함 멍
+  const canRefund = Boolean(order?.paymentId)
+
+  // ✅ 환불 페이지 이동 — 아래 세 가지 방법 중 "하나"만 선택해서 사용하세요 멍
   const goRefund = () => {
-    navigate('/payment/refund')
+    if (!order?.paymentId) return
+
+    /* ───────── 옵션 A: 경로 파라미터로 넘기기 (추천: 가장 명시적) ─────────
+       - 라우트 예시: <Route path="/payment/refund/:paymentId" element={<RefundPage />} />
+    */
+    navigate(`/payment/refund/${order.paymentId}`, {
+      // 주석: 안전하게 중복으로 state에도 넣어둠(선택) 멍
+      state: { paymentId: order.paymentId },
+    })
+
+    /* ───────── 옵션 B: 쿼리스트링으로 넘기기 ─────────
+    navigate(`/payment/refund?paymentId=${encodeURIComponent(order.paymentId)}`)
+    */
+
+    /* ───────── 옵션 C: 라우터 state로만 넘기기 ─────────
+    navigate('/payment/refund', { state: { paymentId: order.paymentId } })
+    */
   }
 
   return (
@@ -104,7 +129,9 @@ const PaymentInfoSection: React.FC<Props> = ({ festivalId, reservationNumber }) 
                   <Button
                     type="button"
                     onClick={goRefund}
-                    className={styles.refundBtn} 
+                    className={styles.refundBtn}
+                    disabled={!canRefund} // 주석: paymentId 없으면 비활성화 멍
+                    aria-disabled={!canRefund}
                   >
                     환불하기
                   </Button>
@@ -114,7 +141,6 @@ const PaymentInfoSection: React.FC<Props> = ({ festivalId, reservationNumber }) 
           </table>
 
           <div className={styles.paymentSummary}>
-            
             <div className={`${styles.row} ${styles.total}`}>
               <span>총 결제금액</span>
               <span>{krw(total, order.currency)}</span>
