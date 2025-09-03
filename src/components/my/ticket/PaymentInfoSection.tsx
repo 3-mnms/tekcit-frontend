@@ -3,7 +3,7 @@ import React, { useMemo } from 'react'
 import { usePaymentOrdersQuery } from '@/models/my/ticket/tanstack-query/usePaymentOrders'
 import styles from './PaymentInfoSection.module.css'
 import { useNavigate } from 'react-router-dom'
-import Button from '@/components/common/button/Button' 
+import Button from '@/components/common/button/Button'
 
 type Props = {
   festivalId: string
@@ -11,10 +11,13 @@ type Props = {
 }
 
 const methodLabel = (m?: string) => {
-  // 주석: 서버 enum과 매칭 주의 — 필요 시 'POINT' → '포인트 결제'로 보정 멍
   switch (m) {
     case 'CARD':
       return '신용/체크카드'
+    case 'BANK_TRANSFER':
+      return '무통장입금/계좌이체'
+    case 'KAKAO_PAY':
+      return '카카오페이'
     case 'POINT':
     case 'POINT_PAYMENT':
       return '포인트 결제'
@@ -26,14 +29,12 @@ const methodLabel = (m?: string) => {
 }
 
 const krw = (n?: number | null, currency?: string) => {
-  // 주석: KRW면 '원' 붙이고, 아니면 통화 코드 그대로 표시 멍
   if (typeof n !== 'number') return '-'
   if (currency && currency !== 'KRW') return `${n.toLocaleString('ko-KR')} ${currency}`
   return n.toLocaleString('ko-KR') + '원'
 }
 
 const toDotYMD = (iso?: string) => {
-  // 주석: ISO → yyyy.MM.dd 변환 멍
   if (!iso) return '-'
   const d = new Date(iso)
   if (isNaN(d.getTime())) return iso
@@ -48,7 +49,6 @@ const PaymentInfoSection: React.FC<Props> = ({ festivalId, reservationNumber }) 
   const { data: list, isLoading, isError, error } = usePaymentOrdersQuery(festivalId)
 
   const order = useMemo(() => {
-    // 주석: 결제내역 최신 1건 선택 — 필요 시 예약번호로 필터링하는 로직으로 바꿔도 됨 멍
     if (!list || list.length === 0) return undefined
     return [...list].sort((a, b) => {
       const ta = new Date(a.payTime as unknown as string).getTime()
@@ -62,28 +62,17 @@ const PaymentInfoSection: React.FC<Props> = ({ festivalId, reservationNumber }) 
   const subtotal = order?.amount ?? 0
   const total = subtotal + fee + delivery
 
-  // ✅ 환불 버튼 활성화 조건: paymentId가 있어야 함 멍
-  const canRefund = Boolean(order?.paymentId)
+  // ⬇️ status 기반 제어
+  const status = (order?.paymentStatus ?? '').toLowerCase()
+  const isCanceled = status === 'canceled' || status === 'cancelled' // 혹시 서버 철자 변형 여지 대비
+  const isPaid = status === 'paid'
+  const canRefund = Boolean(order?.paymentId) && isPaid
 
-  // ✅ 환불 페이지 이동 — 아래 세 가지 방법 중 "하나"만 선택해서 사용하세요 멍
   const goRefund = () => {
-    if (!order?.paymentId) return
-
-    /* ───────── 옵션 A: 경로 파라미터로 넘기기 (추천: 가장 명시적) ─────────
-       - 라우트 예시: <Route path="/payment/refund/:paymentId" element={<RefundPage />} />
-    */
+    if (!canRefund || !order?.paymentId) return
     navigate(`/payment/refund/${order.paymentId}`, {
-      // 주석: 안전하게 중복으로 state에도 넣어둠(선택) 멍
       state: { paymentId: order.paymentId },
     })
-
-    /* ───────── 옵션 B: 쿼리스트링으로 넘기기 ─────────
-    navigate(`/payment/refund?paymentId=${encodeURIComponent(order.paymentId)}`)
-    */
-
-    /* ───────── 옵션 C: 라우터 state로만 넘기기 ─────────
-    navigate('/payment/refund', { state: { paymentId: order.paymentId } })
-    */
   }
 
   return (
@@ -126,15 +115,19 @@ const PaymentInfoSection: React.FC<Props> = ({ festivalId, reservationNumber }) 
                 <td>{reservationNumber}</td>
                 <td>{krw(order.amount, order.currency)}</td>
                 <td>
-                  <Button
-                    type="button"
-                    onClick={goRefund}
-                    className={styles.refundBtn}
-                    disabled={!canRefund} // 주석: paymentId 없으면 비활성화 멍
-                    aria-disabled={!canRefund}
-                  >
-                    환불하기
-                  </Button>
+                  {isCanceled ? (
+                    <span className={styles.refundBadge}>환불완료</span>
+                  ) : (
+                    <Button
+                      type="button"
+                      onClick={goRefund}
+                      className={styles.refundBtn}
+                      disabled={!canRefund}
+                      aria-disabled={!canRefund}
+                    >
+                      환불하기
+                    </Button>
+                  )}
                 </td>
               </tr>
             </tbody>
