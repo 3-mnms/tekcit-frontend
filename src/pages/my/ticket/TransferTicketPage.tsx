@@ -91,6 +91,23 @@ const normalizeServerStatus = (v: unknown): 'REQUESTED' | 'APPROVED' | 'COMPLETE
   return 'REQUESTED';
 };
 
+/** ✅ 화면 표기용 라벨: REQUESTED/APPROVED → "양도 요청", COMPLETED → "양도 승인", CANCELED → "양도 거부" */
+const toUiStatusLabel = (
+  s: ReturnType<typeof normalizeServerStatus>
+): '양도 요청' | '양도 승인' | '양도 거부' => {
+  switch (s) {
+    case 'REQUESTED':
+    case 'APPROVED':
+      return '양도 요청';
+    case 'COMPLETED':
+      return '양도 승인';
+    case 'CANCELED':
+      return '양도 거부';
+    default:
+      return '양도 요청';
+  }
+};
+
 type InboxItem = {
   transferId?: number;
   senderId: number;
@@ -99,12 +116,12 @@ type InboxItem = {
   transferType?: 'FAMILY' | 'OTHERS' | string | number;
   createdAt: string;
   status: string | number;
-  fname: string;
-  posterFile: string;
-  fcltynm: string;
-  ticketPrice: number;
-  performanceDate: string;
-  selectedTicketCount: number;
+  fname: string;            // 공연명
+  posterFile: string;       // 포스터
+  fcltynm: string;          // 장소
+  ticketPrice: number;      // 단가
+  performanceDate: string;  // ISO
+  selectedTicketCount: number; // 매수
 };
 
 const TransferTicketPage: React.FC = () => {
@@ -168,14 +185,29 @@ const TransferTicketPage: React.FC = () => {
       if (pendingId) return;
 
       if (decision === 'ACCEPTED') {
-        // ✅ 수락 시: API 호출 없이 결제 페이지로 이동 + 필요한 값 state로 전달
+        // ✅ 수락 시: 결제 페이지로 이동 + 결제/요약/상품정보에 필요한 state를 모두 전달
         setPendingId(transferId);
+
+        const unitPrice = Number(item.ticketPrice) || 0;
+        const count = Number(item.selectedTicketCount) || 0;
+        const totalPrice = unitPrice * count;
+
         navigate('/payment/transfer', {
           state: {
+            // 결제/검증에 필요한 값
             transferId,
             senderId: item.senderId,
             transferStatus: 'ACCEPTED' as const,
             relation: tType, // 'FAMILY' | 'OTHERS'
+
+            // 🆕 BookingProductInfo & 요약 카드에서 쓸 상품정보
+            title: item.fname,
+            datetime: item.performanceDate,     // ISO 그대로 넘겨두고 렌더쪽에서 포맷
+            location: item.fcltynm,
+            ticket: count,                      // 매수
+            price: unitPrice,                   // 단가 (지인일 때만 노출)
+            totalPrice,                         // 총액 (지인 요약/결제에 사용)
+            posterFile: item.posterFile,        // 필요시 썸네일 등에서 사용
           },
         });
         return;
@@ -230,6 +262,7 @@ const TransferTicketPage: React.FC = () => {
                   const rel = toRelationLabel((it as any).type ?? (it as any).transferType);
                   const isBusy = pendingId != null && pendingId === (it as any).transferId;
                   const normalizedStatus = normalizeServerStatus(it.status);
+                  const uiStatus = toUiStatusLabel(normalizedStatus); // ✅ 라벨 생성
 
                   return (
                     <AfterTransferTicket
@@ -238,7 +271,8 @@ const TransferTicketPage: React.FC = () => {
                       date={fmtDate(it.performanceDate)}
                       time={fmtTime(it.performanceDate)}
                       relation={rel}
-                      status={normalizedStatus} // ✅ 0~3/문자 혼용 방지
+                      status={normalizedStatus}           // 스타일/로직용
+                      statusLabel={uiStatus}              // ✅ 화면 표시용
                       posterUrl={it.posterFile}
                       price={it.ticketPrice}
                       count={it.selectedTicketCount}

@@ -2,12 +2,9 @@
 export type TransferType = 'FAMILY' | 'OTHERS';
 export type TransferStatusFR = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 
-/* ========= 백엔드 표현 =========
- * 문자열 enum이 정식 규격: 'REQUESTED' | 'APPROVED' | 'COMPLETED' | 'CANCELED'
- * (하위호환: 서버가 숫자를 보내는 경우도 수용)
- */
+/* ========= 백엔드 표현 ========= */
 export type TransferStatusBEString = 'REQUESTED' | 'APPROVED' | 'COMPLETED' | 'CANCELED';
-export type TransferStatusBE = 0 | 1 | 2 | 3;  // 수신 하위호환용
+export type TransferStatusBE = 0 | 1 | 2 | 3;
 
 /* ========= 요청 DTO ========= */
 export type TicketTransferRequest = {
@@ -24,11 +21,11 @@ export type PersonInfo = {
 
 /* ========= 수신 아이템 ========= */
 export type TransferWatchItem = {
-  senderId: number;
+  transferId: number;   // 서버가 내려주도록 협의 권장
+  senderId: number;     // 반드시 "양도자"의 사용자 ID
   senderName: string;
   type: TransferType | string | number;
   createdAt: string;
-  // 서버 status(숫자 또는 문자열) 어떤 게 와도 수용
   status: TransferStatusBE | TransferStatusBEString | string;
   fname: string;
   posterFile: string;
@@ -38,14 +35,14 @@ export type TransferWatchItem = {
   selectedTicketCount: number;
 };
 
-/* ========= 응답 DTO ========= */
-// 프론트에서 쓰는 응답 폼(ACCEPTED/REJECTED)을 API가 내부에서 BE 문자열로 변환
+/* ========= 승인/거절 DTO ========= */
+// 프론트 표기로 호출 → API에서 서버 문자열로 변환해 전송
 export type UpdateTicketRequest = {
   transferId: number;
   senderId: number;
   transferStatus: TransferStatusFR; // 'ACCEPTED' | 'REJECTED' | 'PENDING'
-  deliveryMethod?: string;
-  address?: string;
+  deliveryMethod?: 'QR' | 'PAPER' | '' | null;
+  address?: string | null;
 };
 
 /* ========= Others 수락 응답 ========= */
@@ -54,7 +51,7 @@ export type TransferOthersResponse = {
   senderId: number;
   reservationNumber: string;
   selectedTicketCount: number;
-  performanceDate: string;  // ISO string
+  performanceDate: string;
   ticketPrice: number;
   fname: string;
   posterFile: string;
@@ -73,7 +70,6 @@ export type ApiErr = { success: false; errorCode?: string; errorMessage?: string
 export type ApiEnvelope<T> = ApiOk<T> | ApiErr | T;
 
 /* ========= 상태 매퍼 ========= */
-/** 프론트(ACCEPTED/REJECTED/PENDING) → 백엔드 문자열(REQUESTED/APPROVED/CANCELED) */
 export const FRtoBEString = (s: TransferStatusFR): TransferStatusBEString => {
   switch (s) {
     case 'ACCEPTED': return 'APPROVED';
@@ -83,16 +79,13 @@ export const FRtoBEString = (s: TransferStatusFR): TransferStatusBEString => {
   }
 };
 
-// 서버에서 오는 status(문자/숫자)를 프론트 표기로
 export const BEtoFR = (s: TransferStatusBE | string): TransferStatusFR => {
   if (typeof s === 'string') {
     const v = s.trim().toUpperCase();
     if (v === 'APPROVED') return 'ACCEPTED';
     if (v === 'CANCELED') return 'REJECTED';
-    // REQUESTED/COMPLETED → UI 정책에 따라 기본 PENDING
     return 'PENDING';
   }
-  // 숫자 하위호환
   if (s === 1) return 'ACCEPTED';
   if (s === 3) return 'REJECTED';
   return 'PENDING';

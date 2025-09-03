@@ -1,11 +1,4 @@
-import axiosBase from 'axios';
-import { api } from '@/shared/config/axios';
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  type QueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 
 import {
   apiRespondFamily,
@@ -23,94 +16,30 @@ import {
 
 import type {
   UpdateTicketRequest,
-  PersonInfo,
   TicketTransferRequest,
   TransferWatchItem,
   TransferOthersResponse,
   ExtractPayload,
+  PersonInfo,
 } from '@/models/transfer/transferTypes';
 
+/* ===========================
+ *  Query Keys
+ * =========================== */
 export const TRANSFEROR_QK = ['transfer', 'transferor', 'me'] as const;
 export const TRANSFER_OUTBOX_QK = ['transfer', 'requests', 'outbox'] as const;
 export const TRANSFER_INBOX_QK  = ['transfer', 'requests', 'inbox', 'watch'] as const;
 
-/* OCR 전용 axios (전역 인터셉터 우회) */
-const apiRaw = axiosBase.create({
-  baseURL: api.defaults.baseURL,
-  withCredentials: (api.defaults as any)?.withCredentials ?? false,
-});
-
-/* OCR 응답 정규화 */
-function normalizePeopleResponse(raw: any): PersonInfo[] {
-  try {
-    if (typeof raw === 'string') {
-      const t = raw.trim();
-      if (!t) return [];
-      const parsed = JSON.parse(t);
-      return normalizePeopleResponse(parsed);
-    }
-  } catch {
-    return [];
-  }
-  if (!raw) return [];
-  if (Array.isArray(raw)) return raw as PersonInfo[];
-  if (Array.isArray(raw?.data)) return raw.data as PersonInfo[];
-  if (Array.isArray(raw?.result)) return raw.result as PersonInfo[];
-  return [];
-}
-
-/* OCR 훅 */
-export function useExtractPersonInfo() {
-  return useMutation<PersonInfo[], Error, ExtractPayload>({
-    mutationKey: ['transfer', 'extract', 'people'],
-    mutationFn: async ({ file, targetInfo }) => {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('targetInfo', JSON.stringify(targetInfo));
-      const res = await apiRaw.post('/transfer/extract', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        validateStatus: (s) => s >= 200 && s < 300,
-        transformResponse: [(data) => data],
-      });
-      return normalizePeopleResponse(res.data);
-    },
-  });
-}
-
-export function useVerifyFamilyCert() {
-  return useMutation<{ success: boolean; message?: string }, Error, ExtractPayload>({
-    mutationKey: ['transfer', 'extract', 'verify'],
-    mutationFn: async ({ file, targetInfo }) => {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('targetInfo', JSON.stringify(targetInfo));
-      const res = await apiRaw.post('/transfer/extract', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        validateStatus: (s) => s >= 200 && s < 300,
-        transformResponse: [(data) => data],
-      });
-
-      let body: any = res.data;
-      if (typeof body === 'string') {
-        try { body = JSON.parse(body); } catch { body = {}; }
-      }
-      const ok =
-        body?.success === true ||
-        (Array.isArray(body?.data) && body.data.length > 0) ||
-        (Array.isArray(body) && body.length > 0);
-
-      return { success: !!ok, message: body?.message };
-    },
-  });
-}
-
-/* 유저 */
+/* ===========================
+ *  Users / Accounts
+ * =========================== */
 export function useSearchTransferee() {
   return useMutation<AssignmentDTO, Error, string>({
     mutationKey: ['transfer', 'transferee', 'search'],
     mutationFn: (email) => fetchTransfereeByEmail(email),
   });
 }
+
 export function useTransferor(options?: { enabled?: boolean; staleTime?: number }) {
   return useQuery<AssignmentDTO, Error>({
     queryKey: TRANSFEROR_QK,
@@ -119,15 +48,22 @@ export function useTransferor(options?: { enabled?: boolean; staleTime?: number 
     enabled: options?.enabled ?? true,
   });
 }
+
 export function prefetchTransferor(qc: QueryClient, staleTime = 5 * 60 * 1000) {
   return qc.prefetchQuery({ queryKey: TRANSFEROR_QK, queryFn: fetchTransferor, staleTime });
 }
+
 export function ensureTransferor(qc: QueryClient, staleTime = 5 * 60 * 1000) {
   return qc.ensureQueryData({ queryKey: TRANSFEROR_QK, queryFn: fetchTransferor, staleTime });
 }
-export function useTransferQueryClient() { return useQueryClient(); }
 
-/* 요청/조회 */
+export function useTransferQueryClient() {
+  return useQueryClient();
+}
+
+/* ===========================
+ *  Requests / Inbox-Outbox
+ * =========================== */
 export function useRequestTransfer() {
   const qc = useQueryClient();
   return useMutation<void, Error, TicketTransferRequest>({
@@ -150,7 +86,10 @@ export function useWatchTransferQuery(opts?: { userId?: number; includeCanceled?
   });
 }
 
-/* 수락/거절 */
+/* ===========================
+ *  Accept / Reject (공용)
+ * =========================== */
+// 가족: 수락/거절(transferStatus에 따라 모두 처리)
 export function useRespondFamilyTransfer() {
   const qc = useQueryClient();
   return useMutation<void, Error, UpdateTicketRequest>({
@@ -162,6 +101,8 @@ export function useRespondFamilyTransfer() {
     },
   });
 }
+
+// 지인: 수락/거절(transferStatus에 따라 모두 처리)
 export function useRespondOthersTransfer() {
   const qc = useQueryClient();
   return useMutation<TransferOthersResponse, Error, UpdateTicketRequest>({
@@ -170,6 +111,51 @@ export function useRespondOthersTransfer() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TRANSFER_INBOX_QK });
       qc.invalidateQueries({ queryKey: TRANSFER_OUTBOX_QK });
+    },
+  });
+}
+
+/* ========== (옵션) 거절 전용 헬퍼 훅 ========== */
+// 필요하면 이렇게 별도 훅으로도 쉽게 호출 가능
+export function useRejectFamilyTransfer() {
+  const mutate = useRespondFamilyTransfer();
+  return {
+    ...mutate,
+    reject: (base: Omit<UpdateTicketRequest, 'transferStatus' | 'deliveryMethod' | 'address'>) =>
+      mutate.mutate({ ...base, transferStatus: 'REJECTED', deliveryMethod: null, address: null }),
+  };
+}
+
+export function useRejectOthersTransfer() {
+  const mutate = useRespondOthersTransfer();
+  return {
+    ...mutate,
+    reject: (base: Omit<UpdateTicketRequest, 'transferStatus' | 'deliveryMethod' | 'address'>) =>
+      mutate.mutate({ ...base, transferStatus: 'REJECTED', deliveryMethod: null, address: null }),
+  };
+}
+
+/* ===========================
+ *  OCR (가족관계증명서)
+ * =========================== */
+/** OCR → 인물 배열(PersonInfo[]) */
+export function useExtractPersonInfo() {
+  return useMutation<PersonInfo[], Error, ExtractPayload>({
+    mutationKey: ['transfer', 'extract', 'people'],
+    mutationFn: async (payload) => {
+      return await apiExtractPersonInfo(payload);
+    },
+  });
+}
+
+/** OCR 결과의 유효성만 boolean으로 알려주는 훅 */
+export function useVerifyFamilyCert() {
+  return useMutation<{ success: boolean; message?: string }, Error, ExtractPayload>({
+    mutationKey: ['transfer', 'extract', 'verify'],
+    mutationFn: async (payload) => {
+      const people = await apiExtractPersonInfo(payload);
+      const ok = Array.isArray(people) && people.length > 0;
+      return { success: ok };
     },
   });
 }

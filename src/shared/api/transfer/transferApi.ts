@@ -9,6 +9,7 @@ import type {
   ApiEnvelope,
   ApiOk,
   ApiErr,
+  TransferStatusBEString,
 } from '@/models/transfer/transferTypes';
 import { FRtoBEString } from '@/models/transfer/transferTypes';
 
@@ -16,8 +17,8 @@ const PATH = {
   extract: '/transfer/extract',
   request: '/transfer/request',
   watch: '/transfer/watch',
-  acceptanceFamily: '/transfer/acceptance/family',
-  acceptanceOthers: '/transfer/acceptance/others', // 거절도 동일 엔드포인트
+  acceptanceFamily: '/transfer/acceptance/family', // @RequestBody UpdateTicketRequestDTO
+  acceptanceOthers: '/transfer/acceptance/others', // @RequestBody UpdateTicketRequestDTO
 };
 
 const stripNullish = <T extends object>(obj: T): Partial<T> => {
@@ -105,52 +106,57 @@ export async function apiWatchTransfer(
   return [];
 }
 
-/* ============== 가족 ============== */
-/** 가족 응답은 status를 **문자열 enum**으로 전송 */
-export async function apiRespondFamily(body: UpdateTicketRequest): Promise<void> {
-  const beStatus = FRtoBEString(body.transferStatus); // 'APPROVED' | 'CANCELED' | ...
+/* ============== 공통 변환 ============== */
+type UpdateTicketRequestBE = {
+  transferId: number;
+  senderId: number;
+  transferStatus: TransferStatusBEString;        // 'APPROVED' | 'CANCELED' | 'REQUESTED'
+  deliveryMethod?: 'QR' | 'PAPER' | '' | null;
+  address?: string | null;
+};
 
-  const base = stripNullish(body) as any;
-  delete base.transferStatus;               // 서버는 transferStatus 대신 status 사용
-  const mapped = { ...base, status: beStatus };
-
-  const qs = `?transferId=${encodeURIComponent(body.transferId)}&senderId=${encodeURIComponent(body.senderId)}`;
-  const url = `${PATH.acceptanceFamily}${qs}`;
-
-  const res = await api.put(url, mapped, { validateStatus: () => true });
-
-  if (res.status >= 400) {
-    // 디버깅 보조
-    // eslint-disable-next-line no-console
-    console.error('[apiRespondFamily] 4xx/5xx', res.status, res.data, { url, sent: mapped });
-    throw new Error(`${res.status} ${(res.data as any)?.message ?? res.statusText}`);
-  }
-  // 성공(Void)
+// 프론트표기(ACCEPTED/REJECTED/PENDING) → 서버문자열(APPROVED/CANCELED/REQUESTED)
+function toBEBody(fr: UpdateTicketRequest): UpdateTicketRequestBE {
+  const be: UpdateTicketRequestBE = {
+    transferId: fr.transferId,
+    senderId: fr.senderId,
+    transferStatus: FRtoBEString(fr.transferStatus),
+    deliveryMethod: (fr.deliveryMethod ?? null) as any,
+    address:
+      fr.transferStatus === 'ACCEPTED'
+        ? (fr.deliveryMethod === 'PAPER' ? (fr.address ?? '') : null)
+        : null, // 거절/PENDING이면 null
+  };
+  return stripNullish(be) as UpdateTicketRequestBE;
 }
 
-/* ============== 지인(Others) ============== */
-/** Others 응답도 status를 **문자열 enum**으로 전송 */
-export async function apiRespondOthers(body: UpdateTicketRequest): Promise<TransferOthersResponse> {
-  const beStatus = FRtoBEString(body.transferStatus);
-
-  const base = stripNullish(body) as any;
-  delete base.transferStatus;
-  const mapped = { ...base, status: beStatus };
-
-  const qs = `?transferId=${encodeURIComponent(body.transferId)}&senderId=${encodeURIComponent(body.senderId)}`;
-  const url = `${PATH.acceptanceOthers}${qs}`;
-
-  const res = await api.put<ApiEnvelope<TransferOthersResponse> | TransferOthersResponse>(
-    url,
+/* ============== 가족(수락/거절 공용) ============== */
+export async function apiRespondFamily(body: UpdateTicketRequest): Promise<void> {
+  const mapped = toBEBody(body);
+  const res = await api.put<ApiEnvelope<null> | null>(
+    PATH.acceptanceFamily,
     mapped,
     { validateStatus: () => true },
   );
 
   if (res.status >= 400) {
-    // 디버깅 보조
-    // eslint-disable-next-line no-console
-    console.error('[apiRespondOthers] 4xx/5xx', res.status, res.data, { url, sent: mapped });
-    throw new Error(`${res.status} ${(res.data as any)?.message ?? res.statusText}`);
+    console.error('[apiRespondFamily] 4xx/5xx', res.status, res.data, { url: PATH.acceptanceFamily, sent: mapped });
+    throw new Error(`${res.status} ${(res.data as any)?.message ?? (res.data as any)?.errorMessage ?? res.statusText}`);
+  }
+}
+
+/* ============== 지인(수락/거절 공용) ============== */
+export async function apiRespondOthers(body: UpdateTicketRequest): Promise<TransferOthersResponse> {
+  const mapped = toBEBody(body);
+  const res = await api.put<ApiEnvelope<TransferOthersResponse> | TransferOthersResponse>(
+    PATH.acceptanceOthers,
+    mapped,
+    { validateStatus: () => true },
+  );
+
+  if (res.status >= 400) {
+    console.error('[apiRespondOthers] 4xx/5xx', res.status, res.data, { url: PATH.acceptanceOthers, sent: mapped });
+    throw new Error(`${res.status} ${(res.data as any)?.message ?? (res.data as any)?.errorMessage ?? res.statusText}`);
   }
 
   const data = (res.data && ((res.data as any).data ?? res.data)) as TransferOthersResponse;
