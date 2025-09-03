@@ -1,20 +1,18 @@
 .page {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;         /* 뷰포트 꽉 채우기 */
   background: #f3f4f6;
   display: grid;
-  grid-template-rows: auto 1fr;
-}
-
-.header {
-  padding: 16px 20px;
-  color: #3b82f6;
-  font-weight: 700;
-  font-size: 0.95rem;
+  grid-template-rows: 1fr; /* 헤더 제거 → 한 행 */
 }
 
 .center {
   display: grid;
-  place-items: center;
-  padding: 24px 0;
+  place-items: stretch;   /* 내부를 꽉 채움 */
+}
+
+.fullwrap {
+  /* ✅ 여기서 한 번만 값 바꾸면 됨 */
+  --poster-max-w: 420px; /* 가로 최대 */
+  --poster-max-h: 560px; /* 세로 최대 (예: 3:4이면 420x560) */
 }

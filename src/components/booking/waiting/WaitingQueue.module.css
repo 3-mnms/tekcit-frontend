@@ -53,3 +53,39 @@
   background: #4d9afd;
   transition: width 0.4s ease-in-out;
 }
+
+/* 🔥 아래 블록만 교체 (나머지 기존 스타일 건드리지 않음) */
+.cardFull {
+  width: 100%;
+  max-width: none;
+  /* height: 100%;  ← 제거해서 내용 높이에 맞춤 */
+  background: #fff;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 20px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* 포스터: 뷰포트 기준 최대 높이 제한으로 “세로 너무 김” 방지 */
+.cardFull .poster {
+  /* 프레임을 고정 크기로: 내가 정한 최대값 안에서만 그려짐 */
+  width: min(100%, var(--poster-max-w, 420px));
+  height: var(--poster-max-h, 560px);
+
+  /* 이미지 크롭 금지 + 프레임 안에 최대한 맞춤 */
+  background: #d9d9d9 center/contain no-repeat;
+
+  border-radius: 12px;
+  margin: 0 auto 16px;
+}
+
+/* 포스터와 같은 폭으로 정렬 */
+.cardFull .info,
+.cardFull .progressBar {
+  max-width: var(--poster-max-w, 420px);
+  margin-left: auto;
+  margin-right: auto;
+}

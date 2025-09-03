@@ -7,6 +7,7 @@ type Props = {
   waitingCount: number;     // 내 앞에 몇 명
   progressPct: number;      // 0~100
   posterUrl?: string;       // 없으면 회색 박스
+  fullBleed?: boolean;      // 🔥 웨이팅 페이지에서만 전체 화면 느낌
 };
 
 const WaitingQueue: React.FC<Props> = ({
@@ -15,11 +16,15 @@ const WaitingQueue: React.FC<Props> = ({
   waitingCount,
   progressPct,
   posterUrl,
+  fullBleed = false,
 }) => {
   return (
-    <div className={styles.card}>
+    <div className={fullBleed ? styles.cardFull : styles.card}>
       {/* 포스터 */}
-      <div className={styles.poster} style={posterUrl ? { backgroundImage: `url(${posterUrl})` } : undefined} />
+      <div
+        className={styles.poster}
+        style={posterUrl ? { backgroundImage: `url(${posterUrl})` } : undefined}
+      />
 
       {/* 정보 */}
       <div className={styles.info}>
@@ -30,7 +35,10 @@ const WaitingQueue: React.FC<Props> = ({
 
       {/* 진행 바 */}
       <div className={styles.progressBar}>
-        <div className={styles.progress} style={{ width: `${Math.max(0, Math.min(100, progressPct))}%` }} />
+        <div
+          className={styles.progress}
+          style={{ width: `${Math.max(0, Math.min(100, progressPct))}%` }}
+        />
       </div>
     </div>
   );
