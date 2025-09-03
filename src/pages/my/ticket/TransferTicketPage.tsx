@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styles from './TransferTicketPage.module.css';
 import { useNavigate } from 'react-router-dom';
-import { useTicketsQuery, useTicketDetailQuery } from '@/models/my/ticket/tanstack-query/useTickets';
+import { useTransferTicketsQuery, useTicketDetailQuery } from '@/models/my/ticket/tanstack-query/useTickets';
 import {
   useWatchTransferQuery,
   useRespondFamilyTransfer,
@@ -131,7 +131,7 @@ const TransferTicketPage: React.FC = () => {
   const { data: me } = useTransferor({ enabled: true });
 
   /** 내 보유 티켓 */
-  const { data: myTickets } = useTicketsQuery();
+  const { data: myTickets } = useTransferTicketsQuery();
 
   /** 양도요청 수신함 (거절/취소 포함 + userId 안전 전달) */
   const {

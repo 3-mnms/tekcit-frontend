@@ -1,7 +1,7 @@
 // src/models/ticket/tanstack-query/useTickets.ts
 import { useQuery } from '@tanstack/react-query';
-import { getTickets, getTicketDetail } from '@/shared/api/my/history/ticket';
-import type { TicketResponseDTO, TicketListItem, ReservationStatus } from '@/models/my/ticket/ticketTypes';
+import { getTickets, getTicketDetail, getTransferTickets } from '@/shared/api/my/history/ticket';
+import type { TicketResponseDTO, TicketListItem, ReservationStatus, TransferListItem } from '@/models/my/ticket/ticketTypes';
 import { format } from 'date-fns';
 
 const statusToLabel = (s: ReservationStatus): string => {
@@ -46,6 +46,20 @@ const mapToListItem = (t: TicketResponseDTO): TicketListItem => ({
     festivalId: t.festivalId,
 });
 
+const mapToTransferListItem = (t: TicketResponseDTO): TransferListItem => ({
+    id: t.id,
+    reservationNumber: t.reservationNumber,
+    number: t.reservationNumber,
+    title: t.fname,
+    date: toDotYMD(t.reservationDate),
+    dateTime: toYMDHM(t.performanceDate),
+    count: t.selectedTicketCount,
+    statusLabel: statusToLabel(t.reservationStatus),
+    rawStatus: t.reservationStatus,
+    posterFile: t.posterFile,
+    festivalId: t.festivalId,
+});
+
 export const useTicketsQuery = () => {
     return useQuery({
         queryKey: ['tickets', 'me'],
@@ -62,4 +76,13 @@ export const useTicketDetailQuery = (reservationNumber?: string) => {
     enabled: !!reservationNumber,
     staleTime: 60_000,
   });
+};
+
+export const useTransferTicketsQuery = () => {
+    return useQuery({
+        queryKey: ['tickets', 'me'],
+        queryFn: getTransferTickets,
+        staleTime: 60_000,
+        select: (list: TicketResponseDTO[]) => list.map(mapToTransferListItem),
+    });
 };

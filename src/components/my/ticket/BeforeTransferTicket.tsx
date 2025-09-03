@@ -1,10 +1,10 @@
 // src/components/my/ticket/transfer/BeforeTransferTicket.tsx
 import React from 'react';
 import styles from './BeforeTransferTicket.module.css';
-import type { TicketListItem } from '@/models/my/ticket/ticketTypes';
+import type { TransferListItem } from '@/models/my/ticket/ticketTypes';
 
 type Props = {
-  item: TicketListItem;
+  item: TransferListItem;
   onTransfer: (reservationNumber: string) => void; // ⬅️ 변경: string만 넘김
 };
 

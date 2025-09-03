@@ -15,7 +15,6 @@ interface HeaderProps {
 
 const AdminHeader: React.FC<HeaderProps> = ({ userName, onLogout, ...props }) => {
   const navigate = useNavigate()
-  const accessToken = useAuthStore((s) => s.accessToken)
   const logout = useAuthStore((s) => s.logout)
 
   const handleLogout = () => {

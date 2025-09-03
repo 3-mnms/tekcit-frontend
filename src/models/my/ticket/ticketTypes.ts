@@ -29,6 +29,20 @@ export type TicketListItem = {
   festivalId: string;
 };
 
+export type TransferListItem = {
+  id: number;
+  date: string;      
+  number: string;  
+  title: string;    
+  dateTime: string;    
+  count: number;      
+  statusLabel: string;   
+  rawStatus: ReservationStatus;
+  reservationNumber: string;
+  posterFile: string;
+  festivalId: string;
+};
+
 export type TicketType = 'MOBILE' | 'PAPER';
 
 export type TicketDetailResponseDTO = {

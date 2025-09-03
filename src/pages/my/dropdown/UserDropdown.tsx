@@ -28,13 +28,15 @@ const UserDropdown: React.FC = () => {
 
   const openList = () => setPanel('notifications')
   const openDetail = (nid: number) => {
-  if (!Number.isFinite(nid)) return;   // ✅ 방어
-  setSelectedNid(nid);
-  setPanel('notificationDetail');
-};
+    if (!Number.isFinite(nid)) return // ✅ 방어
+    setSelectedNid(nid)
+    setPanel('notificationDetail')
+  }
   const backFromDetail = () => setPanel('notifications')
 
-  const handleGoToMypage = () => navigate('/mypage')
+  const handleGoToMypage = () => {
+    window.location.href = '/mypage'
+  }
   const handleLogout = async () => {
     if (loading) return
     setLoading(true)
@@ -68,9 +70,13 @@ const UserDropdown: React.FC = () => {
           </div>
 
           <PointBox />
-          <MenuItem label="내 정보 수정" onClick={() => navigate('/mypage/myinfo')} />
-          <MenuItem label="내 티켓" onClick={() => navigate('/mypage/ticket')} />
-          <MenuItem label="북마크" onClick={() => navigate('/mypage/bookmark')} />
+          <MenuItem
+            label="내 정보 수정"
+            onClick={() => (window.location.href = '/mypage/myinfo')}
+          />
+          <MenuItem label="내 티켓" onClick={() => (window.location.href = '/mypage/ticket')} />
+          <MenuItem label="북마크" onClick={() => (window.location.href = '/mypage/bookmark')} />
+
           <button className={styles.logoutButton} onClick={handleLogout} disabled={loading}>
             {loading ? '로그아웃 중...' : '로그아웃'}
           </button>
