@@ -16,7 +16,7 @@ const AnnouncementList: React.FC<Props> = ({ announcements, onDelete, onEdit }) 
         <tr>
           <th>공연 제목</th>
           <th>알림 제목</th>
-          <th>작성일</th>
+          <th>알람 발송 시간</th>
           <th className={styles.actionColumn}>관리</th>
         </tr>
       </thead>
