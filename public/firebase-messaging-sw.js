@@ -30,15 +30,15 @@ messaging.onBackgroundMessage((payload) => {
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 4. FCM 토큰 발급
-messaging.getToken({
-    vapidKey: 'BF5YpNLRHPs9tJiv-Se3mIj4ORE7PdZ_q761BsWXCivfkYmMYFGsR1PDNTlKKZ1ho6r3s-79LWUaYF3Px2EQu6Q'
-}).then((currentToken) => {
-    if (currentToken) {
-        console.log('FCM Registration Token:', currentToken);
-    } else {
-        console.log('No registration token available. Request permission to generate one.');
-    }
-}).catch((err) => {
-    console.log('An error occurred while retrieving token. ', err);
-});
+// // 4. FCM 토큰 발급
+// messaging.getToken({
+//     vapidKey: 'BF5YpNLRHPs9tJiv-Se3mIj4ORE7PdZ_q761BsWXCivfkYmMYFGsR1PDNTlKKZ1ho6r3s-79LWUaYF3Px2EQu6Q'
+// }).then((currentToken) => {
+//     if (currentToken) {
+//         console.log('FCM Registration Token:', currentToken);
+//     } else {
+//         console.log('No registration token available. Request permission to generate one.');
+//     }
+// }).catch((err) => {
+//     console.log('An error occurred while retrieving token. ', err);
+// });

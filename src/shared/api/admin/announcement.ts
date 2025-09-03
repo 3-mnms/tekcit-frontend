@@ -25,6 +25,6 @@ export const updateAnnouncement = async (updatedAnnouncement: Announcement): Pro
     return response.data.data;
 };
 
-export const deleteAnnouncement = async (announcementId: number): Promise<void> => {
-    await api.delete(`/api/admin/announcements/${announcementId}`);
+export const deleteAnnouncement = async (scheduleId: number): Promise<void> => {
+    await api.delete<ApiResponse<Announcement>>(`/users/notice/${scheduleId}`);
 };
