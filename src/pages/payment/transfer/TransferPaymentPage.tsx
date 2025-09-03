@@ -153,7 +153,30 @@ const TransferPaymentPage: React.FC = () => {
   // ✅ 모달 핸들러 멍
   const handleAlertConfirm = () => {
     setIsAlertOpen(false)
-    setIsPwModalOpen(true)
+    if (isSubmitting) return
+    setIsSubmitting(true)
+
+    try {
+      const dto = buildApproveDTO()
+      console.log('[approve] relation:', relation, 'dto:', dto)
+
+      if (isFamily) {
+        await respondFamily.mutateAsync(dto)
+        routeToResult(true, { relation: 'FAMILY' })
+      } else {
+        await respondOthers.mutateAsync(dto)
+        setIsPwModalOpen(true)
+      }
+    } catch (e: any) {
+      const msg = e?.message || ''
+      if (msg.includes('TRANSFER_NOT_MATCH_SENDER')) {
+        alert('양도자가 일치하지 않아요. 목록에서 다시 시도해 주세요.')
+      } else {
+        alert('승인 처리 중 오류가 발생했어요.')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
   const handleAlertCancel = () => setIsAlertOpen(false)
 
@@ -179,6 +202,7 @@ const TransferPaymentPage: React.FC = () => {
     : !effectiveSellerId ? '양도자 정보(sellerId)를 확인할 수 없습니다.'
     : '요약 정보를 불러오지 못했습니다. 다시 시도해 주세요.'
 
+  // ── 렌더 ──────────────────────────────────────────────────────────────
   return (
     <div className={styles.page}>
       {/* 상단 헤더 멍 */}
