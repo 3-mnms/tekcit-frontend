@@ -63,8 +63,13 @@
   white-space: nowrap;
 }
 
-.pending { background-color: #fff8e1; color: #a67c00; border: 1px solid #ffd54f; }
+/* 요청 그룹(REQUESTED / APPROVED 서버상태를 하나로 묶음) */
+.request { background-color: #fff8e1; color: #a67c00; border: 1px solid #ffd54f; }
+
+/* 완료(양도 승인) */
 .approved { background-color: #e6f7ef; color: #117a37; border: 1px solid #b2dfdb; }
+
+/* 거부/취소 */
 .rejected { background-color: #fdecea; color: #c62828; border: 1px solid #f5c6cb; }
 
 .info {
@@ -82,7 +87,7 @@
 }
 
 .priceRowHidden {
-  visibility: hidden;   /* 공간은 유지하되 텍스트는 보이지 않음 */
+  visibility: hidden;    /* 공간은 유지하되 텍스트는 보이지 않음 */
   line-height: 1.5;
   min-height: 1.5em;
 }

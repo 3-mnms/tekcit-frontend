@@ -49,6 +49,12 @@
   margin-bottom: 16px;              /* 카드 간 간격 */
 }
 
+.delierycard {
+  background: #fff;                 /* 흰 배경 */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02); /* 미세 그림자 */
+  margin-bottom: 16px;              /* 카드 간 간격 */
+}
+
 /* 카드 타이틀 */
 .cardTitle {
   font-size: 16px;      /* 제목 크기 */
@@ -155,6 +161,13 @@
 }
 .agree input {
   margin-top: 2px;               /* 텍스트와 수직정렬 보정 */
+}
+
+.freeDesc {
+  font-size: 1rem;
+  color: #444;
+  line-height: 1.5;
+  margin: 0.5rem 0 1rem;
 }
 
 /* 다음 버튼: 대표색 적용 */

@@ -1,4 +1,3 @@
-// src/components/my/ticket/transfer/AfterTransferTicket.tsx
 import React from 'react';
 import styles from './AfterTransferTicket.module.css';
 
@@ -9,15 +8,28 @@ const priceFormatter = new Intl.NumberFormat('ko-KR', {
 });
 
 type Relation = '가족' | '지인';
-type RawStatus = string;
-type NormalizedStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+type RawStatus = string | number;
+type NormalizedStatus = 'REQUEST' | 'APPROVED' | 'REJECTED';
 
+/**
+ * 서버 상태 → 화면 상태 정규화
+ * - REQUEST(요청 그룹): REQUESTED, APPROVED(서버상 승인 대기/진행), WAITING, PENDING, '0', '1'
+ * - APPROVED(양도 승인 완료): COMPLETED, SUCCESS, OK, '2'
+ * - REJECTED(양도 거부/취소): CANCELED/CANCELLED, REJECTED, DENIED, DECLINED, '3'
+ */
 function normalizeStatus(s?: RawStatus): NormalizedStatus {
+  if (typeof s === 'number') {
+    if (s === 0 || s === 1) return 'REQUEST'; // REQUESTED/APPROVED(요청으로 묶음)
+    if (s === 2) return 'APPROVED';           // COMPLETED
+    if (s === 3) return 'REJECTED';           // CANCELED
+    return 'REQUEST';
+  }
+
   const v = (s ?? '').toString().trim().toUpperCase();
-  if (['PENDING', 'WAITING', 'REQUESTED'].includes(v)) return 'PENDING';
-  if (['APPROVED', 'ACCEPTED', 'SUCCESS', 'OK'].includes(v)) return 'APPROVED';
-  if (['REJECTED', 'DENIED', 'DECLINED', 'CANCELED', 'CANCELLED'].includes(v)) return 'REJECTED';
-  return 'PENDING';
+  if (['0', '1', 'REQUESTED', 'APPROVED', 'WAITING', 'PENDING'].includes(v)) return 'REQUEST';
+  if (['2', 'COMPLETED', 'SUCCESS', 'OK'].includes(v)) return 'APPROVED';
+  if (['3', 'REJECTED', 'DENIED', 'DECLINED', 'CANCELED', 'CANCELLED'].includes(v)) return 'REJECTED';
+  return 'REQUEST';
 }
 
 type Props = {
@@ -53,9 +65,9 @@ const AfterTransferTicket: React.FC<Props> = ({
   const s = normalizeStatus(status);
 
   const StatusBadge = () => {
-    if (s === 'PENDING') return <span className={`${styles.badge} ${styles.pending}`}>수락 대기중</span>;
-    if (s === 'APPROVED') return <span className={`${styles.badge} ${styles.approved}`}>승인됨</span>;
-    if (s === 'REJECTED') return <span className={`${styles.badge} ${styles.rejected}`}>거절됨</span>;
+    if (s === 'REQUEST') return <span className={`${styles.badge} ${styles.request}`}>양도 요청</span>;
+    if (s === 'APPROVED') return <span className={`${styles.badge} ${styles.approved}`}>양도 승인</span>;
+    if (s === 'REJECTED') return <span className={`${styles.badge} ${styles.rejected}`}>양도 거부</span>;
     return null;
   };
 
@@ -100,8 +112,7 @@ const AfterTransferTicket: React.FC<Props> = ({
           <p className={styles.priceRowHidden} aria-hidden="true" />
         )}
 
-
-        {s === 'PENDING' && (
+        {s === 'REQUEST' && (
           <div className={styles.buttonWrapper}>
             <button
               type="button"
