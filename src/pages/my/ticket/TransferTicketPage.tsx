@@ -1,4 +1,3 @@
-// src/pages/mypage/ticket/transfer/TransferTicketPage.tsx
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styles from './TransferTicketPage.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +6,7 @@ import {
   useWatchTransferQuery,
   useRespondFamilyTransfer,
   useRespondOthersTransfer,
+  useTransferor, // ✅ 내 userId 확보
 } from '@/models/transfer/tanstack-query/useTransfer';
 
 import BeforeTransferTicket from '@/components/my/ticket/BeforeTransferTicket';
@@ -64,7 +64,7 @@ const toRelationLabel = (t: unknown): '가족' | '지인' => {
   }
   return '지인';
 };
-/** 서버 타입 정규화 (엔드포인트 분기용) */
+/** 서버 타입 정규화 (엔드포인트/관계 전달용) */
 const toType = (t: unknown): 'FAMILY' | 'OTHERS' => {
   if (typeof t === 'number') return t === 0 ? 'FAMILY' : 'OTHERS';
   if (typeof t === 'string') {
@@ -75,14 +75,30 @@ const toType = (t: unknown): 'FAMILY' | 'OTHERS' => {
   return 'OTHERS';
 };
 
+/** 서버 상태 enum(0~3 또는 문자열) → 문자열 정규화 */
+const normalizeServerStatus = (v: unknown): 'REQUESTED' | 'APPROVED' | 'COMPLETED' | 'CANCELED' => {
+  if (typeof v === 'number') {
+    return (['REQUESTED', 'APPROVED', 'COMPLETED', 'CANCELED'][v] ?? 'REQUESTED') as any;
+  }
+  if (typeof v === 'string') {
+    const s = v.trim().toUpperCase();
+    if (s === '0') return 'REQUESTED';
+    if (s === '1') return 'APPROVED';
+    if (s === '2') return 'COMPLETED';
+    if (s === '3') return 'CANCELED';
+    if (['REQUESTED', 'APPROVED', 'COMPLETED', 'CANCELED'].includes(s)) return s as any;
+  }
+  return 'REQUESTED';
+};
+
 type InboxItem = {
-  transferId?: number; // ✅ 수락/거절 요청에 필요 (UpdateTicketRequestDTO)
+  transferId?: number;
   senderId: number;
   senderName: string;
   type?: 'FAMILY' | 'OTHERS' | string | number;
   transferType?: 'FAMILY' | 'OTHERS' | string | number;
   createdAt: string;
-  status: string;
+  status: string | number;
   fname: string;
   posterFile: string;
   fcltynm: string;
@@ -94,16 +110,19 @@ type InboxItem = {
 const TransferTicketPage: React.FC = () => {
   const navigate = useNavigate();
 
+  /** 로그인 사용자 (userId 전달용) */
+  const { data: me } = useTransferor({ enabled: true });
+
   /** 내 보유 티켓 */
   const { data: myTickets } = useTicketsQuery();
 
-  /** 양도요청 수신함 */
+  /** 양도요청 수신함 (거절/취소 포함 + userId 안전 전달) */
   const {
     data: inbox,
     isLoading: inboxLoading,
     isError: inboxError,
     error: inboxErr,
-  } = useWatchTransferQuery();
+  } = useWatchTransferQuery({ userId: me?.userId, includeCanceled: true });
 
   /** 수락/거절 훅 */
   const respondFamily = useRespondFamilyTransfer();
@@ -133,7 +152,10 @@ const TransferTicketPage: React.FC = () => {
     navigate(`/mypage/ticket/transfer/${encodeURIComponent(reservationNumber)}`);
   };
 
-  /** 공통 응답 핸들러 */
+  /** 공통 응답 핸들러
+   * - REJECTED: 즉시 API 호출( deliveryMethod/address = "키 자체 생략" )
+   * - ACCEPTED: 즉시 결제 페이지로 이동하며 필수 값(state) 동반 전달
+   */
   const handleRespond = useCallback(
     async (item: InboxItem, decision: 'ACCEPTED' | 'REJECTED') => {
       const transferId = (item as any).transferId as number | undefined;
@@ -144,28 +166,35 @@ const TransferTicketPage: React.FC = () => {
         return;
       }
       if (pendingId) return;
-      setPendingId(transferId);
 
+      if (decision === 'ACCEPTED') {
+        // ✅ 수락 시: API 호출 없이 결제 페이지로 이동 + 필요한 값 state로 전달
+        setPendingId(transferId);
+        navigate('/payment/transfer', {
+          state: {
+            transferId,
+            senderId: item.senderId,
+            transferStatus: 'ACCEPTED' as const,
+            relation: tType, // 'FAMILY' | 'OTHERS'
+          },
+        });
+        return;
+      }
+
+      // ❌ 거절 시: API 호출 (deliveryMethod/address "키 자체"를 보내지 않음)
       try {
-        const body = {
+        setPendingId(transferId);
+        const minimal = {
           transferId,
           senderId: item.senderId,
-          transferStatus: decision,
-          // (필요 시) deliveryMethod/address 추가 가능
-        } as const;
-
+          transferStatus: 'REJECTED' as const,
+        };
         if (tType === 'FAMILY') {
-          await respondFamily.mutateAsync(body);
-          alert(decision === 'ACCEPTED' ? '가족 양도를 수락했어요.' : '가족 양도를 거절했어요.');
+          await respondFamily.mutateAsync(minimal);
         } else {
-          await respondOthers.mutateAsync(body);
-          if (decision === 'ACCEPTED') {
-            // ✅ 결제 라우트만 이동(추가 전달값 불필요)
-            navigate('/payment/transfer');
-          } else {
-            alert('지인 양도를 거절했어요.');
-          }
+          await respondOthers.mutateAsync(minimal);
         }
+        alert('양도 요청을 거절했어요.');
       } catch (e: any) {
         alert(e?.message ?? '요청 처리 중 오류가 발생했어요.');
       } finally {
@@ -200,6 +229,7 @@ const TransferTicketPage: React.FC = () => {
                 {inboxItems.map((it, idx) => {
                   const rel = toRelationLabel((it as any).type ?? (it as any).transferType);
                   const isBusy = pendingId != null && pendingId === (it as any).transferId;
+                  const normalizedStatus = normalizeServerStatus(it.status);
 
                   return (
                     <AfterTransferTicket
@@ -208,7 +238,7 @@ const TransferTicketPage: React.FC = () => {
                       date={fmtDate(it.performanceDate)}
                       time={fmtTime(it.performanceDate)}
                       relation={rel}
-                      status={String(it.status)}
+                      status={normalizedStatus} // ✅ 0~3/문자 혼용 방지
                       posterUrl={it.posterFile}
                       price={it.ticketPrice}
                       count={it.selectedTicketCount}
