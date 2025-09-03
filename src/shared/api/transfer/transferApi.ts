@@ -53,6 +53,20 @@ export async function apiExtractPersonInfo(payload: ExtractPayload): Promise<Ext
   return unwrap<ExtractResponse>(res.data);
 }
 
+export async function apiVerifyFamily(payload: ExtractPayload): Promise<{ success: boolean; message?: string }> {
+  const form = new FormData();
+  form.append('file', payload.file);
+  form.append('targetInfo', JSON.stringify(payload.targetInfo));
+
+  // 👇 이 호출은 unwrap 하지 않는다!
+  const res = await api.post(PATH.extract, form, { validateStatus: () => true });
+  if (res.status >= 400) {
+    throw new Error(`${res.status} ${(res.data as any)?.message ?? res.statusText}`);
+  }
+
+  const d = res.data as any; // 예: { success: true, data: null, message: '...' }
+  return { success: d?.success === true, message: d?.message };
+}
 /* ============== 요청/조회 ============== */
 export async function apiRequestTransfer(body: TicketTransferRequest): Promise<void> {
   const res = await api.post<ApiEnvelope<null> | null>(PATH.request, body, { validateStatus: () => true });
