@@ -5,6 +5,7 @@ import styles from './RefundPage.module.css'
 import TransferTicketInfo from '@/components/payment/refund/RefundTicketInfo'
 import Button from '@/components/common/button/Button'
 import AlertModal from '@/components/common/modal/AlertModal'
+import { refundPayment } from '@/shared/api/payment/refund'
 
 const RefundPage: React.FC = () => {
   // ✅ 모달/로딩 상태
@@ -40,23 +41,31 @@ const RefundPage: React.FC = () => {
   const handleCancel = () => navigate('/mypage/ticket')
   const handleRefundClick = () => setIsRefundModalOpen(true)
 
-  /** ✅ 환불 확정 → 바로 성공 화면으로 이동 (API 호출 제거)
-   *  - 실제 연동 시 여기서 reason을 함께 전달하면 됨
-   */
+  /** ✅ 환불 확정 → 실제 API 호출로 변경 */
   const handleRefundConfirm = async () => {
     setIsRefundModalOpen(false)
     setLoadingRefund(true)
 
-    // TODO: 실제 API가 생기면 아래처럼 body에 포함해서 전달
-    // await api.post('/payments/refund', { paymentId, reason })
-
-    // 데모: 살짝 지연 후 성공
-    setTimeout(() => {
-      // 참고용: 서버 로그 대용
-      console.log('[Refund Confirmed]', { paymentId, reason })
+    try {
+      console.log('[환불 요청 시작]', { paymentId, reason })
+      
+      // axios 인터셉터에서 X-User-Id를 자동으로 JWT에서 추출해서 주입함
+      const response = await refundPayment(paymentId)
+      
+      console.log('[환불 성공]', response)
       routeToResult(true)
+    } catch (error) {
+      console.error('[환불 실패]', error)
+      
+      // 에러 타입에 따른 처리
+      if (error instanceof Error) {
+        console.error('에러 메시지:', error.message)
+      }
+      
+      routeToResult(false)
+    } finally {
       setLoadingRefund(false)
-    }, 500)
+    }
   }
 
   const handleRefundModalCancel = () => setIsRefundModalOpen(false)

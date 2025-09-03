@@ -57,14 +57,12 @@ export const RESULT_CONFIG: Record<ResultType, Record<ResultStatus, View>> = {
     success: {
       title: '충전 완료',
       message: '포인트 충전이 완료되었습니다.',
-      primary: { label: '지갑 보기', to: '/payment/wallet-point' },
-      secondary: { label: '결제 계속하기', to: '/payment' },
+      primary: { label: '결제 내역 확인하기', to: '/payment/wallet-point' },
     },
     fail: {
       title: '충전 실패',
       message: '포인트 충전에 실패했습니다. 잠시 후 다시 시도해 주세요.',
       primary: { label: '다시 충전하기', to: '/payment/wallet-point/money-charge' },
-      secondary: { label: '고객센터', to: '/support' },
     },
   },
 
