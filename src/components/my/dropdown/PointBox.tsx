@@ -36,7 +36,7 @@ const PointBox: React.FC = () => {
       const code = e?.response?.data?.errorCode;
       if (code === 'NOT_FOUND_TEKCIT_PAY_ACCOUNT') {
         alert('테킷페이 계정이 없습니다. 계정 생성 페이지로 이동합니다.');
-        navigate('/payment/wallet-point/money-charge');
+        navigate('/payment/wallet/join');
       } else {
         alert('잔액/계정 조회 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.');
       }

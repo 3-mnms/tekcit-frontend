@@ -1,5 +1,9 @@
-import { useEffect, useRef, useState, useMemo } from 'react'
+// src/pages/payment/BookingPaymentPage.tsx
+// 주석: 예매 결제 페이지 — Tekcit API(request → tekcitpay → complete) 연동 버전
+
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 
 import type { TossPaymentHandle } from '@/components/payment/pay/TossPayment'
 import PaymentInfo from '@/components/payment/pay/PaymentInfo'
@@ -16,10 +20,16 @@ import type { CheckoutState, PaymentMethod } from '@/models/payment/types/paymen
 import { createPaymentId } from '@/models/payment/utils/paymentUtils'
 import { saveBookingSession } from '@/shared/api/payment/paymentSession'
 import { fetchBookingDetail } from '@/shared/api/payment/bookingDetail'
-import { requestTekcitPayment, verifyTekcitPassword } from '@/shared/api/payment/tekcit'
+import {
+  requestTekcitPayment,     // 1단계 — 결제 요청
+  verifyTekcitPassword,      // 2단계 — 지갑 비번 검증+차감 (자동 재시도 포함)
+  confirmTekcitPayment,      // 3단계 — 결제 완료
+  getUserIdForHeader,
+} from '@/shared/api/payment/tekcit'
 
 import styles from './BookingPaymentPage.module.css'
 
+/* JWT에서 name 꺼내기(스토어에 없을 때 폴백) */
 function getNameFromJwt(): string | undefined {
   try {
     const raw = localStorage.getItem('accessToken') || ''
@@ -29,76 +39,69 @@ function getNameFromJwt(): string | undefined {
     const safe = part.replace(/-/g, '+').replace(/_/g, '/')
     const padded = safe + '='.repeat((4 - (safe.length % 4)) % 4)
     const payload = JSON.parse(atob(padded))
-    const name =
-      payload?.name
+    const name = payload?.name
     return typeof name === 'string' && name.trim() ? name.trim() : undefined
   } catch {
     return undefined
   }
 }
 
-// ⏱️ 결제 제한 시간(초) 멍
-const DEADLINE_SECONDS = 5 * 60
+// 결제 제한 시간(초)
+const DEADLINE_SECONDS = 120 * 60
 
 const BookingPaymentPage: React.FC = () => {
-  // 0) 네비게이션/라우터 state 멍
+  /* ───────────────────────── 라우터/상태 기본 ───────────────────────── */
   const navigate = useNavigate()
   const { state } = useLocation()
   const checkout = state as CheckoutState
 
-  // 1) 파생값 계산 — 금액/주문명/공연ID 멍
+  /* 결제 금액/주문명/공연ID 파생값 */
   const unitPrice = checkout?.unitPrice ?? 0
   const quantity = checkout?.quantity ?? 0
-  const finalAmount = useMemo(() => unitPrice * quantity, [unitPrice, quantity]) // 결제 금액 멍
-  const orderName = useMemo(() => checkout?.title, [checkout?.title]) // 주문명 멍
-  const festivalIdVal = checkout?.festivalId // 가드/요청에서 사용 멍
+  const finalAmount = useMemo(() => unitPrice * quantity, [unitPrice, quantity])
+  const orderName = useMemo(() => checkout?.title, [checkout?.title])
+  const festivalIdVal = checkout?.festivalId
 
-  // 3) 로그인 사용자 ID 상태 (훅 순서 보장을 위해 useEffect에서 세팅) 멍
-  // const [setBuyerId] = useState<number | null>(null)
-  const [sellerId, setSellerId] = useState<number | null>(null)
+  /* 사용자/판매자 정보 */
+  const buyerId = useAuthStore((s) => s.user?.userId ?? null)
   const storeName = useAuthStore((s) => s.user?.name) || undefined
   const userName = useMemo(() => storeName ?? getNameFromJwt(), [storeName])
 
-  // 4) 결제/화면 상태 훅들 멍
-  const tossRef = useRef<TossPaymentHandle>(null) // PaymentSection이 ref를 TossPayment로 전달
+  /* 화면/결제 컨트롤 상태 */
+  const tossRef = useRef<TossPaymentHandle>(null)
   const [openedMethod, setOpenedMethod] = useState<PaymentMethod | null>(null)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [ensuredPaymentId, setEnsuredPaymentId] = useState<string | null>(null)
-
-  const openPasswordModal = () => {
-    setEnsuredPaymentId((prev) => prev ?? createPaymentId()) // paymentId 확정
-    setIsPasswordModalOpen(true)
-  }
-
-  const amountToPay = finalAmount ?? checkout.amount
 
   const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState(false)
   const [isPaying, setIsPaying] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [paymentId, setPaymentId] = useState<string | null>(null)
+  const [sellerId, setSellerId] = useState<number | null>(null)
   const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS)
 
-  // ✅ 결제 트랜잭션 ID 최초 1회 생성 + 동시에 프론트 세션 저장
+  const amountToPay = finalAmount ?? checkout.amount
+
+  /* ───────────────────────── 초기 paymentId 생성 + 세션 저장 ───────────────────────── */
   useEffect(() => {
-    // 주석: paymentId가 아직 없으면 생성
     if (!paymentId) {
       const id = createPaymentId()
       setPaymentId(id)
 
       if (checkout?.bookingId && checkout?.festivalId && sellerId) {
         saveBookingSession({
-          paymentId: id,                         // 프론트에서 생성한 결제ID
-          bookingId: checkout.bookingId,         // 라우터 state
-          festivalId: checkout.festivalId,       // 라우터 state
-          sellerId: sellerId,           // 라우터 state (중요)
-          amount: finalAmount,                   // 프론트 계산 금액
-          createdAt: Date.now(),                 // 타임아웃 판단용
+          paymentId: id,
+          bookingId: checkout.bookingId,
+          festivalId: checkout.festivalId,
+          sellerId,
+          amount: finalAmount,
+          createdAt: Date.now(),
         })
       }
     }
-  }, [paymentId, checkout, finalAmount, sellerId]) // 주석: finalAmount가 변하면 세션 갱신이 필요한지 정책에 따라 조정
+  }, [paymentId, checkout, finalAmount, sellerId])
 
-  // 주석: buyerId가 준비되기 전에는 서버 호출 금지 (X-User-Id 누락 방지)
+  /* ───────────────────────── 예매 상세 조회로 sellerId 확보 ───────────────────────── */
   useEffect(() => {
     (async () => {
       try {
@@ -120,67 +123,127 @@ const BookingPaymentPage: React.FC = () => {
     })()
   }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate])
 
-  // 9) 타임업 모달 닫기 헬퍼 멍
+  /* ───────────────────────── TanStack Query — 3단계 뮤테이션 ───────────────────────── */
+
+  // 1) 결제 요청: /api/payments/request
+  const requestMut = useMutation({
+    mutationFn: async () => {
+      const id = paymentId ?? createPaymentId()
+      if (!paymentId) setPaymentId(id)
+
+      if (!sellerId) throw new Error('판매자 정보가 없습니다.')
+      if (!checkout?.bookingId || !checkout?.festivalId) throw new Error('예매 식별 정보가 없습니다.')
+
+      const uid = getUserIdForHeader()
+      if (!uid) throw new Error('로그인이 필요합니다. (buyerId 없음)')
+      const buyerId = Number(uid)
+
+      // 프론트 세션 저장
+      saveBookingSession({
+        paymentId: id,
+        bookingId: checkout.bookingId,
+        festivalId: checkout.festivalId,
+        sellerId,
+        amount: finalAmount,
+        createdAt: Date.now(),
+      })
+
+      // 결제 요청 (PaymentOrder는 재시도 로직에서 대기)
+      await requestTekcitPayment({
+        paymentId: id,
+        bookingId: checkout.bookingId,
+        festivalId: checkout.festivalId,
+        sellerId,
+        buyerId,
+        amount: finalAmount,
+      })
+
+      console.log('✅ 결제 요청 완료, PaymentOrder는 테킷페이 결제에서 자동 대기')
+      return id
+    },
+  })
+
+  // 2) 지갑 결제(비번 검증+차감): /api/tekcitpay - 재시도 로직 포함
+  const tekcitPayMut = useMutation({
+    mutationFn: async (password: string) => {
+      const id = ensuredPaymentId ?? paymentId
+      if (!id) throw new Error('paymentId가 준비되지 않았습니다.')
+      // verifyTekcitPassword가 내부에서 자동 재시도 처리
+      return verifyTekcitPassword({ amount: amountToPay, paymentId: id, password })
+    },
+  })
+
+  // 3) 결제 완료: /api/payments/complete/{paymentId}
+  const completeMut = useMutation({
+    mutationFn: async () => {
+      const id = ensuredPaymentId ?? paymentId
+      if (!id) throw new Error('paymentId가 준비되지 않았습니다.')
+      return confirmTekcitPayment(id)
+    },
+  })
+
+  /* ───────────────────────── 유틸 핸들러 ───────────────────────── */
   const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false)
 
-  // 10) 결과 라우팅 헬퍼 멍
-  const routeToResult = (ok: boolean) => {
+  const routeToResult = useCallback((ok: boolean, id?: string) => {
     const params = new URLSearchParams({ type: 'booking', status: ok ? 'success' : 'fail' })
+    if (id) params.set('paymentId', id)
     navigate(`/payment/result?${params.toString()}`)
-  }
+  }, [navigate])
 
-  // 11) 결제수단 토글 멍
   const toggleMethod = (m: PaymentMethod) => {
     if (isPaying || remainingSeconds <= 0) return
     setOpenedMethod((prev) => (prev === m ? null : m))
     setErr(null)
   }
 
-  // 12) 결제 실행 멍
+  /* ───────────────────────── 결제 버튼 클릭 ───────────────────────── */
   const handlePayment = async () => {
-    // 기본 검증 멍
-    if (!checkout) {
-      setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.')
-      return
-    }
-    if (!openedMethod) {
-      setErr('결제 수단을 선택해주세요.')
-      return
-    }
-    if (remainingSeconds <= 0) {
-      setErr('결제 시간이 만료되었습니다.')
-      setIsTimeUpModalOpen(true)
-      return
-    }
-
+    // 공통 가드
+    if (!checkout) { setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.'); return }
+    if (!openedMethod) { setErr('결제 수단을 선택해주세요.'); return }
+    if (remainingSeconds <= 0) { setErr('결제 시간이 만료되었습니다.'); setIsTimeUpModalOpen(true); return }
     if (isPaying) return
 
-    // 지갑 결제 경로 ─ 비밀번호 모달 열기 멍
+    // 지갑 결제 플로우 — 1) request 성공 → 2) 비번 모달 오픈
     if (openedMethod === 'wallet') {
-      openPasswordModal()
+      try {
+        setIsPaying(true)
+        setErr(null)
+
+        // 결제 요청 — paymentId 보장
+        const id = paymentId ?? createPaymentId()
+        if (!paymentId) setPaymentId(id)
+
+        await requestMut.mutateAsync()               // 서버에 결제 요청 등록
+        setEnsuredPaymentId((prev) => prev ?? id)    // 모달에서도 동일 id 사용
+        setIsPasswordModalOpen(true)                 // 요청 성공 시점에 모달 오픈
+      } catch (e: any) {
+        console.error(e)
+        setErr(e?.message ?? '결제 요청에 실패했습니다.')
+      } finally {
+        setIsPaying(false)
+      }
       return
     }
 
-    // 토스 결제 경로 멍
+    // 카드(Toss) 결제 플로우 — 기존 로직 유지
     if (openedMethod === 'Toss') {
       const ensuredId = paymentId ?? createPaymentId()
       if (!paymentId) setPaymentId(ensuredId)
 
       setIsPaying(true)
       try {
-        // ✅ TossPaymentHandle 타입에 userId 파라미터는 없음 (헤더로 전달되므로 여기선 필요 없음) 멍
         await tossRef.current?.requestPay({
           paymentId: ensuredId,
-          amount: finalAmount,             
-          orderName,                       
-          bookingId: checkout.bookingId,   
-          festivalId: festivalIdVal,      
-          sellerId: sellerId,
-
+          amount: finalAmount,
+          orderName,
+          bookingId: checkout.bookingId,
+          festivalId: festivalIdVal,
+          sellerId: sellerId!,
           successUrl: `${window.location.origin}/payment/result?type=booking`,
           failUrl: `${window.location.origin}/payment/result?type=booking`,
         })
-        // PG 리다이렉트 이후 결과 페이지에서 처리 멍
       } catch (e) {
         setErr('결제 요청 중 오류가 발생했어요.')
         routeToResult(false)
@@ -190,21 +253,22 @@ const BookingPaymentPage: React.FC = () => {
     }
   }
 
+  /* ───────────────────────── 렌더 가드 ───────────────────────── */
   if (sellerId == null) {
     return <div className={styles.page}>sellerId가 null입니다</div>
   }
 
-  // 15) 메인 렌더 멍
+  /* ───────────────────────── 렌더 ───────────────────────── */
   return (
     <div className={styles.page}>
       <BookingPaymentHeader
         initialSeconds={DEADLINE_SECONDS}
-        onTick={(sec) => setRemainingSeconds(sec)} // 매초 남은 시간 반영 멍
-        onExpire={() => setIsTimeUpModalOpen(true)} // 만료 시 모달 열기 멍
+        onTick={(sec) => setRemainingSeconds(sec)}
+        onExpire={() => setIsTimeUpModalOpen(true)}
       />
 
       <div className={styles.container} role="main">
-        {/* 좌측: 수령 방법 + 결제 수단 멍 */}
+        {/* 좌측: 수령 방법 + 결제 수단 */}
         <section className={styles.left}>
           <div className={styles.sectionContainer}>
             <div className={styles.receiveSection}>
@@ -229,7 +293,7 @@ const BookingPaymentPage: React.FC = () => {
           </div>
         </section>
 
-        {/* 우측: 결제 요약/버튼 멍 */}
+        {/* 우측: 결제 요약/버튼 */}
         <aside className={styles.right}>
           <div className={styles.summaryCard}>
             <PaymentInfo />
@@ -248,19 +312,25 @@ const BookingPaymentPage: React.FC = () => {
         </aside>
       </div>
 
-      {/* 지갑 비밀번호 모달 멍 */}
+      {/* 지갑 비밀번호 모달 — verify → complete 순차 처리 */}
       {isPasswordModalOpen && ensuredPaymentId && (
         <PasswordInputModal
-          amount={amountToPay}              // finalAmount 기반 확정 금액
-          paymentId={ensuredPaymentId}      // 모달/서버/리다이렉트 모두 동일한 ID
+          amount={amountToPay}
+          paymentId={ensuredPaymentId}
           userName={userName}
           onClose={() => setIsPasswordModalOpen(false)}
-          onComplete={(pwd) => {
+          onComplete={async (pwd) => {
             setIsPaying(true)
+            setErr(null)
             try {
-              navigate(`/payment/result?type=booking&status=success&paymentId=${ensuredPaymentId}`)
-            } catch {
-              navigate(`/payment/result?type=booking&status=fail`)
+              // PaymentOrder 대기는 verifyTekcitPassword에서 자동 처리됨
+              await tekcitPayMut.mutateAsync(pwd)              // 지갑 검증+차감 (자동 재시도)
+              await completeMut.mutateAsync()                  // 결제 완료
+              routeToResult(true, ensuredPaymentId)
+            } catch (e: any) {
+              console.error(e)
+              setErr(e?.message ?? '결제 처리에 실패했습니다.')
+              routeToResult(false, ensuredPaymentId)
             } finally {
               setIsPaying(false)
               setIsPasswordModalOpen(false)
@@ -269,7 +339,7 @@ const BookingPaymentPage: React.FC = () => {
         />
       )}
 
-      {/* 시간 초과 모달 멍 */}
+      {/* 시간 초과 모달 */}
       {isTimeUpModalOpen && (
         <AlertModal title="시간 만료" onConfirm={handleTimeUpModalClose}>
           결제 시간이 만료되었습니다. 다시 시도해주세요.
