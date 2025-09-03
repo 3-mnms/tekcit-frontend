@@ -42,4 +42,3 @@ export async function requestTossBookingPayment(body: TossPaymentBody) {
   return postWithUserId('/payments/request', payload)
 }
 
-// 테킷 페이 충전할 때 토스 페이먼츠 사용 (추가해야 함)

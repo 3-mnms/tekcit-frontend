@@ -1,22 +1,22 @@
 // src/components/my/ticket/transfer/BeforeTransferTicket.tsx
 import React from 'react';
 import styles from './BeforeTransferTicket.module.css';
-import type { TicketListItem } from '@/models/my/ticket/ticketTypes';
+import type { TransferListItem } from '@/models/my/ticket/ticketTypes';
 
 type Props = {
-  item: TicketListItem;
+  item: TransferListItem;
   onTransfer: (reservationNumber: string) => void; // ⬅️ 변경: string만 넘김
 };
 
 const BeforeTransferTicket: React.FC<Props> = ({ item, onTransfer }) => {
   const fallbackPoster = '/dummy-poster.jpg';
-  const posterSrc = '/dummy-poster.jpg'; // 서버 포스터 있으면 교체
+  const posterSrc = item.posterFile ? encodeURI(item.posterFile) : '';
 
   return (
     <div className={styles.card}>
       <img
         src={posterSrc}
-        alt={`${item.title} 포스터`}
+        alt={item.posterFile}
         className={styles.poster}
         onError={(e) => {
           (e.currentTarget as HTMLImageElement).src = fallbackPoster;

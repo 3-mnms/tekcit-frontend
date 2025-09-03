@@ -17,8 +17,6 @@ const messaging = firebase.messaging();
 
 // 3. 백그라운드 메시지 수신 처리
 messaging.onBackgroundMessage((payload) => {
-    console.log('[firebase-messaging-sw.js] 백그라운드 메시지 수신:', payload);
-
     // 알림 페이로드 구성
     const notificationTitle = payload.notification.title;
     const notificationOptions = {

@@ -3,8 +3,9 @@ import React, { useEffect, useRef } from 'react'
 import styles from './SocialLogin.module.css'
 import KaKao from '@assets/kakao.png'
 import { reissue, type ReissueResponseDTO } from '@/shared/api/auth/login'
-import { useAuthStore } from '@/shared/storage/useAuthStore' 
+import { useAuthStore } from '@/shared/storage/useAuthStore'
 import { getEnv } from '@/shared/config/env'
+import { getAndSaveFcmToken } from '@/shared/api/auth/fcrmToken'
 
 const API_URL = getEnv('API_URL', '')
 
@@ -27,6 +28,7 @@ const SocialLogin: React.FC = () => {
       if (access) {
         useAuthStore.getState().setAccessToken(access) // <<<<<< 변경 핵심
         console.log('[Kakao] accessToken (raw):', access)
+        void getAndSaveFcmToken()
       }
     } catch (e) {
       console.error('[kakao] reissue failed', e)
@@ -35,8 +37,12 @@ const SocialLogin: React.FC = () => {
     // 정리
     if (pollTimer.current) window.clearInterval(pollTimer.current)
     if (storagePollTimer.current) window.clearInterval(storagePollTimer.current)
-    try { popupRef.current?.close() } catch {}
-    try { localStorage.removeItem('kakao_auth_done') } catch {}
+    try {
+      popupRef.current?.close()
+    } catch {}
+    try {
+      localStorage.removeItem('kakao_auth_done')
+    } catch {}
 
     // 라우팅
     if (status === 'existing') {
@@ -94,9 +100,7 @@ const SocialLogin: React.FC = () => {
     const top = window.screenY + (window.outerHeight - h) / 2
 
     processedRef.current = false
-console.log("url: ", API_URL)
     popupRef.current = window.open(
-      
       `${API_URL}/api/auth/kakao/authorize`,
       POPUP_NAME,
       `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`,

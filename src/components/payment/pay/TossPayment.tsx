@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import PortOne, { Currency, PayMethod } from '@portone/browser-sdk/v2'
 import styles from './TossPayment.module.css'
 import { paymentRequest } from '@/shared/api/payment/toss'
-import { api } from '@/shared/config/axios'
 import { paymentConfirm } from '@/shared/api/payment/confirm'
 
 // ✅ props 타입: UI 표시에 필요한 값 + 페이지에서 내려준 컨텍스트

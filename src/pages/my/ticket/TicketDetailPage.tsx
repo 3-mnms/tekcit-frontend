@@ -46,7 +46,7 @@ const TicketDetailPage: React.FC = () => {
             reserverName={reserverName}
           />
           <PaymentInfoSection
-            festivalId={data.festivalId} 
+            bookingId={data.reservationNumber} 
             reservationNumber={data.reservationNumber} 
           />
         </>

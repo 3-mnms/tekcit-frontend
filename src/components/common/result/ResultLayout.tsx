@@ -1,3 +1,5 @@
+// src/pages/result/ResultLayout.tsx
+// 주석: 내부 경로는 react-router nav, 외부(절대) URL은 location.assign 멍
 import { useNavigate } from 'react-router-dom'
 
 export default function ResultLayout({
@@ -9,16 +11,26 @@ export default function ResultLayout({
   secondary?: { label: string; to: string }
 }) {
   const nav = useNavigate()
+
+  // 주석: to가 'http'로 시작하면 외부 이동, 아니면 내부 라우팅 멍
+  const go = (to: string) => {
+    if (/^https?:\/\//i.test(to)) {
+      window.location.assign(to) // 주석: 절대 URL은 브라우저 네비게이션로 처리 멍
+      return
+    }
+    nav(to) // 주석: 내부 경로만 react-router로 이동 멍
+  }
+
   return (
     <div className="mx-auto max-w-[520px] p-8 text-center">
       <h2 className="text-2xl font-bold mb-2">{title}</h2>
       <p className="text-gray-600 mb-8">{message}</p>
       <div className="flex gap-3 justify-center">
-        <button className="px-5 py-3 rounded-xl border" onClick={() => nav(primary.to)}>
+        <button className="px-5 py-3 rounded-xl border" onClick={() => go(primary.to)}>
           {primary.label}
         </button>
         {secondary && (
-          <button className="px-5 py-3 rounded-xl border" onClick={() => nav(secondary.to)}>
+          <button className="px-5 py-3 rounded-xl border" onClick={() => go(secondary.to)}>
             {secondary.label}
           </button>
         )}
