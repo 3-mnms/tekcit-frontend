@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import Button from '@/components/common/button/Button'
 
 type Props = {
-  festivalId: string
+  bookingId: string
   reservationNumber: string
 }
 
@@ -44,18 +44,33 @@ const toDotYMD = (iso?: string) => {
   return `${yyyy}.${mm}.${dd}`
 }
 
-const PaymentInfoSection: React.FC<Props> = ({ festivalId, reservationNumber }) => {
-  const navigate = useNavigate()
-  const { data: list, isLoading, isError, error } = usePaymentOrdersQuery(festivalId)
-
-  const order = useMemo(() => {
-    if (!list || list.length === 0) return undefined
-    return [...list].sort((a, b) => {
-      const ta = new Date(a.payTime as unknown as string).getTime()
-      const tb = new Date(b.payTime as unknown as string).getTime()
-      return tb - ta // desc
+function normalizeOrder(input: any): any | undefined {
+  if (!input) return undefined
+  if (Array.isArray(input)) {
+    if (input.length === 0) return undefined
+    // 최신 1건
+    return [...input].sort((a, b) => {
+      const ta = new Date(String(a.payTime ?? a.createdAt ?? 0)).getTime()
+      const tb = new Date(String(b.payTime ?? b.createdAt ?? 0)).getTime()
+      return tb - ta
     })[0]
-  }, [list])
+  }
+  // 래퍼 형태 방어
+  const wrapped =
+    input?.content ??
+    input?.data?.content ??
+    input?.data ??
+    input
+  if (Array.isArray(wrapped)) return normalizeOrder(wrapped)
+  if (wrapped && typeof wrapped === 'object') return wrapped
+  return undefined
+}
+
+const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) => {
+  const navigate = useNavigate()
+  const { data, isLoading, isError, error } = usePaymentOrdersQuery(bookingId)
+
+  const order = useMemo(() => normalizeOrder(data), [data])
 
   const fee = 0
   const delivery = 0
@@ -67,6 +82,7 @@ const PaymentInfoSection: React.FC<Props> = ({ festivalId, reservationNumber }) 
   const isCanceled = status === 'canceled' || status === 'cancelled' // 혹시 서버 철자 변형 여지 대비
   const isPaid = status === 'paid'
   const canRefund = Boolean(order?.paymentId) && isPaid
+  console.log(status)
 
   const goRefund = () => {
     if (!canRefund || !order?.paymentId) return

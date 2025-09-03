@@ -10,7 +10,7 @@ export type PaymentOrderDTO = {
   paymentStatus: string;
 };
 
-export async function getPaymentOrdersByFestivalId(festivalId: string) {
-  const { data } = await api.get(`/payments/${festivalId}`);
+export async function getPaymentOrdersByBookingId(bookingId: string) {
+  const { data } = await api.get(`/payments/${bookingId}`);
   return (data?.data ?? data) as PaymentOrderDTO[];
 }
