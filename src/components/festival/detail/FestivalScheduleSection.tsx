@@ -10,6 +10,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useFestivalDetail } from '@/models/festival/tanstack-query/useFestivalDetail';
 import { useAuthStore } from '@/shared/storage/useAuthStore';
 import { useUserAgeQuery } from '@/models/festival/tanstack-query/useUserAgeDetail';
+import { useEnterWaitingMutation } from '@/models/waiting/tanstack-query/useWaiting';
 
 /** YYYY-MM-DD */
 const ymd = (d: Date) => {
@@ -40,35 +41,16 @@ const toJsDow = (raw?: string): number | undefined => {
   return map[three];
 };
 
-const openbookingPopup = (
-  fid: string | number,
-  date: Date,
-  time?: string | null,
-  fdfrom?: string | null,
-  fdto?: string | null
-) => {
-  const width = 1000;
-  const height = 600;
-  const left = window.screenX + (window.outerWidth - width) / 2;
-  const top = window.screenY + (window.outerHeight - height) / 2;
-
-  const params = new URLSearchParams();
-  params.set('date', ymd(date));
-  if (time) params.set('time', time);
-  if (fdfrom) params.set('fdfrom', fdfrom);
-  if (fdto) params.set('fdto', fdto);
-
-  const url = `/booking/${fid}?${params.toString()}`;
-
-  window.open(
-    url,
-    '_blank',
-    `width=${width},height=${height},left=${left},top=${top},noopener,noreferrer`
-  );
-};
+/* =========================
+   ✅ 팝업 사이즈 상수
+   ========================= */
+const WAIT_W = 480;
+const WAIT_H = 720;
+const BOOK_W = 1000;
+const BOOK_H = 600;
 
 /* =========================
-   ✅ 연령 체크 유틸들
+   ✅ 연령 체크 유틸들 (파일 내부 전용)
    ========================= */
 
 /** 관람연령 문자열에서 최소 나이 추출 (없으면 null, 전체관람가/전연령 등은 0) */
@@ -85,7 +67,6 @@ function parseMinAge(raw?: string | null): number | null {
     if (!isNaN(n)) return n;
   }
 
-  // 기타 케이스는 해석 불가 → null (차단하지 않음)
   return null;
 }
 
@@ -137,6 +118,86 @@ function getBirthYmdFromStore(store: any): string | null {
   return null;
 }
 
+/** HH:mm → Date에 시분 합치기 (파일 내부 전용) */
+const __fs_combineDateTime = (day: Date, hhmm?: string | null): Date => {
+  const d = new Date(day);
+  d.setSeconds(0, 0);
+  if (!hhmm || hhmm === '공연시작') {
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+  const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm);
+  if (!m) return d;
+  const h = Math.min(23, parseInt(m[1], 10) || 0);
+  const mm = Math.min(59, parseInt(m[2], 10) || 0);
+  d.setHours(h, mm, 0, 0);
+  return d;
+};
+
+/** 중앙 팝업 오픈 (파일 내부 전용) */
+const __fs_openCenteredPopup = (url: string, w: number, h: number) => {
+  const availLeft = (screen as any).availLeft ?? 0;
+  const availTop  = (screen as any).availTop  ?? 0;
+  const availW    = screen.availWidth ?? screen.width;
+  const availH    = screen.availHeight ?? screen.height;
+
+  const left = Math.max(availLeft, Math.round(availLeft + (availW - w) / 2));
+  const top  = Math.max(availTop,  Math.round(availTop  + (availH - h) / 2));
+
+  const feat = [
+    'popup=yes',
+    'noopener',
+    'noreferrer',
+    'toolbar=0',
+    'menubar=0',
+    'location=0',
+    'status=0',
+    'scrollbars=1',
+    'resizable=1',
+    `width=${w}`,
+    `height=${h}`,
+    `left=${left}`,
+    `top=${top}`,
+  ].join(',');
+
+  window.open(url, '_blank', feat);
+};
+
+/** 예매 팝업 (파일 내부 전용) */
+const __fs_openBookingPopup = (
+  fid: string | number,
+  date: Date,
+  time?: string | null,
+  fdfrom?: string | null,
+  fdto?: string | null
+) => {
+  const params = new URLSearchParams();
+  params.set('date', ymd(date));
+  if (time) params.set('time', time);
+  if (fdfrom) params.set('fdfrom', fdfrom);
+  if (fdto) params.set('fdto', fdto);
+  __fs_openCenteredPopup(`/booking/${fid}?${params.toString()}`, BOOK_W, BOOK_H); // 1000×600
+};
+
+/** 대기열 팝업 (파일 내부 전용, enter는 이미 호출됨. skipEnter=1로 중복 방지) */
+const __fs_openWaitingPopup = (
+  fid: string | number,
+  date: Date,
+  time: string | null,
+  waitingNumber: number,
+  fdfrom?: string | null,
+  fdto?: string | null
+) => {
+  const params = new URLSearchParams();
+  params.set('date', ymd(date));
+  if (time) params.set('time', time);
+  params.set('wn', String(waitingNumber));
+  params.set('skipEnter', '1');
+  if (fdfrom) params.set('fdfrom', fdfrom);
+  if (fdto) params.set('fdto', fdto);
+  __fs_openCenteredPopup(`/booking/${fid}/queue?${params.toString()}`, WAIT_W, WAIT_H); // 480×720
+};
+
 const FestivalScheduleSection: React.FC = () => {
   const { fid } = useParams<{ fid: string }>();
   const { data: detail, isLoading, isError, status } = useFestivalDetail(fid ?? '');
@@ -148,6 +209,7 @@ const FestivalScheduleSection: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const accessToken = useAuthStore((s) => s.accessToken);
+  const enterMut = useEnterWaitingMutation();
 
   /** 오늘 00:00 */
   const today = useMemo(() => {
@@ -358,7 +420,7 @@ const FestivalScheduleSection: React.FC = () => {
             <Button
               className={styles.confirmBtn}
               disabled={confirmDisabled}
-              onClick={async () => {                    // ✅ async로 변경
+              onClick={async () => {
                 // 1) ✅ 로그인 가드
                 if (!accessToken) {
                   alert('로그인이 필요한 서비스입니다.');
@@ -393,11 +455,54 @@ const FestivalScheduleSection: React.FC = () => {
                   }
                 }
 
-                // 3) ✅ 예매 팝업
+                // 가상 대기열 추가 테스트 끝나면 삭제
+                const FORCE_WAIT = true; // 테스트 끝나면 false
+                if (FORCE_WAIT && selectedDate && fid) {
+                  const fdfrom = startDate ? ymd(startDate) : null;
+                  const fdto = endDate ? ymd(endDate) : null;
+                  __fs_openWaitingPopup(
+                    fid,
+                    selectedDate,
+                    selectedTime,
+                    37, // 내 앞 대기자 수 (더미)
+                    fdfrom,
+                    fdto
+                  );
+                  return; // 바로 리턴해서 실제 API 호출 안 함
+                }
+
+                // 3) ✅ 대기열 확인 → 분기
                 if (!selectedDate || !fid) return;
                 const fdfrom = startDate ? ymd(startDate) : null;
                 const fdto = endDate ? ymd(endDate) : null;
-                openbookingPopup(fid, selectedDate, selectedTime, fdfrom, fdto);
+
+                const reservationDateTime = __fs_combineDateTime(selectedDate, selectedTime);
+
+                try {
+                  const res = await enterMut.mutateAsync({
+                    festivalId: fid,
+                    reservationDate: reservationDateTime,
+                  });
+
+                  if (res.immediateEntry) {
+                    // 바로 예매 팝업 (1000×600)
+                    __fs_openBookingPopup(fid, selectedDate, selectedTime, fdfrom, fdto);
+                  } else {
+                    // 대기열 팝업 (480×720)
+                    __fs_openWaitingPopup(
+                      fid,
+                      selectedDate,
+                      selectedTime,
+                      res.waitingNumber,
+                      fdfrom,
+                      fdto,
+                    );
+                  }
+                } catch (err) {
+                  console.error('[enter waiting] error:', err);
+                  // 실패 시엔 직접 예매 팝업을 열지 말고 사용자에게 재시도 유도
+                  alert('대기열 진입에 실패했어요. 잠시 후 다시 시도해 주세요.');
+                }
               }}
             >
               예매하기
