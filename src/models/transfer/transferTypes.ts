@@ -72,21 +72,24 @@ export type ApiEnvelope<T> = ApiOk<T> | ApiErr | T;
 /* ========= 상태 매퍼 ========= */
 export const FRtoBEString = (s: TransferStatusFR): TransferStatusBEString => {
   switch (s) {
-    case 'ACCEPTED': return 'APPROVED';
-    case 'REJECTED': return 'CANCELED';
+    case 'ACCEPTED': return 'COMPLETED';   // 수락 완료 = BE COMPLETED
+    case 'REJECTED': return 'CANCELED';    // 거절 = BE CANCELED
     case 'PENDING':
-    default: return 'REQUESTED';
+    default: return 'REQUESTED';           // 요청/승인 대기 = BE REQUESTED
   }
 };
 
 export const BEtoFR = (s: TransferStatusBE | string): TransferStatusFR => {
-  if (typeof s === 'string') {
-    const v = s.trim().toUpperCase();
-    if (v === 'APPROVED') return 'ACCEPTED';
-    if (v === 'CANCELED') return 'REJECTED';
+  const v = typeof s === 'string' ? s.trim().toUpperCase() : String(s);
+
+  if (v === '0' || v === 'REQUESTED' || v === '1' || v === 'APPROVED') {
     return 'PENDING';
   }
-  if (s === 1) return 'ACCEPTED';
-  if (s === 3) return 'REJECTED';
+  if (v === '2' || v === 'COMPLETED') {
+    return 'ACCEPTED';
+  }
+  if (v === '3' || v === 'CANCELED' || v === 'CANCELLED') {
+    return 'REJECTED';
+  }
   return 'PENDING';
 };

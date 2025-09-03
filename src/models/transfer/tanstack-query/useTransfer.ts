@@ -6,6 +6,7 @@ import {
   apiRequestTransfer,
   apiWatchTransfer,
   apiExtractPersonInfo,
+  apiVerifyFamily,
 } from '@/shared/api/transfer/transferApi';
 
 import {
@@ -152,10 +153,6 @@ export function useExtractPersonInfo() {
 export function useVerifyFamilyCert() {
   return useMutation<{ success: boolean; message?: string }, Error, ExtractPayload>({
     mutationKey: ['transfer', 'extract', 'verify'],
-    mutationFn: async (payload) => {
-      const people = await apiExtractPersonInfo(payload);
-      const ok = Array.isArray(people) && people.length > 0;
-      return { success: ok };
-    },
+    mutationFn: (payload) => apiVerifyFamily(payload),
   });
 }
