@@ -464,7 +464,7 @@ const FestivalScheduleSection: React.FC = () => {
                     fid,
                     selectedDate,
                     selectedTime,
-                    37, // 내 앞 대기자 수 (더미)
+                    5, // 내 앞 대기자 수 (더미)
                     fdfrom,
                     fdto
                   );
