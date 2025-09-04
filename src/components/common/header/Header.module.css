@@ -10,9 +10,10 @@
   overflow: hidden;
   position: sticky;   /* 화면 최상단에 달라붙게 */
   top: 0;
-  z-index: 1000;      /* 드롭다운/모달 등과 겹침 방지 */
+  z-index: 10000;      /* 드롭다운/모달 등과 겹침 방지 */
   height: 70px;       /* 고정 높이 권장(패딩 포함 시 box-sizing 필요) */
   box-sizing: border-box;
+  overflow: visible;
 }
 
 .left {

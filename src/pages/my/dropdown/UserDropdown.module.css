@@ -4,7 +4,7 @@
   border-radius: 0.75rem;
   padding: 1rem;
   position: relative;
-  z-index: 10000;
+  z-index: 1000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.403);
 }
 
