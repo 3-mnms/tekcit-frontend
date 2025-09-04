@@ -2,6 +2,7 @@
 import { api } from '@/shared/config/axios'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 import type { AxiosRequestConfig } from 'axios'
+import { z } from 'zod'
 
 /* ───────────────────────── 내부 헬퍼 ───────────────────────── */
 
@@ -135,7 +136,7 @@ export type TekcitAccountDTO = {
 export type PayByTekcitPayDTO = {
   amount: number
   paymentId: string
-  password: number
+  password: string
 }
 
 /* ───────────────────────── API 함수 ───────────────────────── */
@@ -146,11 +147,11 @@ export async function getTekcitBalance(): Promise<number> {
 }
 
 // 재시도 로직이 포함된 테킷페이 결제 함수
-export async function payByTekcitPay(params: { amount: number; paymentId: string; password: string | number }) {
+export async function payByTekcitPay(params: { amount: number; paymentId: string; password: string }) {
   const body: PayByTekcitPayDTO = {
     amount: Number(params.amount),
     paymentId: params.paymentId,
-    password: Number(params.password),
+    password: params.password,
   }
 
   // 최대 10회 재시도 (약 15초 총 대기)
@@ -227,3 +228,32 @@ const TEKCIT_HIS_KEY = 'tekcit.history'
 export async function getTekcitHistory(): Promise<TekcitHistoryItem[]> {
   return JSON.parse(localStorage.getItem(TEKCIT_HIS_KEY) ?? '[]')
 }
+
+export const TransferPayBodySchema = z.object({
+  sellerId: z.number().int().positive('sellerId는 양의 정수여야 합니다.'), // 판매자ID 멍
+  paymentId: z.string().min(10, 'paymentId가 올바르지 않습니다.'),        // 결제ID 멍
+  bookingId: z.string().min(1, 'bookingId가 비어 있습니다.'),             // 예매/예약 식별자 멍
+  totalAmount: z.number().int().nonnegative('totalAmount는 0 이상 정수'),  // 총 결제금액 멍
+  commission: z.number().int().nonnegative('commission는 0 이상 정수'),    // 수수료 멍
+})
+export type TransferPayBody = z.infer<typeof TransferPayBodySchema>         // 타입 유추 멍
+
+/* 주석: 양도 결제 시작 API — 헤더 X-User-Id 자동 첨부(postWithUserId 사용) 멍 */
+export async function postTekcitpayTransfer(input: TransferPayBody) {
+  // 주석: 진입 파라미터 검증(런타임) 멍
+  const body = TransferPayBodySchema.parse(input)
+
+  // 주석: 서버가 소수점 금액을 허용하지 않는 경우를 대비해 정수 변환 보강 멍
+  const clean = {
+    ...body,
+    totalAmount: Math.round(body.totalAmount),
+    commission: Math.round(body.commission),
+  }
+
+  console.log('📤 양도 결제 요청 바디:', clean) // 디버그 멍
+
+  // 주석: 공통 래퍼가 X-User-Id 헤더를 보장 멍
+  //       baseURL이 '/api'라면 여기 경로는 '/tekcitpay/transfer'면 됩니다 멍
+  return postWithUserId('/tekcitpay/transfer', clean)
+}
+
