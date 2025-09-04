@@ -9,7 +9,7 @@ export interface PayByTekcitPayDTO {
 
 /** POST /api/tekcitpay  (비번 검증 + 결제) */
 export async function payByTekcitPay(payload: PayByTekcitPayDTO, userId: number): Promise<void> {
-  await api.post('/api/tekcitpay', payload, {
+  await api.post('/tekcitpay', payload, {
     headers: { 'X-User-Id': String(userId) },
   })
 }

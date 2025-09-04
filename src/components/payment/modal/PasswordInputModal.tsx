@@ -3,7 +3,7 @@ import { useState } from 'react'
 import styles from './PasswordInputModal.module.css'
 import DotDisplay from '@components/payment/password/DotDisplay'
 import Keypad from '@components/payment/password/Keypad'
-import { verifyTekcitPassword } from '@/shared/api/payment/tekcit'
+import { verifyTekcitPassword } from '@/shared/api/payment/tekcits'
 
 interface PasswordInputModalProps {
   onClose: () => void

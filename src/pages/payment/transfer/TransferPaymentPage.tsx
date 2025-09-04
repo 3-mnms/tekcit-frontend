@@ -23,7 +23,7 @@ type TransferState = {
   senderId: number
   transferStatus: 'ACCEPTED'
   relation: 'FAMILY' | 'OTHERS'
-  reservationNumber: string        // ✅ 이 값이 bookingId로 간다!
+  reservationNumber: string       
   title?: string
   datetime?: string
   location?: string
@@ -140,7 +140,7 @@ const TransferPaymentPage: React.FC = () => {
         sellerId: Number(navState.senderId) || null,
         amount,
         currency: 'KRW',
-        payMethod: 'TEKCIT_PAY',
+        payMethod: 'POINT_PAYMENT', 
       }
       await requestPayment(reqBody, userId)
 

@@ -6,7 +6,7 @@ export type PaymentOrderStatus =
   | 'POINT_PAYMENT_REQUESTED'
   | 'POINT_CHARGE_REQUESTED'
 
-export type PayMethodType = 'TEKCIT_PAY' | 'CARD' | 'TOSS' | 'KAKAO_PAY' | 'BANK_TRANSFER'
+export type PayMethodType = 'CARD' | 'POINT_PAYMENT' | 'POINT_CHARGE'
 
 export interface PaymentRequestDTO {
   paymentId: string
@@ -22,12 +22,12 @@ export interface PaymentRequestDTO {
 
 /** POST /api/payments/request */
 export async function requestPayment(dto: PaymentRequestDTO, userId: number): Promise<void> {
-  await api.post('/api/payments/request', dto, {
+  await api.post('/payments/request', dto, {
     headers: { 'X-User-Id': String(userId) },
   })
 }
 
 /** POST /api/payments/complete/{paymentId} (선택) */
 export async function completePayment(paymentId: string): Promise<void> {
-  await api.post(`/api/payments/complete/${encodeURIComponent(paymentId)}`)
+  await api.post(`/payments/complete/${encodeURIComponent(paymentId)}`)
 }
