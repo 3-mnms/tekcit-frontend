@@ -1,4 +1,3 @@
-// src/pages/payment/TransferPaymentPage.tsx
 import React, { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -12,7 +11,7 @@ import TicketDeliverySelectSection, { type DeliveryMethod } from '@/components/b
 
 import { useRespondFamilyTransfer, useRespondOthersTransfer } from '@/models/transfer/tanstack-query/useTransfer'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
-import { createPaymentId } from '@/shared/utils/payment' // ← 네가 둔 위치 사용
+import { createPaymentId } from '@/models/payment/utils/paymentUtils' 
 import { requestPayment, type PaymentRequestDTO } from '@/shared/api/payment/payments'
 
 import styles from './TransferPaymentPage.module.css'
@@ -24,7 +23,7 @@ type TransferState = {
   senderId: number
   transferStatus: 'ACCEPTED'
   relation: 'FAMILY' | 'OTHERS'
-  reservationNumber: string
+  reservationNumber: string        // ✅ 이 값이 bookingId로 간다!
   title?: string
   datetime?: string
   location?: string
@@ -37,11 +36,13 @@ const TransferPaymentPage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const navState = (location.state ?? {}) as Partial<TransferState>
-  const relation: 'FAMILY' | 'OTHERS' = navState.relation === 'FAMILY' || navState.relation === 'OTHERS' ? navState.relation : 'OTHERS'
+
+  const relation: 'FAMILY' | 'OTHERS' =
+    navState.relation === 'FAMILY' || navState.relation === 'OTHERS' ? navState.relation : 'OTHERS'
   const isFamily = relation === 'FAMILY'
 
   const { data: tokenInfo } = useTokenInfoQuery()
-  const userId = tokenInfo?.userId // ✅ 헤더에 실어줄 값
+  const userId = tokenInfo?.userId
 
   const respondFamily = useRespondFamilyTransfer()
   const respondOthers = useRespondOthersTransfer()
@@ -56,7 +57,7 @@ const TransferPaymentPage: React.FC = () => {
   const [isPwModalOpen, setIsPwModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const [paymentId] = useState(() => createPaymentId()) // ✅ 한 번 생성해 고정
+  const [paymentId] = useState(() => createPaymentId())
   const amount = (navState.price ?? 0) * (navState.ticket ?? 1)
 
   const transferIdOK = Number.isFinite(Number(navState.transferId))
@@ -107,7 +108,7 @@ const TransferPaymentPage: React.FC = () => {
     navigate(`/payment/result?${params.toString()}`)
   }
 
-  /** ✅ “다음” 확인 누르면: 승인 → (지인) 결제요청 → 비번모달 */
+  /** “다음” 확인 */
   const handleAlertConfirm = async () => {
     setIsAlertOpen(false)
     if (isSubmitting) return
@@ -128,20 +129,22 @@ const TransferPaymentPage: React.FC = () => {
 
       // 2) 결제 요청 (/api/payments/request)
       if (!userId) throw new Error('로그인이 필요합니다.')
+      if (!navState.reservationNumber) throw new Error('예약번호가 없습니다.')
+
       const reqBody: PaymentRequestDTO = {
         paymentId,
-        bookingId: null,                 // 양도 결제라면 예약번호가 없을 수 있음
-        festivalId: null,                // 필요 시 넘겨줄 값이 있으면 연결
+        bookingId: navState.reservationNumber,        // ✅ 여기! 예약번호를 bookingId로 전달
+        festivalId: null,
         paymentRequestType: 'POINT_PAYMENT_REQUESTED',
-        buyerId: userId,                 // 서버가 헤더도 보지만 필드가 있어도 무방
-        sellerId: Number(navState.senderId) || null, // 양도자 = 판매자
+        buyerId: userId,
+        sellerId: Number(navState.senderId) || null,
         amount,
         currency: 'KRW',
         payMethod: 'TEKCIT_PAY',
       }
       await requestPayment(reqBody, userId)
 
-      // 3) PIN 모달 오픈 → 성공 시 /api/tekcitpay
+      // 3) PIN 모달 오픈 (성공 시 /api/tekcitpay 호출은 모달 내부)
       setIsPwModalOpen(true)
     } catch (e: any) {
       const msg = e?.message || ''
@@ -156,9 +159,7 @@ const TransferPaymentPage: React.FC = () => {
   }
 
   const handlePasswordComplete = async (_password: string) => {
-    // 여기서는 이미 모달 내부에서 /api/tekcitpay 성공까지 끝남
-    // 필요하면 결제 완료 확인 API 호출:
-    // await completePayment(paymentId)
+    // 모달에서 /api/tekcitpay 성공 처리됨
     routeToResult(true, { relation: 'OTHERS' })
   }
 
