@@ -35,7 +35,10 @@ export const verifyCaptcha = async (
   const res = await api.post<ApiEnvelope<CaptchaResponseDTO>>(
     '/captcha/verify',
     null,
-    { params: { captcha } }
+    {
+      params: { captcha },
+      withCredentials: true,     // ⬅️ 중요: 세션 쿠키 보장
+    }
   );
   return res.data;
 };
