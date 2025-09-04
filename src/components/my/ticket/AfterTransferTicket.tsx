@@ -1,6 +1,8 @@
 import React from 'react';
 import styles from './AfterTransferTicket.module.css';
 
+import Button from '@/components/common/button/Button';
+
 const priceFormatter = new Intl.NumberFormat('ko-KR', {
   style: 'currency',
   currency: 'KRW',
@@ -114,22 +116,22 @@ const AfterTransferTicket: React.FC<Props> = ({
 
         {s === 'REQUEST' && (
           <div className={styles.buttonWrapper}>
-            <button
+            <Button
               type="button"
               className={`${styles.btn} ${styles.accept}`}
               onClick={onAccept}
               aria-label="양도 수락"
             >
               수락
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               className={`${styles.btn} ${styles.reject}`}
               onClick={onReject}
               aria-label="양도 거절"
             >
               거절
-            </button>
+            </Button>
           </div>
         )}
       </div>
