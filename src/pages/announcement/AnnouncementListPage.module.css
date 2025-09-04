@@ -20,8 +20,26 @@
 
 .controls {
   display: flex;
+  align-items: center;
   gap: 10px;
 }
+
+.filterGroup {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    padding-right: 10px;
+    border-right: 1px solid #ddd;
+}
+
+.filterCheckbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #4d9afd;
+}
+
 
 .registerBtn {
   background-color: #4d9afd;
