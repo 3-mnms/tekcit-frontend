@@ -27,6 +27,7 @@ type TransferState = {
   senderId: number
   transferStatus: 'ACCEPTED'
   relation: 'FAMILY' | 'OTHERS'
+  reservationNumber: string
   // 표시용
   title?: string
   datetime?: string
@@ -145,7 +146,9 @@ const TransferPaymentPage: React.FC = () => {
 
       if (isFamily) {
         await respondFamily.mutateAsync(dto)
-        routeToResult(true, { relation: 'FAMILY' })
+        alert('성공적으로 티켓 양도를 받았습니다.')
+        navigate('/mypage/ticket/history') // ← 예매내역 경로에 맞춰 필요 시 '/mypage/ticket/reservations' 등으로 변경
+        return
       } else {
         await respondOthers.mutateAsync(dto)
         setIsPwModalOpen(true)

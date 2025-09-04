@@ -116,6 +116,7 @@ type InboxItem = {
   transferType?: 'FAMILY' | 'OTHERS' | string | number;
   createdAt: string;
   status: string | number;
+  reservationNumber: string;
   fname: string;            // 공연명
   posterFile: string;       // 포스터
   fcltynm: string;          // 장소
@@ -208,6 +209,7 @@ const TransferTicketPage: React.FC = () => {
             price: unitPrice,                   // 단가 (지인일 때만 노출)
             totalPrice,                         // 총액 (지인 요약/결제에 사용)
             posterFile: item.posterFile,        // 필요시 썸네일 등에서 사용
+            reservationNumber: item.reservationNumber,
           },
         });
         return;
