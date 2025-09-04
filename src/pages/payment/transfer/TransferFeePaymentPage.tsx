@@ -8,7 +8,7 @@ import PasswordInputModal from '@/components/payment/modal/PasswordInputModal'
 
 import TransferFeeInfo from '@/components/payment/transfer/TransferFeeInfo'
 import TicketInfoSection from '@/components/payment/transfer/TicketInfoSection'
-import { bookingTransfer } from '@/models/payment/bookingTransfer'
+import { bookingTransfer } from '@/models/payment/BookingTransfer'
 import { transferFee } from '@/models/payment/TransferFee'
 import WalletPayment from '@/components/payment/pay/TekcitPay'
 

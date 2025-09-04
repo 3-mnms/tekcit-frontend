@@ -45,7 +45,7 @@ const Sidebar: React.FC = () => {
         <div key={item.label} className={styles.section}>
           <div
             className={`${styles.parent} ${isParentActive(item.path) ? styles.active : ''}`}
-            onClick={() => navigate(item.path)}
+            onClick={() => window.location.href = item.path}
             tabIndex={0}
             role="link"
             aria-current={isParentActive(item.path) ? 'page' : undefined}
@@ -58,7 +58,7 @@ const Sidebar: React.FC = () => {
             <div
               key={child.label}
               className={`${styles.child} ${isActive(child.path) ? styles.active : ''}`}
-              onClick={() => navigate(child.path)}
+              onClick={() => window.location.href = child.path}
               tabIndex={0}
               role="link"
               aria-current={isActive(child.path) ? 'page' : undefined}
