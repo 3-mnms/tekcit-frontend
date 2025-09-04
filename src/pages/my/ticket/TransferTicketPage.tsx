@@ -244,13 +244,6 @@ const TransferTicketPage: React.FC = () => {
 
       {/* === 양도받은 요청(수신함) === */}
       <div className={styles.receivedSection}>
-        {inboxLoading && <div className={styles.empty}>불러오는 중…</div>}
-        {inboxError && (
-          <div className={styles.empty} role="alert" style={{ color: '#b91c1c' }}>
-            조회 실패: {(inboxErr as any)?.message ?? '알 수 없는 오류'}
-          </div>
-        )}
-
         {(() => {
           const inboxItems: InboxItem[] = Array.isArray(inbox) ? (inbox as any).filter(Boolean) : [];
           const hasInbox = !inboxLoading && !inboxError && inboxItems.length > 0;
