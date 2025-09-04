@@ -1,0 +1,123 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  z-index: 99999; /* 예매 UI 위로 */
+  display: grid;
+  place-items: center;
+}
+
+.card {
+  position: relative;
+  width: min(960px, 92%);
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+  padding: 24px;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 40% 1fr;
+  gap: 16px;
+}
+
+.imageBox {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #f1f5f9;
+}
+
+.img {
+  width: 100%;
+  height: auto;
+  max-height: 240px;
+  object-fit: contain;
+  user-select: none;
+}
+
+.imgSkeleton {
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 4/1.2;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+.side { width: 100%; }
+
+.desc { color: #334155; margin-bottom: 8px; }
+
+.timerRow {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+
+.timerLabel { color: #475569; font-size: .9rem; }
+.timerVal {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-weight: 700; color: #0f172a;
+}
+
+.form { display: grid; gap: 8px; width: 100%; }
+
+.label { font-size: .95rem; color: #0f172a; font-weight: 600; }
+
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  outline: none;
+  transition: box-shadow .15s ease, border-color .15s ease;
+  background: #fff;
+  box-sizing: border-box;
+}
+.input:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 4px rgba(147, 197, 253, .35);
+}
+
+.error { color: #dc2626; font-size: .9rem; }
+.serverMsg { color: #1f2937; font-size: .95rem; }
+
+.actions { margin-top: 6px; display: grid; gap: 8px; }
+.textBtn {
+  background: none; border: none; color: #2563eb; text-decoration: underline;
+  padding: 6px 0; cursor: pointer; justify-self: start;
+}
+
+@media (max-width: 860px) {
+  .row { grid-template-columns: 1fr; }
+}
