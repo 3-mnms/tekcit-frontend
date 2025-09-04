@@ -14,7 +14,8 @@ import {getProducts} from '@/shared/api/admin/festival'
 const AnnouncementListPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showSent, setShowSent] = useState(false);
   const [editTarget, setEditTarget] = useState<Announcement | null>(null);
 
 
@@ -64,9 +65,18 @@ const AnnouncementListPage: React.FC = () => {
         alert('공지사항이 삭제되었습니다.');
     },
     onError: (error) => {
-        console.error("삭제 실패:", error);
-        alert('삭제에 실패했습니다.');
-    }
+        // AxiosError 객체에서 서버 응답 상태 코드를 확인해.
+        const status = error.response?.status;
+        
+        // 삐약! 서버에서 기한이 지난 공연이라 삭제할 수 없다고 알려줄 때!
+        if (status === 500) {
+            alert('기한이 지난 공연은 삭제할 수 없습니다!');
+        } else {
+            // 다른 종류의 에러가 났을 때
+            console.error('상품 삭제 실패:', error);
+            alert('상품 삭제에 실패했습니다.');
+        }
+    },
   });
 
   const handleDelete = (scheduleId: number) => {
@@ -92,10 +102,19 @@ const AnnouncementListPage: React.FC = () => {
 
   const filtered = useMemo(() => {
     if (!announcements) return [];
-    return announcements.filter(
+    const filteredBySearch = announcements.filter(
         (a) => a.fname?.includes(searchTerm) || a.title.includes(searchTerm)
     );
-  }, [announcements, searchTerm]);
+
+    // 삐약! `showSent` 상태에 따라 다시 한번 필터링!
+    if (showSent) {
+        return filteredBySearch; // `true`면 전체 다 보여줘!
+    } else {
+        // `false`면 알림이 보내지지 않은 공지사항만 보여줘!
+        return filteredBySearch.filter((a) => !a.sent);
+    }
+  }, [announcements, searchTerm, showSent]); // 삐약! `showSent`를 의존성 배열에 추가!
+
 
   if (isLoading) return <Layout subTitle="공지사항 목록"><div>로딩 중...</div></Layout>;
   if (isError) return <Layout subTitle="공지사항 목록"><div>에러 발생!</div></Layout>;
@@ -107,6 +126,16 @@ const AnnouncementListPage: React.FC = () => {
           <h3 className={styles.title}>전체 공지 {filtered.length}건</h3>
           <div className={styles.controls}>
             <SearchBar searchTerm={searchTerm} onSearch={setSearchTerm} />
+            <div className={styles.filterGroup}>
+              <input
+              type="checkbox"
+              id="showSent"
+              className={styles.filterCheckbox}
+              checked={showSent}
+              onChange={(e) => setShowSent(e.target.checked)}
+              />
+              <p>종료된 공지</p>
+            </div>
             <Button
               className={styles.registerBtn}
               onClick={() => {
