@@ -4,7 +4,7 @@ import Layout from '@/components/layout/Layout';
 import { useMutation, useQueryClient, useQuery} from '@tanstack/react-query';
 import Input from '@/components/shared/Input';
 import DatePicker from '@components/shared/DatePicker';
-import Button from '@components/common/button/Button';
+import Button from '@components/common/Button';
 import PostcodeSearch from '@/components/product/PostcodeSearch';
 import ScheduleDropdown from '@/components/product/ScheduleDropdown';
 import {initialProductData, type Festival, type DayOfWeek} from '@/models/admin/festival';
@@ -70,8 +70,13 @@ const ProductRegisterPage: React.FC = () => {
             navigate('/admin/productManage');
         },
         onError: (error) => {
-            console.error('상품 등록/수정 실패:', error);
-            alert(`상품 ${isEditMode ? '수정' : '등록'}에 실패했습니다.`);
+            const status = error.response?.status;
+            if (status === 500) {
+                alert('지금은 관리자 계정으로 로그인되어 있습니다. 다시 시도해주세요.');
+            } else {
+                console.error('상품 등록/수정 실패:', error);
+                alert(`상품 ${isEditMode ? '수정' : '등록'}에 실패했습니다.`);
+            }
         },
     });
 
@@ -294,9 +299,9 @@ const ProductRegisterPage: React.FC = () => {
                             <div className={styles.formItem}>
                                 <label>12. 고객 티켓 수령 방법</label>
                                 <div className={styles.radioGroup}>
-                                    <label><input type="radio" name="fticketPick" value={1} checked={productData.detail.ticketPick === 1} onChange={handleDetailChange} /> 일괄 배송</label>
-                                    <label><input type="radio" name="fticketPick" value={2} checked={productData.detail.ticketPick === 2} onChange={handleDetailChange} /> 현장 수령(QR)</label>
-                                    <label><input type="radio" name="fticketPick" value={3} checked={productData.detail.ticketPick === 3} onChange={handleDetailChange} /> 배송&현장 수령(QR)</label>
+                                    <label><input type="radio" name="ticketPick" value={1} checked={productData.detail.ticketPick === 1} onChange={handleDetailChange} /> 일괄 배송</label>
+                                    <label><input type="radio" name="ticketPick" value={2} checked={productData.detail.ticketPick === 2} onChange={handleDetailChange} /> 현장 수령(QR)</label>
+                                    <label><input type="radio" name="ticketPick" value={3} checked={productData.detail.ticketPick === 3} onChange={handleDetailChange} /> 배송&현장 수령(QR)</label>
                                 </div>
                             </div>
                         </div>

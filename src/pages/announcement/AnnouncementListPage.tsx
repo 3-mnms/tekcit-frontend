@@ -7,7 +7,7 @@ import AnnouncementModal from '@/components/announcement/AnnouncementModal';
 import styles from './AnnouncementListPage.module.css';
 import type { Announcement, NewAnnouncement } from '@/models/admin/Announcement';
 import { getAnnouncements, updateAnnouncement, deleteAnnouncement, createAnnouncement } from '@/shared/api/admin/announcement';
-import Button from '@/components/common/button/Button';
+import Button from '@/components/common/Button';
 
 import {getProducts} from '@/shared/api/admin/festival'
 
@@ -47,9 +47,14 @@ const AnnouncementListPage: React.FC = () => {
       handleModalClose();
     },
     onError: (error) => {
-      console.error("저장/수정 실패:", error);
-      alert('작업에 실패했습니다.');
-    }
+      const status = error.response?.status;
+      if (status === 500) {
+          alert('지금은 관리자 계정으로 로그인되어 있습니다. 다시 시도해주세요.');
+      } else {
+          console.error('상품 등록/수정 실패:', error);
+          alert(`공지사항 등록에 실패했습니다.`);
+      }
+  },
 });
 
   const deleteMutation = useMutation({
