@@ -25,23 +25,22 @@ import {
   checkTransferStatus,           // 폴백 상태 조회 멍
 } from '@/shared/api/payment/transfer'
 
-import styles from './TransferPaymentPage.module.css'                          // 스타일 멍
+import styles from './TransferPaymentPage.module.css'
 
-type Method = '킷페이'
+type PayMethod = '킷페이' | '토스'
 
-/* ───────── 날짜 포맷 ───────── 멍 */
-function formatKoreanDateTime(iso: string) {
-  try {
-    const d = new Date(iso)
-    if (isNaN(d.getTime())) return iso
-    const y = d.getFullYear()
-    const m = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    const hh = String(d.getHours()).padStart(2, '0')
-    const mm = String(d.getMinutes()).padStart(2, '0')
-    const w = ['일','월','화','수','목','금','토'][d.getDay()]
-    return `${y}.${m}.${day} (${w}) ${hh}:${mm}`
-  } catch { return iso }
+type TransferState = {
+  transferId: number
+  senderId: number
+  transferStatus: 'ACCEPTED'
+  relation: 'FAMILY' | 'OTHERS'
+  // 표시용
+  title?: string
+  datetime?: string
+  location?: string
+  ticket?: number
+  price?: number
+  posterFile?: string
 }
 
 const TransferPaymentPage: React.FC = () => {
@@ -87,35 +86,87 @@ const TransferPaymentPage: React.FC = () => {
   const [isAlertOpen, setIsAlertOpen] = useState(false)                // 안내 모달 멍
   const [isPwModalOpen, setIsPwModalOpen] = useState(false)            // 비번 모달 멍
 
-  // ✅ 금액/수수료 멍
-  const totalAmount = useMemo(() => (summary ? summary.unitPrice * summary.quantity : 0), [summary])
-  const commission = 0 // 정책 확정 시 계산식 교체 멍
+  // 필수 파라미터 가드
+  const transferIdOK = Number.isFinite(Number(navState.transferId))
+  const senderIdOK = Number.isFinite(Number(navState.senderId))
+  if (!transferIdOK || !senderIdOK) {
+    console.error('[TransferPaymentPage] invalid ids:', navState)
+    return (
+      <div className={styles.page}>
+        <header className={styles.header}>
+          <h1 className={styles.title}>양도 주문서</h1>
+        </header>
+        <main className={styles.main}>
+          <section className={styles.card}>
+            <p>요청 정보가 올바르지 않아요. 목록에서 다시 들어와 주세요.</p>
+            <Button onClick={() => navigate(-1)}>뒤로가기</Button>
+          </section>
+        </main>
+      </div>
+    )
+  }
 
-  // ✅ 양도 결제 시작 뮤테이션 — 분리된 API 사용 멍
-  const transferMutation = useMutation({
-    mutationKey: ['tekcitpay-transfer', paymentId],
-    mutationFn: () =>
-      postTekcitpayTransfer({
-        buyerId: buyerId!,                // 헤더 X-User-Id 멍
-        sellerId: effectiveSellerId!,     // 실제 양도자 멍
-        paymentId,                        // 결제 식별자 멍
-        bookingId: String(bookingId),     // 예약 ID 멍
-        totalAmount,                      // 총액 멍
-        commission,                       // 수수료 멍
-      }),
+  // 표시용 금액(요약/결제)
+  const amount = (navState.price ?? 0) * (navState.ticket ?? 1)
+
+  // BookingProductInfo로 내려줄 info 패킷
+  const productInfo = {
+    title: navState.title,
+    datetime: navState.datetime,
+    location: navState.location,
+    ticket: navState.ticket,
+    price: navState.price,
+    relation,
+    posterFile: navState.posterFile,
+  }
+
+  // ── 유틸 ──────────────────────────────────────────────────────────────
+  const routeToResult = (ok: boolean, extra?: Record<string, string | undefined>) => {
+    const params = new URLSearchParams({
+      type: 'transfer',
+      status: ok ? 'success' : 'fail',
+      ...(extra ?? {}),
+    })
+    navigate(`/payment/result?${params.toString()}`)
+  }
+
+  const togglePayMethod = (m: PayMethod) => {
+    setOpenedMethod(prev => (prev === m ? null : m))
+  }
+
+  // ── 버튼 활성화 조건 ─────────────────────────────────────────────────
+  const disabledNext = useMemo(() => {
+    if (!deliveryMethod) return true // 수령방법 필수
+    const addressOk = needAddress ? isAddressFilled : true
+
+    if (isFamily) return !addressOk // 가족: 주소만(필요 시)
+
+    // 지인: 주소(필요 시) + 약관 + 결제수단
+    return !(addressOk && isAgreed && openedMethod !== null)
+  }, [deliveryMethod, needAddress, isAddressFilled, isAgreed, openedMethod, isFamily])
+
+  // ── 승인 DTO 생성 (프론트표기 → API 내부에서 서버표기로 변환) ──────────
+  const buildApproveDTO = () => ({
+    transferId: Number(navState.transferId),
+    senderId: Number(navState.senderId),
+    transferStatus: 'ACCEPTED' as const,       // 프론트 표기(ACCEPTED) → API에서 'APPROVED'로 변환
+    deliveryMethod: deliveryMethod ?? null,    // QR/PAPER/null
+    address: deliveryMethod === 'PAPER' ? (address || '') : null,
   })
 
-  /* ───────── STOMP 구독(연결=구독) ───────── 멍 */
-  const stompRef = useRef<ReturnType<typeof createStompClient> | null>(null) // 현재 STOMP 클라 멍
-  const timeoutRef = useRef<number | null>(null)                             // 타임아웃 타이머 멍
-  const [wsEnabled, setWsEnabled] = useState(false)                          // POST 성공 후 true 멍
+  // ── 모달 핸들러 ──────────────────────────────────────────────────────
+  const handleAlertConfirm = async () => {
+    setIsAlertOpen(false)
+    if (isSubmitting) return
+    setIsSubmitting(true)
 
-  // 주석: 페이지 가시성 변경 시 — 백그라운드에서 불필요한 연결 유지 방지 멍
-  useEffect(() => {
-    const onVisibility = () => {
-      const hidden = document.visibilityState === 'hidden'
-      if (hidden) {
-        try { stompRef.current?.deactivate() } catch {}
+    try {
+      const dto = buildApproveDTO()
+      console.log('[approve] relation:', relation, 'dto:', dto)
+
+      if (isFamily) {
+        await respondFamily.mutateAsync(dto)
+        routeToResult(true, { relation: 'FAMILY' })
       } else {
         if (wsEnabled && !stompRef.current?.active) {
           // 주석: 포그라운드 복귀 시 자동 재연결은 STOMP가 처리(reconnectDelay) 멍
