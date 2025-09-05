@@ -18,15 +18,30 @@ const messaging = firebase.messaging();
 // 3. 백그라운드 메시지 수신 처리
 messaging.onBackgroundMessage((payload) => {
     // 알림 페이로드 구성
-    const notificationTitle = payload.notification.title;
-    const notificationOptions = {
-        body: payload.notification.body,
-        icon: '/firebase-logo.png' // 알림 아이콘 (프로젝트에 맞게 경로를 수정하세요)
-    };
+    try {
+        // 기존의 알림 표시 로직
+        console.log("Push received, trying to show notification with data:", payload.data);
+        const notificationTitle = payload.data.title;
+        const notificationOptions = {
+          body: payload.data.body,
+          icon: '/firebase-logo.png'
+        };
+        self.registration.showNotification(notificationTitle, notificationOptions);
 
-    // 알림 표시
-    self.registration.showNotification(notificationTitle, notificationOptions);
+      } catch (error) {
+        // 만약 위 try 블록에서 에러가 발생하면, 이 catch 블록이 실행됩니다.
+        console.error("Error in onBackgroundMessage: ", error);
+
+        // 에러 내용을 담은 대체 알림을 띄웁니다.
+        const errorTitle = '알림 처리 중 에러 발생';
+        const errorOptions = {
+          body: error.toString(), // 에러 메시지를 알림 내용으로 보여줍니다.
+          icon: '/firebase-logo.png' // 에러 아이콘이 있다면 변경해도 좋습니다.
+        };
+        self.registration.showNotification(errorTitle, errorOptions);
+      }
 });
+
 
 // 4. FCM 토큰 발급
 messaging.getToken({

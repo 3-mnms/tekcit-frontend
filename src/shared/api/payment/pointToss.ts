@@ -14,9 +14,6 @@ export const PointChargeRequestSchema = z.object({
 export type PointChargeRequest = z.infer<typeof PointChargeRequestSchema>
 
 /** [1/2] 결제 요청: POST /payments/request
- *  - paymentRequestType: POINT_CHARGE_REQUESTED
- *  - sellerId/festivalId/bookingId: 포함하지 않음
- *  - buyerId: 바디에 넣지 않고 X-User-Id 헤더에만 세팅
  */
 export async function requestTossPointCharge(input: PointChargeRequest) {
   const { paymentId, amount } = PointChargeRequestSchema.parse(input)
