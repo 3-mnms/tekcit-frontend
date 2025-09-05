@@ -17,15 +17,18 @@ const messaging = firebase.messaging();
 
 // 3. 백그라운드 메시지 수신 처리
 messaging.onBackgroundMessage((payload) => {
-    // 알림 페이로드 구성
-    const notificationTitle = payload.notification.title;
+    console.log('[SW] 백그라운드 메시지를 받았습니다. 원본 페이로드:', payload);
+
+    // 'notification'이 아닌 'data'에서 정보를 꺼냅니다.
+    const notificationTitle = payload.data.title;
     const notificationOptions = {
-        body: payload.notification.body,
-        icon: '/firebase-logo.png' // 알림 아이콘 (프로젝트에 맞게 경로를 수정하세요)
+        body: payload.data.body,
+        icon: '/firebase-logo.png'
+        //tag: payload.data.tag
     };
 
-    // 알림 표시
     self.registration.showNotification(notificationTitle, notificationOptions);
+    console.log('[SW] showNotification 호출이 성공적으로 완료되었습니다.');
 });
 
 // 4. FCM 토큰 발급

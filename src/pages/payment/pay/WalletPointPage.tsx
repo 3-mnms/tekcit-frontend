@@ -1,12 +1,89 @@
+// WalletPointPage.tsx
 // 주석: 내역은 서버에서 page/size만 받아오고, 월 필터는 프론트에서 처리 멍
-import { useMemo, useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useMemo, useState, useEffect, useRef } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
+import { z } from 'zod'
 import Button from '@/components/common/button/Button'
 import WalletHistory, { type WalletHistoryViewItem } from '@/components/payment/pay/WalletHistory'
 import { useWalletBalance, useWalletHistory } from '@/shared/api/payment/tekcitHistory'
+import { confirmPointCharge } from '@/shared/api/payment/pointToss'
+import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
 import styles from './WalletPointPage.module.css'
 
 const PAGE_SIZE = 10
+
+/* ───────────────────────── 결과 처리(확정/알림/새로고침) 멍 ───────────────────────── */
+const ResultQuerySchema = z.object({
+  type: z.literal('wallet-charge').optional(),
+  paymentId: z.string().min(10).optional(),
+  success: z.enum(['true', 'false']).optional(),
+})
+
+function useChargeResultHandler() {
+  const [params] = useSearchParams()
+  const { data: tokenInfo } = useTokenInfoQuery()
+  const userId = tokenInfo?.userId
+
+  const parsed = ResultQuerySchema.safeParse({
+    type: params.get('type') ?? undefined,
+    paymentId: params.get('paymentId') ?? undefined,
+    success: params.get('success') ?? undefined,
+  })
+  const qs = parsed.success ? parsed.data : {}
+
+  // 실패로 돌아온 경우: 바로 안내 후 쿼리 제거되도록 새로고침 이동
+  useEffect(() => {
+    if (qs.type === 'wallet-charge' && qs.success === 'false') {
+      alert('결제가 완료되지 않았습니다.')
+      window.location.replace('/payment/wallet-point')
+    }
+  }, [qs.type, qs.success])
+
+  // 확정 호출 (X-User-Id 필요 시 헤더 포함 — pointToss.ts 참고)
+  const confirmMutation = useMutation({
+    mutationFn: (pid: string) => confirmPointCharge(pid, userId),
+  })
+
+  // 승인 지연 대비 2초 폴링 (userId 준비 후 시작)
+  const pollRef = useRef<number | null>(null)
+  const shouldConfirm =
+    qs.type === 'wallet-charge' && !!qs.paymentId && qs.success === 'true'
+
+  useEffect(() => {
+    if (!shouldConfirm || !userId) return
+
+    if (!confirmMutation.isPending && !confirmMutation.isSuccess) {
+      confirmMutation.mutate(qs.paymentId!)
+    }
+
+    if (pollRef.current == null) {
+      pollRef.current = window.setInterval(() => {
+        if (!confirmMutation.isSuccess && !confirmMutation.isPending) {
+          confirmMutation.mutate(qs.paymentId!)
+        }
+      }, 2000)
+    }
+
+    return () => {
+      if (pollRef.current != null) {
+        clearInterval(pollRef.current)
+        pollRef.current = null
+      }
+    }
+  }, [shouldConfirm, userId, qs.paymentId, confirmMutation.isPending, confirmMutation.isSuccess])
+
+  // 성공 시: 알림 → 새로고침 이동 (쿼리 제거)
+  const redirectedRef = useRef(false)
+  useEffect(() => {
+    if (shouldConfirm && confirmMutation.isSuccess && !redirectedRef.current) {
+      redirectedRef.current = true
+      alert('충전이 완료되었습니다.')
+      window.location.replace('/payment/wallet-point')
+    }
+  }, [shouldConfirm, confirmMutation.isSuccess])
+}
+/* ──────────────────────────────────────────────────────────────────────── */
 
 export default function WalletPointPage() {
   const navigate = useNavigate()
@@ -15,6 +92,9 @@ export default function WalletPointPage() {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
   })
   const [page, setPage] = useState(0)
+
+  // ✅ 결제 결과 처리 훅 실행 (쿼리로 돌아오면 여기서 확정/알림/새로고침)
+  useChargeResultHandler()
 
   const { data: balanceData, isLoading: isBalanceLoading, refetch: refetchBalance } = useWalletBalance()
   const { data: historyPage, isLoading: isHistoryLoading, error: historyError, refetch: refetchHistory } =
@@ -29,25 +109,33 @@ export default function WalletPointPage() {
 
   // 주석: 월 필터(YYYY-MM) — 서버에서 받은 content를 프론트에서 필터링 멍
   const filteredItems = useMemo(() => {
-    const toYM = (iso: string) => {
-      const d = new Date(iso)
+    const toYM = (isoLike: unknown) => {
+      const d = new Date(String(isoLike ?? ''))
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     }
     const list = historyPage?.content ?? []
-    return list.filter((it) => toYM(it.time) === month)
+    // ✅ 서버가 payTime 또는 time을 줄 수 있으므로 둘 다 대응
+    return list.filter((it: any) => toYM(it.payTime ?? it.time) === month)
   }, [historyPage, month])
 
   // 주석: 뷰모델 변환 멍
   const viewItems: WalletHistoryViewItem[] = useMemo(() => {
-    return filteredItems.map((row, idx) => {
-      const method = (row.method ?? '').toUpperCase()
+    return filteredItems.map((row: any, idx: number) => {
+      // ✅ 서버가 payMethod 또는 method를 줄 수 있으므로 둘 다 대응
+      const rawMethod = String(row.payMethod ?? row.method ?? '').toUpperCase()
+
+      // ✅ 규칙: payMethod에 'CHARGE'가 포함되면 충전(+), 아니면 사용(-)
+      // (REFUND가 들어오면 보너스로 환불(+) 처리)
       const type: 'charge' | 'refund' | 'use' =
-        method === 'REFUND' ? 'refund' : method === 'CHARGE' ? 'charge' : 'use'
+        rawMethod.includes('CHARGE') ? 'charge'
+        : rawMethod.includes('REFUND') ? 'refund'
+        : 'use'
+
       return {
-        id: String(row.paymentId ?? `tx-${page}-${idx}`),
-        createdAt: row.time,
+        id: String(row.paymentId ?? row.id ?? `tx-${page}-${idx}`),
+        createdAt: String(row.payTime ?? row.time ?? new Date().toISOString()),
         type,
-        amount: Math.abs(row.amount),
+        amount: Math.abs(Number(row.amount ?? 0)),
       }
     })
   }, [filteredItems, page])
@@ -96,7 +184,12 @@ export default function WalletPointPage() {
 
       {/* 내역 표시 */}
       <section className={styles.historySection}>
-        <WalletHistory month={month} items={viewItems} loading={isHistoryLoading} error={historyError ? '내역을 불러오지 못했어요 (서버 오류)' : null} />
+        <WalletHistory
+          month={month}
+          items={viewItems}
+          loading={isHistoryLoading}
+          error={historyError ? '내역을 불러오지 못했어요 (서버 오류)' : null}
+        />
         <div className={styles.emptyAction}>
           <Button onClick={() => {
             const d = new Date(`${month}-01`); d.setMonth(d.getMonth() - 1)

@@ -464,7 +464,7 @@ const FestivalScheduleSection: React.FC = () => {
                     fid,
                     selectedDate,
                     selectedTime,
-                    37, // 내 앞 대기자 수 (더미)
+                    5, // 내 앞 대기자 수 (더미)
                     fdfrom,
                     fdto
                   );
@@ -501,7 +501,7 @@ const FestivalScheduleSection: React.FC = () => {
                 } catch (err) {
                   console.error('[enter waiting] error:', err);
                   // 실패 시엔 직접 예매 팝업을 열지 말고 사용자에게 재시도 유도
-                  alert('대기열 진입에 실패했어요. 잠시 후 다시 시도해 주세요.');
+                  alert(' 진입에 실패했어요. 잠시 후 다시 시도해 주세요.');
                 }
               }}
             >
