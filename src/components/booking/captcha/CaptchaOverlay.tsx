@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import styles from './CaptchaOverlay.module.css';
 import Button from '@/components/common/Button';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -45,16 +45,19 @@ const CaptchaOverlay: React.FC<Props> = ({
         handleSubmit,
         setError,
         resetField,
-        watch,
+        control,
         formState: { errors },
     } = useForm<FormValues>({
         resolver: zodResolver(schema),
         mode: 'onSubmit',
     });
 
-    const captchaValue = (watch('captcha') || '').trim();                // ← 추가
-    const isCaptchaReady = /^[A-Za-z0-9]{5}$/.test(captchaValue);        // ← 추가
-    const canSubmit = !!url && !isPending && left > 0 && isCaptchaReady; // ← 추가
+    const captchaValue = (useWatch({ control, name: 'captcha' }) || '')
+        .toString()
+        .trim();
+
+    const isCaptchaReady = /^[A-Za-z0-9]{5}$/.test(captchaValue);
+    const canSubmit = !!url && !isPending && left > 0 && isCaptchaReady;
 
     // 새 이미지 로드마다 타이머 초기화
     useEffect(() => {
@@ -106,8 +109,7 @@ const CaptchaOverlay: React.FC<Props> = ({
                 }
             },
             onError: () => {
-                const msg = '네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
-                setServerMsg(msg);
+                const msg = '보안문자 인증에 실패했어요.';
                 setError('captcha', { type: 'server', message: msg });
             },
         });
@@ -157,9 +159,6 @@ const CaptchaOverlay: React.FC<Props> = ({
                             className={styles.input}
                             autoFocus
                             {...register('captcha')}
-                            onChange={(e) => {
-                                e.currentTarget.value = e.currentTarget.value.toUpperCase();
-                            }}
                             onKeyDown={(e) => {
                                 const composing = (e.nativeEvent as any).isComposing;
                                 if (e.key === 'Enter' && !composing) {
