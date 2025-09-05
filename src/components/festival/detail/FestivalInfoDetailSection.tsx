@@ -9,7 +9,12 @@ const FestivalInfoDetailSection: React.FC = () => {
   const { fid } = useParams<{ fid: string }>();
   const { data: detail, isLoading, isError, status } = useFestivalDetail(fid ?? '');
 
-  // 화면은 항상 섹션을 렌더하되, 내용만 상태에 따라 바꿔줌 (훅 순서 안전)
+  // 안전하게 이미지 목록 준비(훅 순서 영향 없음)
+  const images =
+    detail?.contentFiles
+      ?.map((s) => (typeof s === 'string' ? s.trim() : ''))
+      .filter((s) => s.length > 0) ?? [];
+
   let body: React.ReactNode = null;
 
   if (!fid) {
@@ -21,9 +26,28 @@ const FestivalInfoDetailSection: React.FC = () => {
   } else {
     const story = detail.story?.trim();
     body = (
-      <p className={styles.description}>
-        {story && story.length > 0 ? story : '등록된 소개가 없습니다.'}
-      </p>
+      <>
+        <p className={styles.description}>
+          {story && story.length > 0 ? story : '등록된 소개가 없습니다.'}
+        </p>
+
+        {/* ✅ 이미지가 있을 때만 렌더 */}
+        {images.length > 0 && (
+          <div className={styles.imagesGrid} role="list">
+            {images.map((src, idx) => (
+              <figure className={styles.imageItem} role="listitem" key={`${src}-${idx}`}>
+                <img
+                  className={styles.image}
+                  src={src}
+                  alt={`공연 상세 이미지 ${idx + 1}`}
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                />
+              </figure>
+            ))}
+          </div>
+        )}
+      </>
     );
   }
 
