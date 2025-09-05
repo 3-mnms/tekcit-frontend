@@ -11,7 +11,7 @@ import ResultLayout from '@/components/common/result/ResultLayout'
 import { RESULT_CONFIG, type ResultType, type ResultStatus } from '@/shared/config/resultConfig'
 
 // 주석: 카드(토스/PortOne) confirm 전용 API 멍
-import { paymentConfirm as confirmToss } from '@/shared/api/payment/toss'
+// import { paymentConfirm as confirmToss } from '@/shared/api/payment/toss'
 
 /* ───────────────────────── Zod: URL 쿼리 검증 ───────────────────────── */
 /** 주석: 유효한 type/status/paymentId만 통과 멍 */
@@ -54,7 +54,7 @@ export default function ResultPage() {
   const confirmMut = useMutation({
     mutationFn: async (pid: string) => {
       // 주석: 서버가 PortOne(토스)로 승인 확인 멍
-      return confirmToss(pid)
+      // return confirmToss(pid)
     },
     onSuccess: () => {
       // 주석: 성공 시 status=success로 고정 멍(문자열 템플릿으로 단순화)
