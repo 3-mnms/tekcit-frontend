@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import styles from './ScheduleDropdown.module.css';
-import Button from '@/components/common/button/Button';
+import Button from '@/components/common/Button';
 import type { FestivalScheduleDTO, DayOfWeek } from '../../models/admin/festival';
 
 interface ScheduleDropdownProps {

@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './AnnouncementList.module.css';
 import type { Announcement } from '@/models/admin/Announcement';
-import Button from '../common/button/Button';
+import Button from '../common/Button';
 
 interface Props {
   announcements: Announcement[];

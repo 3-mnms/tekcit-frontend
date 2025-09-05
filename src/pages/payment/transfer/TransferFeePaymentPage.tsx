@@ -11,6 +11,11 @@ import PasswordInputModal from '@/components/payment/modal/PasswordInputModal'
 
 import TransferFeeInfo from '@/components/payment/transfer/TransferFeeInfo'
 import TicketInfoSection from '@/components/payment/transfer/TicketInfoSection'
+<<<<<<< HEAD
+=======
+import { bookingTransfer } from '@/models/payment/BookingTransfer'
+import { transferFee } from '@/models/payment/TransferFee'
+>>>>>>> a031375e34d4577aaee6daa2ba75faf8df9b56b4
 import WalletPayment from '@/components/payment/pay/TekcitPay'
 
 import { requestTransferFeePayment } from '@/shared/api/payment/payments'
