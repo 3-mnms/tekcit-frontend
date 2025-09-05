@@ -53,6 +53,7 @@ const TransferPaymentPage: React.FC = () => {
   // 관계 분기(FAMILY/OTHERS) 멍
   const relation: 'FAMILY' | 'OTHERS' =
     navState.relation === 'FAMILY' || navState.relation === 'OTHERS' ? navState.relation : 'OTHERS'
+    navState.relation === 'FAMILY' || navState.relation === 'OTHERS' ? navState.relation : 'OTHERS'
   const isFamily = relation === 'FAMILY'
 
   // 사용자 정보 멍
@@ -69,8 +70,11 @@ const TransferPaymentPage: React.FC = () => {
   const [isAddressFilled, setIsAddressFilled] = useState(false)
   const [isAgreed, setIsAgreed] = useState(false)
   const [openedMethod, setOpenedMethod] = useState<PayMethod | null>(null)
+  const [isAgreed, setIsAgreed] = useState(false)
+  const [openedMethod, setOpenedMethod] = useState<PayMethod | null>(null)
 
   const [isAlertOpen, setIsAlertOpen] = useState(false)
+  const [isPwModalOpen, setIsPwModalOpen] = useState(false)
   const [isPwModalOpen, setIsPwModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -83,6 +87,7 @@ const TransferPaymentPage: React.FC = () => {
   if (!transferIdOK || !senderIdOK) {
     return (
       <div className={styles.page}>
+        <header className={styles.header}><h1 className={styles.title}>양도 주문서</h1></header>
         <header className={styles.header}><h1 className={styles.title}>양도 주문서</h1></header>
         <main className={styles.main}>
           <section className={styles.card}>
@@ -132,6 +137,7 @@ const TransferPaymentPage: React.FC = () => {
   const needAddress = deliveryMethod === 'PAPER'
   const disabledNext = useMemo(() => {
     if (!deliveryMethod) return true
+    if (!deliveryMethod) return true
     const addressOk = needAddress ? isAddressFilled : true
     // 지인 결제는 동의 + 결제수단 + paymentId 로딩 완료까지 확인 멍
     const othersOk =
@@ -160,6 +166,8 @@ const TransferPaymentPage: React.FC = () => {
     senderId: Number(navState.senderId),
     transferStatus: 'ACCEPTED' as const,
     deliveryMethod: deliveryMethod ?? null,
+    transferStatus: 'ACCEPTED' as const,
+    deliveryMethod: deliveryMethod ?? null,
     address: deliveryMethod === 'PAPER' ? (address || '') : null,
   })
 
@@ -177,6 +185,7 @@ const TransferPaymentPage: React.FC = () => {
       if (isFamily) {
         await respondFamily.mutateAsync(dto)
         alert('성공적으로 티켓 양도를 받았습니다.')
+        navigate('/mypage/ticket/history')
         navigate('/mypage/ticket/history')
         return
       }
@@ -261,9 +270,11 @@ const TransferPaymentPage: React.FC = () => {
   return (
     <div className={styles.page}>
       <header className={styles.header}><h1 className={styles.title}>양도 주문서</h1></header>
+      <header className={styles.header}><h1 className={styles.title}>양도 주문서</h1></header>
 
       <div className={styles.layout}>
         <main className={styles.main}>
+          <section className={styles.card}><BookingProductInfo info={productInfo} /></section>
           <section className={styles.card}><BookingProductInfo info={productInfo} /></section>
 
           <section className={styles.card}>
@@ -272,12 +283,14 @@ const TransferPaymentPage: React.FC = () => {
               onChange={(v) => {
                 setDeliveryMethod(v)
                 if (v !== 'PAPER') { setIsAddressFilled(false); setAddress('') }
+                if (v !== 'PAPER') { setIsAddressFilled(false); setAddress('') }
               }}
             />
           </section>
 
           {needAddress && (
             <section className={styles.card}>
+              <AddressForm onValidChange={setIsAddressFilled} onAddressChange={setAddress} />
               <AddressForm onValidChange={setIsAddressFilled} onAddressChange={setAddress} />
             </section>
           )}
@@ -343,18 +356,15 @@ const TransferPaymentPage: React.FC = () => {
                 </div>
 
                 <label className={styles.agree}>
-                  <input
-                    type="checkbox"
-                    checked={isAgreed}
-                    onChange={(e) => setIsAgreed(e.target.checked)}
-                    aria-label="양도 서비스 약관 동의"
-                  />
+                  <input type="checkbox" checked={isAgreed} onChange={(e) => setIsAgreed(e.target.checked)} aria-label="양도 서비스 약관 동의" />
                   <span>(필수) 양도 서비스 이용약관 및 개인정보 수집·이용에 동의합니다.</span>
                 </label>
 
                 <Button
                   disabled={disabledNext || isSubmitting || !userId}
+                  disabled={disabledNext || isSubmitting || !userId}
                   className={styles.nextBtn}
+                  aria-disabled={disabledNext || isSubmitting || !userId}
                   aria-disabled={disabledNext || isSubmitting || !userId}
                   aria-label="다음 단계로 이동"
                   onClick={() => setIsAlertOpen(true)}
@@ -392,6 +402,8 @@ const TransferPaymentPage: React.FC = () => {
       </div>
 
       {isAlertOpen && (
+        <AlertModal title="안내" onCancel={() => setIsAlertOpen(false)} onConfirm={handleAlertConfirm}>
+          {isFamily ? '가족 간 양도는 결제 없이 진행됩니다. 계속하시겠습니까?' : '승인 후 결제를 진행합니다. 계속하시겠습니까?'}
         <AlertModal title="안내" onCancel={() => setIsAlertOpen(false)} onConfirm={handleAlertConfirm}>
           {isFamily ? '가족 간 양도는 결제 없이 진행됩니다. 계속하시겠습니까?' : '승인 후 결제를 진행합니다. 계속하시겠습니까?'}
         </AlertModal>

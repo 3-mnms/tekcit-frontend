@@ -98,7 +98,7 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
       {isLoading && <div className={styles.loading}>불러오는 중…</div>}
       {isError && (
         <div className={styles.error}>
-          불러오기 실패: {(error as Error)?.message ?? '알 수 없는 오류'}
+          양도 받은 티켓은 결제 내역에서 제외됩니다.
         </div>
       )}
       {!isLoading && !isError && !order && (

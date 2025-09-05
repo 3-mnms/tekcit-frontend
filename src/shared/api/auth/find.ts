@@ -42,7 +42,7 @@ export async function postFindRegisteredEmail(body: FindPwEmailDTO) {
 }
 
 export async function patchResetPasswordWithEmail(body: FindPwResetDTO) {
-  await api.patch<ApiSuccess<void>>('/users/resetPasswordWithEmail', body);
+  await api.patch<ApiSuccess<void>>('/users/resetPasswordEmail', body);
 }
 
 export type VerificationType = 'SIGNUP' | 'EMAIL_UPDATE' | 'PASSWORD_FIND';

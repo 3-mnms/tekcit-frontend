@@ -1,11 +1,9 @@
 // src/components/payment/modal/PasswordInputModal.tsx
-// 원래 코드 구조 유지: verifyTekcitPassword 호출 후 onComplete 전달
-
 import { useState } from 'react'
 import styles from './PasswordInputModal.module.css'
 import DotDisplay from '@components/payment/password/DotDisplay'
 import Keypad from '@components/payment/password/Keypad'
-import { verifyTekcitPassword } from '@/shared/api/payment/tekcits' // 경로 통일
+import { verifyTekcitPassword } from '@/shared/api/payment/tekcits'
 
 interface PasswordInputModalProps {
   onClose: () => void
@@ -13,7 +11,7 @@ interface PasswordInputModalProps {
   userName?: string
   amount: number
   paymentId: string
-  userId: number
+  userId: number             // ✅ 추가: 헤더용
 }
 
 const PasswordInputModal: React.FC<PasswordInputModalProps> = ({
@@ -23,40 +21,6 @@ const PasswordInputModal: React.FC<PasswordInputModalProps> = ({
   const [isError, setIsError] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const submitIfReady = async (next: string) => {
-    if (isSubmitting) return
-    if (!/^\d{6}$/.test(next)) return
-    
-    // 디버그 로그 추가
-    console.log('submitIfReady 호출됨:', { 
-      next, 
-      paymentId, 
-      amount, 
-      userId,
-      isFiniteAmount: Number.isFinite(amount)
-    })
-    
-    setIsSubmitting(true)
-    try {
-      console.log('비밀번호 6자리 입력 완료, 상위로 전달:', next)
-      
-      // 약간의 딜레이 후 상위 컴포넌트로 비밀번호 전달
-      setTimeout(() => {
-        console.log('onComplete 호출 시작')
-        onComplete(next)
-        setPassword('')
-        setIsError(false)
-        console.log('onComplete 호출 완료')
-      }, 120)
-    } catch (e: any) {
-      console.error('password handling error:', e)
-      setIsError(true)
-      setTimeout(() => setPassword(''), 300)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
   const handleKeyPress = async (value: string) => {
     if (isSubmitting) return
     if (value === '전체삭제') { setPassword(''); setIsError(false); return }
@@ -65,7 +29,23 @@ const PasswordInputModal: React.FC<PasswordInputModalProps> = ({
 
     const next = password + value
     setPassword(next); setIsError(false)
-    if (next.length === 6) await submitIfReady(next)
+
+    if (next.length === 6) {
+      setIsSubmitting(true)
+      try {
+        await verifyTekcitPassword({ amount, paymentId, password: next }, userId)
+        setTimeout(() => {
+          onComplete(next)
+          setPassword('')
+          setIsError(false)
+        }, 120)
+      } catch {
+        setIsError(true)
+        setTimeout(() => setPassword(''), 300)
+      } finally {
+        setIsSubmitting(false)
+      }
+    }
   }
 
   return (
