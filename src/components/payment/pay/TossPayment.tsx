@@ -103,11 +103,6 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           <span className={styles.title}>토스 페이먼츠</span>
           <span className={styles.sub}>신용/체크카드 / 간편결제</span>
         </button>
-
-        <div className={styles.meta}>
-          <span className={styles.amount}>{amount.toLocaleString()}원</span>
-          <span className={styles.orderName}>{orderName}</span>
-        </div>
       </div>
     )
   },

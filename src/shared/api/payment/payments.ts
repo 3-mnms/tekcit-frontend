@@ -20,6 +20,30 @@ export interface PaymentRequestDTO {
   payMethod: PayMethodType
 }
 
+/** GET /api/payments/{bookingId} → 결제 정보 조회 (paymentId, amount 등) */
+export interface PaymentInfoByBooking {
+  paymentId: string
+  amount: number
+  currency: string
+  payMethod: PayMethodType
+  payTime: string
+  paymentStatus: string
+}
+
+export interface RequestTransferPaymentDTO {
+  sellerId: number
+  paymentId: string
+  bookingId: string
+  totalAmount: number
+  commission: number
+}
+
+export interface RequestTekcitPayDTO {
+  amount: number        // 결제 금액(원)
+  paymentId: string     // 기존(혹은 사전 생성) 결제 ID
+  password: string      // 지갑 비밀번호
+}
+
 /** POST /api/payments/request */
 export async function requestPayment(dto: PaymentRequestDTO, userId: number): Promise<void> {
   await api.post('/payments/request', dto, {
@@ -30,4 +54,38 @@ export async function requestPayment(dto: PaymentRequestDTO, userId: number): Pr
 /** POST /api/payments/complete/{paymentId} (선택) */
 export async function completePayment(paymentId: string): Promise<void> {
   await api.post(`/payments/complete/${encodeURIComponent(paymentId)}`)
+}
+
+/** POST /api/tekcitpay/transfer */
+export async function requestTransferPayment(
+  dto: RequestTransferPaymentDTO,
+  userId: number,
+): Promise<void> {
+  await api.post('/tekcitpay/transfer', dto, {
+    headers: { 'X-User-Id': String(userId) },
+  })
+}
+
+/** POST /api/tekcitpay */
+export async function requestTekcitPay(
+  dto: RequestTekcitPayDTO,
+  userId: number,
+): Promise<void> {
+  await api.post('/tekcitpay', dto, {
+    headers: { 'X-User-Id': String(userId) },
+  })
+}
+
+/**
+ * 예약번호(bookingId)로 결제 정보 조회 → PaymentInfoByBooking 반환
+ * (paymentId, amount 등을 포함)
+ */
+export async function getPaymentIdByBookingId(
+  bookingId: string,
+  userId: number,
+): Promise<PaymentInfoByBooking | null> {
+  const { data } = await api.get(`/payments/${encodeURIComponent(bookingId)}`, {
+    headers: { 'X-User-Id': String(userId) },
+  })
+  return (data?.data ?? null) as PaymentInfoByBooking | null
 }

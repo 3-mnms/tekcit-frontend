@@ -19,8 +19,10 @@ const AmountSchema = z.number().int().positive().min(1000, '최소 1,000원 이�
 const AMOUNT_PRESETS = [10000, 50000, 100000, 1000000]
 
 const WalletChargePage: React.FC = () => {
+  // 입력 금액(문자열로 관리, 숫자만 허용)
   const [amount, setAmount] = useState('')
   const orderName = '지갑 포인트 충전'
+
   const navigate = useNavigate()
   const paymentIdRef = useRef<string>('')
 
@@ -51,16 +53,19 @@ const WalletChargePage: React.FC = () => {
     return url.toString()
   }
 
+  // 보호용 네비게이션(예외 상황 대비)
   const navigateToResult = (qs: Record<string, string>) => {
     const search = new URLSearchParams(qs).toString()
     navigate({ pathname: '/payment/wallet-point', search: `?${search}` }, { replace: true })
   }
 
+  // 프리셋 금액 버튼
   const handlePresetClick = (preset: number) => {
     const prev = parseInt((amount || '').replace(/[^0-9]/g, ''), 10) || 0
     setAmount(String(prev + preset))
   }
 
+  // 금액 입력 핸들러(숫자만 허용)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     if (e.target instanceof HTMLInputElement) {
       const val = e.target.value.replace(/[^0-9]/g, '')
@@ -68,6 +73,7 @@ const WalletChargePage: React.FC = () => {
     }
   }
 
+  // 결제 플로우 시작
   const handleCharge = async (e?: React.MouseEvent) => {
     if (e?.preventDefault) e.preventDefault()
     try {
@@ -106,7 +112,7 @@ const WalletChargePage: React.FC = () => {
         totalAmount: parsed.data,
         currency: Currency.KRW,
         payMethod: PayMethod.CARD,
-        redirectUrl,
+        redirectUrl: buildPortOneRedirect(paymentIdRef.current),
       })
 
       // 결제 직후 결과 페이지로 선 이동 (유지)

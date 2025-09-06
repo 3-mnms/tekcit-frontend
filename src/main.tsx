@@ -1,3 +1,6 @@
+;(window as any).global = window
+
+import 'global';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './app/styles/index.css';
