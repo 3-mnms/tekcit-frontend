@@ -43,7 +43,7 @@
   border-color: #4D9AFD;
 }
 
-input[type="date"] {
+.input[type="date"] {
   padding: 0.45rem 0.75rem;
   border: 1px solid #ccc;
   border-radius: 6px;
