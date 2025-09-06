@@ -1,20 +1,24 @@
 .table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   
 }
 
 th {
   border: 1px solid #ddd;
   padding: 8px 10px;
-  text-align: center;
   font-size: 14px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
 }
 
 td {
   border: 1px solid #ddd;
   padding: 5px 10px;
-  text-align: center;
   font-size: 14px;
 }
 
@@ -23,7 +27,7 @@ thead {
   font-weight: 600;
 }
 
-.actionColumn {
+/* .actionColumn {
   width: 15%;
   min-width: 100px;
 }
@@ -34,20 +38,11 @@ thead {
   gap: 18px;
   border-left: none;
   border-top: none;
-}
+} */
 
-.edit {
-  background-color: white;
-  border: 1px solid;
-  padding: 4px 10px;
+.buttons {
+  display: flex;
   border-radius: 4px;
   cursor: pointer;
-}
-
-.delete {
-  background-color: white;
-  border: 1px solid;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
+  gap: 8px;
 }
