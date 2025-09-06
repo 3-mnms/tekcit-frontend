@@ -1,11 +1,11 @@
 // src/pages/payment/TransferPaymentPage.tsx
-// 목적: 양도 결제 페이지. 가족(FAMILY)은 무료 처리, 지인(OTHERS)은 킷페이 결제 진행 멍
-// 최종 흐름: 다음 클릭 → (가족) 승인 후 히스토리 이동 멍
-//          : 다음 클릭 → (지인) 비번 모달 → requestTekcitPay(기존 paymentId 사용) → respondOthers 승인 → requestTransferPayment(같은 paymentId) → 수수료 결제 페이지로 이동(+스냅샷) 멍
+// 목적: 양도 결제 페이지. 가족(FAMILY)은 무료, 지인(OTHERS)은 포인트 결제
+// 비가족(OTHERS) 최신 플로우: 다음 → transfer 생성(기존 예매 paymentId + 서버 금액 사용) → 비밀번호 모달(검증만) → 지인 승인
 
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query' // 결제ID 조회용 쿼리 사용 멍
+import { useQuery } from '@tanstack/react-query'
+import { z } from 'zod'
 
 import BookingProductInfo from '@/components/payment/BookingProductInfo'
 import AddressForm from '@/components/payment/address/AddressForm'
@@ -15,15 +15,14 @@ import PasswordInputModal from '@/components/payment/modal/PasswordInputModal'
 import WalletPayment from '@/components/payment/pay/TekcitPay'
 import TicketDeliverySelectSection, { type DeliveryMethod } from '@/components/booking/TicketDeliverySelectSection'
 
-import { useRespondFamilyTransfer, useRespondOthersTransfer } from '@/models/transfer/tanstack-query/useTransfer'
+import { useRespondFamilyTransfer } from '@/models/transfer/tanstack-query/useTransfer'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
 
-// tekcitpay/transfer 호출 + 기존 paymentId 조회 유틸 멍
+// 결제/양도 API (서버 금액과 기존 paymentId를 반드시 사용)
 import {
-  requestTekcitPay,
-  requestTransferPayment,
-  type requestTransferPaymentDTO,
-  getPaymentIdByBookingId,      // 예약번호로 기존 paymentId 조회(세션스토리지) 멍
+  requestTransferPayment,           
+  type RequestTransferPaymentDTO,
+  getPaymentIdByBookingId,          
 } from '@/shared/api/payment/payments'
 
 import styles from './TransferPaymentPage.module.css'
@@ -44,50 +43,46 @@ type TransferState = {
   posterFile?: string
 }
 
+// 예약번호 유효성 체크 스키마
+const BookingIdSchema = z.string().min(1)
+
 const TransferPaymentPage: React.FC = () => {
-  // 라우팅 및 네비게이터 멍
+  // 라우팅/상태
   const navigate = useNavigate()
   const location = useLocation()
   const navState = (location.state ?? {}) as Partial<TransferState>
 
-  // 관계 분기(FAMILY/OTHERS) 멍
+  // 관계 분기
   const relation: 'FAMILY' | 'OTHERS' =
-    navState.relation === 'FAMILY' || navState.relation === 'OTHERS' ? navState.relation : 'OTHERS'
     navState.relation === 'FAMILY' || navState.relation === 'OTHERS' ? navState.relation : 'OTHERS'
   const isFamily = relation === 'FAMILY'
 
-  // 사용자 정보 멍
+  // 유저 정보
   const { data: tokenInfo } = useTokenInfoQuery()
   const userId = tokenInfo?.userId
 
-  // 양도 승인 뮤테이션 멍
+  // 승인 뮤테이션
   const respondFamily = useRespondFamilyTransfer()
-  const respondOthers = useRespondOthersTransfer()
 
-  // UI 상태 멍
+  // UI 상태
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod | null>(null)
   const [address, setAddress] = useState('')
   const [isAddressFilled, setIsAddressFilled] = useState(false)
   const [isAgreed, setIsAgreed] = useState(false)
   const [openedMethod, setOpenedMethod] = useState<PayMethod | null>(null)
-  const [isAgreed, setIsAgreed] = useState(false)
-  const [openedMethod, setOpenedMethod] = useState<PayMethod | null>(null)
-
   const [isAlertOpen, setIsAlertOpen] = useState(false)
-  const [isPwModalOpen, setIsPwModalOpen] = useState(false)
   const [isPwModalOpen, setIsPwModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 결제 금액(티켓 단가 × 수량) 멍
+  // 화면 표기용 금액(서버 검증에는 사용하지 않음)
   const amount = (navState.price ?? 0) * (navState.ticket ?? 1)
 
-  // 네비게이션 파라미터 검증(필수 id만 체크) 멍
+  // 필수 파라미터 가드
   const transferIdOK = Number.isFinite(Number(navState.transferId))
   const senderIdOK = Number.isFinite(Number(navState.senderId))
   if (!transferIdOK || !senderIdOK) {
     return (
       <div className={styles.page}>
-        <header className={styles.header}><h1 className={styles.title}>양도 주문서</h1></header>
         <header className={styles.header}><h1 className={styles.title}>양도 주문서</h1></header>
         <main className={styles.main}>
           <section className={styles.card}>
@@ -99,27 +94,30 @@ const TransferPaymentPage: React.FC = () => {
     )
   }
 
-  // 기존 결제의 paymentId 조회(예약번호 기준, 세션스토리지) 멍
-  // - 세션스토리지 동기 조회이지만, 화면 상태 일관성을 위해 useQuery로 래핑 멍
+  // ✅ 서버에서 bookingId → 기존 예매 결제 정보(paymentId, amount) 조회
   const {
-    data: paymentId,
-    isLoading: isPaymentIdLoading,
-    isError: isPaymentIdError,
-    error: paymentIdError,
+    data: basePayment,                 // { paymentId, amount, ... }
+    isLoading: isBasePayLoading,
+    isError: isBasePayError,
+    error: basePayError,
   } = useQuery({
-    queryKey: ['paymentIdByBooking', navState.reservationNumber],
-    // 동기 결과를 Promise.resolve로 감싸 비동기처럼 사용 멍
+    queryKey: ['basePayment', navState.reservationNumber, userId],
     queryFn: async () => {
-      if (!navState.reservationNumber) throw new Error('예약번호가 없습니다.')
-      const pid = getPaymentIdByBookingId(navState.reservationNumber)
-      if (!pid) throw new Error('결제 정보를 찾을 수 없습니다. 예매 결제 단계에서 다시 시도해 주세요.')
-      return pid
+      if (!userId) throw new Error('로그인이 필요합니다.')
+      const bookingId = BookingIdSchema.parse(navState.reservationNumber!)
+      const info = await getPaymentIdByBookingId(bookingId, userId) // PaymentInfoByBooking 반환
+      if (!info?.paymentId) throw new Error('기존 결제 정보를 찾을 수 없습니다.')
+      return info
     },
-    enabled: !!navState.reservationNumber && !isFamily, // 가족은 결제 단계가 없으니 조회 불필요 멍
+    enabled: !!userId && !!navState.reservationNumber && !isFamily,
     staleTime: 60_000,
   })
 
-  // 상품 요약 정보(현재 페이지 표시용) 멍
+  // 서버 기준 값(요청 바디에 사용할 값) — 반드시 서버에서 가져온 금액/ID를 사용해야 검증 통과
+  const basePaymentId = basePayment?.paymentId
+  const baseAmount = basePayment?.amount ?? 0
+
+  // 화면 표시용 상품 요약
   const productInfo = {
     title: navState.title,
     datetime: navState.datetime,
@@ -130,23 +128,21 @@ const TransferPaymentPage: React.FC = () => {
     posterFile: navState.posterFile,
   }
 
-  // 결제수단 토글 멍
+  // 결제수단 토글
   const togglePayMethod = (m: PayMethod) => setOpenedMethod((prev) => (prev === m ? null : m))
 
-  // 다음 버튼 활성화 로직 멍
+  // 다음 버튼 활성 상태: 지인은 basePaymentId가 준비되어야 함
   const needAddress = deliveryMethod === 'PAPER'
   const disabledNext = useMemo(() => {
     if (!deliveryMethod) return true
-    if (!deliveryMethod) return true
     const addressOk = needAddress ? isAddressFilled : true
-    // 지인 결제는 동의 + 결제수단 + paymentId 로딩 완료까지 확인 멍
     const othersOk =
       addressOk &&
       isAgreed &&
       openedMethod !== null &&
-      (!isPaymentIdLoading) &&
-      !!paymentId &&
-      !isPaymentIdError
+      !isBasePayLoading &&
+      !!basePaymentId &&
+      !isBasePayError
     return isFamily ? !addressOk : !othersOk
   }, [
     deliveryMethod,
@@ -155,25 +151,21 @@ const TransferPaymentPage: React.FC = () => {
     isAgreed,
     openedMethod,
     isFamily,
-    isPaymentIdLoading,
-    isPaymentIdError,
-    paymentId,
+    isBasePayLoading,
+    isBasePayError,
+    basePaymentId,
   ])
 
-  // 양도 승인 DTO(가족/지인 공통) 멍
+  // 양도 승인 DTO(가족/지인 공통)
   const buildApproveDTO = () => ({
     transferId: Number(navState.transferId),
     senderId: Number(navState.senderId),
     transferStatus: 'ACCEPTED' as const,
     deliveryMethod: deliveryMethod ?? null,
-    transferStatus: 'ACCEPTED' as const,
-    deliveryMethod: deliveryMethod ?? null,
     address: deliveryMethod === 'PAPER' ? (address || '') : null,
   })
 
-  // “다음” 모달 확인 멍
-  // 가족: 기존과 동일하게 승인 후 히스토리로 이동 멍
-  // 지인: 여기서는 결제/transfer 요청 없이 비밀번호 모달만 연다(tekcitpay 먼저 처리) 멍
+  // “다음” 확인: 가족은 즉시 승인, 지인은 transfer를 먼저 생성(기존 결제ID + 서버 금액)
   const handleAlertConfirm = async () => {
     setIsAlertOpen(false)
     if (isSubmitting) return
@@ -182,25 +174,45 @@ const TransferPaymentPage: React.FC = () => {
     try {
       const dto = buildApproveDTO()
 
+      // 가족: 결제 없이 승인만 처리
       if (isFamily) {
         await respondFamily.mutateAsync(dto)
         alert('성공적으로 티켓 양도를 받았습니다.')
         navigate('/mypage/ticket/history')
-        navigate('/mypage/ticket/history')
         return
       }
 
+      // 지인: transfer 먼저 생성(서버 금액/기존 paymentId 필수)
       if (!userId) throw new Error('로그인이 필요합니다.')
-      if (!navState.reservationNumber) throw new Error('예약번호가 없습니다.')
-      if (isPaymentIdLoading) throw new Error('결제 정보를 불러오는 중입니다.')
-      if (!paymentId) throw new Error((paymentIdError as any)?.message || '결제 정보를 찾을 수 없습니다.')
+      if (isBasePayLoading) throw new Error('결제 정보를 불러오는 중입니다.')
+      if (!basePaymentId) throw new Error((basePayError as any)?.message || '기존 결제 정보를 찾을 수 없습니다.')
 
-      // 지인: 승인(respondOthers)은 결제 성공 후로 미룸 멍
+      // ✅ commission 규칙: 기본 10% (환경변수로 조정 가능), 최소 1원
+      const RATE = Number(import.meta.env.VITE_TRANSFER_FEE_RATE ?? 0.1)
+      const commission = Math.max(1, Math.floor(baseAmount * RATE))
+
+      // ✅ transfer 생성: 기존 예매 결제의 paymentId + 서버 금액 사용
+      const transferReqBody: RequestTransferPaymentDTO = {
+        sellerId: Number(navState.senderId) || 0,
+        paymentId: basePaymentId,               // 기존(PAID/TRANSFER) paymentId
+        bookingId: navState.reservationNumber!, // 현재 예약번호
+        totalAmount: baseAmount,                // 서버 금액(핵심)
+        commission,                             // 서버가 요구 → 0이면 406 가능
+      }
+      console.log('[Transfer][requestTransferPayment payload]', transferReqBody)
+
+      await requestTransferPayment(transferReqBody, userId) // 🔹 여기서 포인트 차감까지 완료됨
+      console.log('[Transfer][requestTransferPayment ok]')
+
+      // 비밀번호 입력(검증만) 모달 표시
       setIsPwModalOpen(true)
     } catch (e: any) {
+      console.log('[Transfer][requestTransferPayment error]', e?.response?.data || e)
       const msg = e?.message || ''
       if (msg.includes('TRANSFER_NOT_MATCH_SENDER')) {
         alert('양도자가 일치하지 않아요. 목록에서 다시 시도해 주세요.')
+      } else if (e?.response?.data?.errorMessage) {
+        alert(e.response.data.errorMessage)
       } else {
         alert(msg || '처리 중 오류가 발생했어요.')
       }
@@ -209,49 +221,21 @@ const TransferPaymentPage: React.FC = () => {
     }
   }
 
-  // 비밀번호 모달 완료 콜백 멍
-  // 1) requestTekcitPay(amount, paymentId, password) 멍
-  // 2) respondOthers 승인 멍
-  // 3) 같은 paymentId로 requestTransferPayment 멍
-  // 4) 수수료 결제 페이지로 이동(+ 스냅샷) 멍
+  // 비번 모달 완료: (결제는 이미 transfer에서 처리됨) → 지인 승인만
   const handlePasswordComplete = async (_password: string) => {
     try {
       if (!userId) throw new Error('로그인이 필요합니다.')
-      if (!navState.reservationNumber) throw new Error('예약번호가 없습니다.')
-      if (!paymentId) throw new Error('결제 정보를 찾을 수 없습니다.')
 
-      // 1) tekcitpay(지갑 결제) 호출: 기존 paymentId 사용 멍
-      await requestTekcitPay(
-        {
-          amount,             // 주문 금액 멍
-          paymentId,          // 기존 결제의 paymentId 멍
-          password: _password // 입력 받은 비밀번호 멍
-        },
-        userId
-      )
-
-      // 2) 양도 승인(지인): 결제 성공 이후 승인 처리 멍
+      // 결제는 /tekcitpay/transfer가 이미 처리했으므로 여기서는 승인만
       const approveDTO = buildApproveDTO()
-      await respondOthers.mutateAsync(approveDTO)
 
-      // 3) 같은 paymentId로 transfer 결제 요청 생성 멍
-      const transferReqBody: requestTransferPaymentDTO = {
-        sellerId: Number(navState.senderId) || 0,
-        paymentId, // tekcitpay에서 사용한 동일한 paymentId 멍
-        bookingId: navState.reservationNumber,
-        totalAmount: amount,
-        commission: 0, // 수수료는 다음 단계에서 결제 멍
-      }
-      await requestTransferPayment(transferReqBody, userId)
-
-      // 4) 안내 후 수수료 결제 페이지로 이동(+ 스냅샷 state) 멍
-      alert('결제가 완료되었습니다. 수수료 결제 페이지로 이동합니다.')
+      alert('양도 처리가 완료되었습니다.')
       navigate('/payment/transfer/transfer-fee', {
         state: {
           transferId: Number(navState.transferId),
           reservationNumber: navState.reservationNumber,
           sellerId: Number(navState.senderId),
-          paymentId, // 다음 단계에서도 동일 paymentId 사용 가능 멍
+          paymentId: basePaymentId, // 참고용
           product: {
             title: navState.title ?? '',
             datetime: navState.datetime ?? '',
@@ -261,8 +245,7 @@ const TransferPaymentPage: React.FC = () => {
         },
       })
     } catch (e: any) {
-      console.error('tekcitpay/transfer 처리 실패:', e)
-      const msg = e?.response?.data?.errorMessage || e?.message || '결제 또는 양도 처리에 실패했습니다.'
+      const msg = e?.response?.data?.errorMessage || e?.message || '양도 승인 처리에 실패했습니다.'
       alert(msg)
     }
   }
@@ -270,11 +253,9 @@ const TransferPaymentPage: React.FC = () => {
   return (
     <div className={styles.page}>
       <header className={styles.header}><h1 className={styles.title}>양도 주문서</h1></header>
-      <header className={styles.header}><h1 className={styles.title}>양도 주문서</h1></header>
 
       <div className={styles.layout}>
         <main className={styles.main}>
-          <section className={styles.card}><BookingProductInfo info={productInfo} /></section>
           <section className={styles.card}><BookingProductInfo info={productInfo} /></section>
 
           <section className={styles.card}>
@@ -283,14 +264,12 @@ const TransferPaymentPage: React.FC = () => {
               onChange={(v) => {
                 setDeliveryMethod(v)
                 if (v !== 'PAPER') { setIsAddressFilled(false); setAddress('') }
-                if (v !== 'PAPER') { setIsAddressFilled(false); setAddress('') }
               }}
             />
           </section>
 
           {needAddress && (
             <section className={styles.card}>
-              <AddressForm onValidChange={setIsAddressFilled} onAddressChange={setAddress} />
               <AddressForm onValidChange={setIsAddressFilled} onAddressChange={setAddress} />
             </section>
           )}
@@ -304,23 +283,24 @@ const TransferPaymentPage: React.FC = () => {
                     className={styles.methodHeader}
                     onClick={() => togglePayMethod('킷페이')}
                     aria-expanded={openedMethod === '킷페이'}
-                    disabled={isPaymentIdLoading || isPaymentIdError}
+                    disabled={isBasePayLoading || isBasePayError}
                     title={
-                      isPaymentIdLoading
+                      isBasePayLoading
                         ? '결제 정보를 불러오는 중입니다.'
-                        : isPaymentIdError
-                        ? (paymentIdError as any)?.message ?? '결제 정보를 찾을 수 없습니다.'
-                        : undefined
+                        : isBasePayError
+                          ? (basePayError as any)?.message ?? '결제 정보를 찾을 수 없습니다.'
+                          : undefined
                     }
                   >
                     <span className={`${styles.radio} ${openedMethod === '킷페이' ? styles.radioOn : ''}`} />
                     <span className={styles.methodText}>
                       킷페이 (포인트 결제)
-                      {isPaymentIdLoading ? ' - 결제정보 조회중...' : ''}
+                      {isBasePayLoading ? ' - 결제정보 조회중...' : ''}
                     </span>
                   </button>
                   {openedMethod === '킷페이' && (
                     <div className={styles.methodBody}>
+                      {/* 화면 표시용 금액은 그대로 유지(서버 검증에는 baseAmount 사용) */}
                       <WalletPayment isOpen onToggle={() => togglePayMethod('킷페이')} dueAmount={amount} />
                     </div>
                   )}
@@ -356,15 +336,18 @@ const TransferPaymentPage: React.FC = () => {
                 </div>
 
                 <label className={styles.agree}>
-                  <input type="checkbox" checked={isAgreed} onChange={(e) => setIsAgreed(e.target.checked)} aria-label="양도 서비스 약관 동의" />
+                  <input
+                    type="checkbox"
+                    checked={isAgreed}
+                    onChange={(e) => setIsAgreed(e.target.checked)}
+                    aria-label="양도 서비스 약관 동의"
+                  />
                   <span>(필수) 양도 서비스 이용약관 및 개인정보 수집·이용에 동의합니다.</span>
                 </label>
 
                 <Button
                   disabled={disabledNext || isSubmitting || !userId}
-                  disabled={disabledNext || isSubmitting || !userId}
                   className={styles.nextBtn}
-                  aria-disabled={disabledNext || isSubmitting || !userId}
                   aria-disabled={disabledNext || isSubmitting || !userId}
                   aria-label="다음 단계로 이동"
                   onClick={() => setIsAlertOpen(true)}
@@ -404,18 +387,17 @@ const TransferPaymentPage: React.FC = () => {
       {isAlertOpen && (
         <AlertModal title="안내" onCancel={() => setIsAlertOpen(false)} onConfirm={handleAlertConfirm}>
           {isFamily ? '가족 간 양도는 결제 없이 진행됩니다. 계속하시겠습니까?' : '승인 후 결제를 진행합니다. 계속하시겠습니까?'}
-        <AlertModal title="안내" onCancel={() => setIsAlertOpen(false)} onConfirm={handleAlertConfirm}>
-          {isFamily ? '가족 간 양도는 결제 없이 진행됩니다. 계속하시겠습니까?' : '승인 후 결제를 진행합니다. 계속하시겠습니까?'}
         </AlertModal>
       )}
 
-      {!isFamily && isPwModalOpen && userId && paymentId && (
+      {/* 비가족: transfer 생성(basePaymentId 준비) 이후에만 모달 표시 - 검증만 수행 */}
+      {!isFamily && isPwModalOpen && userId && basePaymentId && (
         <PasswordInputModal
-          amount={amount}
-          paymentId={paymentId}   // 기존 결제의 paymentId를 그대로 전달(표시/검증용) 멍
+          amount={baseAmount}            // 검증에는 서버 금액 사용
+          paymentId={basePaymentId}      // transfer에 사용한 동일 paymentId
           userId={userId}
           onClose={() => setIsPwModalOpen(false)}
-          onComplete={handlePasswordComplete} // tekcitpay → 승인 → transfer 순서 멍
+          onComplete={handlePasswordComplete} // 결제X, 승인만
         />
       )}
     </div>

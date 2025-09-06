@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { z } from 'zod'
-import { usePaymentStatus } from '@/models/payment/hooks/usePaymentStatus'
 import PortOne, { Currency, PayMethod } from '@portone/browser-sdk/v2'
 
 import styles from './WalletChargePage.module.css'

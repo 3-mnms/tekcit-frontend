@@ -1,7 +1,6 @@
 // src/pages/payment/BookingPaymentPage.tsx
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
 
 import type { TossPaymentHandle } from '@/components/payment/pay/TossPayment'
 import PaymentInfo from '@/components/payment/pay/PaymentInfo'
@@ -58,7 +57,6 @@ const BookingPaymentPage: React.FC = () => {
   const [isPaying, setIsPaying] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [paymentId, setPaymentId] = useState<string | null>(null)
-  const [sellerId, setSellerId] = useState<number | null>(null)
   const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS)
 
   // 최초 paymentId 생성 + 세션 저장
@@ -103,9 +101,8 @@ const BookingPaymentPage: React.FC = () => {
   const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false)
   const routeToResult = (ok: boolean) => {
     const params = new URLSearchParams({ type: 'booking', status: ok ? 'success' : 'fail' })
-    if (id) params.set('paymentId', id)
     navigate(`/payment/result?${params.toString()}`)
-  }, [navigate])
+  }
 
   const toggleMethod = (m: PaymentMethod) => {
     if (isPaying || remainingSeconds <= 0) return
