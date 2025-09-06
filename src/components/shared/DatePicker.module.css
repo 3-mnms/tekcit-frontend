@@ -1,3 +1,8 @@
+.datePickerGroup{
+    display: flex;
+    align-items: center;
+}
+
 .datePicker {
     width: 100%;
     padding: 0.5% 0.5rem;

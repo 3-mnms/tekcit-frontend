@@ -61,25 +61,31 @@ const ProductManagePage: React.FC = () => {
     };
 
     const columns: Column<Festival>[] = [
-        { columnId: 'fid', label: 'id' },
-        { columnId: 'fname', label: '상품명' },
-        { columnId: 'genrenm', label: '장르' },
-        { columnId: 'fcltynm', label: '공연장 이름'},
-        {
-          columnId: 'entrpsnmH',
-          label: '주최자명',
-          render: (item) => <span>{item.detail?.entrpsnmH}</span>
-        },
-        {
-            columnId: 'actions' as keyof Festival,// 삐약! pid를 기준으로 렌더링할게요!
-            label: '액션',
-            render: (item) => (
-                <div className={styles.buttons}>
-                    <Button onClick={(e) => handleViewTicketHolderList(e, item.fid)}>예매자명단</Button>
-                    <Button onClick={(e) => handleViewStats(e, item.fid)}>통계 조회</Button>
-                </div>
-            )
-        },
+    { columnId: 'fid', label: 'id', style: { width: '7%' } },
+    { 
+        columnId: 'fname', 
+        label: '상품명', 
+        style: { width:'40%' }
+    },
+    { columnId: 'genrenm', label: '장르', style: { width: '12%' } },
+    { columnId: 'fcltynm', label: '공연장 이름', style: { width: '15%'} },
+    {
+        columnId: 'entrpsnmH',
+        label: '주최자명',
+        render: (item) => <span>{item.detail?.entrpsnmH}</span>,
+        style: { width: '150px', minWidth: '10%' }
+    },
+    {
+        columnId: 'actions' as keyof Festival,
+        label: '액션',
+        render: (item) => (
+        <div className={styles.buttons}>
+            <Button onClick={(e) => handleViewTicketHolderList(e, item.fid)}>예매자명단</Button>
+            <Button onClick={(e) => handleViewStats(e, item.fid)}>통계 조회</Button>
+        </div>
+        ),
+        style: { width: '15%' }
+    },
     ];
 
     if (isLoading) {

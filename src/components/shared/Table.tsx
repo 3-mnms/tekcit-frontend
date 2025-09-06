@@ -5,6 +5,7 @@ export interface Column<T> {
     columnId: string;
     label: string;
     render?: (item: T) => React.ReactNode;
+    style?: React.CSSProperties;
 }
 
 interface TableProps<T extends object> {
@@ -50,7 +51,7 @@ const Table = <T extends object>({ columns, data, onRowClick, getUniqueKey, isSe
                 <thead>
                     <tr>
                         {isSelectable && (
-                        <th key="checkbox-header" className={styles.th}>
+                        <th key="checkbox-header" className={styles.th} style={{width: '40px'}}>
                             <input
                                 type="checkbox"
                                 onChange={handleSelectAll}
@@ -60,7 +61,7 @@ const Table = <T extends object>({ columns, data, onRowClick, getUniqueKey, isSe
                         )}
                         {columns.map(column => (
 
-                            <th key={column.columnId as string} className={styles.th}>
+                            <th key={column.columnId as string} className={styles.th} style={column.style}>
                                 {column.label}
                             </th>
                         ))}
@@ -74,7 +75,7 @@ const Table = <T extends object>({ columns, data, onRowClick, getUniqueKey, isSe
                                 className={onRowClick ? styles.clickableRow : ''}
                             >
                                 {isSelectable && (
-                                    <td key={`${key}-checkbox`} className={styles.td}>
+                                    <td key={`${key}-checkbox`} className={styles.td} style={{ width: '40px' }}>
                                         <input
                                             type="checkbox"
                                             onChange={() => handleSelectOne(key)}
@@ -83,7 +84,7 @@ const Table = <T extends object>({ columns, data, onRowClick, getUniqueKey, isSe
                                     </td>
                                 )}
                                 {columns.map(column => (
-                                    <td key={`${key}-${String(column.columnId)}`}> 
+                                    <td key={`${key}-${String(column.columnId)}`} style={column.style}> 
                                         {column.render ? column.render(item) : (item[column.columnId as keyof T] as React.ReactNode)}
                                     </td>
                                 ))}
