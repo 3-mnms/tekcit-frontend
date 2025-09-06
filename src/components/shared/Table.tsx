@@ -51,7 +51,7 @@ const Table = <T extends object>({ columns, data, onRowClick, getUniqueKey, isSe
                 <thead>
                     <tr>
                         {isSelectable && (
-                        <th key="checkbox-header" className={styles.th}>
+                        <th key="checkbox-header" className={styles.th} style={{width: '40px'}}>
                             <input
                                 type="checkbox"
                                 onChange={handleSelectAll}
@@ -75,7 +75,7 @@ const Table = <T extends object>({ columns, data, onRowClick, getUniqueKey, isSe
                                 className={onRowClick ? styles.clickableRow : ''}
                             >
                                 {isSelectable && (
-                                    <td key={`${key}-checkbox`} className={styles.td}>
+                                    <td key={`${key}-checkbox`} className={styles.td} style={{ width: '40px' }}>
                                         <input
                                             type="checkbox"
                                             onChange={() => handleSelectOne(key)}
