@@ -31,7 +31,7 @@ const PointBox: React.FC = () => {
     try {
       const account = await getTekcitPayAccount();
       setBalance(account.availableBalance ?? 0); // ✅ 조회 시 갱신
-      navigate('/payment/wallet-point/');
+      navigate('/payment/wallet/join/');
     } catch (e: any) {
       const code = e?.response?.data?.errorCode;
       if (code === 'NOT_FOUND_TEKCIT_PAY_ACCOUNT') {
