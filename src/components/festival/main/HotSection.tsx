@@ -134,12 +134,12 @@ const HotSection: React.FC = () => {
               <>
                 <div className={styles.imageWrapper}>
                   <img
-                    src={posterSrc || '/assets/placeholder-poster.png'}
+                    src={posterSrc || '@/shared/assets/placeholder-poster.png'}
                     alt={festival.prfnm}
                     className={styles.image}
                     referrerPolicy="no-referrer"
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = '/assets/placeholder-poster.png';
+                      (e.currentTarget as HTMLImageElement).src = '@/shared/assets/placeholder-poster.png';
                     }}
                   />
                   <span className={styles.rank}>{index + 1}</span>
@@ -164,7 +164,7 @@ const HotSection: React.FC = () => {
                     state={{
                       fid: festival.fid,
                       title: festival.prfnm,
-                      poster: posterSrc || '/assets/placeholder-poster.png',
+                      poster: posterSrc || '@/shared/assets/placeholder-poster.png',
                       prfpdfrom: festival.prfpdfrom,
                       prfpdto: festival.prfpdto,
                       fcltynm: festival.fcltynm,

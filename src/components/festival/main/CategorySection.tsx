@@ -227,7 +227,7 @@ const CategorySection: React.FC = () => {
 
             const key = `${fid ?? 'unknown'}-${idx}`;
             const title = festival.prfnm;
-            const poster = posterSrc || '/assets/placeholder-poster.png';
+            const poster = posterSrc || '@/shared/assets/placeholder-poster.png';
 
             return (
               <div key={key} className={styles.card}>
@@ -266,7 +266,7 @@ const CategorySection: React.FC = () => {
                         className={styles.image}
                         referrerPolicy="no-referrer"
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = '/assets/placeholder-poster.png';
+                          (e.currentTarget as HTMLImageElement).src = '@/shared/assets/placeholder-poster.png';
                         }}
                       />
                     </div>
