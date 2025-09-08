@@ -61,7 +61,7 @@ const AfterTransferTicket: React.FC<Props> = ({
   onReject,
   className = '',
 }) => {
-  const fallbackPoster = '/dummy-poster.jpg';
+  const fallbackPoster = '@/shared/assets/placeholder-poster.png';
   const showPrice = relation === '지인' && Number.isFinite(price);
 
   const s = normalizeStatus(status);
