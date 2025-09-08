@@ -1,6 +1,8 @@
 // src/pages/payment/BookingPaymentPage.tsx
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import * as SockJS from 'sockjs-client'
+import { Stomp, type Frame, type Message } from '@stomp/stompjs'
 
 import type { TossPaymentHandle } from '@/components/payment/pay/TossPayment'
 import PaymentInfo from '@/components/payment/pay/PaymentInfo'
@@ -24,11 +26,11 @@ import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
 
 import styles from './BookingPaymentPage.module.css'
 
-// ... getNameFromJwt 동일 ...
-
 const DEADLINE_SECONDS = 5 * 60
 
 const BookingPaymentPage: React.FC = () => {
+  const stompClientRef = useRef<any>(null)
+
   const navigate = useNavigate()
   const { state } = useLocation()
   const checkout = state as CheckoutState
@@ -98,10 +100,44 @@ const BookingPaymentPage: React.FC = () => {
     })()
   }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate])
 
+  // 웹소켓 연결 (결제 완료 알림)
+  useEffect(() => {
+    if (!checkout?.bookingId) return
+
+    const connectWebSocket = () => {
+      const socket = new SockJS('/ws')
+      const stompClient = Stomp.over(socket)
+
+      stompClient.connect({}, function (frame: Frame) {
+        console.log('Booking WebSocket 연결됨:', frame)
+
+        stompClient.subscribe(`/user/queue/ticket-status`, function (message: Message) {
+          const data = JSON.parse(message.body)
+          console.log('예매 상태 업데이트:', data)
+
+          if (data.status === 'CONFIRMED') {
+            navigate('/payment/result?type=booking&status=success')
+          } else if (data.status === 'CANCELED') {
+            navigate('/payment/result?type=booking&status=fail')
+          }
+        })
+      })
+
+      stompClientRef.current = stompClient
+    }
+
+    connectWebSocket()
+
+    return () => {
+      if (stompClientRef.current?.connected) {
+        stompClientRef.current.disconnect()
+      }
+    }
+  }, [checkout?.bookingId, navigate])
+
   const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false)
   const routeToResult = (ok: boolean) => {
-    const params = new URLSearchParams({ type: 'booking', status: ok ? 'success' : 'fail' })
-    navigate(`/payment/result?${params.toString()}`)
+    navigate(`/payment/result?type=booking&status=${ok ? 'success' : 'fail'}`)
   }
 
   const toggleMethod = (m: PaymentMethod) => {
@@ -166,8 +202,8 @@ const BookingPaymentPage: React.FC = () => {
         bookingId: checkout.bookingId,
         festivalId: festivalIdVal,
         sellerId: sellerId!,
-        successUrl: `${window.location.origin}/payment/result?type=booking&paymentId=${encodeURIComponent(ensuredId)}&status=success`,
-        failUrl: `${window.location.origin}/payment/result?type=booking&paymentId=${encodeURIComponent(ensuredId)}&status=fail`,
+        successUrl: `${window.location.origin}/payment/result?type=booking&status=success`,
+        failUrl: `${window.location.origin}/payment/result?type=booking&status=fail`,
       })
     } catch {
       setErr('결제 요청 중 오류가 발생했어요.')
@@ -233,8 +269,11 @@ const BookingPaymentPage: React.FC = () => {
           userId={userId as number}
           onClose={() => setIsPasswordModalOpen(false)}
           onComplete={() => {
-            // tekcitpay 성공 후 콜백
-            navigate(`/payment/result?type=booking&status=success&paymentId=${ensuredPaymentId}`)
+            // WebSocket 메시지 누락 대비 - 2초 후 자동 이동
+            setTimeout(() => {
+              navigate('/payment/result?type=booking&status=success')
+            }, 2000)
+
             setIsPasswordModalOpen(false)
           }}
         />

@@ -1,9 +1,10 @@
 // src/pages/payment/TransferPaymentPage.tsx
-
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
+import * as SockJS from 'sockjs-client'
+import { Stomp } from '@stomp/stompjs'
 
 import BookingProductInfo from '@/components/payment/BookingProductInfo'
 import AddressForm from '@/components/payment/address/AddressForm'
@@ -45,6 +46,8 @@ type TransferState = {
 const BookingIdSchema = z.string().min(1)
 
 const TransferPaymentPage: React.FC = () => {
+  const stompClientRef = useRef<any>(null)
+
   // 라우팅/상태
   const navigate = useNavigate()
   const location = useLocation()
@@ -61,6 +64,62 @@ const TransferPaymentPage: React.FC = () => {
 
   // 승인 뮤테이션
   const respondFamily = useRespondFamilyTransfer()
+
+  // ✅ 서버에서 bookingId → db에 저장된 기존 예매 결제 정보(paymentId, amount) 조회
+  const {
+    data: basePayment,                 // { paymentId, amount, ... }
+    isLoading: isBasePayLoading,
+    isError: isBasePayError,
+    error: basePayError,
+  } = useQuery({
+    queryKey: ['basePayment', navState.reservationNumber, userId],
+    queryFn: async () => {
+      if (!userId) throw new Error('로그인이 필요합니다.')
+      const bookingId = BookingIdSchema.parse(navState.reservationNumber!)
+      const info = await getPaymentIdByBookingId(bookingId, userId) // PaymentInfoByBooking 반환
+      if (!info?.paymentId) throw new Error('기존 결제 정보를 찾을 수 없습니다.')
+      return info
+    },
+    enabled: !!userId && !!navState.reservationNumber && !isFamily,
+    staleTime: 60_000,
+  })
+
+  // 웹소켓 연결
+  useEffect(() => {
+    if (!navState.transferId) return
+
+    const connectWebSocket = () => {
+      const socket = new SockJS('/ws')
+      const stompClient = Stomp.over(socket)
+
+      stompClient.connect({}, function (frame) {
+        console.log('Transfer WebSocket 연결됨:', frame)
+
+        stompClient.subscribe(`/user/queue/transfer-status`, function (message) {
+          const data = JSON.parse(message.body)
+          console.log('양도 상태 업데이트:', data)
+          // ✅ 필터링 추가 (안전성)
+          if (data.reservationNumber === navState.reservationNumber) {
+            if (data.status === 'COMPLETED') {
+              navigate('/payment/result?type=transfer&status=success')
+            } else if (data.status === 'FAILED' || data.status === 'CANCELED') {
+              navigate('/payment/result?type=transfer&status=fail')
+            }
+          }
+        })
+      })
+
+      stompClientRef.current = stompClient
+    }
+
+    connectWebSocket()
+
+    return () => {
+      if (stompClientRef.current?.connected) {
+        stompClientRef.current.disconnect()
+      }
+    }
+  }, [navState.transferId, navState.reservationNumber, userId, navigate])
 
   // UI 상태
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod | null>(null)
@@ -92,27 +151,8 @@ const TransferPaymentPage: React.FC = () => {
     )
   }
 
-  // ✅ 서버에서 bookingId → db에 저장된 기존 예매 결제 정보(paymentId, amount) 조회
-  const {
-    data: basePayment,                 // { paymentId, amount, ... }
-    isLoading: isBasePayLoading,
-    isError: isBasePayError,
-    error: basePayError,
-  } = useQuery({
-    queryKey: ['basePayment', navState.reservationNumber, userId],
-    queryFn: async () => {
-      if (!userId) throw new Error('로그인이 필요합니다.')
-      const bookingId = BookingIdSchema.parse(navState.reservationNumber!)
-      const info = await getPaymentIdByBookingId(bookingId, userId) // PaymentInfoByBooking 반환
-      if (!info?.paymentId) throw new Error('기존 결제 정보를 찾을 수 없습니다.')
-      return info
-    },
-    enabled: !!userId && !!navState.reservationNumber && !isFamily,
-    staleTime: 60_000,
-  })
-
   // 서버 기준 값(요청 바디에 사용할 값) — 반드시 서버에서 가져온 금액/ID를 사용해야 검증 통과
-  const basePaymentId = basePayment?.paymentId 
+  const basePaymentId = basePayment?.paymentId
   const baseAmount = basePayment?.amount ?? 0
 
   // 화면 표시용 상품 요약
@@ -243,16 +283,20 @@ const TransferPaymentPage: React.FC = () => {
       const approveDTO = buildApproveDTO()
       await respondFamily.mutateAsync(approveDTO)
 
-      alert('양도 처리가 완료되었습니다.')
-      navigate('/mypage/ticket/history')
+      // ✅ WebSocket 메시지 누락 대비 추가
+      setTimeout(() => {
+        navigate('/payment/result?type=transfer&status=success')
+      }, 2000)
 
     } catch (e: any) {
       console.log('[Transfer][handlePasswordComplete error]', e?.response?.data || e)
       const msg = e?.response?.data?.errorMessage || e?.message || '양도 처리에 실패했습니다.'
       alert(msg)
+      navigate('/payment/result?type=transfer&status=fail')
     }
   }
 
+  // 페이지 렌더
   return (
     <div className={styles.page}>
       <header className={styles.header}><h1 className={styles.title}>양도 주문서</h1></header>
@@ -397,7 +441,7 @@ const TransferPaymentPage: React.FC = () => {
       {!isFamily && isPwModalOpen && userId && basePaymentId && (
         <PasswordInputModal
           amount={baseAmount}            // 검증에는 서버 금액 사용
-          paymentId={basePaymentId}     
+          paymentId={basePaymentId}
           userId={userId}
           onClose={() => setIsPwModalOpen(false)}
           onComplete={handlePasswordComplete} // 결제X, 승인만
