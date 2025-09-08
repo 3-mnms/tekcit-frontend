@@ -131,7 +131,7 @@ const ResultPanel: React.FC = () => {
                       className={styles.poster}
                       referrerPolicy="no-referrer"
                       onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = '/assets/placeholder-poster.png';
+                        (e.currentTarget as HTMLImageElement).src = '@/shared/assets/placeholder-poster.png';
                       }}
                     />
                   )}
