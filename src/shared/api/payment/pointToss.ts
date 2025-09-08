@@ -1,6 +1,4 @@
 // src/shared/api/payment/pointToss.ts
-// 설명: 포인트 충전의 사전요청/확정 API. sellerId/festivalId/bookingId는 보내지 않으며,
-//       buyerId는 바디에 넣지 않고 X-User-Id 헤더로만 보냄.
 
 import { z } from 'zod'
 import { api } from '@/shared/config/axios'
