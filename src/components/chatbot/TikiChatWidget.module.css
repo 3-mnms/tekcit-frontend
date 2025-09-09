@@ -26,8 +26,8 @@
 }
 
 .logo {
-  width: 60%;
-  height: 60%;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   user-select: none;
   pointer-events: none; /* 버튼 클릭을 가로막지 않도록 */
