@@ -2,13 +2,15 @@
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router/router";
 import TikiChatWidget from '@/components/chatbot/TikiChatWidget';
+import useNoChatWidget from "@/models/ai/useNoChatWidget";
 
 export default function App() {
+  const noChat = useNoChatWidget();
+
   return (
     <>
       <RouterProvider router={router} />
-      {/* 항상 우하단에 떠있게 */}
-      <TikiChatWidget />
+      {!noChat && <TikiChatWidget />}
     </>
   );
 }
