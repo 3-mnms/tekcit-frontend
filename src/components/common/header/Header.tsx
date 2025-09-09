@@ -7,7 +7,6 @@ import { useQuery } from '@tanstack/react-query'
 import { getFestivalCategories } from '@/shared/api/festival/festivalApi'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
 import UserDropdown from '@/pages/my/dropdown/UserDropdown'
-import { useAuthStore } from '@/shared/storage/useAuthStore' 
 import '@fortawesome/fontawesome-free/css/all.min.css'
 
 const CATEGORY_ORDER = ['무용', '대중음악', '뮤지컬/연극', '복합', '클래식/국악', '서커스/마술']
@@ -74,7 +73,7 @@ const Header: React.FC = () => {
           src={logo}
           alt="tekcit logo"
           className={styles.logo}
-          onClick={() => navigate('/')}
+          onClick={() => (window.location.href = '/')}
           style={{ cursor: 'pointer' }}
         />
         <div className={styles.categoryList}>
@@ -107,6 +106,17 @@ const Header: React.FC = () => {
       </div>
 
       <div className={styles.right} ref={dropdownRef}>
+        {/* ✅ 공연 추천 버튼 */}
+        <div
+          className={styles.rightButton}
+          onClick={() => (window.location.href = '/nearby')}
+          aria-label="내 주변 공연 추천"
+          title="내 주변 공연 추천"
+        >
+          <i className="fa-solid fa-location-dot" />
+          <span>공연 추천</span>
+        </div>
+
         {isLoading ? (
           <div className={styles.rightButton} aria-hidden="true" />
         ) : tokenInfo ? (

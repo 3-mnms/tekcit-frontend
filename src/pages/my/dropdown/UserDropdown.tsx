@@ -72,9 +72,9 @@ const UserDropdown: React.FC = () => {
           <PointBox />
           <MenuItem
             label="내 정보 수정"
-            onClick={() => (window.location.href = '/mypage/myinfo')}
+            onClick={() => (window.location.href = '/mypage/myinfo/detail')}
           />
-          <MenuItem label="내 티켓" onClick={() => (window.location.href = '/mypage/ticket')} />
+          <MenuItem label="내 티켓" onClick={() => (window.location.href = '/mypage/ticket/history')} />
           <MenuItem label="북마크" onClick={() => (window.location.href = '/mypage/bookmark')} />
 
           <button className={styles.logoutButton} onClick={handleLogout} disabled={loading}>

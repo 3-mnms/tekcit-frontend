@@ -14,28 +14,6 @@ import AfterTransferTicket from '@/components/my/ticket/AfterTransferTicket';
 
 export const TRANSFER_DONE_EVENT = 'ticket:transferred';
 
-/** 포스터만 얇게 */
-const TicketPoster: React.FC<{ reservationNumber: string; alt: string; className?: string }> = ({
-  reservationNumber,
-  alt,
-  className,
-}) => {
-  const { data } = useTicketDetailQuery(reservationNumber);
-  const src = data?.posterFile || '/dummy-poster.jpg';
-  return (
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      loading="lazy"
-      decoding="async"
-      onError={(e) => {
-        (e.currentTarget as HTMLImageElement).src = '/dummy-poster.jpg';
-      }}
-    />
-  );
-};
-
 const fmtDate = (iso?: string) => {
   if (!iso) return '-';
   const d = new Date(iso);

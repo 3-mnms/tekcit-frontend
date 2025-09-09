@@ -2,8 +2,8 @@ import { createBrowserRouter } from 'react-router-dom'
 
 // main
 import MainPage from '@pages/home/MainPage'
-import CategoryPage from '@pages/home/CategoryPage';
-import SearchPage from '@/pages/home/SearchPage';
+import CategoryPage from '@pages/home/CategoryPage'
+import SearchPage from '@/pages/home/SearchPage'
 import FestivalDetailPage from '@pages/festival-detail/FestivalDetailPage'
 
 //auth
@@ -33,7 +33,7 @@ import MyTicketPage from '@/pages/my/ticket/MyTicketPage'
 import TicketDetailPage from '@/pages/my/ticket/TicketDetailPage'
 import TransferTicketPage from '@/pages/my/ticket/TransferTicketPage'
 import EntranceCheckPage from '@/pages/my/ticket/EntranceCheckPage'
-import AddressDetailPage from '@/pages/my/myInfo/address/AddressDetailPage';
+import AddressDetailPage from '@/pages/my/myInfo/address/AddressDetailPage'
 
 // transfer
 import TransferPage from '@/pages/transfer/TransferPage'
@@ -66,11 +66,14 @@ import TicketHolderListPage from '@/pages/productManage/TicketHolderListPage'
 import StatisticsPage from '@/pages/productManage/StatisticsPage'
 import Spinner from '@/components/common/spinner/Spinner';
 
+// ai
+import NearbyShowsPage from '@/pages/ai/nearby/NearbyShowsPage'
+
 export const router = createBrowserRouter([
   { path: '/', element: <MainPage /> },
   { path: '/category/:name', element: <CategoryPage /> },
   { path: '/search', element: <SearchPage /> },
-  { path: "/festival/:fid", element: <FestivalDetailPage /> },
+  { path: '/festival/:fid', element: <FestivalDetailPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/auth/signup', element: <SignupPage /> },
   {path:'/spinner', element:<Spinner/>},
@@ -82,7 +85,6 @@ export const router = createBrowserRouter([
   { path: '/find-id', element: <FindIdPage /> },
   { path: '/find-password', element: <FindPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
-
 
   {
     path: '/mypage',
@@ -115,8 +117,8 @@ export const router = createBrowserRouter([
           { path: '', element: <MyTicketPage /> },
           { path: 'history', element: <TicketHistoryPage /> },
           { path: 'detail/:reservationNumber', element: <TicketDetailPage /> },
-          { 
-            path: 'transfer', 
+          {
+            path: 'transfer',
             children: [
               { path: '', element: <TransferTicketPage /> },
               { path: ':reservationNumber', element: <TransferPage /> },
@@ -142,7 +144,7 @@ export const router = createBrowserRouter([
       { path: ':fid/queue', element: <QueuePage /> },
       { path: ':fid', element: <OrderPage /> },
       { path: ':fid/order-info', element: <OrderInfoPage /> },
-    ]
+    ],
   },
 
   // payment
@@ -153,9 +155,7 @@ export const router = createBrowserRouter([
       { path: 'result', element: <ResultPage /> },
       {
         path: 'wallet/join', // 최종 경로: /payment/wallet/join
-        element: (
-            <TeckitJoinPage />
-        ),
+        element: <TeckitJoinPage />,
       },
       {
         path: 'transfer',
@@ -166,9 +166,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'refund/:paymentId',
-        children: [
-          { path: '', element: <RefundPage /> },
-        ],
+        children: [{ path: '', element: <RefundPage /> }],
       },
       {
         path: 'wallet-point',
@@ -196,6 +194,14 @@ export const router = createBrowserRouter([
 
       { path: 'button', element: <HomePage /> },
       { path: 'layout', element: <Layout /> },
+    ],
+  },
+
+  {
+    path: 'nearby',
+    children: [
+      { path: '', element: <NearbyShowsPage /> },
+      { path: 'operatManage/user', element: <OperatManageUserPage /> },
     ],
   },
 ])
