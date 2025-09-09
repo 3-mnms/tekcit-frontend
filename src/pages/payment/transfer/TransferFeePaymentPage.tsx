@@ -14,7 +14,7 @@ import TicketInfoSection from '@/components/payment/transfer/TicketInfoSection'
 import WalletPayment from '@/components/payment/pay/TekcitPay'
 
 // 포인트 결제 API만 사용
-import { requestTekcitPay } from '@/shared/api/payment/payments'
+import { requestTransferPayment } from '@/shared/api/payment/payments'
 
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 import { createPaymentId as _createPaymentId } from '@/models/payment/utils/paymentUtils'
@@ -115,7 +115,7 @@ const TransferFeePaymentPage: React.FC = () => {
 
     try {
       // tekcitpay: 비밀번호 검증 + 포인트 차감
-      await requestTekcitPay(
+      await requestTransferPayment(
         {
           amount: totalFee,   // 수수료 금액
           paymentId,          // 결제 식별자
