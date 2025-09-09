@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import SockJS from 'sockjs-client'
 // import { Stomp, type Frame, type Message } from '@stomp/stompjs'
-import { Client, type Frame, type IMessage } from '@stomp/stompjs'
+import { Client } from '@stomp/stompjs'
 
 import type { TossPaymentHandle } from '@/components/payment/pay/TossPayment'
 import PaymentInfo from '@/components/payment/pay/PaymentInfo'
@@ -151,19 +151,69 @@ const BookingPaymentPage: React.FC = () => {
             console.log('[WebSocket] 파싱된 데이터:', data)
 
             if (data.status === 'CONFIRMED') {
-              console.log('✅ [WebSocket] 결제 완료 - 성공 페이지로 이동')
-              navigate('/payment/result?type=booking&status=success')
+              console.log('✅ [WebSocket] 결제 완료 감지')
+
+              // ✅ 팝업인지 확인하고 부모창에 메시지 전송
+              if (window.opener && !window.opener.closed) {
+                console.log('팝업에서 부모창으로 결제 완료 메시지 전송')
+                window.opener.postMessage({
+                  type: 'PAYMENT_SUCCESS',
+                  data: {
+                    bookingId: checkout?.bookingId,
+                    paymentId: ensuredPaymentId || paymentId,
+                    status: 'success'
+                  }
+                }, window.location.origin)
+
+                // 팝업 창 닫기
+                setTimeout(() => {
+                  window.close()
+                }, 1000)
+              } else {
+                // 일반 페이지라면 직접 이동
+                navigate('/payment/result?type=booking&status=success')
+              }
             } else if (data.status === 'CANCELED') {
-              console.log('❌ [WebSocket] 결제 취소 - 실패 페이지로 이동')
-              navigate('/payment/result?type=booking&status=fail')
-            } else {
-              console.log('ℹ️ [WebSocket] 기타 상태:', data.status)
+              console.log('❌ [WebSocket] 결제 취소')
+
+              if (window.opener && !window.opener.closed) {
+                window.opener.postMessage({
+                  type: 'PAYMENT_FAILURE',
+                  data: {
+                    bookingId: checkout?.bookingId,
+                    status: 'fail',
+                    reason: 'canceled'
+                  }
+                }, window.location.origin)
+
+                setTimeout(() => {
+                  window.close()
+                }, 1000)
+              } else {
+                navigate('/payment/result?type=booking&status=fail')
+              }
             }
+
           } catch (parseError) {
             console.error('❌ [WebSocket] 메시지 파싱 실패:', parseError)
             console.error('[WebSocket] 원본 메시지:', message.body)
           }
         })
+
+        //     if (data.status === 'CONFIRMED') {
+        //       console.log('✅ [WebSocket] 결제 완료 - 성공 페이지로 이동')
+        //       navigate('/payment/result?type=booking&status=success')
+        //     } else if (data.status === 'CANCELED') {
+        //       console.log('❌ [WebSocket] 결제 취소 - 실패 페이지로 이동')
+        //       navigate('/payment/result?type=booking&status=fail')
+        //     } else {
+        //       console.log('ℹ️ [WebSocket] 기타 상태:', data.status)
+        //     }
+        //   } catch (parseError) {
+        //     console.error('❌ [WebSocket] 메시지 파싱 실패:', parseError)
+        //     console.error('[WebSocket] 원본 메시지:', message.body)
+        //   }
+        // })
 
         console.log('✅ [WebSocket] 구독 완료, subscription:', subscription)
 

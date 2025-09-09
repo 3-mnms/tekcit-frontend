@@ -81,14 +81,6 @@ const RefundPage: React.FC = () => {
         <p className={styles.subtitle}>환불 내용을 확인한 뒤 진행해 주세요.</p>
       </header>
 
-      {/* 마이페이지 예매 취소에서 넘겨주는 데이터 넣을 예정 */}
-      <TransferTicketInfo
-        title="하울의 움직이는 성"
-        date="2025.09.21 (일) 오후 3시"
-        ticket={2}
-        price={150000}
-      />
-
       {/* ✅ 취소 사유 입력 영역 */}
       <section className={styles.reasonSection} aria-labelledby="refund-reason-label">
         <div className={styles.reasonHead}>

@@ -17,13 +17,7 @@ import TicketDeliverySelectSection, { type DeliveryMethod } from '@/components/b
 
 import { useRespondFamilyTransfer, useRespondOthersTransfer } from '@/models/transfer/tanstack-query/useTransfer'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
-
-// 결제/양도 API (서버 금액과 기존 paymentId를 반드시 사용)
-import {
-  requestTransferPayment,
-  type RequestTransferPaymentDTO,
-  getPaymentIdByBookingId,
-} from '@/shared/api/payment/payments'
+import { requestTransferPayment, type RequestTransferPaymentDTO, getPaymentIdByBookingId } from '@/shared/api/payment/payments'
 
 import styles from './TransferPaymentPage.module.css'
 
@@ -191,6 +185,8 @@ const TransferPaymentPage: React.FC = () => {
 
   // 화면 표기용 금액(서버 검증에는 사용하지 않음)
   const amount = (navState.price ?? 0) * (navState.ticket ?? 1)
+  const commision = Math.floor(amount*0.1)
+  const totalAmount = amount + commision
 
   // 필수 파라미터 가드
   const transferIdOK = Number.isFinite(Number(navState.transferId))
@@ -416,11 +412,16 @@ const TransferPaymentPage: React.FC = () => {
                   <span className={styles.priceValue}>{amount.toLocaleString()}원</span>
                 </div>
 
+                <div className={styles.priceRow}>
+                  <span>수수료 (10%)</span>
+                  <span className={styles.priceValue}> {commision.toLocaleString()}원 </span>
+                </div>
+
                 <div className={styles.divider} />
 
                 <div className={styles.priceTotal} aria-live="polite">
                   <strong>총 결제 금액</strong>
-                  <strong className={styles.priceStrong}>{amount.toLocaleString()}원</strong>
+                  <strong className={styles.priceStrong}>{totalAmount.toLocaleString()}원</strong>
                 </div>
 
                 <label className={styles.agree}>
