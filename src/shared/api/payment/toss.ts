@@ -1,7 +1,10 @@
 // 포트원 토스 페이먼츠 api 호출
 
 import type { TossPaymentBody } from '@/models/payment/types/paymentTypes'
-import { postWithUserId } from './payment'
+// import { postWithUserId } from './payment'
+import { requestPayment, completePayment } from '@/shared/api/payment/payments'
+
+const DUMMY_USER_ID = 1
 
 /** 결제 사전요청 멍 */
 export const paymentRequest = async (
@@ -22,12 +25,18 @@ export const paymentRequest = async (
     payMethod: 'CARD',
     paymentRequestType: 'GENERAL_PAYMENT_REQUESTED',
   }
-  return postWithUserId('/payments/request', payload)
+  // return postWithUserId('/payments/request', payload)
+  return requestPayment(payload, DUMMY_USER_ID)
 }
+
+// // 결제 결과 확인 API
+// export async function paymentConfirm(paymentId: string) {
+//   return postWithUserId(`/payments/complete/${paymentId}`, {})
+// }
 
 // 결제 결과 확인 API
 export async function paymentConfirm(paymentId: string) {
-  return postWithUserId(`/payments/complete/${paymentId}`, {})
+  return completePayment(paymentId)
 }
 
 /** ✅ 예매 결제(토스) */
@@ -39,6 +48,7 @@ export async function requestTossBookingPayment(body: TossPaymentBody) {
     paymentRequestType: 'GENERAL_PAYMENT_REQUESTED',
   }
 
-  return postWithUserId('/payments/request', payload)
+  // return postWithUserId('/payments/request', payload)
+  return requestPayment(payload, DUMMY_USER_ID)  
 }
 

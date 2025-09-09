@@ -71,9 +71,7 @@ export async function getWithUserId<T = any>(url: string, config: any = {}) {
 }
 
 /** ✅ POST 호출 시 X-User-Id 헤더 자동 부착 (+ baseURL 중복 방지) */
-export async function postWithUserId<T = any>(url: string, body: any) {
-  console.log(`#!@#! url : ${url}}, body : ${body}`);
-  
+export async function postWithUserId<T = any>(url: string, body: any) {  
 
   const res = await api.post<T>(url, body, {
     headers: {
