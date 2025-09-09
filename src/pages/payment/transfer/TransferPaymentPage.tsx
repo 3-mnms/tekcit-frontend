@@ -3,8 +3,9 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
-import * as SockJS from 'sockjs-client'
-import { Stomp } from '@stomp/stompjs'
+import SockJS from 'sockjs-client'
+// import { Stomp } from '@stomp/stompjs'
+import { Client } from '@stomp/stompjs'
 
 import BookingProductInfo from '@/components/payment/BookingProductInfo'
 import AddressForm from '@/components/payment/address/AddressForm'
@@ -14,7 +15,7 @@ import PasswordInputModal from '@/components/payment/modal/TransferPasswordInput
 import WalletPayment from '@/components/payment/pay/TekcitPay'
 import TicketDeliverySelectSection, { type DeliveryMethod } from '@/components/booking/TicketDeliverySelectSection'
 
-import { useRespondFamilyTransfer } from '@/models/transfer/tanstack-query/useTransfer'
+import { useRespondFamilyTransfer, useRespondOthersTransfer } from '@/models/transfer/tanstack-query/useTransfer'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
 
 // 결제/양도 API (서버 금액과 기존 paymentId를 반드시 사용)
@@ -46,7 +47,8 @@ type TransferState = {
 const BookingIdSchema = z.string().min(1)
 
 const TransferPaymentPage: React.FC = () => {
-  const stompClientRef = useRef<any>(null)
+  // const stompClientRef = useRef<any>(null)
+  const stompClientRef = useRef<Client | null>(null)
 
   // 라우팅/상태
   const navigate = useNavigate()
@@ -64,6 +66,7 @@ const TransferPaymentPage: React.FC = () => {
 
   // 승인 뮤테이션
   const respondFamily = useRespondFamilyTransfer()
+  const respondOthers = useRespondOthersTransfer()
 
   // ✅ 서버에서 bookingId → db에 저장된 기존 예매 결제 정보(paymentId, amount) 조회
   const {
@@ -86,19 +89,49 @@ const TransferPaymentPage: React.FC = () => {
 
   // 웹소켓 연결
   useEffect(() => {
-    if (!navState.transferId) return
+    console.log('[Transfer WebSocket] 초기화 시작, transferId:', navState.transferId)
+
+    if (!navState.transferId) {
+      console.log('[Transfer WebSocket] transferId 없음, 연결하지 않음')
+      return
+    }
+
+    // 기존 연결이 있으면 먼저 정리
+    if (stompClientRef.current?.connected) {
+      console.log('[Transfer WebSocket] 기존 연결 해제 중...')
+      stompClientRef.current.deactivate()
+      stompClientRef.current = null
+    }
 
     const connectWebSocket = () => {
-      const socket = new SockJS('/ws')
-      const stompClient = Stomp.over(socket)
+      console.log('[Transfer WebSocket] 새 연결 시작...')
+      console.log('[Transfer WebSocket] 연결 URL: http://localhost:10000/ws')
 
-      stompClient.connect({}, function (frame) {
+      // 최신 @stomp/stompjs Client 방식 사용
+      const client = new Client({
+        webSocketFactory: () => new (SockJS as any)('http://localhost:10000/ws'),
+        connectHeaders: {},
+        debug: (str) => {
+          console.log('[Transfer STOMP Debug]', str)
+        },
+        reconnectDelay: 5000,
+        heartbeatIncoming: 10000,
+        heartbeatOutgoing: 10000,
+      })
+
+      // 연결 성공 핸들러
+      client.onConnect = (frame) => {
         console.log('Transfer WebSocket 연결됨:', frame)
 
-        stompClient.subscribe(`/user/queue/transfer-status`, function (message) {
+        // 연결 성공 후에만 ref에 저장
+        stompClientRef.current = client
+
+        // 구독 시작
+        const subscription = client.subscribe('/user/queue/transfer-status', (message) => {
           const data = JSON.parse(message.body)
           console.log('양도 상태 업데이트:', data)
-          // ✅ 필터링 추가 (안전성)
+
+          // 필터링 추가 (안전성)
           if (data.reservationNumber === navState.reservationNumber) {
             if (data.status === 'COMPLETED') {
               navigate('/payment/result?type=transfer&status=success')
@@ -107,16 +140,41 @@ const TransferPaymentPage: React.FC = () => {
             }
           }
         })
-      })
 
-      stompClientRef.current = stompClient
+        console.log('Transfer WebSocket 구독 완료:', subscription)
+      }
+
+      // 에러 핸들러들
+      client.onStompError = (frame) => {
+        console.error('Transfer WebSocket STOMP 에러:', frame.headers?.message)
+      }
+
+      client.onWebSocketError = (error) => {
+        console.error('Transfer WebSocket 에러:', error)
+      }
+
+      client.onDisconnect = () => {
+        console.log('Transfer WebSocket 연결 해제됨')
+      }
+
+      // 연결 시작
+      try {
+        client.activate()
+        console.log('Transfer WebSocket 클라이언트 활성화 완료')
+      } catch (error) {
+        console.error('Transfer WebSocket 클라이언트 활성화 실패:', error)
+      }
     }
 
     connectWebSocket()
 
+    // cleanup 함수
     return () => {
+      console.log('[Transfer WebSocket] cleanup 실행')
       if (stompClientRef.current?.connected) {
-        stompClientRef.current.disconnect()
+        console.log('[Transfer WebSocket] 연결 해제 중...')
+        stompClientRef.current.deactivate()
+        stompClientRef.current = null
       }
     }
   }, [navState.transferId, navState.reservationNumber, userId, navigate])
@@ -224,23 +282,6 @@ const TransferPaymentPage: React.FC = () => {
       if (isBasePayLoading) throw new Error('결제 정보를 불러오는 중입니다.')
       if (!basePaymentId) throw new Error((basePayError as any)?.message || '기존 결제 정보를 찾을 수 없습니다.')
 
-      // // ✅ commission 규칙: 기본 10% (환경변수로 조정 가능), 최소 1원
-      // const RATE = Number(import.meta.env.VITE_TRANSFER_FEE_RATE ?? 0.1)
-      // const commission = Math.max(1, Math.floor(baseAmount * RATE))
-
-      // // ✅ transfer 생성: 기존 예매 결제의 paymentId + 서버 금액 사용
-      // const transferReqBody: RequestTransferPaymentDTO = {
-      //   sellerId: Number(navState.senderId) || 0,
-      //   paymentId: basePaymentId,               // 기존(PAID/TRANSFER) paymentId
-      //   bookingId: navState.reservationNumber!, // 현재 예약번호
-      //   totalAmount: baseAmount,                // 서버 금액(핵심)
-      //   commission,                             // 서버가 요구 → 0이면 406 가능
-      // }
-      // console.log('[Transfer][requestTransferPayment payload]', transferReqBody)
-
-      // await requestTransferPayment(transferReqBody, userId) // 🔹 여기서 포인트 차감까지 완료됨
-      // console.log('[Transfer][requestTransferPayment ok]')
-
       // 비밀번호 입력
       setIsPwModalOpen(true)
     } catch (e: any) {
@@ -281,7 +322,7 @@ const TransferPaymentPage: React.FC = () => {
 
       // 양도 승인 처리
       const approveDTO = buildApproveDTO()
-      await respondFamily.mutateAsync(approveDTO)
+      await respondOthers.mutateAsync(approveDTO)
 
       // ✅ WebSocket 메시지 누락 대비 추가
       setTimeout(() => {
