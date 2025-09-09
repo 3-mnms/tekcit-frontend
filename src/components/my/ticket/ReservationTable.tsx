@@ -74,9 +74,9 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter })
                 <td data-label="공연명" className={`${styles.left} ${styles.ellipsis}`}>
                   {item.title}
                 </td>
-                <td data-label="일시">{item.dateTime}</td>
-                <td data-label="매수">{item.count}</td>
-                <td data-label="예매상태">{item.statusLabel}</td>
+                <td data-label="일시" className={styles.ellipsis}>{item.dateTime}</td>
+                <td data-label="매수" className={styles.ellipsis}>{item.count}</td>
+                <td data-label="예매상태" className={styles.ellipsis}>{item.statusLabel}</td>
               </tr>
             ))}
         </tbody>

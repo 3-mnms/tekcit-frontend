@@ -15,16 +15,20 @@
   flex-wrap: wrap;
 }
 
+.noWrap { 
+  flex-wrap: nowrap;
+}
+
 .label {
   font-weight: 600;
   font-size: 0.95rem;
-  min-width: 100px;
+  min-width: 120px;
 }
 
 .periodButtons {
   display: flex;
   gap: 0.5rem;
-  margin-left: 1%;
+  margin-left: -5px;
 }
 
 .periodButtons button {
@@ -44,11 +48,8 @@
 }
 
 .input[type="date"] {
-  padding: 0.45rem 0.75rem;
   border: 1px solid #ccc;
   border-radius: 6px;
-  font-size: 0.9rem;
-  width: 200px;
 }
 
 .searchBtn {
@@ -61,6 +62,8 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  width: 20%;
+  height: 44px;
 }
 
 .searchBtn:hover {
