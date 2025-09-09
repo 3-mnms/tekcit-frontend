@@ -3,8 +3,6 @@ import { useState } from 'react'
 import styles from './PasswordInputModal.module.css'
 import DotDisplay from '@components/payment/password/DotDisplay'
 import Keypad from '@components/payment/password/Keypad'
-// import { verifyTekcitPassword } from '@/shared/api/payment/tekcits'
-import { requestTekcitPay } from '@/shared/api/payment/payments'
 
 interface PasswordInputModalProps {
   onClose: () => void
@@ -12,7 +10,7 @@ interface PasswordInputModalProps {
   userName?: string
   amount: number
   paymentId: string
-  userId: number          
+  userId: number             // 헤더용 prop은 그대로 두되 사용하지 않음
 }
 
 const PasswordInputModal: React.FC<PasswordInputModalProps> = ({
@@ -31,28 +29,30 @@ const PasswordInputModal: React.FC<PasswordInputModalProps> = ({
     const next = password + value
     setPassword(next); setIsError(false)
 
+    // ✅ 6자리 완료 시 서버 호출 없이 즉시 완료 콜백만 실행
     if (next.length === 6) {
       setIsSubmitting(true)
-      try {
-        await requestTekcitPay({ amount, paymentId, password: next }, userId)
-        setTimeout(() => {
-          onComplete(next)
-          setPassword('')
-          setIsError(false)
-        }, 120)
-      } catch {
-        setIsError(true)
-        setTimeout(() => setPassword(''), 300)
-      } finally {
+      // 살짝의 딜레이로 UX 부드럽게
+      setTimeout(() => {
+        onComplete(next)
+        setPassword('')
+        setIsError(false)
         setIsSubmitting(false)
-      }
+      }, 120)
     }
   }
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true">
       <div className={styles.modal}>
-        <button className={styles.closeButton} onClick={onClose} aria-label="비밀번호 입력 닫기" disabled={isSubmitting}>✕</button>
+        <button
+          className={styles.closeButton}
+          onClick={onClose}
+          aria-label="비밀번호 입력 닫기"
+          disabled={isSubmitting}
+        >
+          ✕
+        </button>
 
         <div className={styles.top}>
           {userName && <p className={styles.label}>{userName}님의</p>}

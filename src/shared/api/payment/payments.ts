@@ -39,9 +39,10 @@ export interface RequestTransferPaymentDTO {
 }
 
 export interface RequestTekcitPayDTO {
-  amount: number        // 결제 금액(원)
-  paymentId: string     // 기존(혹은 사전 생성) 결제 ID
-  password: string      // 지갑 비밀번호
+  amount: number            // 결제 금액(원)
+  paymentId: string         // 결제 ID
+  password: string          // 지갑 비밀번호
+  toUserId?: number         // ▶︎ 입금 받을 사용자 ID(관리자 ID)
 }
 
 /** POST /api/payments/request */
@@ -71,10 +72,27 @@ export async function requestTekcitPay(
   dto: RequestTekcitPayDTO,
   userId: number,
 ): Promise<void> {
+  // 요청 전 디버그 로그
+  console.debug('[payments] requestTekcitPay:request', {
+    baseURL: (api.defaults as any)?.baseURL,
+    path: '/tekcitpay',
+    payload: dto,
+    headers: { 'X-User-Id': String(userId) },
+  })
+
   await api.post('/tekcitpay', dto, {
     headers: { 'X-User-Id': String(userId) },
   })
+
+  // 성공 로그
+  console.debug('[payments] requestTekcitPay:success', {
+    paymentId: dto.paymentId,
+    amount: dto.amount,
+    toUserId: dto.toUserId,
+    purpose: dto.purpose,
+  })
 }
+
 
 /**
  * 예약번호(bookingId)로 결제 정보 조회 → PaymentInfoByBooking 반환
