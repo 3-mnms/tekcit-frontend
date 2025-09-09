@@ -23,8 +23,8 @@ type UiShow = {
 }
 
 const toUi = (raw: any): UiShow => ({
-  id: String(raw.festivalId ?? raw.id ?? crypto.randomUUID()),
-  title: raw.title ?? raw.festivalName ?? '-',
+  id: String(raw.festivalDetailId ?? raw.id ?? crypto.randomUUID()),
+  title: raw.name ?? raw.festivalName ?? '-',
   venue: raw.venue ?? raw.hallName ?? raw.address ?? '-',
   distanceKm:
     typeof raw.distance === 'number'
@@ -34,7 +34,7 @@ const toUi = (raw: any): UiShow => ({
         : null,
   lat: raw.latitude ?? raw.lat ?? null,
   lng: raw.longitude ?? raw.lng ?? null,
-  poster: raw.posterUrl ?? raw.posterFile ?? null,
+  poster: raw.poster ?? raw.posterFile ?? null,
 })
 
 const NearbyShowsPage: React.FC = () => {
@@ -127,7 +127,7 @@ const NearbyShowsPage: React.FC = () => {
             <button
               className={styles.addrBtn}
               type="button"
-              onClick={() => navigate('/mypage/address')}
+              onClick={() => navigate('/mypage/myinfo/address')}
             >
               기본 주소 변경
             </button>
@@ -177,7 +177,7 @@ const NearbyShowsPage: React.FC = () => {
                         className={styles.btnPrimary}
                         onClick={() => navigate(`/festival/${s.id}`)}
                       >
-                        상세 페이지로 이동
+                        공연 상세 페이지로 이동
                       </Button>
                     </div>
                   </div>

@@ -25,6 +25,7 @@
   font-size: 28px;
   line-height: 1.2;
   margin: 0;
+  font-weight: 600;
 }
 
 .addr {
@@ -77,16 +78,35 @@
   color: #6b7280;
 }
 
-.meta { display: flex; flex-direction: column; gap: 6px; }
-.cardTitle { margin: 0; font-size: 18px; }
-.venue { color: #666; font-size: 13px; }
-.distance { color: #222; font-size: 13px; }
+.meta {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto;
+  gap: 6px;
+  min-height: 140px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 18px;
+}
+
+.venue {
+  color: #666;
+  font-size: 13px;
+}
+
+.distance {
+  color: #222;
+  font-size: 13px;
+}
 
 .actions {
-  margin-top: 10px;
+  margin-top: 0;        
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;       
+  align-self: end;          
+  justify-self: end;
 }
 
 .btnGhost {
@@ -97,12 +117,23 @@
   border-radius: 8px;
 }
 
+.btnGhost:hover {
+  background-color: #fcfcfc;
+  color: rgb(0, 0, 0);
+  border: 1px solid #cbd5e1;
+}
+
 .btnPrimary {
   background: #4d9afd;
   color: #fff;
   border: 1px solid #4d9afd;
   padding: 10px 12px;
   border-radius: 8px;
+}
+
+.btnPrimary:hover {
+  background-color: #3585ea;
+  color: whitesmoke;
 }
 
 /* 지도 */
@@ -114,7 +145,7 @@
   display: flex;
   flex-direction: column;
   min-height: 80vh;
-  margin-top: -70px;
+  /* margin-top: -50px; */
 }
 
 .mapHeader {
@@ -127,9 +158,14 @@
   color: #1f2937;
 }
 
-.mapTools { display: flex; gap: 6px; }
+.mapTools {
+  display: flex;
+  gap: 6px;
+}
+
 .mapTools button {
-  width: 28px; height: 28px;
+  width: 28px;
+  height: 28px;
   border-radius: 6px;
   border: 1px solid #e5e7eb;
   background: #fff;
@@ -139,32 +175,52 @@
 .mapArea {
   position: relative;
   flex: 1;
-  background: #f0f6ff; 
+  background: #f0f6ff;
 }
 
 .marker {
   position: absolute;
-  width: 38px; height: 38px;
+  width: 38px;
+  height: 38px;
   border-radius: 999px;
-  display: grid; place-items: center;
-  box-shadow: 0 6px 14px rgba(0,0,0,.15);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, .15);
   border: 2px solid #fff;
   transform: translate(-50%, -50%);
   cursor: pointer;
 }
-.marker1 { background: #1e293b; color: #fff; }
-.marker2 { background: #0ea5e9; color: #fff; }
-.marker3 { background: #64748b; color: #fff; }
+
+.marker1 {
+  background: #1e293b;
+  color: #fff;
+}
+
+.marker2 {
+  background: #0ea5e9;
+  color: #fff;
+}
+
+.marker3 {
+  background: #64748b;
+  color: #fff;
+}
 
 .kakaoBadge {
   position: absolute;
-  right: 12px; bottom: 8px;
+  right: 12px;
+  bottom: 8px;
   font-size: 11px;
   color: #888;
 }
 
 /* 반응형 */
 @media (max-width: 1024px) {
-  .content { grid-template-columns: 1fr; }
-  .mapWrap { order: -1; }
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .mapWrap {
+    order: -1;
+  }
 }
