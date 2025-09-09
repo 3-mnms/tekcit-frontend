@@ -33,9 +33,10 @@ const RefundPage: React.FC = () => {
         type: 'refund',
         status: ok ? 'success' : 'fail',
       }).toString()
+      console.log(q);
+      
       navigate(`/payment/result?${q}`)
-    },
-    [navigate],
+    },[navigate]
   )
 
   const handleCancel = () => navigate(-1)
@@ -51,18 +52,20 @@ const RefundPage: React.FC = () => {
       
       // axios 인터셉터에서 X-User-Id를 자동으로 JWT에서 추출해서 주입함
       const response = await refundPayment(paymentId)
-      
-      console.log('[환불 성공]', response)
-      routeToResult(true)
-    } catch (error) {
-      console.error('[환불 실패]', error)
-      
-      // 에러 타입에 따른 처리
-      if (error instanceof Error) {
-        console.error('에러 메시지:', error.message)
+      if(response.success){
+        routeToResult(true)
+      }else{
+        routeToResult(false)
       }
+    } catch (error) {
+      // console.error('[환불 실패]', error)
       
-      routeToResult(false)
+      // // 에러 타입에 따른 처리
+      // if (error instanceof Error) {
+      //   console.error('에러 메시지:', error.message)
+      // }
+      
+      // routeToResult(false)
     } finally {
       setLoadingRefund(false)
     }
