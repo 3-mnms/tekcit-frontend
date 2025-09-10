@@ -3,8 +3,9 @@ import styles from './HotSection.module.css';
 import type { Festival } from '@/models/festival/festivalType';
 import { getFestivals } from '@/shared/api/festival/festivalApi';
 import { useParams, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// 라우트 슬러그 -> 그룹 카테고리
+/* ───────────────────────── 카테고리 매핑 ───────────────────────── */
 const slugToCategory: Record<string, string> = {
   pop: '대중음악',
   dance: '무용',
@@ -14,7 +15,6 @@ const slugToCategory: Record<string, string> = {
   mix: '복합',
 };
 
-// 원본 카테고리 -> 그룹 카테고리
 const CATEGORY_MAP: Record<string, string> = {
   '대중무용': '무용',
   '무용(서양/한국무용)': '무용',
@@ -29,7 +29,7 @@ const CATEGORY_MAP: Record<string, string> = {
 const normalizeCategory = (original?: string): string =>
   original ? (CATEGORY_MAP[original] ?? '복합') : '복합';
 
-// 포스터 URL 보정(절대경로/https 강제)
+/* 포스터 URL 보정(절대경로/https 강제) */
 const buildPosterUrl = (f: Partial<Festival>): string => {
   const raw =
     (f as any)?.poster ??
@@ -45,54 +45,31 @@ const buildPosterUrl = (f: Partial<Festival>): string => {
   return `https://www.kopis.or.kr${encodeURI(path)}`;
 };
 
-// 카드 최대 너비(px) — CSS .card max-width 와 반드시 동일
-const CARD_MAX = 220;
-const GAP = 24; // 1.5rem
-
+/* ───────────────────────── 컴포넌트 ───────────────────────── */
 const HotSection: React.FC = () => {
   const { name: slug } = useParams<{ name?: string }>();
-  const [festivals, setFestivals] = useState<Festival[]>([]);
 
-  // 🔑 칼럼 수는 section(상위 컨테이너)의 실제 너비로 계산
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const [cols, setCols] = useState(5);
+  const [festivals, setFestivals] = useState<Festival[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [hoveringBar, setHoveringBar] = useState(false);
+
+  // 모바일(hover 없음) 감지 → 모바일에선 썸네일 스트립 항상 노출
+  const isCoarsePointer = useRef<boolean>(false);
+  useEffect(() => {
+    isCoarsePointer.current = window.matchMedia('(pointer:coarse)').matches;
+  }, []);
 
   const selectedCategory = useMemo(
     () => (slug ? slugToCategory[slug] ?? null : null),
     [slug]
   );
 
-  // 상위 컨테이너 폭 기준으로 1~5 칼럼 산정 (겹침/유령칼럼 방지)
-  useEffect(() => {
-    const el = sectionRef.current;
-    const updateCols = () => {
-      const width =
-        el?.getBoundingClientRect().width ??
-        document.documentElement.clientWidth ??
-        window.innerWidth;
-
-      // (cols * CARD_MAX) + (cols - 1) * GAP <= width
-      const possible = Math.floor((width + GAP) / (CARD_MAX + GAP));
-      const next = Math.max(1, Math.min(5, possible));
-      setCols(next);
-    };
-
-    updateCols();
-    const ro = new ResizeObserver(updateCols);
-    if (el) ro.observe(el);
-    window.addEventListener('resize', updateCols);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', updateCols);
-    };
-  }, []);
-
-  // ✅ 데이터 로드 (/festival 자체가 조회수 내림차순 정렬)
+  // 데이터 로드: /festival 자체가 조회수 내림차순 정렬
   useEffect(() => {
     const fetchData = async () => {
       try {
         const list = await getFestivals();
-        setFestivals(list); // 이미 정렬돼서 옴!
+        setFestivals(list);
       } catch (err) {
         console.error('🔥 Hot 공연 불러오기 실패', err);
         setFestivals([]);
@@ -101,103 +78,210 @@ const HotSection: React.FC = () => {
     fetchData();
   }, []);
 
-  // 카테고리 선택 시 필터 (정렬은 API 결과 유지)
+  // 카테고리 필터
   const filtered = useMemo(() => {
     if (!selectedCategory) return festivals;
-    return festivals.filter((f) => normalizeCategory((f as any).genrenm) === selectedCategory);
+    return festivals.filter(
+      (f) => normalizeCategory((f as any).genrenm) === selectedCategory
+    );
   }, [festivals, selectedCategory]);
 
-  // ✅ 실제 렌더 개수
-  // - 아이템 있을 때: min(계산된 칼럼 수, 데이터 수, 5)
-  // - 아이템 없을 때: 최소 1칸은 유지(placeholder 자리)
-  const hasItems = filtered.length > 0;
-  const count = hasItems ? Math.min(cols, filtered.length, 5) : 1;
+  // 상단 히어로 & 썸네일에 쓸 상위 10개만
+  const items = useMemo(() => filtered.slice(0, 10), [filtered]);
+  const hasItems = items.length > 0;
+
+  // 현재 아이템
+  const current = hasItems ? items[currentIndex] : undefined;
+  const currentPoster = current ? buildPosterUrl(current) : '';
+
+  // 접근성: 좌/우 방향키로 이동
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!hasItems) return;
+      if (e.key === 'ArrowRight') {
+        setCurrentIndex((p) => (p + 1) % items.length);
+      } else if (e.key === 'ArrowLeft') {
+        setCurrentIndex((p) => (p - 1 + items.length) % items.length);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [hasItems, items.length]);
+
+  const goPrev = () => setCurrentIndex(p => (p - 1 + items.length) % items.length);
+  const goNext = () => setCurrentIndex(p => (p + 1) % items.length);
+
 
   return (
-    <section className={styles.section} ref={sectionRef}>
+    <section className={styles.section}>
+      {/* ✅ 배경 이미지 레이어 */}
+      {hasItems && (
+        <motion.img
+          key={currentPoster} // 포스터가 바뀔 때마다 다시 그려짐
+          src={currentPoster || '@/shared/assets/placeholder-poster.png'}
+          alt=""
+          aria-hidden="true"
+          className={styles.bgImage}
+          referrerPolicy="no-referrer"
+          draggable={false}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.28 }}
+        />
+      )}
+
+      {/* ✅ 배경 위 오버레이 */}
+      <div className={styles.bgOverlay} />
+
       <h2 className={styles.title}>
         {selectedCategory ? `${selectedCategory} HOT 공연` : '오늘의 HOT 공연'}
       </h2>
 
-      {/* CSS 변수로 칼럼 수 동기화(유령 칼럼 방지 + 가운데 정렬) */}
-      <div
-        className={styles.cardList}
-        style={{ ['--cols' as any]: count }}
-      >
-        {hasItems ? (
-          filtered.slice(0, count).map((festival, index) => {
-            const key = `${festival.fid || (festival as any).id || 'unknown'}-${index}`;
-            const posterSrc = buildPosterUrl(festival);
-            const to = festival.fid ? `/festival/${festival.fid}` : undefined;
-
-            const CardInner = (
-              <>
-                <div className={styles.imageWrapper}>
-                  <img
-                    src={posterSrc || '@/shared/assets/placeholder-poster.png'}
-                    alt={festival.prfnm}
-                    className={styles.image}
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = '@/shared/assets/placeholder-poster.png';
-                    }}
-                  />
-                  <span className={styles.rank}>{index + 1}</span>
-                </div>
-                <div className={styles.content}>
-                  <h3 className={styles.name}>{festival.prfnm}</h3>
-                  <p className={styles.location}>{festival.fcltynm}</p>
-                  <p className={styles.date}>
-                    {festival.prfpdfrom === festival.prfpdto
-                      ? festival.prfpdfrom
-                      : `${festival.prfpdfrom} ~ ${festival.prfpdto}`}
-                  </p>
-                </div>
-              </>
-            );
-
-            return (
-              <div key={key} className={styles.card}>
-                {to ? (
-                  <Link
-                    to={to}
-                    state={{
-                      fid: festival.fid,
-                      title: festival.prfnm,
-                      poster: posterSrc || '@/shared/assets/placeholder-poster.png',
-                      prfpdfrom: festival.prfpdfrom,
-                      prfpdto: festival.prfpdto,
-                      fcltynm: festival.fcltynm,
-                    }}
-                    className={styles.cardLink}
-                    aria-label={`${festival.prfnm} 상세보기`}
-                  >
-                    {CardInner}
-                  </Link>
-                ) : (
-                  <div className={styles.cardStatic} title="상세 이동 불가: 식별자 없음">
-                    {CardInner}
-                  </div>
-                )}
-              </div>
-            );
-          })
-        ) : (
-          <>
-            {/* 자리 유지용 투명 카드 1개 */}
-            <div className={`${styles.card} ${styles.emptyCard}`} aria-hidden />
-
-            {/* 화면 전체에 보이는 안내 문구(카드 위 오버레이) */}
-            <div className={styles.emptyOverlay} aria-live="polite">
-              <span className={styles.emptyOverlayText}>
-                현재 예매 가능한 공연이 없습니다.
-              </span>
+      {/* 히어로 카드 */}
+      {hasItems ? (
+        <motion.div
+          key={current?.fid ?? currentIndex}
+          className={styles.hero}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28 }}
+          aria-live="polite"
+        >
+          <Link
+            to={`/festival/${current?.fid}`}
+            state={{
+              fid: current?.fid,
+              title: current?.prfnm,
+              poster: currentPoster || '@/shared/assets/placeholder-poster.png',
+              prfpdfrom: current?.prfpdfrom,
+              prfpdto: current?.prfpdto,
+              fcltynm: current?.fcltynm,
+            }}
+            className={styles.heroLink}
+            aria-label={`${current?.prfnm} 상세보기`}
+          >
+            <div className={styles.heroPoster}>
+              <img
+                src={currentPoster || '@/shared/assets/placeholder-poster.png'}
+                alt={current?.prfnm}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src =
+                    '@/shared/assets/placeholder-poster.png';
+                }}
+                referrerPolicy="no-referrer"
+                draggable={false}
+              />
+              <span className={styles.rankPill}>{currentIndex + 1}</span>
             </div>
-          </>
-        )}
-      </div>
+          </Link>
+        </motion.div>
+      ) : (
+        <div className={styles.empty}>현재 예매 가능한 공연이 없습니다.</div>
+      )}
+
+      {/* 좌우 화살표 */}
+      {hasItems && (
+        <>
+          <motion.button
+            type="button"
+            className={`${styles.arrow} ${styles.arrowLeft}`}
+            onClick={goPrev}
+            whileTap={{ scale: 0.95 }}
+            aria-label="이전 포스터"
+          >
+            <svg className={styles.arrowIcon} viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M15.5 19.5L8.5 12l7-7.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </motion.button>
+
+          <motion.button
+            type="button"
+            className={`${styles.arrow} ${styles.arrowRight}`}
+            onClick={goNext}
+            whileTap={{ scale: 0.95 }}
+            aria-label="다음 포스터"
+          >
+            <svg className={styles.arrowIcon} viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M8.5 4.5L15.5 12l-7 7.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </motion.button>
+
+          {/* 하단 바 */}
+          <div
+            className={styles.bottomBar}
+            onMouseEnter={() => setHoveringBar(true)}
+            onMouseLeave={() => setHoveringBar(false)}
+            style={
+              {
+                '--segments': items.length,
+                '--index': currentIndex,
+              } as React.CSSProperties
+            }
+          >
+            <AnimatePresence>
+              {(hoveringBar || isCoarsePointer.current) && (
+                <motion.div
+                  className={styles.thumbLayer}
+                  initial={{ y: 16, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 16, opacity: 0 }}
+                  transition={{ duration: 0.22 }}
+                >
+                  {items.map((f, i) => {
+                    const src = buildPosterUrl(f);
+                    const isActive = i === currentIndex;
+                    return (
+                      <button
+                        type="button"
+                        key={`${f.fid ?? i}`}
+                        className={`${styles.thumbBtn} ${isActive ? styles.activeThumb : ''
+                          }`}
+                        onClick={() => setCurrentIndex(i)}
+                        aria-label={`${i + 1}위 포스터로 이동`}
+                      >
+                        <img
+                          src={src || '@/shared/assets/placeholder-poster.png'}
+                          alt={f.prfnm}
+                          className={styles.thumb}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src =
+                              '@/shared/assets/placeholder-poster.png';
+                          }}
+                          referrerPolicy="no-referrer"
+                          draggable={false}
+                        />
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className={styles.barTrack} />
+            <div className={styles.barIndicator} />
+            <span className={styles.pageText}>
+              {currentIndex + 1}/{items.length}
+            </span>
+          </div>
+        </>
+      )}
     </section>
   );
+
 };
 
 export default HotSection;

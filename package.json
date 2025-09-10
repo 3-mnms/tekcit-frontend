@@ -19,6 +19,7 @@
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",
     "firebase": "^12.2.1",
+    "framer-motion": "^12.23.12",
     "react": "^19.1.0",
     "react-datepicker": "^8.4.0",
     "react-daum-postcode": "^3.2.0",

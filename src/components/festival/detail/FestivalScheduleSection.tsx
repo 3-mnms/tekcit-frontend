@@ -135,7 +135,7 @@ const __fs_combineDateTime = (day: Date, hhmm?: string | null): Date => {
 };
 
 /** 중앙 팝업 오픈 (파일 내부 전용) */
-const __fs_openCenteredPopup = (url: string, w: number, h: number) => {
+const __fs_openCenteredPopup = (url: string, w: number, h: number, name: string = 'tekcit-popup') => {
   const availLeft = (screen as any).availLeft ?? 0;
   const availTop  = (screen as any).availTop  ?? 0;
   const availW    = screen.availWidth ?? screen.width;
@@ -145,22 +145,13 @@ const __fs_openCenteredPopup = (url: string, w: number, h: number) => {
   const top  = Math.max(availTop,  Math.round(availTop  + (availH - h) / 2));
 
   const feat = [
-    'popup=yes',
-    'noopener',
-    'noreferrer',
-    'toolbar=0',
-    'menubar=0',
-    'location=0',
-    'status=0',
-    'scrollbars=1',
-    'resizable=1',
-    `width=${w}`,
-    `height=${h}`,
-    `left=${left}`,
-    `top=${top}`,
+    'popup=yes','noopener','noreferrer',
+    'toolbar=0','menubar=0','location=0','status=0',
+    'scrollbars=1','resizable=1',
+    `width=${w}`, `height=${h}`, `left=${left}`, `top=${top}`,
   ].join(',');
 
-  window.open(url, '_blank', feat);
+  window.open(url, name, feat);  // ← _blank 대신 고정 name
 };
 
 /** 예매 팝업 (파일 내부 전용) */
@@ -176,6 +167,7 @@ const __fs_openBookingPopup = (
   if (time) params.set('time', time);
   if (fdfrom) params.set('fdfrom', fdfrom);
   if (fdto) params.set('fdto', fdto);
+  params.set('nochat', '1'); 
   __fs_openCenteredPopup(`/booking/${fid}?${params.toString()}`, BOOK_W, BOOK_H); // 1000×600
 };
 
@@ -195,6 +187,7 @@ const __fs_openWaitingPopup = (
   params.set('skipEnter', '1');
   if (fdfrom) params.set('fdfrom', fdfrom);
   if (fdto) params.set('fdto', fdto);
+  params.set('nochat', '1'); 
   __fs_openCenteredPopup(`/booking/${fid}/queue?${params.toString()}`, WAIT_W, WAIT_H); // 480×720
 };
 
