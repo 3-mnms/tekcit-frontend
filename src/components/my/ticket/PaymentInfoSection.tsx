@@ -91,6 +91,8 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
       state: {
         paymentId: order.paymentId,
         paymentAmount: order.amount,
+        quantity: order.quantity, 
+        unitPrice: order.unitPrice,
       },
     })
   }

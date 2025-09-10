@@ -42,7 +42,8 @@ const BookingPaymentPage: React.FC = () => {
 
   const [sellerId, setSellerId] = useState<number | null>(null)
   const storeName = useAuthStore((s) => s.user?.name) || undefined
-  const userName = useMemo(() => storeName ?? getNameFromJwt(), [storeName])
+  const userName = useMemo(() => storeName)
+  const [wsShouldConnect, setWsShouldConnect] = useState(false) // 웹소켓 연결 타이밍 (플래그 추가)
 
   const tossRef = useRef<TossPaymentHandle>(null)
   const [openedMethod, setOpenedMethod] = useState<PaymentMethod | null>(null)
@@ -88,7 +89,7 @@ const BookingPaymentPage: React.FC = () => {
           reservationNumber: checkout.bookingId,
         })
         if (!res.success) throw new Error(res.message || '상세 조회 실패')
-        const sid = (res.data?.sellerId ?? res.data?.seller_id) as number | undefined
+        const sid = (res.data?.sellerId ?? res.data?.sellerId) as number | undefined
         if (!sid || sid <= 0) throw new Error('sellerId 누락')
         setSellerId(sid)
       } catch (e) {
@@ -101,6 +102,9 @@ const BookingPaymentPage: React.FC = () => {
 
   // 웹소켓 연결 (결제 완료 알림)
   useEffect(() => {
+    if (!wsShouldConnect || !checkout?.bookingId) return
+    console.log('[WebSocket] 연결 시작(지정된 트리거 시점)')
+
     console.log('[WebSocket] 초기화 시작, bookingId:', checkout?.bookingId)
 
     if (!checkout?.bookingId) {
@@ -140,20 +144,13 @@ const BookingPaymentPage: React.FC = () => {
         stompClientRef.current = client
 
         // 구독 시작
-        console.log('[WebSocket] 구독 시작: /user/queue/ticket-status')
         const subscription = client.subscribe('/user/queue/ticket-status', (message) => {
-          console.log('📨 [WebSocket] 메시지 수신 - Raw:', message)
-          console.log('📨 [WebSocket] 메시지 본문:', message.body)
-
           try {
             const data = JSON.parse(message.body)
-            console.log('[WebSocket] 파싱된 데이터:', data)
 
             if (data.status === 'CONFIRMED') {
-              console.log('✅ [WebSocket] 결제 완료 - 성공 페이지로 이동')
               navigate('/payment/result?type=booking&status=success')
             } else if (data.status === 'CANCELED') {
-              console.log('❌ [WebSocket] 결제 취소 - 실패 페이지로 이동')
               navigate('/payment/result?type=booking&status=fail')
             } else {
               console.log('ℹ️ [WebSocket] 기타 상태:', data.status)
@@ -163,25 +160,6 @@ const BookingPaymentPage: React.FC = () => {
             console.error('[WebSocket] 원본 메시지:', message.body)
           }
         })
-
-        console.log('✅ [WebSocket] 구독 완료, subscription:', subscription)
-
-        // 테스트 메시지 전송
-        setTimeout(() => {
-          try {
-            client.publish({
-              destination: '/app/test',
-              body: JSON.stringify({
-                type: 'connection-test',
-                bookingId: checkout?.bookingId,
-                timestamp: new Date().toISOString()
-              })
-            })
-            console.log('📤 [WebSocket] 테스트 메시지 전송 완료')
-          } catch (error) {
-            console.error('❌ [WebSocket] 테스트 메시지 전송 실패:', error)
-          }
-        }, 1000)
       }
 
       // 에러 핸들러들
@@ -228,7 +206,7 @@ const BookingPaymentPage: React.FC = () => {
         stompClientRef.current = null
       }
     }
-  }, [checkout?.bookingId, navigate])
+  }, [wsShouldConnect, checkout?.bookingId, navigate])
 
   const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false)
   const routeToResult = (ok: boolean) => {

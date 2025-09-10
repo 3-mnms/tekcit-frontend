@@ -1,4 +1,5 @@
-import { useState, useCallback, useMemo } from 'react'
+// src/pages/payment/refund/RefundPage.tsx
+import { useState, useCallback } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import styles from './RefundPage.module.css'
 
@@ -8,55 +9,60 @@ import AlertModal from '@/components/common/modal/AlertModal'
 import { refundPayment } from '@/shared/api/payment/refund'
 
 const RefundPage: React.FC = () => {
-  // ✅ 모달/로딩 상태
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false)
-  const [loadingRefund, setLoadingRefund] = useState(false)                                 // 최대 글자 수(텍스트 제한)
+  const [loadingRefund, setLoadingRefund] = useState(false)
 
   const navigate = useNavigate()
-
-  // ✅ path(:paymentId) > query(?paymentId=) > state 순으로 처리
   const { paymentId: paymentIdFromPath } = useParams<{ paymentId: string }>()
   const location = useLocation()
-  const qs = useMemo(() => new URLSearchParams(location.search), [location.search])
-  const paymentId =
-    paymentIdFromPath || qs.get('paymentId') || (location.state as any)?.paymentId || ''
-  const stateData = location.state as {
-    paymentAmount: number
+
+  const krw = (n: number) => `${(n ?? 0).toLocaleString('ko-KR')}원`
+
+  // ✅ state 로 전달된 값만 사용 (수수료 없음)
+  const {
+    paymentId: statePaymentId,
+    paymentAmount,
+    title,
+    date,
+    quantity,
+    unitPrice,
+  } = (location.state || {}) as {
+    paymentId?: string
+    paymentAmount?: number
+    title?: string
+    date?: string
+    quantity?: number
+    unitPrice?: number
   }
 
-  // ✅ 환불 처리 후 결과 페이지 이동
+  const paymentId = paymentIdFromPath || statePaymentId || ''
+  const amount = paymentAmount ?? 0
+  const qty = quantity ?? 1
+  const perPrice = unitPrice ?? (amount && qty ? Math.floor(amount / qty) : 0)
+
   const routeToResult = useCallback(
     (ok: boolean) => {
       const q = new URLSearchParams({
         type: 'refund',
         status: ok ? 'success' : 'fail',
       }).toString()
-      console.log(q);
-      
       navigate(`/payment/result?${q}`)
-    },[navigate]
+    },
+    [navigate]
   )
 
   const handleCancel = () => navigate(-1)
   const handleRefundClick = () => setIsRefundModalOpen(true)
 
-  /** ✅ 환불 확정 → 실제 API 호출로 변경 */
   const handleRefundConfirm = async () => {
     setIsRefundModalOpen(false)
     setLoadingRefund(true)
-
     try {
-      console.log('[환불 요청 시작]', { paymentId })
-      
-      // axios 인터셉터에서 X-User-Id를 자동으로 JWT에서 추출해서 주입함
+      if (!paymentId) throw new Error('paymentId 누락')
       const response = await refundPayment(paymentId)
-      if(response.success){
-        routeToResult(true)
-      }else{
-        routeToResult(false)
-      }
-    } catch (error) {
-      // routeToResult(false)
+      routeToResult(Boolean(response?.success))
+    } catch {
+      routeToResult(false)
     } finally {
       setLoadingRefund(false)
     }
@@ -71,23 +77,36 @@ const RefundPage: React.FC = () => {
         <p className={styles.subtitle}>환불 내용을 확인한 뒤 진행해 주세요.</p>
       </header>
 
-      {/* 금액 요약 */}
-      <section className={styles.summary} aria-label="환불 금액 요약">
+      {/* ✅ 전달받은 예매(상품) 정보 표시 */}
+      {(
+        <section className={`${styles.card} ${styles.product}`} aria-label="예매 정보">
+          <TransferTicketInfo
+            title={title ?? '-'}
+            date={date ?? '-'}
+            ticket={qty}
+            price={perPrice}
+          />
+        </section>
+      )}
+
+      {/* 금액 요약 (수수료 없음) */}
+      <section className={`${styles.card} ${styles.summary}`} aria-label="환불 금액 요약">
         <div className={styles.summaryHead}>
           <span className={styles.badge}>요약</span>
+          <span className={styles.tip}>결제 금액과 동일하게 환불됩니다.</span>
         </div>
 
         <dl className={styles.list}>
           <div className={styles.row}>
             <dt className={styles.label}>최종 환불 예정 금액</dt>
-            <dd className={styles.value}>100,000원</dd>
+            <dd className={`${styles.value} ${styles.amount}`}>{krw(amount)}</dd>
           </div>
 
-        <div role="separator" className={styles.divider} />
+          <div role="separator" className={styles.divider} />
 
           <div className={styles.rowTotal}>
             <dt className={styles.totalLabel}>결제 금액</dt>
-            <dd className={styles.totalValue}>102,000원</dd>
+            <dd className={`${styles.totalValue} ${styles.amount}`}>{krw(amount)}</dd>
           </div>
         </dl>
 
@@ -107,6 +126,8 @@ const RefundPage: React.FC = () => {
         <Button
           className={`${styles.btn} ${styles.btnPrimary}`}
           onClick={handleRefundClick}
+          disabled={loadingRefund || !paymentId}
+          aria-busy={loadingRefund}
         >
           {loadingRefund ? '처리 중…' : '환불'}
         </Button>
@@ -119,8 +140,7 @@ const RefundPage: React.FC = () => {
           onConfirm={handleRefundConfirm}
           confirmText="확인"
           cancelText="취소"
-        >
-        </AlertModal>
+        />
       )}
     </div>
   )
