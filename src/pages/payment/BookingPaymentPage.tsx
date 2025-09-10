@@ -23,10 +23,33 @@ import { fetchBookingDetail } from '@/shared/api/payment/bookingDetail'
 
 import { requestPayment, type PaymentRequestDTO } from '@/shared/api/payment/payments'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
+import { useReleaseWaitingMutation } from '@/models/waiting/tanstack-query/useWaiting'
 
 import styles from './BookingPaymentPage.module.css'
 
 const DEADLINE_SECONDS = 5 * 60
+
+const parseYMD = (s?: string) => {
+  if (!s) return undefined
+  const t = s.trim().replace(/[./]/g, '-')
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t)
+  const d = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(t)
+  if (isNaN(d.getTime())) return undefined
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+const combineDateTime = (day?: Date, hhmm?: string | null) => {
+  if (!day) return undefined
+  const d = new Date(day)
+  if (!hhmm) {
+    d.setHours(0, 0, 0, 0)
+    return d
+  }
+  const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm)
+  if (!m) return d
+  d.setHours(Math.min(23, +m[1] || 0), Math.min(59, +m[2] || 0), 0, 0)
+  return d
+}
 
 const BookingPaymentPage: React.FC = () => {
   const stompClientRef = useRef<any>(null)
@@ -81,7 +104,7 @@ const BookingPaymentPage: React.FC = () => {
 
   // sellerId 확보
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       try {
         const res = await fetchBookingDetail({
           festivalId: checkout.festivalId,
@@ -175,8 +198,8 @@ const BookingPaymentPage: React.FC = () => {
               body: JSON.stringify({
                 type: 'connection-test',
                 bookingId: checkout?.bookingId,
-                timestamp: new Date().toISOString()
-              })
+                timestamp: new Date().toISOString(),
+              }),
             })
             console.log('📤 [WebSocket] 테스트 메시지 전송 완료')
           } catch (error) {
@@ -231,8 +254,32 @@ const BookingPaymentPage: React.FC = () => {
     }
   }, [checkout?.bookingId, navigate])
 
+  const releaseMut = useReleaseWaitingMutation();
+  const releasedOnceRef = useRef(false);
+
+  const reservationDate = useMemo(() => {
+    const day = parseYMD(checkout?.performanceDate)
+    return combineDateTime(day, (checkout as any)?.performanceTime ?? null)
+  }, [checkout?.performanceDate, (checkout as any)?.performanceTime])
+
+  const callReleaseOnce = (why: string) => {
+    if (releasedOnceRef.current) return
+    if (!checkout?.festivalId || !reservationDate) return // 정보 없으면 skip
+    releasedOnceRef.current = true
+    releaseMut.mutate({
+      festivalId: String(checkout.festivalId),
+      reservationDate,
+    })
+    // (선택) 디버깅 로그
+    console.log('[waiting.release] fired:', why, {
+      festivalId: checkout.festivalId,
+      reservationDate: reservationDate.toISOString(),
+    })
+  }
+
   const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false)
   const routeToResult = (ok: boolean) => {
+    callReleaseOnce(ok ? 'routeToResult:success' : 'routeToResult:fail')
     navigate(`/payment/result?type=booking&status=${ok ? 'success' : 'fail'}`)
   }
 
@@ -244,9 +291,19 @@ const BookingPaymentPage: React.FC = () => {
 
   // request → (wallet) 모달(tekcitpay) → (완료 라우팅)  ※ complete 호출 없음
   const handlePayment = async () => {
-    if (!checkout) { setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.'); return }
-    if (!openedMethod) { setErr('결제 수단을 선택해주세요.'); return }
-    if (remainingSeconds <= 0) { setErr('결제 시간이 만료되었습니다.'); setIsTimeUpModalOpen(true); return }
+    if (!checkout) {
+      setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.')
+      return
+    }
+    if (!openedMethod) {
+      setErr('결제 수단을 선택해주세요.')
+      return
+    }
+    if (remainingSeconds <= 0) {
+      setErr('결제 시간이 만료되었습니다.')
+      setIsTimeUpModalOpen(true)
+      return
+    }
     if (isPaying) return
 
     // paymentId 고정
@@ -254,17 +311,22 @@ const BookingPaymentPage: React.FC = () => {
     if (!ensuredPaymentId) setEnsuredPaymentId(ensuredId)
     if (!paymentId) setPaymentId(ensuredId)
 
-    if (!Number.isFinite(userId)) { setErr('로그인이 필요합니다.'); return }
-    if (!sellerId) { setErr('판매자 정보가 없어요. 다시 시도해 주세요.'); return }
+    if (!Number.isFinite(userId)) {
+      setErr('로그인이 필요합니다.')
+      return
+    }
+    if (!sellerId) {
+      setErr('판매자 정보가 없어요. 다시 시도해 주세요.')
+      return
+    }
 
     // 1) REQUEST (지갑은 'POINT_PAYMENT', 카드/토스는 'CARD')
     const dto: PaymentRequestDTO = {
       paymentId: ensuredId,
       bookingId: checkout.bookingId ?? null,
       festivalId: checkout.festivalId ?? null,
-      paymentRequestType: openedMethod === 'wallet'
-        ? 'POINT_PAYMENT_REQUESTED'
-        : 'GENERAL_PAYMENT_REQUESTED',
+      paymentRequestType:
+        openedMethod === 'wallet' ? 'POINT_PAYMENT_REQUESTED' : 'GENERAL_PAYMENT_REQUESTED',
       buyerId: userId!,
       sellerId: sellerId!,
       amount: finalAmount,
@@ -347,9 +409,16 @@ const BookingPaymentPage: React.FC = () => {
 
         {/* 우측 */}
         <aside className={styles.right}>
-          <div className={styles.summaryCard}><PaymentInfo /></div>
+          <div className={styles.summaryCard}>
+            <PaymentInfo />
+          </div>
           <div className={styles.buttonWrapper}>
-            <Button type="button" className={styles.payButton} onClick={handlePayment} aria-busy={isPaying}>
+            <Button
+              type="button"
+              className={styles.payButton}
+              onClick={handlePayment}
+              aria-busy={isPaying}
+            >
               {isPaying ? '결제 중...' : '결제하기'}
             </Button>
           </div>
