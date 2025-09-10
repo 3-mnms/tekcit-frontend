@@ -33,9 +33,6 @@ const normalizeCategory = (original?: string): string =>
 const buildPosterUrl = (f: Partial<Festival>): string => {
   const raw =
     (f as any)?.poster ??
-    (f as any)?.poster_file ??
-    (f as any)?.posterFile ??
-    (f as any)?.posterUrl ??
     '';
   if (!raw) return '';
   if (raw.startsWith('http://') || raw.startsWith('https://')) {

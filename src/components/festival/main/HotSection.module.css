@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: flex-start;
   padding: 2rem;
-  height: 700px;
+  height: 600px;
   background-color: #000;
   overflow: hidden;
 }
@@ -24,7 +24,7 @@
 .bgOverlay {
   position: absolute;
   inset: 0;
-  /* background: linear-gradient(to bottom, rgba(0, 0, 0, 0.445), rgba(0,0,0,.18)); */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.445), rgba(0,0,0,.18));
   z-index: 1;
 }
 
@@ -33,7 +33,7 @@
   font-weight: bold;
   color: white;
   margin-bottom: 1.5rem;
-  margin-left: 5rem;
+  /* margin-left: 5rem; */
 }
 
 .cardList {
@@ -183,7 +183,6 @@
 .heroPoster {
   aspect-ratio: 2 / 3;
   width: clamp(200px, 32vw, 220px);
-  margin-left: 60px;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
@@ -243,9 +242,9 @@
 
 .thumbLayer {
   position: absolute;
-  left: 33%;
+  left: 30%;
   bottom: calc(100% + 10px);
-  /* transform: translateX(-50%); */
+  transform: translateX(-50%);
   display: flex;
   gap: 8px;
   padding: 8px 10px;
@@ -326,9 +325,9 @@
   pointer-events: none;
 }
 
-.title, .hero, .bottomBar, .arrow {
+.title, .hero, .bottomBar {
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 @media (max-width: 768px) {

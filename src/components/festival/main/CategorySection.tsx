@@ -12,7 +12,7 @@ const canon = (s?: string) =>
     .replace(/[()（）]/g, (m) => (m === '(' || m === '（' ? '(' : ')'));
 
 // 💡 메인에서는 5개만!
-const MAX_MAIN_ITEMS = 5;
+const MAX_MAIN_ITEMS = 500;
 
 /** 원본 -> 그룹 */
 const CATEGORY_MAP: Record<string, string> = {
