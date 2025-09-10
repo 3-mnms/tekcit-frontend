@@ -28,7 +28,11 @@ import styles from './BookingPaymentPage.module.css'
 const DEADLINE_SECONDS = 5 * 60
 
 const BookingPaymentPage: React.FC = () => {
+  const location = useLocation();
   const stompClientRef = useRef<any>(null)
+
+  const STORE_KEY = import.meta.env.VITE_PORTONE_STORE_KEY
+  const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY
 
   const navigate = useNavigate()
   const { state } = useLocation()
@@ -269,6 +273,8 @@ const BookingPaymentPage: React.FC = () => {
       amount: finalAmount,
       currency: 'KRW',
       payMethod: openedMethod === 'wallet' ? 'POINT_PAYMENT' : 'CARD',
+      STORE_KEY,
+      CHANNEL_KEY,
     }
 
     setIsPaying(true)
