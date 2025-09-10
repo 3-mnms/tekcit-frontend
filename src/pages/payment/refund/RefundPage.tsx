@@ -22,8 +22,6 @@ const RefundPage: React.FC = () => {
   const {
     paymentId: statePaymentId,
     paymentAmount,
-    title,
-    date,
     quantity,
     unitPrice,
   } = (location.state || {}) as {
@@ -81,8 +79,6 @@ const RefundPage: React.FC = () => {
       {(
         <section className={`${styles.card} ${styles.product}`} aria-label="예매 정보">
           <TransferTicketInfo
-            title={title ?? '-'}
-            date={date ?? '-'}
             ticket={qty}
             price={perPrice}
           />
@@ -93,21 +89,16 @@ const RefundPage: React.FC = () => {
       <section className={`${styles.card} ${styles.summary}`} aria-label="환불 금액 요약">
         <div className={styles.summaryHead}>
           <span className={styles.badge}>요약</span>
-          <span className={styles.tip}>결제 금액과 동일하게 환불됩니다.</span>
+          <span className={styles.tip}>최종 환불 금액과 동일하게 환불됩니다.</span>
         </div>
 
         <dl className={styles.list}>
           <div className={styles.row}>
-            <dt className={styles.label}>최종 환불 예정 금액</dt>
-            <dd className={`${styles.value} ${styles.amount}`}>{krw(amount)}</dd>
+            <dt className={styles.totalLabel}>최종 환불 예정 금액</dt>
+            <dd className={`${styles.totalValue} ${styles.amount}`}>{krw(amount)}</dd>
           </div>
 
           <div role="separator" className={styles.divider} />
-
-          <div className={styles.rowTotal}>
-            <dt className={styles.totalLabel}>결제 금액</dt>
-            <dd className={`${styles.totalValue} ${styles.amount}`}>{krw(amount)}</dd>
-          </div>
         </dl>
 
         <p className={styles.notice}>

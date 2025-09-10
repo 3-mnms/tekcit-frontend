@@ -103,112 +103,60 @@ const BookingPaymentPage: React.FC = () => {
   // 웹소켓 연결 (결제 완료 알림)
   useEffect(() => {
     if (!wsShouldConnect || !checkout?.bookingId) return
-    console.log('[WebSocket] 연결 시작(지정된 트리거 시점)')
 
-    console.log('[WebSocket] 초기화 시작, bookingId:', checkout?.bookingId)
-
-    if (!checkout?.bookingId) {
-      console.log('[WebSocket] bookingId 없음, 연결하지 않음')
-      return
-    }
-
-    // 기존 연결이 있으면 먼저 정리
-    if (stompClientRef.current?.connected) {
-      console.log('[WebSocket] 기존 연결 해제 중...')
-      stompClientRef.current.deactivate()
+    // 기존 연결 정리
+    if (stompClientRef.current) {
+      try { stompClientRef.current.deactivate() } catch { }
       stompClientRef.current = null
     }
 
-    const connectWebSocket = () => {
-      console.log('[WebSocket] 새 연결 시작...')
-      console.log('[WebSocket] 연결 URL: http://localhost:10000/ws') // ✅ 포트 수정
+    const client = new Client({
+      // SockJS 엔드포인트
+      webSocketFactory: () => new SockJS('http://localhost:10000/ws'),
+      // Spring Security(JWT) 사용 시 CONNECT 헤더에 토큰 전달
+      connectHeaders: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      debug: (str) => console.log('[STOMP]', str),
+      // 웹소켓 끊어지면 자동 재접속
+      reconnectDelay: 5000,
+      heartbeatIncoming: 10000,
+      heartbeatOutgoing: 10000,
+    })
 
-      // ✅ 최신 @stomp/stompjs Client 방식 사용
-      const client = new Client({
-        webSocketFactory: () => new SockJS('http://localhost:10000/ws'), // ✅ 포트 수정
-        connectHeaders: {},
-        debug: (str) => {
-          console.log('[STOMP Debug]', str)
-        },
-        reconnectDelay: 5000,
-        heartbeatIncoming: 10000,
-        heartbeatOutgoing: 10000,
-      })
-
-      // 연결 성공 핸들러
-      client.onConnect = (frame) => {
-        console.log('✅ [WebSocket] STOMP 연결 성공:', frame)
-        console.log('[WebSocket] 연결된 세션:', frame.headers?.session)
-
-        // 연결 성공 후에만 ref에 저장
-        stompClientRef.current = client
-
-        // 구독 시작
-        const subscription = client.subscribe('/user/queue/ticket-status', (message) => {
-          try {
-            const data = JSON.parse(message.body)
-
-            if (data.status === 'CONFIRMED') {
-              navigate('/payment/result?type=booking&status=success')
-            } else if (data.status === 'CANCELED') {
-              navigate('/payment/result?type=booking&status=fail')
-            } else {
-              console.log('ℹ️ [WebSocket] 기타 상태:', data.status)
-            }
-          } catch (parseError) {
-            console.error('❌ [WebSocket] 메시지 파싱 실패:', parseError)
-            console.error('[WebSocket] 원본 메시지:', message.body)
+    client.onConnect = () => {
+      // 사용자별 큐 구독
+      client.subscribe('/user/queue/ticket-status', (message) => {
+        try {
+          const data = JSON.parse(message.body)
+          if (data.status === 'CONFIRMED') {
+            navigate('/payment/result?type=booking&status=success')
+          } else if (data.status === 'CANCELED') {
+            navigate('/payment/result?type=booking&status=fail')
+          } else {
+            console.log('[WS] 기타 상태:', data.status)
           }
-        })
-      }
-
-      // 에러 핸들러들
-      client.onStompError = (frame) => {
-        console.error('❌ [WebSocket] STOMP 프로토콜 에러:', frame.headers?.message)
-        console.error('[WebSocket] 에러 본문:', frame.body)
-      }
-
-      client.onWebSocketError = (error) => {
-        console.error('❌ [WebSocket] WebSocket 에러:', error)
-      }
-
-      client.onWebSocketClose = (event) => {
-        console.log('🔌 [WebSocket] WebSocket 연결 종료:', event)
-      }
-
-      client.onDisconnect = () => {
-        console.log('🔌 [WebSocket] STOMP 연결 해제됨')
-
-        // 5초 후 재연결 시도
-        setTimeout(() => {
-          console.log('[WebSocket] 5초 후 재연결 시도...')
-          connectWebSocket()
-        }, 5000)
-      }
-
-      // 연결 시작
-      try {
-        client.activate()
-        console.log('[WebSocket] 클라이언트 활성화 완료')
-      } catch (error) {
-        console.error('❌ [WebSocket] 클라이언트 활성화 실패:', error)
-      }
+        } catch (e) {
+          console.error('[WS] 메시지 파싱 실패', e, message.body)
+        }
+      })
     }
 
-    connectWebSocket()
+    client.onStompError = (frame) => {
+      console.error('[WS] STOMP 에러:', frame.headers?.message, frame.body)
+    }
+    client.onWebSocketError = (err) => console.error('[WS] 소켓 에러:', err)
+    client.onWebSocketClose = (ev) => console.log('[WS] 소켓 종료:', ev)
 
-    // cleanup 함수
+    // ref에 보관하고 활성화
+    stompClientRef.current = client
+    client.activate()
+
     return () => {
-      console.log('[WebSocket] cleanup 실행')
-      if (stompClientRef.current?.connected) {
-        console.log('[WebSocket] 연결 해제 중...')
-        stompClientRef.current.deactivate()
-        stompClientRef.current = null
-      }
+      // 연결 여부와 상관없이 deactivate 호출 (내부에서 안전하게 처리)
+      try { client.deactivate() } catch { }
+      stompClientRef.current = null
     }
-  }, [wsShouldConnect, checkout?.bookingId, navigate])
+  }, [wsShouldConnect, checkout?.bookingId, navigate, accessToken])
 
-  const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false)
   const routeToResult = (ok: boolean) => {
     navigate(`/payment/result?type=booking&status=${ok ? 'success' : 'fail'}`)
   }
