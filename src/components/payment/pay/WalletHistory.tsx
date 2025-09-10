@@ -1,9 +1,7 @@
-// 주석: WalletHistory — 데이터를 부모에서 받아 '표시만' 하는 컴포넌트 멍
-//      API 호출/필터링/정렬은 전부 부모(WalletPointPage)에서 처리함 멍
+// 주석: WalletHistory — 데이터를 부모에서 받아 '표시만' 하는 컴포넌트
 
 import styles from './WalletHistory.module.css'
 
-/** 주석: 부모에서 내려줄 뷰모델 타입 — 화면에 필요한 필드만 간추림 멍 */
 export type WalletHistoryViewItem = {
   id: string                              // 주석: 키용 식별자(paymentId 등) 멍
   createdAt: string                       // 주석: ISO 문자열 멍
@@ -12,11 +10,8 @@ export type WalletHistoryViewItem = {
 }
 
 export type WalletHistoryProps = {
-  /** 주석: 선택 월(YYYY-MM) — 상단 문구에만 사용. 필터링은 부모가 수행 멍 */
   month?: string
-  /** 주석: 부모가 가공한 결과 목록 멍 */
   items: WalletHistoryViewItem[]
-  /** 주석: 로딩/에러 표시 제어 멍 */
   loading?: boolean
   error?: string | null
 }

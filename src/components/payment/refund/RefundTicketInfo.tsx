@@ -13,17 +13,9 @@ const TransferTicketInfo: React.FC<TransferTicketInfoProps> = ({
   date,
   ticket,
   price,
-  posterUrl,
 }) => {
   return (
     <div className={styles.ticketBox}>
-      <div className={styles.thumbnail}>
-        <img
-          src={posterUrl || '/assets/no-poster.png'}
-          alt="포스터"
-          className={styles.posterImg}
-        />
-      </div>
 
       <div className={styles.ticketDetail}>
         <div className={styles.infoRow}>

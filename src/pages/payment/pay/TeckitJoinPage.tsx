@@ -1,8 +1,4 @@
 // src/pages/payment/TeckitJoinPage.tsx
-// ✅ 테킷 페이 계좌 개설 페이지 (로그인 필수 + 백엔드 스펙 맞춤) 멍
-//    - Body: { password: "string(6자리)" } ← Swagger/Controller 기준 멍
-//    - Header: X-User-Id (axios 인터셉터에서 자동 부착 가정) 멍
-//    - 성공 시: 지갑/포인트 화면으로 이동 멍
 
 import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
@@ -16,7 +12,7 @@ import { useAuthStore } from '@/shared/storage/useAuthStore'
 import {
   CreateAccountRequestSchema,
   createTekcitPayAccount,
-} from '@/shared/api/payment/Join' // 주석: 계좌 생성 API 멍
+} from '@/shared/api/payment/join' // 주석: 계좌 생성 API 멍
 
 /* ───────────────────────── 폼 스키마 ───────────────────────── */
 // 주석: 화면 폼은 password 두 번 입력 + 약관 동의 멍

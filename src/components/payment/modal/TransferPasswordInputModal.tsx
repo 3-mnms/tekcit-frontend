@@ -14,7 +14,7 @@ interface PasswordInputModalProps {
 }
 
 const PasswordInputModal: React.FC<PasswordInputModalProps> = ({
-  onComplete, onClose, userName, amount, paymentId, userId,
+  onComplete, onClose, userName
 }) => {
   const [password, setPassword] = useState('')
   const [isError, setIsError] = useState(false)

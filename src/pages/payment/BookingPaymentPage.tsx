@@ -2,8 +2,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import SockJS from 'sockjs-client'
-// import { Stomp, type Frame, type Message } from '@stomp/stompjs'
-import { Client, type Frame, type IMessage } from '@stomp/stompjs'
+import { Client } from '@stomp/stompjs'
 
 import type { TossPaymentHandle } from '@/components/payment/pay/TossPayment'
 import PaymentInfo from '@/components/payment/pay/PaymentInfo'
@@ -445,7 +444,16 @@ const BookingPaymentPage: React.FC = () => {
       )}
 
       {isTimeUpModalOpen && (
-        <AlertModal title="시간 만료" onConfirm={handleTimeUpModalClose}>
+        <AlertModal
+          title="시간 만료"
+          onConfirm={() => {
+            setIsTimeUpModalOpen(false)
+            if (window.opener && !window.opener.closed) {
+              window.close()
+            }
+          }}
+          hideCancel
+        >
           결제 시간이 만료되었습니다. 다시 시도해주세요.
         </AlertModal>
       )}

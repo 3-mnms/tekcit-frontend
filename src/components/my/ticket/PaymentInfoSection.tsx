@@ -86,8 +86,12 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
 
   const goRefund = () => {
     if (!canRefund || !order?.paymentId) return
+
     navigate(`/payment/refund/${order.paymentId}`, {
-      state: { paymentId: order.paymentId },
+      state: {
+        paymentId: order.paymentId,
+        paymentAmount: order.amount,
+      },
     })
   }
 

@@ -1,5 +1,4 @@
 // WalletPointPage.tsx
-// 주석: 내역은 서버에서 page/size만 받아오고, 월 필터는 프론트에서 처리 멍
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
@@ -13,7 +12,6 @@ import styles from './WalletPointPage.module.css'
 
 const PAGE_SIZE = 10
 
-/* ───────────────────────── 결과 처리(확정/알림/새로고침) 멍 ───────────────────────── */
 const ResultQuerySchema = z.object({
   type: z.literal('wallet-charge').optional(),
   paymentId: z.string().min(10).optional(),
@@ -83,7 +81,6 @@ function useChargeResultHandler() {
     }
   }, [shouldConfirm, confirmMutation.isSuccess])
 }
-/* ──────────────────────────────────────────────────────────────────────── */
 
 export default function WalletPointPage() {
   const navigate = useNavigate()
