@@ -3,7 +3,6 @@ import { useState } from 'react'
 import styles from './PasswordInputModal.module.css'
 import DotDisplay from '@components/payment/password/DotDisplay'
 import Keypad from '@components/payment/password/Keypad'
-// import { verifyTekcitPassword } from '@/shared/api/payment/tekcits'
 import { requestTekcitPay } from '@/shared/api/payment/payments'
 
 interface PasswordInputModalProps {
