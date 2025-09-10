@@ -31,7 +31,7 @@ export type NearbyFestivalListDTO = {
 };
 
 export async function getNearbyFestivals(): Promise<NearbyFestivalListDTO> {
-  const { data } = await api.get('/festival/geocode/nearby/festivalList');
+  const { data } = await api.get('/festival/nearby/festivalList');
   // 백엔드 공통 래핑(SuccessResponse) 대비
   const payload = data?.data ?? data;
   return payload as NearbyFestivalListDTO;
