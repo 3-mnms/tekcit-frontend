@@ -64,6 +64,10 @@
   height: 50px;
 }
 
+.searchWrapper:focus {
+  outline: none;
+}
+
 /* ✅ 좁은 화면일 때 검색창 숨김 */
 @media (max-width: 800px) {
   .center {
@@ -78,6 +82,11 @@
   font-size: 14px;
   font-weight: 500;
   background-color: white;
+}
+
+.searchWrapper input:focus {
+  outline: none;
+  box-shadow: none; 
 }
 
 .right {

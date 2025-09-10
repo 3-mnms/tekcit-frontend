@@ -112,6 +112,7 @@
     opacity 0.35s ease;
   transform-style: preserve-3d;
   backface-visibility: hidden; 
+  will-change: transform, filter, opacity;
 }
 
 .cardPoster img {

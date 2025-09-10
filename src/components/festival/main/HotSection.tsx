@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import styles from './HotSection.module.css'
 import type { Festival } from '@/models/festival/festivalType'
-import { getFestivals } from '@/shared/api/festival/festivalApi'
 import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -11,6 +10,8 @@ import { Navigation, Keyboard, A11y, EffectCoverflow } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/effect-coverflow'
+
+import { useHotFestivals } from '@/models/festival/tanstack-query/useHotFestivals'
 
 /* ───────────────────────── 카테고리 매핑 ───────────────────────── */
 const slugToCategory: Record<string, string> = {
@@ -22,23 +23,9 @@ const slugToCategory: Record<string, string> = {
   mix: '복합',
 }
 
-const CATEGORY_MAP: Record<string, string> = {
-  대중무용: '무용',
-  '무용(서양/한국무용)': '무용',
-  대중음악: '대중음악',
-  뮤지컬: '뮤지컬/연극',
-  연극: '뮤지컬/연극',
-  '서양음악(클래식)': '클래식/국악',
-  '한국음악(국악)': '클래식/국악',
-  '서커스/마술': '서커스/마술',
-}
-
-const normalizeCategory = (original?: string): string =>
-  original ? (CATEGORY_MAP[original] ?? '복합') : '복합'
-
 /* 포스터 URL 보정(절대경로/https 강제) */
 const buildPosterUrl = (f: Partial<Festival>): string => {
-  const raw = (f as any)?.poster ?? ''
+  const raw = f?.poster ?? ''
   if (!raw) return ''
   if (raw.startsWith('http://') || raw.startsWith('https://')) {
     return raw.replace(/^http:\/\//i, 'https://')
@@ -47,18 +34,26 @@ const buildPosterUrl = (f: Partial<Festival>): string => {
   return `https://www.kopis.or.kr${encodeURI(path)}`
 }
 
-/* ───────────────────────── 컴포넌트 ───────────────────────── */
+/* 이미지 프리로드(유휴시간 사용) */
+const preloadImages = (urls: string[]) => {
+  const run = () => {
+    urls.forEach((u) => {
+      const img = new Image()
+      img.src = u
+    })
+  }
+  if ('requestIdleCallback' in window && typeof window.requestIdleCallback === 'function') {
+    window.requestIdleCallback(run as IdleRequestCallback)
+  } else {
+    setTimeout(run, 0)
+  }
+}
+
 const HotSection: React.FC = () => {
   const { name: slug } = useParams<{ name?: string }>()
-
-  const [festivals, setFestivals] = useState<Festival[]>([])
   const [hoveringBar, setHoveringBar] = useState(false)
-
-  // Swiper 제어/상태
   const swiperRef = useRef<SwiperType | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0) // 활성(가운데) 슬라이드의 "원본 배열" 인덱스
-
-  // 모바일(hover 없음) 감지 → 모바일에선 썸네일 스트립 항상 노출
   const isCoarsePointer = useRef<boolean>(false)
   useEffect(() => {
     isCoarsePointer.current = window.matchMedia('(pointer:coarse)').matches
@@ -66,42 +61,25 @@ const HotSection: React.FC = () => {
 
   const selectedCategory = useMemo(() => (slug ? (slugToCategory[slug] ?? null) : null), [slug])
 
-  // 데이터 로드
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const list = await getFestivals()
-        setFestivals(list)
-      } catch (err) {
-        console.error('🔥 Hot 공연 불러오기 실패', err)
-        setFestivals([])
-      }
-    }
-    fetchData()
-  }, [])
-
-  // 카테고리 필터 → 상위 10개
-  const items = useMemo(() => {
-    const base = selectedCategory
-      ? festivals.filter((f) => normalizeCategory((f as any).genrenm) === selectedCategory)
-      : festivals
-    return base.slice(0, 10)
-  }, [festivals, selectedCategory])
-
+  // ✅ 데이터 로드 & 캐싱 (최적화)
+  const { data: items = [], isLoading } = useHotFestivals(selectedCategory, 10)
   const hasItems = items.length > 0
 
   // 배경 포스터 = 활성(가운데) 슬라이드 포스터
   const bgPoster = hasItems ? buildPosterUrl(items[currentIndex]) : ''
-
+  useEffect(() => {
+    setCurrentIndex(0)
+    if (items.length) {
+      swiperRef.current?.slideToLoop(0, 0)
+      warmUpAround(0)
+    }
+  }, [selectedCategory, items.length])
   // 키보드 좌우 화살표
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!hasItems || !swiperRef.current) return
-      if (e.key === 'ArrowRight') {
-        swiperRef.current.slideNext()
-      } else if (e.key === 'ArrowLeft') {
-        swiperRef.current.slidePrev()
-      }
+      if (e.key === 'ArrowRight') swiperRef.current.slideNext()
+      else if (e.key === 'ArrowLeft') swiperRef.current.slidePrev()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -110,9 +88,22 @@ const HotSection: React.FC = () => {
   const goPrev = () => swiperRef.current?.slidePrev()
   const goNext = () => swiperRef.current?.slideNext()
 
+  // ✅ 슬라이드 주변 이미지 프리로드
+  const warmUpAround = (idx: number) => {
+    if (!hasItems) return
+    const around = [idx, idx + 1, idx - 1, idx + 2, idx - 2]
+      .map((i) => ((i % items.length) + items.length) % items.length)
+      .map((i) => buildPosterUrl(items[i]))
+      .filter(Boolean)
+    preloadImages(Array.from(new Set(around)))
+  }
+
+  const SLIDES_PER_VIEW = 5
+  const shouldLoop = items.length > SLIDES_PER_VIEW
+
   return (
     <section className={styles.section}>
-      {/* ✅ 배경: 가운데 카드 포스터 */}
+      {/* 배경: 가운데 카드 포스터 */}
       {hasItems && (
         <motion.img
           key={bgPoster}
@@ -127,24 +118,32 @@ const HotSection: React.FC = () => {
           transition={{ duration: 0.28 }}
         />
       )}
-
-      {/* ✅ 배경 오버레이 */}
       <div className={styles.bgOverlay} />
 
       <h2 className={styles.title}>
         {selectedCategory ? `${selectedCategory} HOT 공연` : '오늘의 HOT 공연'}
       </h2>
 
-      {/* ✅ 5장 Swiper 캐러셀 */}
-      {hasItems ? (
+      {/* 캐러셀 */}
+      {isLoading ? (
+        <div className={styles.carouselWrap}>
+          <div className={styles.skeletonRow}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className={styles.skeletonCard} />
+            ))}
+          </div>
+        </div>
+      ) : hasItems ? (
         <div className={styles.carouselWrap} aria-live="polite">
           <Swiper
-            modules={[Navigation, Keyboard, A11y, EffectCoverflow]} // ⬅️ 추가
+            modules={[Navigation, Keyboard, A11y, EffectCoverflow]}
             effect="coverflow"
-            grabCursor={true}
-            centeredSlides={true}
+            grabCursor
+            centeredSlides
             slidesPerView={5}
-            initialSlide={Math.floor(10 / 2 - 2)}
+            initialSlide={0}
+            loop={shouldLoop}
+            watchOverflow
             coverflowEffect={{
               rotate: 10,
               stretch: 40,
@@ -153,7 +152,6 @@ const HotSection: React.FC = () => {
               slideShadows: false,
             }}
             spaceBetween={24}
-            loop
             keyboard={{ enabled: true }}
             navigation={{ nextEl: '.swiper-next', prevEl: '.swiper-prev' }}
             breakpoints={{
@@ -163,10 +161,13 @@ const HotSection: React.FC = () => {
             }}
             onSwiper={(sw) => {
               swiperRef.current = sw
-              setCurrentIndex(sw.realIndex) // 초기 활성 인덱스
+              sw.slideToLoop(0, 0)
+              setCurrentIndex(sw.realIndex)
+              warmUpAround(0)
             }}
             onSlideChange={(sw) => {
-              setCurrentIndex(sw.realIndex) // 루프 환경에서도 원본 배열 인덱스
+              setCurrentIndex(sw.realIndex)
+              warmUpAround(sw.realIndex)
             }}
             className={styles.heroSwiper}
           >
@@ -175,19 +176,16 @@ const HotSection: React.FC = () => {
               const isActive = i === currentIndex
 
               const handleClick = (e: React.MouseEvent) => {
-                if (isActive) {
-                  // 가운데 카드일 때만 링크 이동 허용
-                  return
-                } else {
+                if (!isActive) {
                   e.preventDefault()
-                  swiperRef.current?.slideToLoop(i, 400) // 옆 카드 눌렀을 땐 가운데로
+                  swiperRef.current?.slideToLoop(i, 400) // 옆 카드 → 가운데로
                 }
               }
 
               return (
                 <SwiperSlide key={f.fid ?? i} className={styles.slide}>
                   <Link
-                    to={isActive ? `/festival/${f.fid}` : '#'} // 가운데만 상세 경로
+                    to={isActive ? `/festival/${f.fid}` : '#'} // 중앙 카드만 상세 진입
                     onClick={handleClick}
                     state={
                       isActive
@@ -207,19 +205,24 @@ const HotSection: React.FC = () => {
                     <div
                       className={`${styles.cardPoster} ${isActive ? styles.isCenter : styles.isSide}`}
                     >
+                      {/* ✅ lazy 이미지 + async 디코드 */}
                       <img
                         src={poster || '@/shared/assets/placeholder-poster.png'}
                         alt={f.prfnm}
-                        onError={(e) => {
-                          ;(e.currentTarget as HTMLImageElement).src =
-                            '@/shared/assets/placeholder-poster.png'
-                        }}
+                        loading="lazy"
+                        decoding="async"
                         referrerPolicy="no-referrer"
                         draggable={false}
+                        onError={(e) => {
+                          const el = e.currentTarget as HTMLImageElement
+                          el.removeAttribute('data-src')
+                          el.src = '@/shared/assets/placeholder-poster.png'
+                        }}
                       />
+
                       <span className={styles.rankPill}>{i + 1}</span>
 
-                      {/* ⬇️ hover overlay */}
+                      {/* hover overlay */}
                       <div className={styles.cardOverlay}>
                         <h3 className={styles.ovTitle}>{f.prfnm}</h3>
                         <p className={styles.ovPeriod}>{f.prfpdfrom}</p>
@@ -238,8 +241,8 @@ const HotSection: React.FC = () => {
         <div className={styles.empty}>현재 예매 가능한 공연이 없습니다.</div>
       )}
 
-      {/* ✅ 하단 바(가운데 기준 페이지 표시) */}
-      {hasItems && (
+      {/* 하단 바/네비 */}
+      {hasItems && !isLoading && (
         <>
           <button
             type="button"
@@ -280,12 +283,7 @@ const HotSection: React.FC = () => {
             className={styles.bottomBar}
             onMouseEnter={() => setHoveringBar(true)}
             onMouseLeave={() => setHoveringBar(false)}
-            style={
-              {
-                '--segments': items.length,
-                '--index': currentIndex,
-              } as React.CSSProperties
-            }
+            style={{ '--segments': items.length, '--index': currentIndex } as React.CSSProperties}
           >
             <AnimatePresence>
               {(hoveringBar || isCoarsePointer.current) && (
@@ -299,7 +297,6 @@ const HotSection: React.FC = () => {
                   {items.map((f, i) => {
                     const src = buildPosterUrl(f)
                     const isActive = i === currentIndex
-
                     return (
                       <button
                         type="button"
@@ -312,12 +309,14 @@ const HotSection: React.FC = () => {
                           src={src || '@/shared/assets/placeholder-poster.png'}
                           alt={f.prfnm}
                           className={styles.thumb}
+                          loading="lazy"
+                          decoding="async"
+                          referrerPolicy="no-referrer"
+                          draggable={false}
                           onError={(e) => {
                             ;(e.currentTarget as HTMLImageElement).src =
                               '@/shared/assets/placeholder-poster.png'
                           }}
-                          referrerPolicy="no-referrer"
-                          draggable={false}
                         />
                       </button>
                     )
