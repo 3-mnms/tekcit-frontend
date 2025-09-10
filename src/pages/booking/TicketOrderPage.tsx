@@ -20,11 +20,6 @@ const toLocalIsoString = (date: Date, timeHHmm: string) => {
   return `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}T${pad2(dt.getHours())}:${pad2(dt.getMinutes())}:00`;
 };
 
-const toCurl = (url: string, body: any) => {
-  const json = JSON.stringify(body).replace(/'/g, `'\\''`);
-  return `curl -i -X POST '${url}' -H 'Content-Type: application/json' -d '${json}'`;
-};
-
 const DOW: Array<'SUN' | 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT'> =
   ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
@@ -146,9 +141,6 @@ const TicketOrderPage: React.FC = () => {
       performanceDate: toLocalIsoString(selDate, selTime),
       selectedTicketCount: 0,
     };
-    console.log('[PHASE1 payload → /api/booking/detail/phases/1]');
-    console.log(payload);
-    console.log('[cURL]', toCurl('/api/booking/detail/phases/1', payload));
     return payload;
   }, [fid, selDate, selTime]);
 
@@ -240,10 +232,6 @@ const TicketOrderPage: React.FC = () => {
         performanceDate: toLocalIsoString(date, time),
         selectedTicketCount: quantity,
       };
-
-      console.log('[PHASE2 payload → /api/booking/selectDate]');
-      console.log(payload);
-      console.log('[cURL]', toCurl('/api/booking/selectDate', payload));
 
       try {
         const res = await selMut.mutateAsync(payload);

@@ -188,23 +188,6 @@ const BookingPaymentPage: React.FC = () => {
         })
 
         console.log('✅ [WebSocket] 구독 완료, subscription:', subscription)
-
-        // 테스트 메시지 전송
-        setTimeout(() => {
-          try {
-            client.publish({
-              destination: '/app/test',
-              body: JSON.stringify({
-                type: 'connection-test',
-                bookingId: checkout?.bookingId,
-                timestamp: new Date().toISOString(),
-              }),
-            })
-            console.log('📤 [WebSocket] 테스트 메시지 전송 완료')
-          } catch (error) {
-            console.error('❌ [WebSocket] 테스트 메시지 전송 실패:', error)
-          }
-        }, 1000)
       }
 
       // 에러 핸들러들
@@ -253,8 +236,8 @@ const BookingPaymentPage: React.FC = () => {
     }
   }, [checkout?.bookingId, navigate])
 
-  const releaseMut = useReleaseWaitingMutation();
-  const releasedOnceRef = useRef(false);
+  const releaseMut = useReleaseWaitingMutation()
+  const releasedOnceRef = useRef(false)
 
   const reservationDate = useMemo(() => {
     const day = parseYMD(checkout?.performanceDate)
@@ -352,6 +335,15 @@ const BookingPaymentPage: React.FC = () => {
 
     // 2') 카드/토스는 PG 이동 (결과 페이지에서 별도 처리)
     try {
+      sessionStorage.setItem(
+        'tekcit:waitingRelease',
+        JSON.stringify({
+          festivalId: checkout.festivalId,
+          performanceDate: checkout.performanceDate, // "YYYY-MM-DD"
+          performanceTime: (checkout as any)?.performanceTime ?? null, // "HH:mm" | null
+        }),
+      )
+      
       await tossRef.current?.requestPay({
         paymentId: ensuredId,
         amount: finalAmount,
