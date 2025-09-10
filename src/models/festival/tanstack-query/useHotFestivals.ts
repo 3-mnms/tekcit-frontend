@@ -14,18 +14,14 @@ const CATEGORY_MAP: Record<string, string> = {
 }
 const normalizeCategory = (o?: string) => (o ? (CATEGORY_MAP[o] ?? '복합') : '복합')
 
-export function useHotFestivals(selectedCategory?: string | null, limit = 10) {
-  return useQuery({
-    queryKey: ['hotFestivals'],            // 캐시 키
-    queryFn: getFestivals,                 // 실제 호출
-    staleTime: 1000 * 60 * 5,              // 5분 동안 재요청 안 함
-    gcTime: 1000 * 60 * 30,                // 30분 캐시 유지
-    placeholderData: keepPreviousData,     // 재렌더 시 깜빡임 최소화
-    select: (list: Festival[]) => {
-      const base = selectedCategory
-        ? list.filter((f) => normalizeCategory((f as any).genrenm) === selectedCategory)
-        : list
-      return base.slice(0, limit)
+export function useHotFestivals(_category: string | null, size = 10, opt?: { enabled?: boolean }) {
+  return useQuery<Festival[]>({
+    queryKey: ['hotAll', size],
+    enabled: opt?.enabled ?? true,
+    queryFn: async ({ signal }) => {
+      const list = await getFestivals({ signal });  
+      return list.slice(0, size);                 
     },
+    staleTime: 60_000,
   })
 }

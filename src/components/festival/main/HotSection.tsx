@@ -12,6 +12,8 @@ import 'swiper/css/navigation'
 import 'swiper/css/effect-coverflow'
 
 import { useHotFestivals } from '@/models/festival/tanstack-query/useHotFestivals'
+import { useHotByGenrenm } from '@/models/festival/tanstack-query/useCategoryPaged'
+import { useCategorySelection } from '@/shared/storage/useCategorySelection'
 
 /* ───────────────────────── 카테고리 매핑 ───────────────────────── */
 const slugToCategory: Record<string, string> = {
@@ -51,6 +53,8 @@ const preloadImages = (urls: string[]) => {
 
 const HotSection: React.FC = () => {
   const { name: slug } = useParams<{ name?: string }>()
+  const isCategoryPage = !!slug
+  const { activeChild } = useCategorySelection()
   const [hoveringBar, setHoveringBar] = useState(false)
   const swiperRef = useRef<SwiperType | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0) // 활성(가운데) 슬라이드의 "원본 배열" 인덱스
@@ -60,9 +64,16 @@ const HotSection: React.FC = () => {
   }, [])
 
   const selectedCategory = useMemo(() => (slug ? (slugToCategory[slug] ?? null) : null), [slug])
+  const childForQuery = activeChild ?? undefined
 
-  // ✅ 데이터 로드 & 캐싱 (최적화)
-  const { data: items = [], isLoading } = useHotFestivals(selectedCategory, 10)
+  // ✅ 훅은 항상 같은 순서로 호출 + enabled로 제어
+  const catHot = useHotByGenrenm(childForQuery, 10, { enabled: isCategoryPage })
+  const allHot = useHotFestivals(null, 10, { enabled: !isCategoryPage })
+
+  // ✅ 뷰에 쓸 데이터 선택
+  const items = (isCategoryPage ? catHot.data : allHot.data) ?? []
+  const isLoading = isCategoryPage ? catHot.isLoading : allHot.isLoading
+
   const hasItems = items.length > 0
 
   // 배경 포스터 = 활성(가운데) 슬라이드 포스터

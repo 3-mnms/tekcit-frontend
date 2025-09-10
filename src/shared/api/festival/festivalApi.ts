@@ -4,10 +4,19 @@ import type { Festival, FestivalDetail } from '@/models/festival/festivalType'
 
 type SuccessResponse<T> = { data: T; message?: string }
 
-// 필요하면 요청 취소를 위해 옵션으로 signal 받기
 type ReqOpt = { signal?: AbortSignal }
 
-// 목록
+export type PageResp<T> = {
+  content: T[];
+  number: number;    
+  size: number;         
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+};
+
 export const getFestivals = async (opt?: ReqOpt): Promise<Festival[]> => {
   const res = await api.get<SuccessResponse<{ content: Festival[] }>>('/festival', {
     signal: opt?.signal,
@@ -46,3 +55,16 @@ export const increaseFestivalViews = async (fid: string, opt?: ReqOpt): Promise<
   })
   return res.data.data
 }
+
+export const getFestivalsByGenrenm = async (
+  genrenm: string,
+  page = 0,
+  size = 15,
+  signal?: AbortSignal,
+) => {
+  const res = await api.get<SuccessResponse<PageResp<Festival>>>(
+    `/festival/categories/${encodeURIComponent(genrenm)}?page=${page}&size=${size}`,
+    { signal }
+  );
+  return res.data.data;
+};
