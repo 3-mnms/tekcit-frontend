@@ -45,6 +45,8 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
       async requestPay({ paymentId, amount, orderName, bookingId, festivalId, sellerId, successUrl }) {
         // 1) 필수 키 체크
         if (!STORE_ID || !CHANNEL_KEY) {
+          console.log('STORE_ID', import.meta.env.VITE_PORTONE_STORE_ID)
+          console.log('CHANNEL_KEY', import.meta.env.VITE_PORTONE_CHANNEL_KEY)
           alert('결제 설정이 올바르지 않습니다. 관리자에게 문의하세요.')
           throw new Error('Missing PortOne credentials')
         }
