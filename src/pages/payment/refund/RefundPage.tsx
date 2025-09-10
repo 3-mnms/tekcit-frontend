@@ -10,12 +10,7 @@ import { refundPayment } from '@/shared/api/payment/refund'
 const RefundPage: React.FC = () => {
   // ✅ 모달/로딩 상태
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false)
-  const [loadingRefund, setLoadingRefund] = useState(false)
-
-  // ✅ 취소 사유 입력 상태
-  const [reason, setReason] = useState<string>('')              // 사용자가 입력한 취소 사유
-  const REASON_MINLEN = 10                                      // 최소 글자 수
-  const REASON_MAXLEN = 200                                     // 최대 글자 수(텍스트 제한)
+  const [loadingRefund, setLoadingRefund] = useState(false)                                 // 최대 글자 수(텍스트 제한)
 
   const navigate = useNavigate()
 
@@ -25,6 +20,9 @@ const RefundPage: React.FC = () => {
   const qs = useMemo(() => new URLSearchParams(location.search), [location.search])
   const paymentId =
     paymentIdFromPath || qs.get('paymentId') || (location.state as any)?.paymentId || ''
+  const stateData = location.state as {
+    paymentAmount: number
+  }
 
   // ✅ 환불 처리 후 결과 페이지 이동
   const routeToResult = useCallback(
@@ -48,7 +46,7 @@ const RefundPage: React.FC = () => {
     setLoadingRefund(true)
 
     try {
-      console.log('[환불 요청 시작]', { paymentId, reason })
+      console.log('[환불 요청 시작]', { paymentId })
       
       // axios 인터셉터에서 X-User-Id를 자동으로 JWT에서 추출해서 주입함
       const response = await refundPayment(paymentId)
@@ -58,13 +56,6 @@ const RefundPage: React.FC = () => {
         routeToResult(false)
       }
     } catch (error) {
-      // console.error('[환불 실패]', error)
-      
-      // // 에러 타입에 따른 처리
-      // if (error instanceof Error) {
-      //   console.error('에러 메시지:', error.message)
-      // }
-      
       // routeToResult(false)
     } finally {
       setLoadingRefund(false)
@@ -73,10 +64,6 @@ const RefundPage: React.FC = () => {
 
   const handleRefundModalCancel = () => setIsRefundModalOpen(false)
 
-  // ✅ 환불 버튼 활성화 조건: 로딩 X, paymentId 존재, 사유 최소 글자 수 충족
-  const canRefund =
-    !loadingRefund && !!paymentId && reason.trim().length >= REASON_MINLEN
-
   return (
     <div className={styles.page} aria-busy={loadingRefund}>
       <header className={styles.header}>
@@ -84,51 +71,16 @@ const RefundPage: React.FC = () => {
         <p className={styles.subtitle}>환불 내용을 확인한 뒤 진행해 주세요.</p>
       </header>
 
-      {/* ✅ 취소 사유 입력 영역 */}
-      <section className={styles.reasonSection} aria-labelledby="refund-reason-label">
-        <div className={styles.reasonHead}>
-          <label id="refund-reason-label" className={styles.reasonLabel}>
-            취소 사유
-          </label>
-          <span
-            className={styles.counter}
-            aria-live="polite"
-          >
-            {reason.length}/{REASON_MAXLEN}
-          </span>
-        </div>
-
-        <textarea
-          className={styles.textarea}
-          placeholder="취소 사유를 작성해 주세요. (최소 10자)"
-          value={reason}
-          maxLength={REASON_MAXLEN}
-          onChange={(e) => setReason(e.target.value)}
-          aria-invalid={reason.trim().length > 0 && reason.trim().length < REASON_MINLEN}
-          aria-describedby="refund-reason-help"
-        />
-        <p id="refund-reason-help" className={styles.helper}>
-          {reason.trim().length < REASON_MINLEN
-            ? `최소 ${REASON_MINLEN}자 이상 입력해야 합니다.`
-            : '좋습니다. 환불 버튼으로 진행할 수 있습니다.'}
-        </p>
-      </section>
-
       {/* 금액 요약 */}
       <section className={styles.summary} aria-label="환불 금액 요약">
         <div className={styles.summaryHead}>
           <span className={styles.badge}>요약</span>
-          <span className={styles.tip}>수수료 제외 후 환불됩니다.</span>
         </div>
 
         <dl className={styles.list}>
           <div className={styles.row}>
             <dt className={styles.label}>최종 환불 예정 금액</dt>
             <dd className={styles.value}>100,000원</dd>
-          </div>
-          <div className={styles.row}>
-            <dt className={styles.label}>환불 수수료</dt>
-            <dd className={styles.value}>2,000원</dd>
           </div>
 
         <div role="separator" className={styles.divider} />
@@ -155,7 +107,6 @@ const RefundPage: React.FC = () => {
         <Button
           className={`${styles.btn} ${styles.btnPrimary}`}
           onClick={handleRefundClick}
-          disabled={!canRefund}              // 🔒 사유 미입력/부족 시 비활성화
         >
           {loadingRefund ? '처리 중…' : '환불'}
         </Button>
@@ -169,13 +120,6 @@ const RefundPage: React.FC = () => {
           confirmText="확인"
           cancelText="취소"
         >
-          {/* ✅ 모달에 사용자가 입력한 사유를 함께 보여줌 */}
-          <p className={styles.modalText}>
-            아래의 사유로 환불을 진행할까요?
-          </p>
-          <blockquote className={styles.reasonPreview}>
-            {reason || '사유 없음'}
-          </blockquote>
         </AlertModal>
       )}
     </div>

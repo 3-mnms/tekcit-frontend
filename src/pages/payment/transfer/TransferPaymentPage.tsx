@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import SockJS from 'sockjs-client'
-// import { Stomp } from '@stomp/stompjs'
 import { Client } from '@stomp/stompjs'
 
 import BookingProductInfo from '@/components/payment/BookingProductInfo'

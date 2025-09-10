@@ -27,21 +27,19 @@ export default function ResultPage() {
   const parsed = QuerySchema.safeParse({ type: qType, status: qStatus, paymentId: qPaymentId })
   const type = (parsed.success ? parsed.data.type : undefined) as ResultType | undefined
   const status = (parsed.success ? parsed.data.status : undefined) as ResultStatus | undefined
-  const paymentId = (parsed.success ? parsed.data.paymentId : undefined) as string | undefined
 
   const needConfirm = type === 'booking' || type === 'transfer'
 
   const firedRef = useRef<string | null>(null)
 
   const confirmMut = useMutation({
-    mutationFn: async (pid: string) => {
+    mutationFn: async () => {
     },
     onSuccess: () => {
-      nav(`/payment/result?type=${type}&status=success&paymentId=${paymentId}`, { replace: true })
+      nav(`/payment/result?type=${type}&status=success`, { replace: true })
     },
     onError: (e: any) => {
-      console.error('[ResultPage] confirm error:', e?.response?.status, e?.response?.data)
-      nav(`/payment/result?type=${type}&status=fail&paymentId=${paymentId}`, { replace: true })
+      nav(`/payment/result?type=${type}&status=fail`, { replace: true })
     },
   })
 
@@ -51,11 +49,10 @@ export default function ResultPage() {
     if (!needConfirm) return
 
     if (status === 'success') {
-      if (firedRef.current === paymentId) return
-      firedRef.current = paymentId
-      confirmMut.mutate(paymentId)
+      if (firedRef.current) return
+      confirmMut.mutate()
     }
-  }, [status, paymentId, nav, needConfirm])
+  }, [status, nav, needConfirm])
 
   const view = useMemo(() => {
     if (type && status === 'fail') return RESULT_CONFIG[type]?.fail ?? null
