@@ -166,3 +166,9 @@
     font-size: 0.7rem;
     flex-shrink: 0; 
 }
+
+.required::after {
+    content: '*'; /* 삐약! 별표를 넣어요! */
+    color: red; /* 삐약! 색상을 빨간색으로! */
+    margin-left: 4px; /* 삐약! 글자와 약간의 간격을 줘요! */
+}
