@@ -3,7 +3,7 @@ import styles from './AddressItem.module.css'
 import { FaHome, FaBuilding, FaEdit, FaTrash } from 'react-icons/fa'
 
 interface AddressItemProps {
-  id?: string
+  id: number
   name: string
   phone: string
   zipCode: string
