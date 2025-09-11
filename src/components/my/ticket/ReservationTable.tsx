@@ -87,11 +87,6 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter })
                 <button className={styles.ghostBtn} onClick={() => goDetail(item)}>
                   상세보기
                 </button>
-                {item.statusLabel === '예매 완료' && (
-                  <button className={styles.dangerGhostBtn}>
-                    취소하기
-                  </button>
-                )}
               </div>
             </div>
           </div>
