@@ -76,7 +76,7 @@ const EditInfoPage: React.FC = () => {
   return (
     <section className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>정보 수정</h2>
+        <h2 className={styles.title}>내 정보 수정</h2>
       </div>
 
       <form className={`${styles.card} ${styles.cardAccent}`} onSubmit={handleSubmit(onSubmit)} noValidate>

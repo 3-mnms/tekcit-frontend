@@ -77,7 +77,7 @@ const DetailPage: React.FC = () => {
     <section className={styles.container}>
       {/* Page header */}
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>내 정보 수정</h1>
+        <h1 className={styles.pageTitle}>내 정보</h1>
       </div>
 
       {/* 기본정보 카드 */}
