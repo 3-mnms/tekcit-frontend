@@ -103,7 +103,7 @@ const BookingPaymentPage: React.FC = () => {
 
   // sellerId 확보
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       try {
         const res = await fetchBookingDetail({
           festivalId: checkout.festivalId,
@@ -111,9 +111,9 @@ const BookingPaymentPage: React.FC = () => {
           reservationNumber: checkout.bookingId,
         })
         if (!res.success) throw new Error(res.message || '상세 조회 실패')
-        // const sid = (res.data?.sellerId ?? res.data?.sellerId) as number | undefined
-        // if (!sid) throw new Error('sellerId 누락')
-        // setSellerId(sid)
+        const sid = (res.data?.sellerId ?? res.data?.sellerId) as number | undefined
+        if (!sid) throw new Error('sellerId 누락')
+        setSellerId(sid)
       } catch (e) {
         // console.error('예매 상세 조회 실패', e)
         // alert('결제 정보를 불러오지 못했습니다.')
@@ -290,10 +290,10 @@ const BookingPaymentPage: React.FC = () => {
 
   // request → (wallet) 모달(tekcitpay) → (완료 라우팅)  ※ complete 호출 없음
   const handlePayment = async () => {
-    // if (!checkout) {
-    //   setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.')
-    //   return
-    // }
+    if (!checkout) {
+      setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.')
+      return
+    }
     if (!openedMethod) {
       setErr('결제 수단을 선택해주세요.')
       return
@@ -356,7 +356,7 @@ const BookingPaymentPage: React.FC = () => {
           performanceTime: (checkout as any)?.performanceTime ?? null, // "HH:mm" | null
         }),
       )
-      
+
       await tossRef.current?.requestPay({
         paymentId: ensuredId,
         amount: finalAmount,
@@ -374,7 +374,7 @@ const BookingPaymentPage: React.FC = () => {
       setIsPaying(false)
     }
   }
-  
+
   return (
     <div className={styles.page}>
       <BookingPaymentHeader
