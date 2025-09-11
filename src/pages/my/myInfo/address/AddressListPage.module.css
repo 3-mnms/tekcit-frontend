@@ -1,27 +1,34 @@
 .container {
   padding: 1.5rem;
   width: 100%;
-  max-width: 640px;
+  max-width: 768px;
+}
+
+.header {
+  margin-bottom: 1rem;
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 1.25rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 0.25rem 0;
 }
 
 .list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
-.card {
-  border: 1px solid #b4b4b4;
-  border-radius: 16px;
-  padding: 12px;
+.skelCard {
+  border-left: 4px solid #4D9AFD;
+  /* 대표색 */
   background: #fff;
-  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
 }
 
 .skeletonTitle {
@@ -41,15 +48,24 @@
 
 .errorText {
   color: #ef4444;
-  font-size: 14px;
+  font-size: 0.9rem;
 }
 
 .addButton {
-  margin-top: 12px;
+  margin-top: 1rem;
   width: 100%;
+  background: #4D9AFD !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 600;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
 }
 
-.addrText {
-  color: #6b7280;
-  font-size: 14px;
+.addButton:hover {
+  background: #3b82f6 !important;
+}
+
+.addIcon {
+  margin-right: 6px;
 }

@@ -1,33 +1,50 @@
 .container {
   padding: 1.5rem;
   width: 100%;
-  max-width: 640px;
+  max-width: 768px;
+  margin: 0 auto;
 }
 
 .title {
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 800;
+  color: #111827;
   margin-bottom: 1rem;
 }
 
+/* 카드 패널: 좌측 대표색 보더 + 라이트 섀도우 */
 .panel {
-  border: 1px solid #b4b4b4;
-  border-radius: 16px;
+  border-left: 4px solid #4D9AFD;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
   background: #fff;
-  padding: 1.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
 }
 
+/* 인풋 간격 살짝 넉넉하게 */
 .form > div {
-  margin: 0 0 0.5rem 0 !important;  
+  margin: 0 0 0.6rem 0 !important;
 }
 
+/* 라벨 톤 통일 */
 .label {
-  font-weight:400;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #374151;
 }
 
+/* 연락처 인풋 */
 .phoneInput {
   flex: 1;
   margin-bottom: 0.5rem;
+}
+
+/* 주소 행 구성 */
+.addressGroup {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.25rem;
 }
 
 .addressRow {
@@ -35,34 +52,42 @@
   gap: 0.5rem;
   align-items: flex-start;
   margin-top: 8px;
+}
 
-}
 .zonecodeInput {
-  flex: 1;
+  width: 8rem;
 }
+
+/* 주소 검색 버튼: 블루 아웃라인 */
 .searchButton {
   white-space: nowrap;
   padding: 0.6rem 1rem;
+  border: 1px solid #bfdbfe !important;  /* 연한 블루 */
+  color: #2563eb !important;              /* 진한 블루 */
+  background: transparent !important;
+  border-radius: 10px !important;
 }
+.searchButton:hover { background: #eff6ff !important; }
 
 .addressInput {
   flex: 1;
-  margin-top: -0.5rem;
+  margin-top: -0.3rem;
 }
 
 .detailInput {
   flex: 1;
-  margin-top: -0.5rem;
+  margin-top: -0.3rem;
 }
 
-
+/* 체크박스: 대표색 */
 .checkboxLabel {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.95rem;
-  color: #333;
+  color: #374151;
   user-select: none;
+  margin-top: 0.25rem;
 }
 .checkboxLabel input[type="checkbox"] {
   accent-color: #4D9AFD;
@@ -70,20 +95,49 @@
   height: 1rem;
 }
 
+/* 액션 버튼 영역: 2분할 그리드로 안정 정렬 */
 .actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
   margin-top: 1rem;
 }
-.actionButton {
-  width: 50%;
-}
 
+/* 기본 액션 버튼을 '프라이머리(대표색)'로 */
+.actionButton {
+  width: 100%;
+  background: #4D9AFD !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 600;
+  padding: 0.85rem 1rem !important;
+  border-radius: 10px !important;
+}
+.actionButton:hover { background: #3b82f6 !important; }
+
+/* 편집 모드의 '취소'에 쓰이는 아웃라인 버튼 */
+.outlineButton {
+  background: #fff !important;
+  color: #4b5563 !important;
+  border: 1px solid #d1d5db !important;
+}
+.outlineButton:hover { background: #f9fafb !important; }
+
+/* (선택) 삭제 버튼 전용 – TSX에서 className에 추가하면 사용 가능 */
+.dangerButton {
+  background: #fff !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+}
+.dangerButton:hover { background: #fef2f2 !important; }
+
+/* 에러/스켈레톤 */
 .errorText {
   color: #ef4444;
   text-align: center;
   margin-bottom: 1rem;
 }
+
 .fullButton { width: 100%; }
 
 .skeleton {
@@ -94,15 +148,14 @@
   animation: pulse 1.6s ease-in-out infinite;
 }
 
+/* 비활성 인풋 톤 */
 input:disabled {
-  background: #f3f4f6; /* 기본 회색 */
+  background: #f3f4f6;
   color: #6b7280;
 }
 
-.editing input:disabled {
-  background: #fff !important;  /* 수정 모드일 땐 흰색으로 강제 */
-  color: #111;
-}
+/* 수정 모드에서 비활성 강제로 흰색으로 보이게 하고 싶을 때(옵션)
+.editing input:disabled { background: #fff !important; color: #111; } */
 
 @keyframes pulse {
   0% { opacity: 0.55; }
