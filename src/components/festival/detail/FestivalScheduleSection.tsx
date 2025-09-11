@@ -371,8 +371,8 @@ const FestivalScheduleSection: React.FC = () => {
                   }
                 }
 
-                // 3) 대기열 확인/분기 (현재는 테스트 더미)
-                const FORCE_WAIT = true; // 배포시 false
+                // 가상 대기열 추가 테스트 끝나면 삭제
+                const FORCE_WAIT = false; // 테스트 끝나면 false
                 if (FORCE_WAIT && selectedDate && fid) {
                   const fdfrom = startDate ? ymd(startDate) : null;
                   const fdto = endDate ? ymd(endDate) : null;

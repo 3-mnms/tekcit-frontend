@@ -1,10 +1,21 @@
 import { api } from '@/shared/config/axios';
 import type { Festival, FestivalDetail } from '@/models/festival/festivalType';
 
-type SuccessResponse<T> = { data: T; message?: string };
-type ReqOpt = { signal?: AbortSignal };
+type SuccessResponse<T> = { data: T; message?: string }
 
-// 목록
+type ReqOpt = { signal?: AbortSignal }
+
+export type PageResp<T> = {
+  content: T[];
+  number: number;    
+  size: number;         
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+};
+
 export const getFestivals = async (opt?: ReqOpt): Promise<Festival[]> => {
   const res = await api.get<SuccessResponse<{ content: Festival[] }>>('/festival', {
     signal: opt?.signal,
@@ -40,6 +51,19 @@ export const getFestivalDetail = async (fid: string, opt?: ReqOpt): Promise<Fest
 export const increaseFestivalViews = async (fid: string, opt?: ReqOpt): Promise<number> => {
   const res = await api.post<SuccessResponse<number>>(`/festival/views/${fid}`, undefined, {
     signal: opt?.signal,
+  })
+  return res.data.data
+}
+
+export const getFestivalsByCategory = async (
+  genrenm: string,
+  page = 0,
+  size = 15,
+  signal?: AbortSignal,
+) => {
+  const res = await api.get<SuccessResponse<PageResp<Festival>>>('/festival/categories', {
+    params: { genrenm, page, size },
+    signal,
   });
   return res.data.data;
 };

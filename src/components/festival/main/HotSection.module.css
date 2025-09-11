@@ -5,26 +5,28 @@
   align-items: center;
   justify-content: flex-start;
   padding: 2rem;
-  height: 700px;
+  height: 600px;
   background-color: #000;
   overflow: hidden;
 }
 
 .bgImage {
   position: absolute;
-  inset: 0;          
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;   
+  object-fit: cover;
   object-position: center;
   z-index: 0;
   pointer-events: none;
+  filter: blur(12px) brightness(0.7);
+  transform: scale(1.1);
 }
 
 .bgOverlay {
   position: absolute;
   inset: 0;
-  /* background: linear-gradient(to bottom, rgba(0, 0, 0, 0.445), rgba(0,0,0,.18)); */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.445), rgba(0, 0, 0, .18));
   z-index: 1;
 }
 
@@ -32,82 +34,148 @@
   font-size: 1.5rem;
   font-weight: bold;
   color: white;
-  margin-bottom: 1.5rem;
-  margin-left: 5rem;
-}
-
-.cardList {
-  --cols: 5;
-  --count: var(--cols);
-  --gap: 30px;
-  display: grid;
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-  gap: var(--gap);
-  max-width: calc(var(--count) * 240px + (var(--count) - 1) * var(--gap));
-  margin-left: auto;
-  margin-right: auto;
+  margin-bottom: 1.25rem;
   position: relative;
+  z-index: 3;
 }
 
-.card {
-  background-color: white;
-  border-radius: 1rem;
-  overflow: hidden;
-  text-align: center;
-  padding: 1rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.carouselWrap {
+  position: relative;
+  z-index: 3;
   width: 100%;
-  max-width: 240px;
-  min-width: 160px;
-  margin: 0 auto;
+  max-width: 1200px;
+  margin: 0 auto 8px;
+  /* overflow: visible !important; */
+  top: 5%;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
 }
 
+:global(.swiper) {
+  width: 100%;
+  padding: 4px 10px;
+}
+
+:global(.swiper-slide) {
+  display: flex;
+  justify-content: center;
+}
+
+.heroSwiper {
+  perspective: 1400px;
+}
+
+/* 카드 공통 */
 .cardLink {
   display: block;
-  text-decoration: none;
   color: inherit;
+  text-decoration: none;
 }
 
-.cardLink:hover {
-  cursor: pointer;
-}
+/* 포스터와 같은 폭으로 정렬 */
+.cardTitle {
+  width: clamp(140px, 18vw, 220px);
+  margin: 8px auto 0;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.2;
+  text-align: center;
 
-.imageWrapper {
-  position: relative;
-  aspect-ratio: 2 / 3;
-  width: 100%;
-  max-width: 200px;
-  height: 270px;
-  border-radius: 12px;
-  overflow: hidden;
-  background-color: #eee;
-  margin: 0 auto;
-}
-
-.image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.name {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0.75rem 0 0.25rem;
-  white-space: nowrap;
+  /* 두 줄 말줄임 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  /* 배경 위 가독성 */
+  text-shadow: 0 1px 2px rgba(0,0,0,.45);
+  min-height: calc(1.2em * 2); /* 두 줄 높이 확보로 카드 높이 안정 */
 }
 
-.rank {
+/* 가운데 카드 강조 시 제목도 살짝 강조하고 싶다면(옵션) */
+.isCenter ~ .cardTitle {
+  filter: none;
+  opacity: 1;
+}
+
+.cardPoster {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  width: clamp(140px, 18vw, 250px);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .32);
+  transition:
+    transform 0.35s ease,
+    filter 0.35s ease,
+    opacity 0.35s ease;
+  transform-style: preserve-3d;
+  backface-visibility: hidden; 
+  will-change: transform, filter, opacity;
+}
+
+.cardPoster img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.cardOverlay {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  font-size: 2rem;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.421);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.cardPoster:hover .cardOverlay {
+  opacity: 1;
+}
+
+.ovTitle {
+  font-size: 20px;
   font-weight: 700;
-  color: white;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.ovPeriod {
+  font-size: 15px;
+  margin-bottom: -4px;
+}
+
+.ovPlace {
+  font-size: 15px;
+  opacity: 0.9;
+  margin-top: 10px;
+  font-weight: 700;
+}
+
+.isCenter {
+  transform: translateZ(60px) scale(1.05);
+  z-index: 2;
+  filter: none;
+}
+
+.isSide {
+  opacity: .92;
+  filter: saturate(.9) brightness(.98);
 }
 
 .rankPill {
@@ -115,182 +183,10 @@
   top: 10px;
   left: 10px;
   z-index: 1;
-}
-
-.location {
-  font-size: 0.875rem;
-  color: #444;
-  margin-bottom: 0.2rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.date {
-  font-size: 0.875rem;
-  color: #999;
-  margin-bottom: 0.2rem;
-}
-
-.emptyCard {
-  background: transparent;
-  box-shadow: none;
-  border: none;
-  width: 100%;
-  max-width: 220px;
-  min-width: 160px;
-  aspect-ratio: 2 / 3;
-  margin: 0 auto;
-  min-height: 393px;
-}
-
-.emptyOverlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 1;
-  padding: 0 1rem;
-}
-
-.emptyOverlayText {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #fff;
-  white-space: nowrap;
-  text-align: center;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, .25);
-  margin-bottom: 20%;
-}
-
-.hero {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-}
-
-.heroLink {
-  display: block;
-  text-align: center;
-  text-decoration: none;
-  color: inherit;
-}
-
-.heroPoster {
-  aspect-ratio: 2 / 3;
-  width: clamp(200px, 32vw, 220px);
-  margin-left: 60px;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-  position: relative;
-}
-
-.heroPoster img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  object-position: center;
-}
-
-.bottomBar {
-  width: 100%;
-  height: 48px;
-  margin-top: auto;
-  position: relative;
-  overflow: visible;
-}
-
-.barTrack {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 10px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.85);
-}
-
-.barIndicator {
-  --seg: calc(100% / var(--segments));
-  position: absolute;
-  bottom: 8px;
-  left: calc(var(--index) * var(--seg));
-  width: var(--seg);
-  height: 4px;
-  background: #4D9AFD;
-  border-radius: 2px;
-  transition: left 200ms ease, width 200ms ease;
-}
-
-.pageText {
-  position: absolute;
-  left: 50%;
-  bottom: 18px;
-  transform: translateX(-50%);
   color: #fff;
   font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  user-select: none;
-  pointer-events: none;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-}
-
-.thumbLayer {
-  position: absolute;
-  left: 33%;
-  bottom: calc(100% + 10px);
-  /* transform: translateX(-50%); */
-  display: flex;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  backdrop-filter: blur(4px);
-  background: rgba(0, 0, 0, 0.35);
-  z-index: 3;
-}
-
-.thumbnailStrip {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.thumbBtn {
-  appearance: none;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 6px;
-  overflow: hidden;
-  outline: none;
-}
-
-.thumb {
-  width: 58px;
-  height: 86px;
-  object-fit: cover;
-  display: block;
-  opacity: 0.8;
-  transition: transform 120ms ease, opacity 120ms ease;
-}
-
-.thumbBtn:hover .thumb {
-  transform: translateY(-3px);
-  opacity: 1;
-}
-
-.activeThumb .thumb {
-  outline: 2px solid #4D9AFD;
-  outline-offset: -2px;
-  opacity: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+  font-size: 20px;
 }
 
 .arrow {
@@ -313,11 +209,11 @@
 }
 
 .arrowLeft {
-  left: 16px;
+  left: 20px;
 }
 
 .arrowRight {
-  right: 16px;
+  right: 20px;
 }
 
 .arrowIcon {
@@ -326,24 +222,103 @@
   pointer-events: none;
 }
 
-.title, .hero, .bottomBar, .arrow {
+/* 하단 바 */
+.bottomBar {
+  width: 100%;
+  height: 48px;
+  margin-top: auto;
   position: relative;
-  z-index: 2;
+  overflow: visible;
+  z-index: 3;
+}
+
+.barTrack {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  height: 2px;
+  background: rgba(169, 168, 168, .85);
+}
+
+.barIndicator {
+  --seg: calc(100% / var(--segments));
+  position: absolute;
+  bottom: 8px;
+  left: calc(var(--index) * var(--seg));
+  width: var(--seg);
+  height: 4px;
+  background: #4D9AFD;
+  border-radius: 2px;
+  transition: left 200ms ease, width 200ms ease;
+}
+
+.pageText {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  color: rgba(169, 168, 168, .85);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .02em;
+  user-select: none;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .45);
+}
+
+/* 썸네일 레이어 (옵션) */
+.thumbLayer {
+  position: absolute;
+  left: 30%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 3;
+}
+
+.thumbBtn {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  overflow: hidden;
+  outline: none;
+}
+
+.thumb {
+  width: 58px;
+  height: 86px;
+  object-fit: cover;
+  display: block;
+  opacity: .8;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.thumbBtn:hover .thumb {
+  transform: translateY(-3px);
+  opacity: 1;
+}
+
+.activeThumb .thumb {
+  outline: 2px solid #4D9AFD;
+  outline-offset: -2px;
+  opacity: 1;
 }
 
 @media (max-width: 768px) {
   .arrowLeft {
-    left: 8px;
+    left: 4px;
   }
 
   .arrowRight {
-    right: 8px;
-  }
-}
-
-
-@media (pointer: coarse) {
-  .thumbLayer {
-    bottom: calc(100% + 12px);
+    right: 4px;
   }
 }
