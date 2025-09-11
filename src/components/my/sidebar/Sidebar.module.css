@@ -1,52 +1,34 @@
+/* 사이드바 컨테이너 */
 .sidebar {
   width: 240px;
   padding: 2rem 1.5rem;
-  border: 1px solid #a9a9a9;
-  border-radius: 8px;
-  background-color: #ffffff;
+  background: #ffffff;
+  border: 1px solid #e5e7eb; /* gray-200 */
+  border-radius: 12px;
   position: sticky;
-  top: 2rem;
+  top: 88px;                 /* 헤더 높이에 맞게 조절 */
   height: fit-content;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
 }
 
+/* 섹션 간격 */
 .section {
-  margin-bottom: 2rem;
+  margin-bottom: 24px;
 }
 
+/* 섹션 타이틀(클릭X 라벨) */
 .parent {
-  font-weight: 600;
-  color: #333;
-  padding: 0.6rem 0.75rem;
-  font-size: 1.05rem;
-  border-radius: 8px;
-  transition: background 0.2s ease;
-  cursor: pointer;
+  font-weight: 700;
+  color: #111827;           /* gray-900 */
+  font-size: 1rem;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb; /* gray-200 */
 }
 
-.child {
-  margin-left: 0.75rem;
-  margin-top: 0.4rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.94rem;
-  color: #555;
-  border-radius: 6px;
-  transition: background 0.2s ease;
-  cursor: pointer;
-}
-
-.active {
-  background-color: #edf2ff;
-  color: #1e40af;
-  font-weight: 600;
-}
-
-.parent:hover,
-.child:hover {
-  background-color: #f3f4f6;
-}
-
-.parent:focus-visible,
-.child:focus-visible {
-  outline: 2px solid #3b82f6;
+/* 접근성 포커스 스타일 (Nav/버튼 공용) */
+:global(.focus-ring):focus-visible,
+.parent:focus-visible {
+  outline: 2px solid #3b82f6;  /* blue-500 */
   outline-offset: 2px;
 }

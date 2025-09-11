@@ -1,70 +1,25 @@
-import React from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import styles from './Sidebar.module.css'
-import { useState } from 'react'
-import SidebarElement from './element/SidebarElement'
-
-interface SidebarItem {
-  label: string
-  path: string
-  children?: SidebarItem[]
-}
+// src/components/my/sidebar/Sidebar.tsx
+import React from 'react';
+// import styles from './Sidebar.module.css';
+import SidebarElement from './element/SidebarElement';
+import type { TabKey } from '@/pages/my/MyPage';
 
 const sidebarItems = {
-  profileInfo: {
-    title: '기본정보',
-    activeTab: 'profileInfo',
-  },
-  passwordChange: {
-    title: '비밀번호 변경',
-    activeTab: 'passwordChange',
-  },
-  deliveryManagement: {
-    title: '배송지 관리',
-    activeTab: 'deliveryManagement',
-  },
-  accountWithdrawal: {
-    title: '회원 탈퇴',
-    activeTab: 'accountWithdrawal',
-  },
-  bookingHistory: {
-    title: '예매 / 취소 내역',
-    activeTab: 'bookingHistory',
-  },
-  ticketTransfer: {
-    title: '티켓 양도',
-    activeTab: 'ticketTransfer',
-  },
-  bookmark: {
-    title: '북마크',
-    activeTab: 'bookmark',
-  },
-}
-const Sidebar: React.FC = () => {
-  const renderContent = () => {
-    // switch (activeTab) {
-    //   case 'profileInfo':
-    //     return <ProfileInfo />
-    //   case 'bookingHistory':
-    //     return <BookingHistory />
-    //   case 'bookmark':
-    //     return <Bookmark />
-    //   case 'passwordChange':
-    //     return <PasswordChange />
-    //   case 'deliveryManagement':
-    //     return <DeliveryManagement />
-    //   case 'accountWithdrawal':
-    //     return <AccountWithdrawal />
-    //   case 'ticketTransfer':
-    //     return <TicketTransfer />
-    //   default:
-    //     return <BookingHistory />
-    // }
-  }
+  profileInfo: { title: '기본정보', key: 'profileInfo' as TabKey },
+  passwordChange: { title: '비밀번호 변경', key: 'passwordChange' as TabKey },
+  deliveryManagement: { title: '배송지 관리', key: 'deliveryManagement' as TabKey },
+  accountWithdrawal: { title: '회원 탈퇴', key: 'accountWithdrawal' as TabKey },
+  bookingHistory: { title: '예매 / 취소 내역', key: 'bookingHistory' as TabKey },
+  ticketTransfer: { title: '티켓 양도', key: 'ticketTransfer' as TabKey },
+  bookmark: { title: '북마크', key: 'bookmark' as TabKey },
+};
 
-  const [activeTab, setActiveTab] = useState('booking-history')
-  console.log(activeTab)
+type Props = {
+  activeTab: TabKey;
+  setActiveTab: (k: TabKey) => void;
+};
 
+const Sidebar: React.FC<Props> = ({ activeTab, setActiveTab }) => {
   return (
     <div className="min-h-screen  fixed border-red-100 ">
       <div className="flex">
@@ -79,28 +34,28 @@ const Sidebar: React.FC = () => {
                 <div className="space-y-3">
                   <SidebarElement
                     title={sidebarItems.profileInfo.title}
-                    tabKey={sidebarItems.profileInfo.activeTab}
+                    tabKey={sidebarItems.profileInfo.key}
                     activeTab={activeTab}
-                    onClick={() => setActiveTab(sidebarItems.profileInfo.activeTab)}
+                    onClick={() => setActiveTab(sidebarItems.profileInfo.key)}
                   />
 
                   <SidebarElement
                     title={sidebarItems.passwordChange.title}
-                    tabKey={sidebarItems.passwordChange.activeTab}
+                    tabKey={sidebarItems.passwordChange.key}
                     activeTab={activeTab}
-                    onClick={() => setActiveTab(sidebarItems.passwordChange.activeTab)}
+                    onClick={() => setActiveTab(sidebarItems.passwordChange.key)}
                   />
                   <SidebarElement
                     title={sidebarItems.deliveryManagement.title}
-                    tabKey={sidebarItems.deliveryManagement.activeTab}
+                    tabKey={sidebarItems.deliveryManagement.key}
                     activeTab={activeTab}
-                    onClick={() => setActiveTab(sidebarItems.deliveryManagement.activeTab)}
+                    onClick={() => setActiveTab(sidebarItems.deliveryManagement.key)}
                   />
                   <SidebarElement
                     title={sidebarItems.accountWithdrawal.title}
-                    tabKey={sidebarItems.accountWithdrawal.activeTab}
+                    tabKey={sidebarItems.accountWithdrawal.key}
                     activeTab={activeTab}
-                    onClick={() => setActiveTab(sidebarItems.accountWithdrawal.activeTab)}
+                    onClick={() => setActiveTab(sidebarItems.accountWithdrawal.key)}
                   />
                 </div>
               </div>
@@ -112,15 +67,15 @@ const Sidebar: React.FC = () => {
                 <div className="space-y-3">
                   <SidebarElement
                     title={sidebarItems.bookingHistory.title}
-                    tabKey={sidebarItems.bookingHistory.activeTab}
+                    tabKey={sidebarItems.bookingHistory.key}
                     activeTab={activeTab}
-                    onClick={() => setActiveTab(sidebarItems.bookingHistory.activeTab)}
+                    onClick={() => setActiveTab(sidebarItems.bookingHistory.key)}
                   />
                   <SidebarElement
                     title={sidebarItems.ticketTransfer.title}
-                    tabKey={sidebarItems.ticketTransfer.activeTab}
+                    tabKey={sidebarItems.ticketTransfer.key}
                     activeTab={activeTab}
-                    onClick={() => setActiveTab(sidebarItems.ticketTransfer.activeTab)}
+                    onClick={() => setActiveTab(sidebarItems.ticketTransfer.key)}
                   />
                 </div>
               </div>
@@ -129,9 +84,9 @@ const Sidebar: React.FC = () => {
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                   <SidebarElement
                     title={sidebarItems.bookmark.title}
-                    tabKey={sidebarItems.bookmark.activeTab}
+                    tabKey={sidebarItems.bookmark.key}
                     activeTab={activeTab}
-                    onClick={() => setActiveTab(sidebarItems.bookmark.activeTab)}
+                    onClick={() => setActiveTab(sidebarItems.bookmark.key)}
                   />
                 </h2>
               </div>
@@ -140,10 +95,10 @@ const Sidebar: React.FC = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-8">{renderContent()}</div>
+        {/* <div className="flex-1 p-8">{renderContent()}</div> */}
       </div>
     </div>
   )
 }
 
-export default Sidebar
+export default Sidebar;
