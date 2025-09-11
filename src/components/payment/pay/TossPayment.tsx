@@ -34,11 +34,6 @@ export type TossPaymentHandle = {
 const STORE_ID = getEnv("VITE_PORTONE_STORE_ID")
 const CHANNEL_KEY = getEnv("VITE_PORTONE_CHANNEL_KEY")
 
-console.log(STORE_ID);
-console.log(CHANNEL_KEY);
-
-
-
 const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
   (
     { isOpen, onToggle, amount, orderName, redirectUrl },
