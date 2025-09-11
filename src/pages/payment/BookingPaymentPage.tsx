@@ -314,10 +314,6 @@ const BookingPaymentPage: React.FC = () => {
       setErr('로그인이 필요합니다.')
       return
     }
-    if (!sellerId) {
-      setErr('판매자 정보가 없어요. 다시 시도해 주세요.')
-      return
-    }
 
     // 1) REQUEST (지갑은 'POINT_PAYMENT', 카드/토스는 'CARD')
     const dto: PaymentRequestDTO = {
