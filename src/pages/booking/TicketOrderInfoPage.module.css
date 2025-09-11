@@ -1,167 +1,174 @@
 /* ===== 레이아웃 기본 ===== */
-
 .wrapper {
   display: flex;
   justify-content: center;
-  /* 상위 레이아웃 여백이 만들어내는 스크롤 방지 */
+  align-items: stretch;
+  width: 100%;   /* 브라우저 뷰포트 기준 */
+  height: 100%;  /* 브라우저 뷰포트 기준 */
   padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .page {
-  width: 1000px;
-  height: 600px;
+  width: 100%;   /* 96% → 100% */
+  height: 100%;  /* 96% → 100% */
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 620px 350px; /* 좌/우 */
-  gap: 20px;
-  padding: 12px;
-  overflow: hidden;  /* 내부 스크롤 금지 */
+  grid-template-columns: 65% 35%; /* 62% + 34% → 합 100%로 조정 */
+  gap: 0%;        /* 좌우 간격 제거 (있으면 총합이 100% 넘음) */
+  padding: 2%;    /* 내부 여백은 유지 */
+  overflow: hidden;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 0%; /* 전체 꽉 채우면 radius는 보통 제거 */
+  align-items: stretch;
 }
 
 /* 좌/우 컬럼은 위쪽에만 붙고, 내부 스크롤 없음 */
 .leftCol {
-  display: grid;
-  gap: 10px;        /* 🔽 간격 줄여서 전체 높이 절약 */
-  align-content: start;
-  min-height: 0;
+  display: grid;     /* 멍 */
+  gap: 1.2%;         /* 멍 */
+  align-content: start; /* 멍 */
+  min-height: 0;     /* 멍 */
 }
 
 .rightCol {
-  display: grid;
-  gap: 10px;        /* 🔽 간격 줄여서 전체 높이 절약 */
-  margin-right: 10px;
-  align-content: start;
-  min-height: 0;
+  display: grid;     /* 멍 */
+  height: 100%;
+  gap: 1.2%;         /* 멍 */
+  margin-right: 1%;  /* 멍 */
+  align-content: stretch; /* 멍 */
 }
 
 /* 카드 내부에서 overflow:auto가 있어도 무시 */
 .noScroll { 
-  overflow: visible !important; 
-  max-height: none !important; 
+  overflow: visible !important;  /* 멍 */
+  max-height: none !important;   /* 멍 */
 }
 
 /* QR일 때 보이는 플레이스홀더 */
 .placeholder {
-  border: 1px solid #e5e7eb;
-  background: #f8f9fb;
-  border-radius: 14px;
-  padding: 12px;    /* 🔽 줄이기 */
-  color: #6b7280;
+  border: 0.3% solid #e5e7eb; /* 멍 */
+  background: #f8f9fb;        /* 멍 */
+  border-radius: 2%;          /* 멍 */
+  padding: 1.2%;              /* 멍 */
+  color: #6b7280;             /* 멍 */
 }
 
 /* ====== 컴팩트/폭 제한 유틸 ====== */
-
-/* 수령 방법/주소 등의 섹션 너비를 적당히 제한 */
 .sectionMaxW {
-  max-width: 640px;
+  max-width: 100%; /* 멍: 고정 px 대신 100% */
 }
 
-/* 수령 방법 카드 섹션의 패딩/타이포/간격을 컴팩트하게 조정 */
+/* 수령 방법 카드 섹션 */
 .deliveryCompact {
-  padding: 16px !important;            /* Tailwind p-5 덮어쓰기 */
-  border-radius: 16px;
+  padding: 1.6% !important;  /* 멍 */
+  border-radius: 2%;          /* 멍 */
 }
 
-/* 섹션 타이틀 간격/크기 축소 */
+/* 섹션 타이틀 */
 .deliveryCompact > h2 {
-  margin-bottom: 8px !important;
-  font-size: 15px !important;
-  line-height: 20px !important;
+  margin-bottom: 0.8% !important; /* 멍 */
+  font-size: 95% !important;      /* 멍 */
+  line-height: 120% !important;   /* 멍 */
 }
 
-/* 라디오 그룹 간격 축소 */
+/* 라디오 그룹 간격 */
 .deliveryCompact [role='radiogroup'] {
-  display: grid;
-  gap: 8px !important;
+  display: grid;      /* 멍 */
+  gap: 0.8% !important; /* 멍 */
 }
 
-/* 지류(PAPER) 선택 시 표시되는 주소 폼 영역 컴팩트 */
+/* 주소 폼 박스 */
 .addressBox {
-  max-width: 620px;
+  max-width: 100%; /* 멍 */
+  overflow: auto;  /* 멍: 내부 스크롤 허용으로 잘림 방지 */
 }
 
-/* 주소 폼 내부 컨트롤 높이/폰트 축소 (과도한 세로팽창 방지) */
+/* 주소 폼 내부 컨트롤(페이지 영역에서 강제) */
 .addressBox input,
 .addressBox select,
 .addressBox button,
 .addressBox textarea {
-  height: 40px;
-  font-size: 14px;
-  line-height: 20px;
-  box-sizing: border-box;
+  height: auto;      /* 멍: 고정 비율 대신 auto */
+  font-size: 90%;    /* 멍 */
+  line-height: 130%; /* 멍 */
+  box-sizing: border-box; /* 멍 */
+  padding: 1% 2%;    /* 멍 */
 }
 
 .addressBox textarea {
-  min-height: 80px;
+  min-height: 8%; /* 멍 */
 }
 
-/* 버튼들이 과하게 커지지 않도록 */
+/* 버튼들 */
 .addressBox .btn,
 .addressBox button[type='button'],
 .addressBox button[type='submit'] {
-  height: 40px;
-  padding: 0 12px;
-  font-weight: 600;
+  height: auto;     /* 멍 */
+  padding: 1% 2%;   /* 멍 */
+  font-weight: 600; /* 멍 */
 }
 
-/* (선택) 좌측 컬럼 안의 카드들 여백을 살짝 더 조밀하게 */
+/* 좌측 컬럼 카드 여백 */
 .leftCol > section,
 .leftCol > div {
-  margin-bottom: 2px;
+  margin-bottom: 0.2%; /* 멍 */
 }
 
+/* 공용 카드 박스 */
 .boxCard {
-  max-width: 620px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  border-radius: 16px;
-  padding: 16px;
+  max-width: 100%;             /* 멍 */
+  height: auto;                /* 멍: 130% → 자동, 과팽창 제거 */
+  border: 0.3% solid #e5e7eb;  /* 멍 */
+  background: #fff;            /* 멍 */
+  border-radius: 2%;           /* 멍 */
+  padding: 1.6%;               /* 멍 */
 }
 
-/* 수령방법 카드: 내부 섹션이 커지지 않게 유지(패딩만 살짝) */
+/* 수령방법 카드 */
 .deliveryCard {
-  max-width: 620px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  border-radius: 16px;
-  padding: 16px;
+  max-width: 100%;             /* 멍 */
+  border: 0.3% solid #e5e7eb;  /* 멍 */
+  background: #fff;            /* 멍 */
+  border-radius: 2%;           /* 멍 */
+  padding: 1.6%;               /* 멍 */
 }
 
-/* 주소 카드: 컨트롤이 과하게 커지지 않도록 컴팩트 사이징 */
+/* 주소 카드 */
 .addressCard {
-  max-width: 620px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  border-radius: 16px;
-  padding: 16px;
+  max-width: 100%;             /* 멍 */
+  border: 0.3% solid #e5e7eb;  /* 멍 */
+  background: #fff;            /* 멍 */
+  border-radius: 2%;           /* 멍 */
+  padding: 1.6%;               /* 멍 */
 }
 
 .addressCard input,
 .addressCard select,
 .addressCard button,
 .addressCard textarea {
-  height: 40px;
-  font-size: 14px;
-  line-height: 20px;
-  box-sizing: border-box;
+  height: auto;      /* 멍 */
+  font-size: 90%;    /* 멍 */
+  line-height: 130%; /* 멍 */
+  box-sizing: border-box; /* 멍 */
+  padding: 1% 2%;    /* 멍 */
 }
 
 .addressCard textarea {
-  min-height: 80px;
+  min-height: 8%; /* 멍 */
 }
 
 /* 버튼 과대 방지 */
 .addressCard .btn,
 .addressCard button[type='button'],
 .addressCard button[type='submit'] {
-  height: 40px;
-  padding: 0 12px;
-  font-weight: 600;
+  height: auto;    /* 멍 */
+  padding: 1% 2%;  /* 멍 */
+  font-weight: 600;/* 멍 */
 }
 
 /* 수령방법 컴포넌트가 내부에서 ring/border로 흔들려도 부모 카드 레이아웃은 고정 */
 .deliveryCard > * {
-  width: 100%;
+  width: 100%; /* 멍 */
 }

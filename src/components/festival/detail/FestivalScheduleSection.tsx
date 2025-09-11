@@ -37,7 +37,7 @@ const DOW_KEYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'] as const;
 const WAIT_W = 480;
 const WAIT_H = 720;
 const BOOK_W = 1000;
-const BOOK_H = 600;
+const BOOK_H = 700;
 
 /** HH:mm → Date에 시분 합치기 */
 const __fs_combineDateTime = (day: Date, hhmm?: string | null): Date => {
