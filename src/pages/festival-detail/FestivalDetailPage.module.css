@@ -8,7 +8,7 @@
 /* ✅ 페이지 본문 전체를 감싸는 2컬럼 그리드 */
 .layout {
   display: grid;
-  grid-template-columns: 1fr clamp(320px, 26vw, 420px);
+  grid-template-columns: 1fr clamp(320px, 40vw, 400px);
   column-gap: 2rem;
   align-items: start;
   padding: 2rem 5%;
@@ -70,6 +70,8 @@
   padding: 2rem;
   border: 1px solid #ddd;
   border-radius: 0.75rem;
+  min-height: 470px;
+
 }
 
 /* 단일 컬럼 안내용 */
