@@ -304,9 +304,9 @@ const ProductRegisterPage: React.FC = () => {
                             <div className={styles.formItem}>
                                 <label>12. 고객 티켓 수령 방법</label>
                                 <div className={styles.radioGroup}>
-                                    <label><input type="radio" name="ticketPick" value={1} checked={productData.detail.ticketPick === 1} onChange={handleDetailChange} /> 일괄 배송</label>
+                                    <label><input type="radio" name="ticketPick" value={1} checked={productData.detail.ticketPick === 1} onChange={handleDetailChange} /> 배송&현장 수령</label>
                                     <label><input type="radio" name="ticketPick" value={2} checked={productData.detail.ticketPick === 2} onChange={handleDetailChange} /> 현장 수령(QR)</label>
-                                    <label><input type="radio" name="ticketPick" value={3} checked={productData.detail.ticketPick === 3} onChange={handleDetailChange} /> 배송&현장 수령(QR)</label>
+
                                 </div>
                             </div>
                         </div>
