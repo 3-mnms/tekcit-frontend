@@ -14,11 +14,15 @@ const TikiChatWidget: React.FC = () => {
         className={`${styles.fab} ${open ? styles.fabActive : ''}`}
         onClick={() => setOpen((v) => !v)}
       >
-        <img src={tikiLogo} alt="Tiki" className={styles.logo} />
+        {open ? (
+          <span className={styles.closeIcon}>×</span>
+        ) : (
+          <img src={tikiLogo} alt="Tiki" className={styles.logo} /> 
+        )}
       </button>
 
-      {/* 포털로 띄우는 채팅창 */}
-      <ChatWindow open={open} onClose={() => setOpen(false)} />
+      {/* 포털로 띄우는 채팅창 (닫기 버튼은 제거) */}
+      <ChatWindow open={open} />
     </>
   );
 };

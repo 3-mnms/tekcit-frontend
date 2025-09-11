@@ -2,7 +2,7 @@
 import { api2 } from '@/shared/config/axios';
 
 export async function askChat(question: string): Promise<string> {
-  const res = await api2.post('/chat', { question });
+  const res = await api2.post('/ai/chat', { question });
 
   const data = res.data;
 
