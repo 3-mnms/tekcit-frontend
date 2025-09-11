@@ -201,7 +201,7 @@ export const router = createBrowserRouter([
     path: 'nearby',
     children: [
       { path: '', element: <NearbyShowsPage /> },
-      { path: 'operatManage/user', element: <OperatManageUserPage /> },
+      // { path: 'spot', element: <NearbySpotPage  /> },
     ],
   },
 ])

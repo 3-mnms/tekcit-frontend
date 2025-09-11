@@ -37,6 +37,9 @@ const TicketOrderInfoPage: React.FC = () => {
   const [address, setAddress] = useState<string>(''); // PAPER 저장용
   const isPaper = method === 'PAPER';
 
+  const STORE_KEY=import.meta.env.VITE_PORTONE_STORE_KEY
+  const CHANNEL_KEY=import.meta.env.VITE_PORTONE_CHANNEL_KEY
+
   useEffect(() => {
     console.log('넘겨받은 예매 state 👉', state);
   }, [state]);
@@ -156,6 +159,8 @@ const TicketOrderInfoPage: React.FC = () => {
       bookerName: user?.name ?? '',
       deliveryMethod: method,                       // 'QR' | 'PAPER' (API 유지)
       address: method === 'PAPER' ? address : undefined,
+      STORE_KEY,
+      CHANNEL_KEY,
     };
 
     try {

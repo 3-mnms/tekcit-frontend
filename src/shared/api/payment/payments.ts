@@ -18,6 +18,8 @@ export interface PaymentRequestDTO {
   amount: number
   currency?: 'KRW'
   payMethod: PayMethodType
+  STORE_KEY: string
+  CHANNEL_KEY: string
 }
 
 /** GET /api/payments/{bookingId} → 결제 정보 조회 (paymentId, amount 등) */
