@@ -118,11 +118,11 @@ const BookingPaymentPage: React.FC = () => {
         const sid = (res.data?.sellerId ?? res.data?.sellerId) as number | undefined
         if (!sid) throw new Error('sellerId 누락')
         setSellerId(sid)
-      // } catch (e) {
-      //   console.error('예매 상세 조회 실패', e)
-      //   alert('결제 정보를 불러오지 못했습니다.')
-      //   navigate(-1)
-      // }
+      } catch (e) {
+        // console.error('예매 상세 조회 실패', e)
+        // alert('결제 정보를 불러오지 못했습니다.')
+        // navigate(-1)
+      }
     })()
   }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate])
 
