@@ -5,7 +5,8 @@ export type PaymentMethod = 'wallet' | 'Toss'
 
 // 프론트 예매 페이지에서 받아오는 정보 타입
 export type CheckoutState = {
-  bookingId: string
+  bookingId?: string
+  reservationNumber: string
   posterUrl?: string
   title: string
   performanceDate: string

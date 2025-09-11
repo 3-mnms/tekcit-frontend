@@ -1,13 +1,29 @@
 :root {
-  --page-max: 640px;
-  --radius: 14px;
-  --line: #e5e7eb;
+  --page-max: 720px;
+  --radius: 16px;
+  --line: #e6e8ee;
   --muted: #6b7280;
-  --text: #111827;
+  --text: #0f172a;
+  --bg: #ffffff;
   --bg-soft: #f7f8fa;
   --primary: #111827;
   --primary-weak: #f3f4f6;
-  --danger: #ef4444;
+  --shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+  --focus: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+/* Dark mode (optional) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --line: #2b2f38;
+    --muted: #9aa3b2;
+    --text: #e5eaf3;
+    --bg: #12141a;
+    --bg-soft: #171a22;
+    --primary: #e5eaf3;
+    --primary-weak: #222531;
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
 }
 
 /* 레이아웃 */
@@ -15,7 +31,7 @@
   width: 100%;
   max-width: var(--page-max);
   margin: 0 auto;
-  padding: 24px 20px 96px; /* 하단 고정 버튼 여백 */
+  padding: clamp(16px, 2.8vw, 28px) 20px 110px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -23,16 +39,16 @@
 
 /* 헤더 */
 .header {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 6px;
 }
 .title {
   text-align: center;
-  font-size: 22px;
+  font-size: clamp(20px, 2.2vw, 24px);
   font-weight: 800;
   color: var(--text);
   margin: 0;
+  letter-spacing: -0.01em;
 }
 .subtitle {
   text-align: center;
@@ -41,35 +57,37 @@
   margin: 0;
 }
 
-/* 요약 카드 */
-.summary {
-  background: #fff;
+/* 카드 공통 */
+.card {
+  background: var(--bg);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 16px 16px 12px;
-  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.06);
+  box-shadow: var(--shadow);
 }
 
+/* 요약 카드 */
+.summary {
+  padding: 18px 18px 14px;
+  display: grid;
+  gap: 12px;
+}
 .summaryHead {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 10px;
 }
-
 .badge {
   display: inline-flex;
   align-items: center;
-  height: 22px;
-  padding: 0 8px;
+  height: 24px;
+  padding: 0 10px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text);
   background: var(--primary-weak);
   border: 1px solid var(--line);
 }
-
 .tip {
   font-size: 12px;
   color: var(--muted);
@@ -81,93 +99,102 @@
   gap: 10px;
   margin: 0;
 }
-
 .row,
 .rowTotal {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
+  gap: 12px;
 }
-
 .label {
   color: var(--muted);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
 }
 .value {
-  font-weight: 700;
+  font-weight: 800;
   font-size: 15px;
   color: var(--text);
+}
+.amount {
+  letter-spacing: 0.02em;
+  tab-size: 2;
 }
 
 .divider {
   height: 1px;
   background: var(--line);
   margin: 4px 0;
+  border-radius: 1px;
 }
 
 .totalLabel {
-  font-weight: 700;
+  font-weight: 800;
   font-size: 15px;
   color: var(--text);
 }
 .totalValue {
-  font-weight: 800;
-  font-size: 16px;
+  font-weight: 900;
+  font-size: 18px;
   color: var(--text);
 }
 
 /* 안내 */
 .notice {
-  margin: 12px 0 0;
+  margin: 6px 0 0;
   font-size: 12px;
   color: var(--muted);
 }
 
-/* 하단 액션 (모바일 고정) */
+/* 하단 액션 (스티키) */
 .actions {
   position: sticky;
   bottom: 0;
   left: 0;
   right: 0;
-  margin-top: 8px;
-  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 22px);
-  padding: 18px 0 6px;
-  display: flex;
+  margin-top: 10px;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--bg) 22px);
+  padding: 18px 0 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
-  justify-content: center;
   border-top: 1px solid var(--line);
 }
 
-/* 버튼 공통(내부 Button 위에 className으로 입힘) */
+/* 버튼 공통 */
 .btn {
-  width: 160px;
-  height: 48px;
+  height: 50px;
   border-radius: 12px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
+  outline: none;
+}
+.btn:focus-visible {
+  box-shadow: var(--focus);
 }
 
-/* ▼ 고스트(취소) 버튼이 흰 배경에서 글자가 사라지는 문제 해결 멍 */
+/* 고스트 버튼/프라이머리 버튼 */
 .btnGhost {
-  background: #fff !important;        /* 기본 primary 배경을 무시하고 흰색으로 강제 멍 */
-  color: var(--text) !important;       /* 버튼 컴포넌트 기본 흰 글자를 검정으로 강제 멍 */
-  border: 1px solid var(--line) !important; /* 외곽선으로 구분 강화 멍 */
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line) !important;
 }
-
-/* ▼ 혹시 기본 스타일에서 글자색이 덮이면 대비를 고정 멍 */
 .btnPrimary {
-  background: var(--text) !important;  /* 진한 배경 고정 멍 */
-  color: #fff !important;              /* 흰 글자 고정 멍 */
+  background: var(--primary) !important;
+  color: #fff !important;
+  border: 1px solid transparent !important;
 }
 
-/* 호버/액션 */
 @media (hover: hover) {
   .btnGhost:hover { background: var(--bg-soft); }
   .btnPrimary:hover { filter: brightness(0.95); }
 }
+.btn:active { transform: translateY(1px); }
 
 /* 반응형 */
-@media (max-width: 480px) {
-  .btn { width: 100%; }
-  .actions { padding: 14px 0 4px; }
+@media (max-width: 560px) {
+  .page { padding-bottom: 100px; }
+  .actions { grid-template-columns: 1fr; }
 }
