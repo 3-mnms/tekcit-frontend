@@ -75,19 +75,10 @@ const __fs_openCenteredPopup = (
 
   const feat = [
     'popup=yes',
-    'noopener',
-    'noreferrer',
-    'toolbar=0',
-    'menubar=0',
-    'location=0',
-    'status=0',
-    'scrollbars=1',
-    'resizable=1',
-    `width=${w}`,
-    `height=${h}`,
-    `left=${left}`,
-    `top=${top}`,
-  ].join(',')
+    'toolbar=0','menubar=0','location=0','status=0',
+    'scrollbars=1','resizable=1',
+    `width=${w}`, `height=${h}`, `left=${left}`, `top=${top}`,
+  ].join(',');
 
   window.open(url, name, feat)
 }

@@ -126,27 +126,16 @@ export default function ResultPage() {
     }
   }, [status, needConfirm, confirmMut])
 
+  console.log(confirmMut);
+  
   // ─────────────────────────────────────────────
   // ✅ 뷰 구성 (기존 유지)
   // ─────────────────────────────────────────────
   const view = useMemo(() => {
     if (type && status === 'fail') return RESULT_CONFIG[type]?.fail ?? null
 
-    if (needConfirm && confirmMut.isPending) {
-      return {
-        title: '확인 중',
-        message: '결제 결과를 확인하고 있습니다...',
-        primary: { label: '메인으로', to: '/' },
-      }
-    }
+    if (type && status==="success") return RESULT_CONFIG[type]?.success ?? null
 
-    if (type && status) return RESULT_CONFIG[type]?.[status] ?? null
-
-    return {
-      title: '확인 중',
-      message: '결제 결과를 확인하고 있습니다...',
-      primary: { label: '메인으로', to: '/' },
-    }
   }, [type, status, confirmMut.isPending, needConfirm])
 
   return <ResultLayout {...view} />

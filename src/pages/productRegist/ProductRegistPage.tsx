@@ -23,8 +23,6 @@ const ProductRegisterPage: React.FC = () => {
     const queryClient = useQueryClient();
     const { fid: fid } = useParams<{ fid: string }>();
     const isEditMode = !!fid;
-    
-    console.log('Step 1: ID from URL:', fid);
 
     const [productData, setProductData] = useState<Festival>(initialProductData);
     const [posterFile, setPosterFile] = useState<File | null>(null);
@@ -48,10 +46,8 @@ const ProductRegisterPage: React.FC = () => {
             };
         }
     });
-    console.log('Step 2: Data from useQuery:', existingProduct);
 
     useEffect(() => {
-         console.log('Step 3: useEffect is running. existingProduct is:', existingProduct);
         if (isEditMode && existingProduct) {
             setProductData(existingProduct);
         } else {
@@ -62,9 +58,9 @@ const ProductRegisterPage: React.FC = () => {
     const { mutate, isPending } = useMutation({
         mutationFn: (formData: FormData) => isEditMode ? updateProduct(fid!, formData) : createProduct(formData),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['products'] }); // 삐약! 목록 페이지 캐시 무효화!
+            queryClient.invalidateQueries({ queryKey: ['products'] }); 
             if (isEditMode) {
-                queryClient.invalidateQueries({ queryKey: ['product', fid] }); // 상세 정보 캐시도 무효화!
+                queryClient.invalidateQueries({ queryKey: ['product', fid] });
             }
             alert(`상품이 성공적으로 ${isEditMode ? '수정' : '등록'}되었습니다!`);
             navigate('/admin/productManage');
@@ -87,7 +83,7 @@ const ProductRegisterPage: React.FC = () => {
 
     const handleDetailChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        const isNumeric = ['ticketPrice', 'maxPurchase', 'availableNOP', 'ticketPick'].includes(name);
+        const isNumeric = ['ticketPrice', 'maxPurchase', 'availableNOP', 'ticketPick'].includes(name)   ;
         setProductData(p => ({
             ...p,
             detail: {
@@ -131,7 +127,14 @@ const ProductRegisterPage: React.FC = () => {
     };
 
     const handleSubmit = () => {
-        if (!productData.fname) return alert('삐약! 상품명을 입력해주세요!');
+        if (!productData.fname) return alert('상품명을 입력해주세요!');
+        if (!productData.genrenm) return alert('장르를 선택해주세요!');
+        if (!productData.detail.entrpsnmH) return alert('기획사명을 입력해주세요!');
+        if (!productData.detail.ticketPrice) return alert('티켓 가격을 입력해주세요!');
+        if (!posterFile) return alert('포스터 파일이 없습니다.');
+        if (contentFiles.length === 0) return alert('상세 정보 이미지가 없습니다.');
+        
+
         const formData = new FormData();
         const productInfoToSend = {
             ...productData,
@@ -160,7 +163,7 @@ const ProductRegisterPage: React.FC = () => {
                     <div className={styles.formSection}>
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
-                                <label>1. 상품명</label>
+                                <label className={styles.required}>1. 상품명</label>
                                 <Input 
                                     type="string" 
                                     name="fname" 
@@ -172,14 +175,16 @@ const ProductRegisterPage: React.FC = () => {
                         </div>
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
-                                <label>2. 상품 장르</label>
+                                <label className={styles.required}>2. 상품 장르</label>
                                 <select name="genrenm" className={styles.select} value={productData.genrenm} onChange={handleChange}>
                                     <option value="">선택해주세요</option>
-                                    <option value="뮤지컬">뮤지컬</option>
+                                    <option value="무용">무용</option>
                                     <option value="대중음악">대중음악(콘서트)</option>
+                                    <option value="뮤지컬">뮤지컬</option>
                                     <option value="연극">연극</option>
-                                    <option value="한국음악">한국음악(국악)</option>
-                                    <option value="서양음악">서양음악(클래식)</option>
+                                    <option value="한국음악(국악)">한국음악(국악)</option>
+                                    <option value="서양음악(클래식)">서양음악(클래식)</option>
+                                    <option value="서커스/마술">서커스/마술</option>
                                 </select>
                             </div>
                             <div className={styles.formItem}>
@@ -213,7 +218,7 @@ const ProductRegisterPage: React.FC = () => {
                         </div>
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
-                                <label>5. 공연 시작일</label>
+                                <label className={styles.required}>5. 공연 시작일</label>
                                 <DatePicker 
                                     name="fdfrom" 
                                     value={productData.fdfrom} 
@@ -253,7 +258,7 @@ const ProductRegisterPage: React.FC = () => {
                             </div>
                             <div className={styles.formItem}>
                                 <div className={styles.formItem}>
-                                    <label>8. 수용인원</label>
+                                    <label className={styles.required}>8. 수용인원</label>
                                     <Input
                                         type="string"
                                         name="availableNOP"
@@ -265,7 +270,7 @@ const ProductRegisterPage: React.FC = () => {
                                 </div>
                             </div>
                             <div className={styles.formItem}>
-                                <label>9. 가격</label>
+                                <label className={styles.required}>9. 가격</label>
                                 <Input 
                                     type="string" 
                                     name="ticketPrice" 
@@ -299,14 +304,14 @@ const ProductRegisterPage: React.FC = () => {
                             <div className={styles.formItem}>
                                 <label>12. 고객 티켓 수령 방법</label>
                                 <div className={styles.radioGroup}>
-                                    <label><input type="radio" name="ticketPick" value={1} checked={productData.detail.ticketPick === 1} onChange={handleDetailChange} /> 일괄 배송</label>
+                                    <label><input type="radio" name="ticketPick" value={1} checked={productData.detail.ticketPick === 1} onChange={handleDetailChange} /> 배송&현장 수령</label>
                                     <label><input type="radio" name="ticketPick" value={2} checked={productData.detail.ticketPick === 2} onChange={handleDetailChange} /> 현장 수령(QR)</label>
-                                    <label><input type="radio" name="ticketPick" value={3} checked={productData.detail.ticketPick === 3} onChange={handleDetailChange} /> 배송&현장 수령(QR)</label>
+
                                 </div>
                             </div>
                         </div>
                             <div className={styles.formItem}>
-                                <label>13. 기획사명</label>
+                                <label className={styles.required}>13. 기획사명</label>
                                 <Input 
                                     type="string" 
                                     name="entrpsnmH" 
@@ -320,7 +325,7 @@ const ProductRegisterPage: React.FC = () => {
                         <div className={styles.formRow}>
                             <div className={styles.formItem}>
                                 <div className={styles.fileUploadItem}>
-                                    <label>14-1. 포스터 이미지</label>
+                                    <label className={styles.required}>14-1. 포스터 이미지</label>
                                     <Input 
                                         type="file"
                                         name="posterFile"
@@ -340,7 +345,7 @@ const ProductRegisterPage: React.FC = () => {
                                 </div>
                                 {/* 3. 상세 정보 이미지 업로드 */}
                                 <div className={styles.fileUploadItem}>
-                                    <label>14-3. 상세 정보 이미지</label>
+                                    <label className={styles.required}>14-3. 상세 정보 이미지</label>
                                     <Input 
                                         type="file"
                                         name="contentFiles"
