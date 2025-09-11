@@ -1,7 +1,7 @@
 // src/app/App.tsx
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router/router";
-import TikiChatWidget from '@/components/chatbot/TikiChatWidget';
+import TikiChatWidget from '@/components/ai/chatbot/TikiChatWidget';
 import useNoChatWidget from "@/models/ai/useNoChatWidget";
 
 export default function App() {

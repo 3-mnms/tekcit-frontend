@@ -1,43 +1,51 @@
-// src/shared/api/festival/FestivalApi.ts
-import { api } from '@/shared/config/axios'             // ✅ 공용 axios 인스턴스
-import type { Festival, FestivalDetail } from '@/models/festival/festivalType'
+import { api } from '@/shared/config/axios';
+import type { Festival, FestivalDetail } from '@/models/festival/festivalType';
 
 type SuccessResponse<T> = { data: T; message?: string }
 
-// 필요하면 요청 취소를 위해 옵션으로 signal 받기
 type ReqOpt = { signal?: AbortSignal }
 
-// 목록
+export type PageResp<T> = {
+  content: T[];
+  number: number;    
+  size: number;         
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+};
+
 export const getFestivals = async (opt?: ReqOpt): Promise<Festival[]> => {
   const res = await api.get<SuccessResponse<{ content: Festival[] }>>('/festival', {
     signal: opt?.signal,
-  })
-  return res.data.data.content
-}
+  });
+  return res.data.data.content;
+};
 
 // 카테고리
 export const getFestivalCategories = async (opt?: ReqOpt): Promise<string[]> => {
   const res = await api.get<SuccessResponse<string[]>>('/festival/categories', {
     signal: opt?.signal,
-  })
-  return res.data.data
-}
+  });
+  return res.data.data;
+};
 
 // 조회수 단건 조회
 export const getFestivalViews = async (fid: string, opt?: ReqOpt): Promise<number> => {
   const res = await api.get<SuccessResponse<number>>(`/festival/views/${fid}`, {
     signal: opt?.signal,
-  })
-  return res.data.data
-}
+  });
+  return res.data.data;
+};
 
-// 상세
+// 상세 (⚠️ 엔드포인트/로직 변경 없음)
 export const getFestivalDetail = async (fid: string, opt?: ReqOpt): Promise<FestivalDetail> => {
   const res = await api.get<SuccessResponse<FestivalDetail>>(`/festival/${fid}`, {
     signal: opt?.signal,
-  })
-  return res.data.data
-}
+  });
+  return res.data.data;
+};
 
 // 조회수 증가(POST)
 export const increaseFestivalViews = async (fid: string, opt?: ReqOpt): Promise<number> => {
@@ -46,3 +54,16 @@ export const increaseFestivalViews = async (fid: string, opt?: ReqOpt): Promise<
   })
   return res.data.data
 }
+
+export const getFestivalsByCategory = async (
+  genrenm: string,
+  page = 0,
+  size = 15,
+  signal?: AbortSignal,
+) => {
+  const res = await api.get<SuccessResponse<PageResp<Festival>>>('/festival/categories', {
+    params: { genrenm, page, size },
+    signal,
+  });
+  return res.data.data;
+};

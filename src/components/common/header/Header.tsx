@@ -9,13 +9,13 @@ import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
 import UserDropdown from '@/pages/my/dropdown/UserDropdown'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 
-const CATEGORY_ORDER = ['무용', '대중음악', '뮤지컬/연극', '복합', '클래식/국악', '서커스/마술']
+const CATEGORY_ORDER = ['무용', '대중음악', '뮤지컬/연극', '클래식/국악', '서커스/마술']
 
 const categoryMap: Record<string, string> = {
   무용: 'dance',
   대중음악: 'pop',
   '뮤지컬/연극': 'theater',
-  복합: 'mix',
+  // 복합: 'mix',
   '클래식/국악': 'classic',
   '서커스/마술': 'magic',
 }
