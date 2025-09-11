@@ -7,14 +7,20 @@ interface AddressDropdownProps {
 }
 
 const AddressDropdown: React.FC<AddressDropdownProps> = ({ addresses }) => {
-    if (!addresses || addresses.length === 0) {
+    const validAddresses = addresses?.filter(addr => addr.address);
+
+    if (!validAddresses || validAddresses.length === 0) {
         return <span>주소 없음</span>;
     }
 
-    // 삐약! is_primary가 true인 주소를 맨 위로 정렬합니다!
+    // 삐약! 기본(default) 주소를 맨 위로 정렬합니다!
     const sortedAddresses = [...addresses].sort((a, b) => {
-        if (a.is_primary) return -1;
-        if (b.is_primary) return 1;
+        if (a.default && !b.default) {
+            return -1;
+        }
+        if (!a.default && b.default) {
+            return 1;
+        }
         return 0;
     });
 

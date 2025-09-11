@@ -11,9 +11,10 @@ import Button from '@/components/common/button/Button'
 
 import { requestTossPointCharge, type PointChargeRequest } from '@/shared/api/payment/pointToss'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
+import { getEnv } from '@/shared/config/env'
 
-const STORE_ID = import.meta.env.VITE_PORTONE_STORE_ID?.trim()
-const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY?.trim()
+const STORE_ID =getEnv("VITE_PORTONE_STORE_ID")
+const CHANNEL_KEY = getEnv("VITE_PORTONE_CHANNEL_KEY")
 
 const AmountSchema = z.number().int().positive().min(1000, '최소 1,000원 이상 충전해 주세요.')
 const AMOUNT_PRESETS = [10000, 50000, 100000, 1000000]

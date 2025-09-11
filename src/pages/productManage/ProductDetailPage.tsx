@@ -111,7 +111,7 @@ const ProductDetailPage: React.FC = () => {
                     <p>가격: {product.detail.ticketPrice}원</p>
                     <p>구매 매수 제한: {product.detail.maxPurchase}</p>
                     <p>티켓 수령 방법: {product.detail.ticketPick}</p>
-                    <p>상세 정보: {product.story}</p>
+                    <p>상세 정보: {product.detail.story}</p>
                     <div className={styles.fileSection}>
                         <p>포스터 파일:</p>
                         {product.posterFile ? (
