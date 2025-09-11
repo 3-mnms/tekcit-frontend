@@ -1,6 +1,6 @@
 import React from 'react';
 import DatePicker from 'react-datepicker';
-import ko from 'date-fns/locale/ko';
+import { ko } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
 import Button from '@/components/common/button/Button';
 import styles from './TicketOrderSection.module.css';
@@ -74,6 +74,7 @@ const TicketOrderSection: React.FC<Props> = ({
   useDemoIfEmpty = false,
   className = '',
 }) => {
+  // 1) 날짜 목록 normalize
   const normalizedDates = React.useMemo<Date[]>(
     () =>
       (Array.isArray(availableDates) ? availableDates : [])
@@ -82,6 +83,7 @@ const TicketOrderSection: React.FC<Props> = ({
     [availableDates]
   );
 
+  // 데모 대체
   const demo = useDemoIfEmpty && normalizedDates.length === 0 ? makeDemo() : null;
   const dates = demo ? demo.dates : normalizedDates;
   const tbd = demo ? demo.times : timesByDate ?? {};
@@ -89,45 +91,66 @@ const TicketOrderSection: React.FC<Props> = ({
   const maxQty = demo ? demo.maxQty : maxQuantity ?? 4;
   const isSoldOut = maxQty <= 0;
 
+  // 2) 날짜 정렬 및 범위
   const sortedDates = React.useMemo(() => [...dates].sort((a, b) => a.getTime() - b.getTime()), [dates]);
   const minDate = sortedDates[0] ?? null;
   const maxDate = sortedDates[sortedDates.length - 1] ?? null;
 
+  // 3) 상태: date
   const [date, setDate] = React.useState<Date | null>(selectedDate ?? minDate ?? null);
 
-  const timesForDate = React.useMemo(() => {
-    if (!date) return [];
-    const arr = tbd[ymd(date)] ?? [];
-    return Array.from(new Set(arr)).sort((a, b) => {
-      const [ha, ma] = a.split(':').map(Number);
-      const [hb, mb] = b.split(':').map(Number);
-      return ha * 60 + ma - (hb * 60 + mb);
-    });
-  }, [date, tbd]);
-
-  const [time, setTime] = React.useState<string | null>(
-    selectedTime ?? (timesForDate[0] ?? null)
+  // 4) 날짜별 시간 계산 헬퍼 (중복 제거 + 오름차순 정렬)
+  const getTimesFor = React.useCallback(
+    (d: Date | null) => {
+      if (!d) return [];
+      const arr = (tbd[ymd(d)] ?? []) as string[];
+      return Array.from(new Set(arr)).sort((a, b) => {
+        const [ha, ma] = a.split(':').map(Number);
+        const [hb, mb] = b.split(':').map(Number);
+        return ha * 60 + ma - (hb * 60 + mb);
+      });
+    },
+    [tbd]
   );
 
-  React.useEffect(() => {
-    if (!date) return setTime(null);
-    if (timesForDate.length === 0) return setTime(null);
-    if (!time || !timesForDate.includes(time)) setTime(timesForDate[0]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date, timesForDate]);
+  // 5) 선택된 날짜의 시간 목록
+  const timesForDate = React.useMemo(() => getTimesFor(date), [date, getTimesFor]);
 
+  // 6) 상태: time (초기값은 selectedTime 또는 가장 이른 시간)
+  const [time, setTime] = React.useState<string | null>(
+    selectedTime && timesForDate.includes(selectedTime) ? selectedTime : timesForDate[0] ?? null
+  );
+
+  // ✅ 날짜 변경 시점에서 즉시 time 보정 (같은 시간이 없으면 가장 이른 시간으로 자동 선택)
+  const handleChangeDate = (d: Date | null) => {
+    setDate(d);
+    const list = getTimesFor(d);
+    if (list.length === 0) {
+      setTime(null);
+    } else if (!time || !list.includes(time)) {
+      setTime(list[0]); // 가장 빠른 시간 자동 선택
+    } // 같은 시간이 있으면 유지
+  };
+
+  // 7) 수량
   const [quantity, setQuantity] = React.useState(clamp(initialQuantity, 1, Math.max(1, maxQty)));
   const totalPrice = unitPrice * (isSoldOut ? 0 : quantity);
   const isReady = !!date && !!time && !isSoldOut;
 
   const includeDate = (d: Date) => sortedDates.some((ad) => ymd(ad) === ymd(d));
 
-  // 선택 변경 시 부모에 알려주기
+  // 8) 부모에게 선택 변경 통지 (항상 유효 조합만 전달)
   React.useEffect(() => {
-    onSelectionChange?.(date, time, quantity);
-  }, [date, time, quantity, onSelectionChange]);
+    const list = getTimesFor(date);
+    const safeTime = time && list.includes(time) ? time : list[0] ?? null;
+    if (safeTime !== time) {
+      setTime(safeTime);
+      return; // 다음 effect에서 onSelectionChange 호출
+    }
+    onSelectionChange?.(date, safeTime, quantity);
+  }, [date, time, quantity, getTimesFor, onSelectionChange]);
 
-  // 더블클릭 가드 (부모 onNext 중복 호출 방지)
+  // 9) 더블클릭 가드
   const clickLockRef = React.useRef(false);
   const handleNext = () => {
     if (!isReady || !date || !time) return;
@@ -136,7 +159,6 @@ const TicketOrderSection: React.FC<Props> = ({
     try {
       onNext?.({ fid, date, time, quantity });
     } finally {
-      // 부모에서 비동기 처리하므로, 즉시 해제해도 되고 부모에서 done 콜백 받아도 OK
       clickLockRef.current = false;
     }
   };
@@ -150,7 +172,7 @@ const TicketOrderSection: React.FC<Props> = ({
           <div>
             <DatePicker
               selected={date}
-              onChange={(d) => setDate(d)}
+              onChange={handleChangeDate}
               locale={ko}
               inline
               filterDate={includeDate}
