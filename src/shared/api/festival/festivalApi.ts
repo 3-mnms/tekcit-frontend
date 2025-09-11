@@ -55,15 +55,15 @@ export const increaseFestivalViews = async (fid: string, opt?: ReqOpt): Promise<
   return res.data.data
 }
 
-export const getFestivalsByGenrenm = async (
+export const getFestivalsByCategory = async (
   genrenm: string,
   page = 0,
   size = 15,
   signal?: AbortSignal,
 ) => {
-  const res = await api.get<SuccessResponse<PageResp<Festival>>>(
-    `/festival/categories/${encodeURIComponent(genrenm)}?page=${page}&size=${size}`,
-    { signal }
-  );
+  const res = await api.get<SuccessResponse<PageResp<Festival>>>('/festival/categories', {
+    params: { genrenm, page, size },
+    signal,
+  });
   return res.data.data;
 };
