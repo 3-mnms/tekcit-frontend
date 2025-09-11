@@ -68,6 +68,7 @@ import Spinner from '@/components/common/spinner/Spinner';
 
 // ai
 import NearbyShowsPage from '@/pages/ai/nearby/NearbyShowsPage'
+import NearbySpotPage from '@/pages/ai/nearby/NearbySpotPage';
 
 export const router = createBrowserRouter([
   { path: '/', element: <MainPage /> },
@@ -201,7 +202,7 @@ export const router = createBrowserRouter([
     path: 'nearby',
     children: [
       { path: '', element: <NearbyShowsPage /> },
-      { path: 'operatManage/user', element: <OperatManageUserPage /> },
+      { path: 'spot', element: <NearbySpotPage  /> },
     ],
   },
 ])

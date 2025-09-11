@@ -4,6 +4,7 @@ import PortOne, { Currency, PayMethod } from '@portone/browser-sdk/v2'
 import styles from './TossPayment.module.css'
 import { paymentRequest } from '@/shared/api/payment/toss'
 import { paymentConfirm } from '@/shared/api/payment/confirm'
+import { getEnv } from '@/shared/config/env'
 
 // ✅ props 타입: UI 표시에 필요한 값 + 페이지에서 내려준 컨텍스트
 export interface TossPaymentProps {
@@ -30,8 +31,13 @@ export type TossPaymentHandle = {
 }
 
 // ✅ 환경변수 (PortOne)
-const STORE_ID = import.meta.env.VITE_PORTONE_STORE_ID?.trim()
-const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY?.trim()
+const STORE_ID =getEnv("VITE_PORTONE_STORE_ID")
+const CHANNEL_KEY = getEnv("VITE_PORTONE_CHANNEL_KEY")
+
+console.log(STORE_ID);
+console.log(CHANNEL_KEY);
+
+
 
 const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
   (
