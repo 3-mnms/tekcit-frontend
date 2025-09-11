@@ -16,6 +16,7 @@
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.25);
   display: flex;
   flex-direction: column;
+  height: 500px;
 }
 
 /* 헤더 */
@@ -67,6 +68,7 @@
   max-height: 420px;
   overflow: auto;
   background: #f8fafc;
+  flex: 1;
 }
 
 /* 푸터 */

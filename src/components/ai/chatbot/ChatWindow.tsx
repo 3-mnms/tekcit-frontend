@@ -1,41 +1,65 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import styles from './ChatWindow.module.css';
-import ChatMessage from './ChatMessage';
+// src/components/chatbot/ChatWindow.tsx
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import styles from './ChatWindow.module.css'
+import ChatMessage from './ChatMessage'
+import { useChatbot } from '@/models/ai/tanstack-query/useChatbot'
 
-type Props = {
-  open: boolean;
-  onClose: () => void;
-};
+type Props = { open: boolean; onClose: () => void }
 
-const dummyConversation = [
-  { id: 'm1', role: 'bot' as const, name: 'tiki', text: '안녕하세요. tekcit 고객센터 챗봇입니다.\n무엇을 도와드릴까요?' },
-  { id: 'm2', role: 'user' as const, name: 'me', text: '티켓 예매 방법이 궁금해요' },
-  { id: 'm3', role: 'bot' as const, name: 'tiki', text: '✨티켓 예매 방법 알기✨\n1. 회원 가입을 한다.\n2. 예매하고 싶은 공연 상세페이지에 들어간다.\n3. 예매 버튼을 누른다.\n4. 시간과 날짜를 선택한다.\n5. 결제 수단을 선택한다.\n6. 티켓 출력 방법을 선택한다.\n7. 결제 한다.\n8. 끝.' },
-];
+type Msg = { id: string; role: 'bot' | 'user'; text: string }
+
+const seed: Msg[] = [
+  {
+    id: 'm1',
+    role: 'bot',
+    text: '안녕하세요 고객님! 테킷 고객센터 챗봇입니다.\n무엇을 도와드릴까요?',
+  },
+]
 
 const ChatWindow: React.FC<Props> = ({ open, onClose }) => {
-  const [container] = useState(() => {
-    const div = document.createElement('div');
-    return div;
-  });
-
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [container] = useState(() => document.createElement('div'))
+  const [msgs, setMsgs] = useState<Msg[]>(seed)
+  const [input, setInput] = useState('')
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const { mutateAsync, isPending } = useChatbot()
 
   useEffect(() => {
-    container.setAttribute('data-tiki-portal', 'true');
-    document.body.appendChild(container);
+    container.setAttribute('data-tiki-portal', 'true')
+    document.body.appendChild(container)
     return () => {
-      document.body.removeChild(container);
-    };
-  }, [container]);
+      document.body.removeChild(container)
+    }
+  }, [container])
 
   useEffect(() => {
-    if (open && bottomRef.current) {
-      // 살짝 지연 후 스크롤
-      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
+    if (open) setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 0)
+  }, [open, msgs.length])
+
+  const send = async () => {
+    const q = input.trim()
+    if (!q) return
+
+    // 1) 유저 메시지 1번만 추가
+    const userMsg: Msg = { id: crypto.randomUUID(), role: 'user', text: q }
+    setMsgs((m) => [...m, userMsg])
+    setInput('')
+
+    try {
+      // 2) 서버 호출 (라이브/데모 분기)
+      const answer = await mutateAsync(q);
+      // 3) 봇 메시지 추가 (유저 메시지 다시 넣지 않기)
+      const botMsg: Msg = { id: crypto.randomUUID(), role: 'bot', text: answer }
+      setMsgs((m) => [...m, botMsg])
+    } catch (e: any) {
+      const botErr: Msg = {
+        id: crypto.randomUUID(),
+        role: 'bot',
+        text: String(e?.response?.data ?? e?.message ?? '챗봇 호출 중 오류가 발생했어요.'),
+      }
+      setMsgs((m) => [...m, botErr])
     }
-  }, [open]);
+  }
 
   const content = open ? (
     <div className={styles.wrap} role="dialog" aria-label="Tiki chat window">
@@ -45,32 +69,42 @@ const ChatWindow: React.FC<Props> = ({ open, onClose }) => {
             <span className={styles.brand}>Tiki</span>
             <span className={styles.subtitle}>tekcit 고객센터 챗봇</span>
           </div>
-          <button className={styles.closeBtn} aria-label="close" onClick={onClose}>×</button>
+          <button className={styles.closeBtn} onClick={onClose}>
+            ×
+          </button>
         </header>
 
         <div className={styles.body}>
-          {dummyConversation.map((m) => (
-            <ChatMessage key={m.id} role={m.role} name={m.name} text={m.text} />
+          {msgs.map((m) => (
+            <ChatMessage key={m.id} role={m.role} name={m.role} text={m.text} />
           ))}
-          <div ref={bottomRef} />
+          {isPending && (
+            <div style={{ fontSize: 12, opacity: 0.7, color: '#64748b' }}>답변 생성 중…</div>
+          )}
         </div>
 
         <footer className={styles.footer}>
-          <button type="button" className={styles.faqBtn}>자주 묻는 질문</button>
           <div className={styles.inputBar}>
             <input
               className={styles.input}
               placeholder="메시지를 입력하세요."
-              disabled
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') send()
+              }}
+              disabled={isPending}
             />
-            <button className={styles.sendBtn} disabled>➤</button>
+            <button className={styles.sendBtn} onClick={send} disabled={isPending || !input.trim()}>
+              ➤
+            </button>
           </div>
         </footer>
       </div>
     </div>
-  ) : null;
+  ) : null
 
-  return createPortal(content, container);
-};
+  return createPortal(content, container)
+}
 
-export default ChatWindow;
+export default ChatWindow
