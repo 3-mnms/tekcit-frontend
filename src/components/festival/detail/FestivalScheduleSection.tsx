@@ -66,7 +66,7 @@ const __fs_openCenteredPopup = (url: string, w: number, h: number, name: string 
   const top  = Math.max(availTop,  Math.round(availTop  + (availH - h) / 2));
 
   const feat = [
-    'popup=yes','noopener','noreferrer',
+    'popup=yes',
     'toolbar=0','menubar=0','location=0','status=0',
     'scrollbars=1','resizable=1',
     `width=${w}`, `height=${h}`, `left=${left}`, `top=${top}`,

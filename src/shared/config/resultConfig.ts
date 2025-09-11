@@ -14,8 +14,7 @@ export const RESULT_CONFIG: Record<ResultType, Record<ResultStatus, View>> = {
     success: {
       title: '결제 성공',
       message: '예매 결제가 완료되었습니다.',
-      primary: { label: '내 예매 확인', to: '/my/tickets' },
-      secondary: { label: '메인으로', to: '/' },
+      primary: { label: '내 예매 확인', to: '/mypage/ticket/history' },
     },
     fail: {
       title: '결제 실패',
