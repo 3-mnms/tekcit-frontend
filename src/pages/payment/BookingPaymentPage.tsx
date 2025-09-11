@@ -51,11 +51,7 @@ const combineDateTime = (day?: Date, hhmm?: string | null) => {
 }
 
 const BookingPaymentPage: React.FC = () => {
-  const location = useLocation();
   const stompClientRef = useRef<any>(null)
-
-  const STORE_KEY = import.meta.env.VITE_PORTONE_STORE_KEY
-  const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY
 
   const navigate = useNavigate()
   const { state } = useLocation()
@@ -294,10 +290,10 @@ const BookingPaymentPage: React.FC = () => {
 
   // request → (wallet) 모달(tekcitpay) → (완료 라우팅)  ※ complete 호출 없음
   const handlePayment = async () => {
-    if (!checkout) {
-      setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.')
-      return
-    }
+    // if (!checkout) {
+    //   setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.')
+    //   return
+    // }
     if (!openedMethod) {
       setErr('결제 수단을 선택해주세요.')
       return
@@ -335,8 +331,6 @@ const BookingPaymentPage: React.FC = () => {
       amount: finalAmount,
       currency: 'KRW',
       payMethod: openedMethod === 'wallet' ? 'POINT_PAYMENT' : 'CARD',
-      STORE_KEY,
-      CHANNEL_KEY,
     }
 
     setIsPaying(true)
