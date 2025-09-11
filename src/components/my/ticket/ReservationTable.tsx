@@ -26,61 +26,77 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter })
     })
   }, [data, startDate, endDate, statusFilter])
 
-  const handleRowClick = (row: TicketListItem) => {
+  const goDetail = (row: TicketListItem) =>
     navigate(`/mypage/ticket/detail/${row.reservationNumber}`)
+
+  if (isLoading) {
+    return (
+      <div className={styles.skeletonList}>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className={styles.skelCard} />
+        ))}
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <div className={styles.errorBox}>목록 조회 실패: {(error as Error)?.message ?? '알 수 없는 오류'}</div>
+  }
+
+  if (!filteredData.length) {
+    return (
+      <div className={`${styles.card} ${styles.empty}`}>
+        <div className={styles.emptyIcon} aria-hidden />
+        <h3 className={styles.emptyTitle}>예매 내역이 없습니다</h3>
+        <p className={styles.emptyDesc}>선택한 조건에 해당하는 예매 내역이 없습니다.</p>
+        <button className={styles.primaryBtn}>티켓 예매하기</button>
+      </div>
+    )
   }
 
   return (
-    <div className={styles.tableWrapper}>
-      <table className={styles.table} aria-label="예매 내역">
-        <thead>
-          <tr>
-            <th>예매일</th>
-            <th>예매번호</th>
-            <th>공연명</th>
-            <th>일시</th>
-            <th>매수</th>
-            <th>예매상태</th>
-          </tr>
-        </thead>
-        <tbody>
-          {isLoading && (
-            <tr>
-              <td colSpan={6}>불러오는 중…</td>
-            </tr>
-          )}
-          {isError && (
-            <tr>
-              <td colSpan={6}>목록 조회 실패: {(error as Error)?.message ?? '알 수 없는 오류'}</td>
-            </tr>
-          )}
-          {!isLoading && !isError && filteredData.length === 0 && (
-            <tr>
-              <td colSpan={6}>조건에 맞는 예매 내역이 없습니다.</td>
-            </tr>
-          )}
-          {!isLoading &&
-            !isError &&
-            filteredData.map((item) => (
-              <tr
-                key={item.reservationNumber}
-                onClick={() => handleRowClick(item)}
-                className={styles.clickableRow}
+    <div className={styles.list}>
+      {filteredData.map((item) => (
+        <article key={item.reservationNumber} className={styles.card}>
+          <div className={styles.leftBar} aria-hidden />
+          <div className={styles.cardBody}>
+            <div className={styles.topRow}>
+              <div className={styles.titleWrap}>
+                <h3 className={styles.title}>{item.title}</h3>
+                <div className={styles.metaRow}>
+                  <span className={styles.meta}><i className={styles.iTicket} />{item.number}</span>
+                  <span className={styles.meta}><i className={styles.iCal} />{item.date}</span>
+                  <span className={styles.meta}><i className={styles.iClock} />{item.dateTime?.split(' ')[1] ?? ''}</span>
+                </div>
+              </div>
+              <span
+                className={`${styles.badge} ${
+                  item.statusLabel === '예매 완료'
+                    ? styles.badgeBlue
+                    : styles.badgeGray
+                }`}
               >
-                <td data-label="예매일">{item.date}</td>
-                <td data-label="예매번호" className={`${styles.mono} ${styles.ellipsis}`}>
-                  {item.number}
-                </td>
-                <td data-label="공연명" className={`${styles.left} ${styles.ellipsis}`}>
-                  {item.title}
-                </td>
-                <td data-label="일시" className={styles.ellipsis}>{item.dateTime}</td>
-                <td data-label="매수" className={styles.ellipsis}>{item.count}</td>
-                <td data-label="예매상태" className={styles.ellipsis}>{item.statusLabel}</td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+                {item.statusLabel}
+              </span>
+            </div>
+
+            <div className={styles.bottomRow}>
+              <span className={styles.meta}><i className={styles.iUser} />{item.count}매</span>
+
+              <div className={styles.actions}>
+                <button className={styles.ghostBtn} onClick={() => goDetail(item)}>
+                  상세보기
+                </button>
+                {item.statusLabel === '예매 완료' && (
+                  <button className={styles.dangerGhostBtn}>
+                    취소하기
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </article>
+      ))}
     </div>
   )
 }

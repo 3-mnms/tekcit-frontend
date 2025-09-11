@@ -1,98 +1,82 @@
+/* TicketHistoryPage.module.css */
 .container {
   width: 100%;
   padding: 1.5rem;
   box-sizing: border-box;
 }
 
+.headerWrap {
+  margin-bottom: 1rem;
+}
+
 .title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: #0f172a;
 }
 
-.statusFilterWrapper {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 1rem 0 1.5rem;
-}
-
-.selectBox {
-  position: relative;
-  width: 160px;
-  /* 셀렉트와 동일 너비 */
-}
-
-/* ▼ 화살표는 여기서 그림 (사라지지 않음) */
-.selectBox::after {
-  content: "";
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 12px;
-  height: 12px;
-  pointer-events: none;
-  /* 클릭 방해 금지 */
-  background-repeat: no-repeat;
-  background-size: 12px 12px;
-  background-image: url("data:image/svg+xml,%3Csvg width='14' height='10' viewBox='0 0 14 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23666' stroke-width='2' fill='none'/%3E%3C/svg%3E");
-}
-
-.statusSelect {
-  height: 40px;
-  width: 100%;
-  padding: 0 2rem 0 0.8rem;
-  font-size: 0.95rem;
-  border: 1px solid #ccc;
+.card {
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
   background: #fff;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: none !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
-  cursor: pointer;
+  /* box-shadow: 0 1px 6px rgba(0, 0, 0, .04); */
+  margin-bottom: 1.25rem;
 }
 
-.statusSelect:hover {
-  border-color: #cbd5e1;
+.cardBody {
+  padding: 1.25rem;
 }
 
-.statusSelect:focus {
-  outline: 3px solid #e0efff;
-  border-color: #60a5fa;
+.filtersGrid {
+  display: grid;
+  grid-template-columns: 1fr; 
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .filtersGrid { grid-template-columns: 1fr 1fr; } /* 상단 2열 */
 }
 
-.statusSelect::-ms-expand {
-  display: none;
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  margin-top: -15px;
 }
 
-.customReactSelect__control {
-  border-color: #ccc;
-  box-shadow: none;
-  cursor: pointer;
-  font-size: 0.95rem;
+.blockLabel {
+  font-size: .9rem;
+  font-weight: 700;
+  color: #334155;
 }
 
-.customReactSelect__control:hover {
+.btnGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.filterBtn {
+  height: 32px;
+  padding: 0 .75rem;
+  border-radius: 8px;
+  font-size: .875rem;
+  font-weight: 600;
+  border: 1px solid #cfe0ff;
+  background: #fff;
+  color: #4D9AFD;
+  box-shadow: 0 .5px 2px rgba(0, 0, 0, .02);
+  transition: all .15s ease;
+}
+
+.filterBtn:hover {
+  background: #f3f8ff;
   border-color: #4D9AFD;
+  color: #317fe0;
 }
 
-.customReactSelect__single-value {
-  color: #333;
-}
-
-.customReactSelect__option {
-  cursor: pointer;
-}
-
-.customReactSelect__option--is-focused {
-  background-color: #f0f8ff;
-}
-
-.customReactSelect__menu {
-  z-index: 10;
-  border: 1px solid #ccc;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+.filterBtnActive {
+  background: #4D9AFD;
+  color: #fff;
+  border-color: #4D9AFD;
+  box-shadow: 0 0 0 2px rgba(77, 154, 253, .18) inset;
 }
