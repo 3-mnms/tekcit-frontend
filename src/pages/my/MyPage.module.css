@@ -7,12 +7,10 @@
 .wrapper {
   display: flex;
   align-items: flex-start;
-  padding: 2.5rem 10vw; 
-  gap: 4rem;
   width: 100%;
   box-sizing: border-box;
-  max-width: 1440px;    
-  margin: 0 auto;      
+  max-width: 1440px;
+  margin: 0 auto;
 }
 
 .content {
