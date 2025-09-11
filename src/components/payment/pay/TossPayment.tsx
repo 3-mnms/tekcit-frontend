@@ -31,7 +31,7 @@ export type TossPaymentHandle = {
 }
 
 // ✅ 환경변수 (PortOne)
-const STORE_ID =getEnv("VITE_PORTONE_STORE_ID")
+const STORE_ID = getEnv("VITE_PORTONE_STORE_ID")
 const CHANNEL_KEY = getEnv("VITE_PORTONE_CHANNEL_KEY")
 
 console.log(STORE_ID);
@@ -49,15 +49,16 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
     // ✅ 페이지에서 ref로 호출할 requestPay 구현을 노출
     useImperativeHandle(ref, () => ({
       async requestPay({ paymentId, amount, orderName, bookingId, festivalId, sellerId, successUrl }) {
+        const hasSellerId =
+          typeof sellerId === 'number' && Number.isFinite(sellerId) && sellerId >= 0
+
         // 1) 필수 키 체크
         if (!STORE_ID || !CHANNEL_KEY) {
-          console.log('STORE_ID', import.meta.env.VITE_PORTONE_STORE_ID)
-          console.log('CHANNEL_KEY', import.meta.env.VITE_PORTONE_CHANNEL_KEY)
           alert('결제 설정이 올바르지 않습니다. 관리자에게 문의하세요.')
           throw new Error('Missing PortOne credentials')
         }
 
-        if (!bookingId || !festivalId || !sellerId) {
+        if (!bookingId || !festivalId || !hasSellerId) {
           alert('결제 정보가 부족합니다. 다시 시도해 주세요.')
           throw new Error('Invalid booking/festival/seller context')
         }
@@ -86,20 +87,20 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           payMethod: PayMethod.CARD,
           redirectUrl: finalRedirect,
         })
-        try{
-            const result=await paymentConfirm(paymentId);
-            
+        try {
+          const result = await paymentConfirm(paymentId);
 
-        // ✅ 동일 페이지에서 쿼리만 업데이트하여 결과 렌더 유도 멍
-      
-            if(result.success){
-              navigate(`/payment/result?paymentId=${paymentId}`)
-            }else{
-              navigate(`/payments/result`)
-            }
 
-        }catch(err){
-            console.error("에러")
+          // ✅ 동일 페이지에서 쿼리만 업데이트하여 결과 렌더 유도 멍
+
+          if (result.success) {
+            navigate(`/payment/result?paymentId=${paymentId}`)
+          } else {
+            navigate(`/payments/result`)
+          }
+
+        } catch (err) {
+          console.error("에러")
         }
       },
     }))

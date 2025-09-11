@@ -51,11 +51,7 @@ const combineDateTime = (day?: Date, hhmm?: string | null) => {
 }
 
 const BookingPaymentPage: React.FC = () => {
-  const location = useLocation();
   const stompClientRef = useRef<any>(null)
-
-  const STORE_KEY = import.meta.env.VITE_PORTONE_STORE_KEY
-  const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY
 
   const navigate = useNavigate()
   const { state } = useLocation()
@@ -115,147 +111,147 @@ const BookingPaymentPage: React.FC = () => {
           reservationNumber: checkout.bookingId,
         })
         if (!res.success) throw new Error(res.message || '상세 조회 실패')
-        const sid = (res.data?.sellerId ?? res.data?.seller_id) as number | undefined
-        if (!sid || sid <= 0) throw new Error('sellerId 누락')
+        const sid = (res.data?.sellerId ?? res.data?.sellerId) as number | undefined
+        if (!sid) throw new Error('sellerId 누락')
         setSellerId(sid)
       } catch (e) {
-        console.error('예매 상세 조회 실패', e)
-        alert('결제 정보를 불러오지 못했습니다.')
-        navigate(-1)
+        // console.error('예매 상세 조회 실패', e)
+        // alert('결제 정보를 불러오지 못했습니다.')
+        // navigate(-1)
       }
     })()
   }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate])
 
   // 웹소켓 연결 (결제 완료 알림)
-  // useEffect(() => {
-  //   console.log('[WebSocket] 초기화 시작, bookingId:', checkout?.bookingId)
+  useEffect(() => {
+    console.log('[WebSocket] 초기화 시작, bookingId:', checkout?.bookingId)
 
-  //   if (!checkout?.bookingId) {
-  //     console.log('[WebSocket] bookingId 없음, 연결하지 않음')
-  //     return
-  //   }
+    if (!checkout?.bookingId) {
+      console.log('[WebSocket] bookingId 없음, 연결하지 않음')
+      return
+    }
 
-  //   // 기존 연결이 있으면 먼저 정리
-  //   if (stompClientRef.current?.connected) {
-  //     console.log('[WebSocket] 기존 연결 해제 중...')
-  //     stompClientRef.current.deactivate()
-  //     stompClientRef.current = null
-  //   }
+    // 기존 연결이 있으면 먼저 정리
+    if (stompClientRef.current?.connected) {
+      console.log('[WebSocket] 기존 연결 해제 중...')
+      stompClientRef.current.deactivate()
+      stompClientRef.current = null
+    }
 
-  //   const connectWebSocket = () => {
-  //     console.log('[WebSocket] 새 연결 시작...')
-  //     console.log('[WebSocket] 연결 URL: http://localhost:10000/ws') // ✅ 포트 수정
+    const connectWebSocket = () => {
+      console.log('[WebSocket] 새 연결 시작...')
+      console.log('[WebSocket] 연결 URL: http://localhost:10000/ws') // ✅ 포트 수정
 
-  //     // ✅ 최신 @stomp/stompjs Client 방식 사용
-  //     const client = new Client({
-  //       webSocketFactory: () => new SockJS('http://localhost:10000/ws'), // ✅ 포트 수정
-  //       connectHeaders: {},
-  //       debug: (str) => {
-  //         console.log('[STOMP Debug]', str)
-  //       },
-  //       reconnectDelay: 5000,
-  //       heartbeatIncoming: 10000,
-  //       heartbeatOutgoing: 10000,
-  //     })
+      // ✅ 최신 @stomp/stompjs Client 방식 사용
+      const client = new Client({
+        webSocketFactory: () => new SockJS('http://localhost:10000/ws'), // ✅ 포트 수정
+        connectHeaders: {},
+        debug: (str) => {
+          console.log('[STOMP Debug]', str)
+        },
+        reconnectDelay: 5000,
+        heartbeatIncoming: 10000,
+        heartbeatOutgoing: 10000,
+      })
 
-  //     // 연결 성공 핸들러
-  //     client.onConnect = (frame) => {
-  //       console.log('✅ [WebSocket] STOMP 연결 성공:', frame)
-  //       console.log('[WebSocket] 연결된 세션:', frame.headers?.session)
+      // 연결 성공 핸들러
+      client.onConnect = (frame) => {
+        console.log('✅ [WebSocket] STOMP 연결 성공:', frame)
+        console.log('[WebSocket] 연결된 세션:', frame.headers?.session)
 
-  //       // 연결 성공 후에만 ref에 저장
-  //       stompClientRef.current = client
+        // 연결 성공 후에만 ref에 저장
+        stompClientRef.current = client
 
-  //       // 구독 시작
-  //       console.log('[WebSocket] 구독 시작: /user/queue/ticket-status')
-  //       const subscription = client.subscribe('/user/queue/ticket-status', (message) => {
-  //         console.log('📨 [WebSocket] 메시지 수신 - Raw:', message)
-  //         console.log('📨 [WebSocket] 메시지 본문:', message.body)
+        // 구독 시작
+        console.log('[WebSocket] 구독 시작: /user/queue/ticket-status')
+        const subscription = client.subscribe('/user/queue/ticket-status', (message) => {
+          console.log('📨 [WebSocket] 메시지 수신 - Raw:', message)
+          console.log('📨 [WebSocket] 메시지 본문:', message.body)
 
-  //         try {
-  //           const data = JSON.parse(message.body)
-  //           console.log('[WebSocket] 파싱된 데이터:', data)
+          try {
+            const data = JSON.parse(message.body)
+            console.log('[WebSocket] 파싱된 데이터:', data)
 
-  //           if (data.status === 'CONFIRMED') {
-  //             console.log('✅ [WebSocket] 결제 완료 - 성공 페이지로 이동')
-  //             navigate('/payment/result?type=booking&status=success')
-  //           } else if (data.status === 'CANCELED') {
-  //             console.log('❌ [WebSocket] 결제 취소 - 실패 페이지로 이동')
-  //             navigate('/payment/result?type=booking&status=fail')
-  //           } else {
-  //             console.log('ℹ️ [WebSocket] 기타 상태:', data.status)
-  //           }
-  //         } catch (parseError) {
-  //           console.error('❌ [WebSocket] 메시지 파싱 실패:', parseError)
-  //           console.error('[WebSocket] 원본 메시지:', message.body)
-  //         }
-  //       })
+            if (data.status === 'CONFIRMED') {
+              console.log('✅ [WebSocket] 결제 완료 - 성공 페이지로 이동')
+              navigate('/payment/result?type=booking&status=success')
+            } else if (data.status === 'CANCELED') {
+              console.log('❌ [WebSocket] 결제 취소 - 실패 페이지로 이동')
+              navigate('/payment/result?type=booking&status=fail')
+            } else {
+              console.log('ℹ️ [WebSocket] 기타 상태:', data.status)
+            }
+          } catch (parseError) {
+            console.error('❌ [WebSocket] 메시지 파싱 실패:', parseError)
+            console.error('[WebSocket] 원본 메시지:', message.body)
+          }
+        })
 
-  //       console.log('✅ [WebSocket] 구독 완료, subscription:', subscription)
+        console.log('✅ [WebSocket] 구독 완료, subscription:', subscription)
 
-  //       // 테스트 메시지 전송
-  //       setTimeout(() => {
-  //         try {
-  //           client.publish({
-  //             destination: '/app/test',
-  //             body: JSON.stringify({
-  //               type: 'connection-test',
-  //               bookingId: checkout?.bookingId,
-  //               timestamp: new Date().toISOString()
-  //             })
-  //           })
-  //           console.log('📤 [WebSocket] 테스트 메시지 전송 완료')
-  //         } catch (error) {
-  //           console.error('❌ [WebSocket] 테스트 메시지 전송 실패:', error)
-  //         }
-  //       }, 1000)
-  //     }
+        // 테스트 메시지 전송
+        setTimeout(() => {
+          try {
+            client.publish({
+              destination: '/app/test',
+              body: JSON.stringify({
+                type: 'connection-test',
+                bookingId: checkout?.bookingId,
+                timestamp: new Date().toISOString()
+              })
+            })
+            console.log('📤 [WebSocket] 테스트 메시지 전송 완료')
+          } catch (error) {
+            console.error('❌ [WebSocket] 테스트 메시지 전송 실패:', error)
+          }
+        }, 1000)
+      }
 
-  //     // 에러 핸들러들
-  //     client.onStompError = (frame) => {
-  //       console.error('❌ [WebSocket] STOMP 프로토콜 에러:', frame.headers?.message)
-  //       console.error('[WebSocket] 에러 본문:', frame.body)
-  //     }
+      // 에러 핸들러들
+      client.onStompError = (frame) => {
+        console.error('❌ [WebSocket] STOMP 프로토콜 에러:', frame.headers?.message)
+        console.error('[WebSocket] 에러 본문:', frame.body)
+      }
 
-  //     client.onWebSocketError = (error) => {
-  //       console.error('❌ [WebSocket] WebSocket 에러:', error)
-  //     }
+      client.onWebSocketError = (error) => {
+        console.error('❌ [WebSocket] WebSocket 에러:', error)
+      }
 
-  //     client.onWebSocketClose = (event) => {
-  //       console.log('🔌 [WebSocket] WebSocket 연결 종료:', event)
-  //     }
+      client.onWebSocketClose = (event) => {
+        console.log('🔌 [WebSocket] WebSocket 연결 종료:', event)
+      }
 
-  //     client.onDisconnect = () => {
-  //       console.log('🔌 [WebSocket] STOMP 연결 해제됨')
+      client.onDisconnect = () => {
+        console.log('🔌 [WebSocket] STOMP 연결 해제됨')
 
-  //       // 5초 후 재연결 시도
-  //       setTimeout(() => {
-  //         console.log('[WebSocket] 5초 후 재연결 시도...')
-  //         connectWebSocket()
-  //       }, 5000)
-  //     }
+        // 5초 후 재연결 시도
+        setTimeout(() => {
+          console.log('[WebSocket] 5초 후 재연결 시도...')
+          connectWebSocket()
+        }, 5000)
+      }
 
-  //     // 연결 시작
-  //     try {
-  //       client.activate()
-  //       console.log('[WebSocket] 클라이언트 활성화 완료')
-  //     } catch (error) {
-  //       console.error('❌ [WebSocket] 클라이언트 활성화 실패:', error)
-  //     }
-  //   }
+      // 연결 시작
+      try {
+        client.activate()
+        console.log('[WebSocket] 클라이언트 활성화 완료')
+      } catch (error) {
+        console.error('❌ [WebSocket] 클라이언트 활성화 실패:', error)
+      }
+    }
 
-  //   connectWebSocket()
+    connectWebSocket()
 
-  //   // cleanup 함수
-  //   return () => {
-  //     console.log('[WebSocket] cleanup 실행')
-  //     if (stompClientRef.current?.connected) {
-  //       console.log('[WebSocket] 연결 해제 중...')
-  //       stompClientRef.current.deactivate()
-  //       stompClientRef.current = null
-  //     }
-  //   }
-  // }, [checkout?.bookingId, navigate])
+    // cleanup 함수
+    return () => {
+      console.log('[WebSocket] cleanup 실행')
+      if (stompClientRef.current?.connected) {
+        console.log('[WebSocket] 연결 해제 중...')
+        stompClientRef.current.deactivate()
+        stompClientRef.current = null
+      }
+    }
+  }, [checkout?.bookingId, navigate])
 
   const releaseMut = useReleaseWaitingMutation()
   const releasedOnceRef = useRef(false)
@@ -294,10 +290,10 @@ const BookingPaymentPage: React.FC = () => {
 
   // request → (wallet) 모달(tekcitpay) → (완료 라우팅)  ※ complete 호출 없음
   const handlePayment = async () => {
-    if (!checkout) {
-      setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.')
-      return
-    }
+    // if (!checkout) {
+    //   setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.')
+    //   return
+    // }
     if (!openedMethod) {
       setErr('결제 수단을 선택해주세요.')
       return
@@ -318,10 +314,6 @@ const BookingPaymentPage: React.FC = () => {
       setErr('로그인이 필요합니다.')
       return
     }
-    if (!sellerId) {
-      setErr('판매자 정보가 없어요. 다시 시도해 주세요.')
-      return
-    }
 
     // 1) REQUEST (지갑은 'POINT_PAYMENT', 카드/토스는 'CARD')
     const dto: PaymentRequestDTO = {
@@ -335,8 +327,6 @@ const BookingPaymentPage: React.FC = () => {
       amount: finalAmount,
       currency: 'KRW',
       payMethod: openedMethod === 'wallet' ? 'POINT_PAYMENT' : 'CARD',
-      STORE_KEY,
-      CHANNEL_KEY,
     }
 
     setIsPaying(true)
