@@ -42,8 +42,7 @@ const BookingPaymentPage: React.FC = () => {
 
   const [sellerId, setSellerId] = useState<number | null>(null)
   const storeName = useAuthStore((s) => s.user?.name) || undefined
-  const userName = useMemo(() => storeName)
-  const [wsShouldConnect, setWsShouldConnect] = useState(false) // 웹소켓 연결 타이밍 (플래그 추가)
+  const userName = useMemo(() => storeName ?? getNameFromJwt(), [storeName])
 
   const tossRef = useRef<TossPaymentHandle>(null)
   const [openedMethod, setOpenedMethod] = useState<PaymentMethod | null>(null)
@@ -86,11 +85,11 @@ const BookingPaymentPage: React.FC = () => {
         const res = await fetchBookingDetail({
           festivalId: checkout.festivalId,
           performanceDate: checkout.performanceDate,
-          reservationNumber: checkout.bookingId,
+          reservationNumber: checkout.reservationNumber ?? checkout.bookingId,
         })
         if (!res.success) throw new Error(res.message || '상세 조회 실패')
         const sid = (res.data?.sellerId ?? res.data?.sellerId) as number | undefined
-        if (!sid || sid <= 0) throw new Error('sellerId 누락')
+        if (!sid) throw new Error('sellerId 누락')
         setSellerId(sid)
       } catch (e) {
         console.error('예매 상세 조회 실패', e)
@@ -98,64 +97,107 @@ const BookingPaymentPage: React.FC = () => {
         navigate(-1)
       }
     })()
-  }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate])
+  }, [checkout?.festivalId, checkout?.performanceDate, checkout?.reservationNumber, checkout?.bookingId, navigate])
 
   // 웹소켓 연결 (결제 완료 알림)
   useEffect(() => {
-    if (!wsShouldConnect || !checkout?.bookingId) return
+    console.log('[WebSocket] 초기화 시작, bookingId:', checkout?.bookingId)
 
-    // 기존 연결 정리
-    if (stompClientRef.current) {
-      try { stompClientRef.current.deactivate() } catch { }
+    if (!checkout?.bookingId) {
+      console.log('[WebSocket] bookingId 없음, 연결하지 않음')
+      return
+    }
+
+    // 기존 연결이 있으면 먼저 정리
+    if (stompClientRef.current?.connected) {
+      console.log('[WebSocket] 기존 연결 해제 중...')
+      stompClientRef.current.deactivate()
       stompClientRef.current = null
     }
 
-    const client = new Client({
-      // SockJS 엔드포인트
-      webSocketFactory: () => new SockJS('http://localhost:10000/ws'),
-      // Spring Security(JWT) 사용 시 CONNECT 헤더에 토큰 전달
-      connectHeaders: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-      debug: (str) => console.log('[STOMP]', str),
-      // 웹소켓 끊어지면 자동 재접속
-      reconnectDelay: 5000,
-      heartbeatIncoming: 10000,
-      heartbeatOutgoing: 10000,
-    })
+    const connectWebSocket = () => {
+      console.log('[WebSocket] 새 연결 시작...')
 
-    client.onConnect = () => {
-      // 사용자별 큐 구독
-      client.subscribe('/user/queue/ticket-status', (message) => {
-        try {
-          const data = JSON.parse(message.body)
-          if (data.status === 'CONFIRMED') {
-            navigate('/payment/result?type=booking&status=success')
-          } else if (data.status === 'CANCELED') {
-            navigate('/payment/result?type=booking&status=fail')
-          } else {
-            console.log('[WS] 기타 상태:', data.status)
-          }
-        } catch (e) {
-          console.error('[WS] 메시지 파싱 실패', e, message.body)
-        }
+      // ✅ 최신 @stomp/stompjs Client 방식 사용
+      const client = new Client({
+        webSocketFactory: () => new SockJS('http://localhost:10000/ws'),
+        connectHeaders: {},
+        debug: (str) => {
+          console.log('[STOMP Debug]', str)
+        },
+        reconnectDelay: 5000,
+        heartbeatIncoming: 10000,
+        heartbeatOutgoing: 10000,
       })
+
+      // 연결 성공 핸들러
+      client.onConnect = (frame) => {
+        console.log('✅ [WebSocket] STOMP 연결 성공:', frame)
+
+        // 연결 성공 후에만 ref에 저장
+        stompClientRef.current = client
+
+        // 구독 시작
+        const subscription = client.subscribe('/user/queue/ticket-status', (message) => {
+          console.log('📨 [WebSocket] 메시지 본문:', message.body)
+
+          try {
+            const data = JSON.parse(message.body)
+            console.log('[WebSocket] 파싱된 데이터:', data)
+
+            if (data.status === 'CONFIRMED') {
+              navigate('/payment/result?type=booking&status=success')
+            } else if (data.status === 'CANCELED') {
+              navigate('/payment/result?type=booking&status=fail')
+            }
+          } catch (parseError) {
+            console.error('❌ [WebSocket] 메시지 파싱 실패:', parseError)
+          }
+        })
+
+        console.log('✅ [WebSocket] 구독 완료, subscription:', subscription)
+      }
+
+      // 에러 핸들러들
+      client.onStompError = (frame) => {
+        console.error('[WebSocket] 에러 본문:', frame.body)
+      }
+
+      client.onWebSocketError = (error) => {
+        console.error('❌ [WebSocket] WebSocket 에러:', error)
+      }
+
+      client.onDisconnect = () => {
+        console.log('🔌 [WebSocket] STOMP 연결 해제됨')
+
+        // 5초 후 재연결 시도
+        setTimeout(() => {
+          console.log('[WebSocket] 5초 후 재연결 시도...')
+          connectWebSocket()
+        }, 5000)
+      }
+
+      // 연결 시작
+      try {
+        client.activate()
+        console.log('[WebSocket] 클라이언트 활성화 완료')
+      } catch (error) {
+        console.error('❌ [WebSocket] 클라이언트 활성화 실패:', error)
+      }
     }
 
-    client.onStompError = (frame) => {
-      console.error('[WS] STOMP 에러:', frame.headers?.message, frame.body)
-    }
-    client.onWebSocketError = (err) => console.error('[WS] 소켓 에러:', err)
-    client.onWebSocketClose = (ev) => console.log('[WS] 소켓 종료:', ev)
+    connectWebSocket()
 
-    // ref에 보관하고 활성화
-    stompClientRef.current = client
-    client.activate()
-
+    // cleanup 함수
     return () => {
-      // 연결 여부와 상관없이 deactivate 호출 (내부에서 안전하게 처리)
-      try { client.deactivate() } catch { }
-      stompClientRef.current = null
+      console.log('[WebSocket] cleanup 실행')
+      if (stompClientRef.current?.connected) {
+        console.log('[WebSocket] 연결 해제 중...')
+        stompClientRef.current.deactivate()
+        stompClientRef.current = null
+      }
     }
-  }, [wsShouldConnect, checkout?.bookingId, navigate, accessToken])
+  }, [checkout?.bookingId, navigate])
 
   const routeToResult = (ok: boolean) => {
     navigate(`/payment/result?type=booking&status=${ok ? 'success' : 'fail'}`)
@@ -233,9 +275,7 @@ const BookingPaymentPage: React.FC = () => {
       setIsPaying(false)
     }
   }
-
-  if (sellerId == null) return <div className={styles.page}>sellerId가 null입니다</div>
-
+  
   return (
     <div className={styles.page}>
       <BookingPaymentHeader
@@ -281,7 +321,7 @@ const BookingPaymentPage: React.FC = () => {
         </aside>
       </div>
 
-      {/* 지갑 비밀번호 모달: tekcitpay 성공 시 바로 라우팅 (complete 호출 X) */}
+      {/* 지갑 비밀번호 모달: tekcitpay 성공 시 바로 라우팅 */}
       {isPasswordModalOpen && ensuredPaymentId && Number.isFinite(userId) && (
         <PasswordInputModal
           amount={amountToPay}

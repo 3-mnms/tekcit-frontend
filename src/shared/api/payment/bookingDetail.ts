@@ -48,11 +48,6 @@ export async function fetchBookingDetail(
     if (!res.data?.sellerId && (res as any)?.data?.seller_id) {
       res.data.sellerId = Number((res as any).data.seller_id)
     }
-
-    if (typeof res.data?.sellerId !== 'number' || !Number.isFinite(res.data.sellerId)) {
-      throw new Error('sellerId 누락 또는 형식 오류')
-    }
-
     return res
   } catch (e: any) {
     const status = e?.response?.status as number | undefined
