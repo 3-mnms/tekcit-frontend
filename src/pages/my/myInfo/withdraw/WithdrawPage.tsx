@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDeleteAccountMutation } from '@/models/auth/tanstack-query/useDeleteAccount'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 
-import { FaExclamationTriangle, FaUserTimes, FaShieldAlt } from 'react-icons/fa'
+import { FaExclamationTriangle } from 'react-icons/fa'
 
 const WithdrawPage: React.FC = () => {
   const [checked, setChecked] = useState(false)

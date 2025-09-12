@@ -74,7 +74,7 @@ const centerAndResizeExact = (targetInnerW: number, targetInnerH: number) => {
 
     window.resizeTo(targetOuterW, targetOuterH)
     window.moveTo(left, top)
-  } catch {}
+  } catch { }
 }
 
 /* =========================
@@ -205,10 +205,10 @@ const TicketQueuePage: React.FC = () => {
         lastMsgAtRef.current = Date.now()
         handleQueueMessage(msg)
       })
-      client.subscribe(USER_QUEUE_TOPIC, (msg: IMessage) => {
-        lastMsgAtRef.current = Date.now()
-        handleQueueMessage(msg)
-      })
+      client.subscribe("/user/queue/waitingNumber", (payload) => {
+        const data = JSON.parse(payload.body);
+        console.log("데이터" ,data);
+      });
     }
 
     client.onStompError = (frame) => {
@@ -221,19 +221,19 @@ const TicketQueuePage: React.FC = () => {
     client.activate()
     stompRef.current = client
 
-    const softFallback = setInterval(() => {
-      const lag = Date.now() - lastMsgAtRef.current
-      if (lag > 10000) {
-        setAhead((n) => Math.max(0, n - 1))
-        lastMsgAtRef.current = Date.now()
-      }
-    }, 5000)
+    // const softFallback = setInterval(() => {
+    //   const lag = Date.now() - lastMsgAtRef.current
+    //   if (lag > 100000) {
+    //     setAhead((n) => Math.max(0, n - 1))
+    //     lastMsgAtRef.current = Date.now()
+    //   }
+    // }, 5000)
 
     return () => {
-      clearInterval(softFallback)
+      // clearInterval(softFallback)
       try {
         client.deactivate()
-      } catch {}
+      } catch { }
       stompRef.current = null
       wsActiveRef.current = false
     }
@@ -258,7 +258,7 @@ const TicketQueuePage: React.FC = () => {
       if (proceedingToBookingRef.current || isUnmountedRef.current) return
       try {
         exitMut.mutate({ festivalId: String(fid), reservationDate })
-      } catch {}
+      } catch { }
     }
     window.addEventListener('pagehide', callExit)
     window.addEventListener('beforeunload', callExit)

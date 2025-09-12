@@ -66,7 +66,7 @@ const AddressListPage: React.FC = () => {
               {(data ?? []).map((addr) => (
                 <AddressItem
                   key={addr.id}
-                  id={String(addr.id)}
+                  id={Number(addr.id)}
                   name={addr.name}
                   phone={addr.phone}
                   zipCode={addr.zipCode}
