@@ -83,6 +83,8 @@ const BookingPaymentPage: React.FC = () => {
   const [paymentId, setPaymentId] = useState<string | null>(null)
   const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS)
 
+  const accessToken = useAuthStore.getState().accessToken
+
   // 최초 paymentId 생성 + 세션 저장
   useEffect(() => {
     if (!paymentId) {
@@ -145,7 +147,9 @@ const BookingPaymentPage: React.FC = () => {
       // ✅ 최신 @stomp/stompjs Client 방식 사용
       const client = new Client({
         webSocketFactory: () => new SockJS('http://localhost:10000/ws'), // ✅ 포트 수정
-        connectHeaders: {},
+        connectHeaders: {
+          Authorization: `Bearer ${accessToken}`
+        },
         debug: (str) => {
           console.log('[STOMP Debug]', str)
         },
