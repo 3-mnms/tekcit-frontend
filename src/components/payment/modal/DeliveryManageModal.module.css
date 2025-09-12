@@ -1,6 +1,6 @@
 /* ✅ 카드 리스트 래퍼: 스크롤바 정리 + 위아래 여백 멍 */
 .address-wrapper {
-  max-height: min(56vh, 540px);      /* 높이 제한으로 스크롤 발생 멍 */
+  max-height: min(56vh, 540px); 
   overflow: auto;
   padding-right: 4px;                /* 스크롤바 공간 보정 멍 */
   margin-top: 8px;
