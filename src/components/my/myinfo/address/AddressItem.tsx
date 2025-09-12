@@ -1,13 +1,17 @@
 import React from 'react'
 import styles from './AddressItem.module.css'
+import { FaHome, FaBuilding, FaEdit, FaTrash } from 'react-icons/fa'
 
 interface AddressItemProps {
+  id: number
   name: string
   phone: string
   zipCode: string
   address: string
   isDefault?: boolean
   onClick?: () => void
+  onEdit?: () => void
+  onDelete?: () => void
 }
 
 const AddressItem: React.FC<AddressItemProps> = ({
@@ -17,28 +21,50 @@ const AddressItem: React.FC<AddressItemProps> = ({
   address,
   isDefault = false,
   onClick,
+  onEdit,
+  onDelete,
 }) => {
+  const isHome = name === '집'
+
   return (
-    <div className={styles.item} onClick={onClick}>
-      <div className={styles.content}>
-        {/* 이름 + 배지 (같은 줄) */}
-        <div className={styles.topRow}>
-          <span className={styles.name}>{name}</span>
-          {isDefault && <span className={styles.badge}>기본 배송지</span>}
+    <div className={styles.item} onClick={onClick} role="button">
+      <div className={styles.inner}>
+        <div className={styles.left}>
+          <div className={styles.titleRow}>
+            <span className={styles.iconWrap}>
+              {isHome ? <FaHome /> : <FaBuilding />}
+            </span>
+            <span className={styles.recipient}>{name}</span>
+            {isDefault && <span className={styles.badge}>기본 배송지</span>}
+          </div>
+
+          <div className={styles.info}>
+            <div className={styles.phone}>{phone}</div>
+            <div className={styles.addr}>
+              ({zipCode}) {address}
+            </div>
+          </div>
         </div>
 
-        {/* 전화번호 (아래 줄) */}
-        <div className={styles.phoneRow}>
-          <span className={styles.phone}>{phone}</span>
-        </div>
-
-        {/* 주소 */}
-        <div className={styles.address}>
-          ({zipCode}) {address}
+        <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
+          <button
+            className={`${styles.actionBtn} ${styles.editBtn}`}
+            onClick={onEdit}
+            aria-label="주소 수정"
+            type="button"
+          >
+            <FaEdit />
+          </button>
+          <button
+            className={`${styles.actionBtn} ${styles.deleteBtn}`}
+            onClick={onDelete}
+            aria-label="주소 삭제"
+            type="button"
+          >
+            <FaTrash />
+          </button>
         </div>
       </div>
-
-      <span className={styles.arrow}>›</span>
     </div>
   )
 }

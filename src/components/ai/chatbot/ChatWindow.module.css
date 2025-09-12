@@ -1,8 +1,8 @@
 /* 포털 래퍼: 우하단 고정 */
 .wrap {
   position: fixed;
-  right: 20px;
-  bottom: 96px; /* 플로팅 버튼 위로 살짝 띄움 */
+  right: 30px;
+  bottom: 90px; /* 플로팅 버튼 위로 살짝 띄움 */
   z-index: 10030; /* 페이지 모든 요소 위 */
 }
 
@@ -16,6 +16,7 @@
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.25);
   display: flex;
   flex-direction: column;
+  height: 500px;
 }
 
 /* 헤더 */
@@ -67,6 +68,9 @@
   max-height: 420px;
   overflow: auto;
   background: #f8fafc;
+  flex: 1;
+  overscroll-behavior: contain;    
+  scroll-behavior: smooth; 
 }
 
 /* 푸터 */
@@ -115,6 +119,12 @@
   background: #4D9AFD;
   color: #fff;
   font-weight: 700;
-  cursor: not-allowed; /* 더미라 비활성 */
-  opacity: .6;
+}
+
+.sendBtn:hover {
+  border: none;
+  border-radius: 10px;
+  background: #478ce7;
+  color: #fff;
+  font-weight: 700;
 }

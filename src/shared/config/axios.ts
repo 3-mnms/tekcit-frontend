@@ -13,6 +13,15 @@ export const api = axios.create({
   xsrfHeaderName: 'X-XSRF-TOKEN',
 })
 
+const API_URL2 = getEnv('API_URL', '')
+
+export const api2 = axios.create({
+  baseURL: API_URL2,
+  withCredentials: true,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+})
+
 export const AUTH_TOKEN_EVENT = 'auth:token'
 let ACCESS_TOKEN_MEM: string | null = null
 
