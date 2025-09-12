@@ -258,7 +258,7 @@ const ProductRegisterPage: React.FC = () => {
                             </div>
                             <div className={styles.formItem}>
                                 <div className={styles.formItem}>
-                                    <label>8. 수용인원</label>
+                                    <label className={styles.required}>8. 수용인원</label>
                                     <Input
                                         type="string"
                                         name="availableNOP"

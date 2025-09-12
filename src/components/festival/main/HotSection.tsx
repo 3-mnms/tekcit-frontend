@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 import { Swiper, SwiperSlide } from 'swiper/react'
 import type { Swiper as SwiperType } from 'swiper/types'
-import { Navigation, Keyboard, A11y, EffectCoverflow } from 'swiper/modules'
+import { Navigation, Keyboard, A11y, EffectCoverflow, Autoplay } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/effect-coverflow'
@@ -147,7 +147,7 @@ const HotSection: React.FC = () => {
       ) : hasItems ? (
         <div className={styles.carouselWrap} aria-live="polite">
           <Swiper
-            modules={[Navigation, Keyboard, A11y, EffectCoverflow]}
+            modules={[Navigation, Keyboard, A11y, EffectCoverflow, Autoplay]}
             effect="coverflow"
             grabCursor
             centeredSlides
@@ -169,6 +169,13 @@ const HotSection: React.FC = () => {
               0: { slidesPerView: 3, spaceBetween: 12, centeredSlides: true },
               768: { slidesPerView: 5, spaceBetween: 20, centeredSlides: true },
               1024: { slidesPerView: 5, spaceBetween: 24, centeredSlides: true },
+            }}
+            autoplay={{
+              delay: 2000,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true,
+              waitForTransition: true,
+              stopOnLastSlide: false,
             }}
             onSwiper={(sw) => {
               swiperRef.current = sw

@@ -1,13 +1,11 @@
 import React from 'react';
-import styles from './ChatWindow.module.css';
 
 type ChatMessageProps = {
   role: 'bot' | 'user';
-  name: string;
   text: string;
 };
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ role, name, text }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ role, text }) => {
   const isUser = role === 'user';
   return (
     <div
@@ -31,7 +29,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ role, name, text }) => {
           boxShadow: isUser ? 'none' : '0 2px 6px rgba(15,23,42,.05)',
         }}
       >
-        {!isUser && <div style={{ fontSize: 12, opacity: .7, marginBottom: 4 }}>{name}</div>}
+        {!isUser && <div style={{ fontSize: 12, opacity: .7, marginBottom: 4 }}>Tiki</div>}
         {text}
       </div>
     </div>

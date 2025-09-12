@@ -106,16 +106,17 @@ const Header: React.FC = () => {
       </div>
 
       <div className={styles.right} ref={dropdownRef}>
-        {/* ✅ 공연 추천 버튼 */}
-        <div
-          className={styles.rightButton}
-          onClick={() => (window.location.href = '/nearby')}
-          aria-label="내 주변 공연 추천"
-          title="내 주변 공연 추천"
-        >
-          <i className="fa-solid fa-location-dot" />
-          <span>공연 추천</span>
-        </div>
+        {tokenInfo && !isStaff && (
+          <div
+            className={styles.rightButton}
+            onClick={() => (window.location.href = '/nearby')}
+            aria-label="내 주변 공연 추천"
+            title="내 주변 공연 추천"
+          >
+            <i className="fa-solid fa-location-dot" />
+            <span>공연 추천</span>
+          </div>
+        )}
 
         {isLoading ? (
           <div className={styles.rightButton} aria-hidden="true" />

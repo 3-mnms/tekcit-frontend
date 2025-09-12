@@ -1,30 +1,12 @@
 .emptyCard {
+  border-left: 4px solid #4D9AFD; /* 대표색 */
   border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 16px;
-  background: #fafafa;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  border-radius: 12px;
+  background: #fff;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+  display: grid;
+  gap: 6px;
 }
-.emptyTitle {
-  font-weight: 700;
-  font-size: 16px;
-}
-.emptyDesc {
-  color: #6b7280;
-  font-size: 14px;
-  line-height: 1.4;
-}
-.addInlineBtn {
-  align-self: flex-start;
-  margin-top: 4px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-  background: white;
-  cursor: pointer;
-}
-.addInlineBtn:active {
-  transform: translateY(1px);
-}
+.emptyTitle { font-weight: 800; color: #111827; }
+.emptyDesc  { color: #6b7280; font-size: 0.95rem; }

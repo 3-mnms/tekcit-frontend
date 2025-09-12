@@ -1,71 +1,119 @@
-.form {
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
+.container {
   width: 100%;
+  max-width: 768px;
 }
 
-.addressGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.header {
   margin-bottom: 1rem;
   width: 100%;
 }
 
-.addressRow {
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.card {
+  border-left: 4px solid #4D9AFD;
+  /* 대표색 */
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  padding: 1rem 1.25rem 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+  display: grid;
+  gap: 1rem;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 4px;
+}
+
+.icon {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  color: #4D9AFD;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardTitle {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: -20px;
+}
+
+@media (min-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.block {
+  display: grid;
+  margin-bottom: -20px;
+}
+
+.blockLabel {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.zipRow {
   display: flex;
   gap: 0.5rem;
   align-items: flex-start;
 }
 
-.addressInput {
-  flex: 1;
-  margin-top: -1rem;
-  width: 50%; 
+.zipcode {
+  width: 9rem;
+  margin-bottom: -10px;
 }
 
-.detailInput {
-  margin-top: -1rem; 
+.searchBtn {
+  border: 1px solid #bfdbfe !important;
+  color: #2563eb !important;
+  background: transparent !important;
+  height: 49px;
 }
 
-.searchButtonWrapper {
-  /* padding-top: 1.8rem;  */
+.searchBtn:hover {
+  background: #eff6ff !important;
 }
 
-.searchButton {
-  white-space: nowrap;
-  padding: 0.6rem 1rem;
+.address {
+  margin-bottom: -10px;
+}
+
+.input {
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  height: 49px;
+  border-radius: 8px;
+  padding: 0 2.5rem 0 0.75rem;
+  font-size: 0.95rem;
+  transition: border-color .15s ease, box-shadow .15s ease;
 }
 
 .checkboxLabel {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.95rem;
-  color: #333;
-}
-
-.submitButton {
-  width: 100%;
-  margin-top: 1rem;
-}
-
-.checkboxWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.checkboxLabel {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-  color: #333;
+  color: #374151;
 }
 
 .checkboxLabel input[type="checkbox"] {
@@ -74,9 +122,33 @@
   height: 1rem;
 }
 
-/* .label {
+.actionRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.primaryBtn {
+  background: #4D9AFD !important;
+  color: #fff !important;
+  border: none !important;
   font-weight: 600;
-  font-size: 0.95rem;
-  color: #333;
-  margin-bottom: 0.25rem;
-} */
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+}
+
+.primaryBtn:hover {
+  background: #3b82f6 !important;
+}
+
+.cancelBtn {
+  border: 1px solid #d1d5db !important;
+  color: #4b5563 !important;
+  background: #fff !important;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+}
+
+.cancelBtn:hover {
+  background: #f9fafb !important;
+}

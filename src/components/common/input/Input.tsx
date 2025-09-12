@@ -8,7 +8,7 @@ interface FormInputProps {
   value?: string
   defaultValue?: string
   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
-  label?: string
+  label?: React.ReactNode;  
   options?: string[]
   disabled?: boolean
   className?: string

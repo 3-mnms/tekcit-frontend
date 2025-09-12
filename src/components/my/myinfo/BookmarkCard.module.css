@@ -1,71 +1,101 @@
-:root {
-  --bookmark-card-w: 160px;
-  --title-lines: 3;
-}
-
 .card {
-  position: relative;
-  box-sizing: border-box;
-  width: var(--bookmark-card-w);
-  border: 1px solid #ddd;
-  border-radius: 1rem;
-  padding: 0.75rem;
-  text-align: center;
-  background-color: #f8f8f8;
-}
-
-.heartIcon {
-  position: absolute;
-  top: 6px;
-  right: 8px;
-  background: none;
-  border: none;
-  font-size: 1.1rem;
-  cursor: pointer;
-}
-
-.thumbnail {
-  width: 100%;
-  aspect-ratio: 5 / 7;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-left: 6px solid #4D9AFD;
+  border-radius: 14px;
   overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.thumbnail .img {
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(77, 154, 253, 0.25);
+}
+
+.thumbWrap {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 5 / 7;
+}
+
+.img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  transition: transform 0.3s ease;
 }
 
-.imagePlaceholder {
-  font-size: 2rem;
-  display: grid;
-  place-items: center;
+.card:hover .img {
+  transform: scale(1.05);
+}
+
+.placeholder {
   width: 100%;
   height: 100%;
+  display: grid;
+  place-items: center;
+  background: #f1f5f9;
+  color: #94a3b8;
+  font-size: 2rem;
 }
 
-.performanceName {
-  margin-top: 8px;
-  font-size: 0.95rem;
-  line-height: 1.4;
-
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: var(--title-lines);
-  overflow: hidden;
-
-  max-height: calc(var(--title-lines) * 1.4em);
-
-  word-break: keep-all;
-}
-
-.removeBtn {
-  margin-top: 0.3rem;
-  font-size: 0.75rem;
-  background: none;
+.heartBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #ffffffcc;
   border: none;
-  color: #555;
+  border-radius: 50%;
+  padding: 0.35rem;
   cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.heartBtn:hover {
+  background: #fff;
+}
+
+.heartIcon {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: #94a3b8;
+}
+
+.heartIcon.active {
+  color: #4D9AFD;
+  fill: currentColor;
+}
+
+.info {
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #0f172a;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.metaIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: #4D9AFD;
 }

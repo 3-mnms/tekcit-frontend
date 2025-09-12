@@ -1,68 +1,116 @@
 .item {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #4D9AFD;
+  /* 대표색 */
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+  transition: box-shadow .2s ease, transform .02s ease;
+}
+
+.item:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
+}
+
+.inner {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  align-items: stretch;
-  padding: 1rem;
-  background-color: #fff;
-  border: 1px solid #b4b4b4;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  margin-bottom: 15px;
+  padding: 1rem 1.25rem;
+  gap: 0.75rem;
 }
-.item:last-child { margin-bottom: 0; }
-.item:hover { background-color: #f9fafb; }
 
-.content {
+.left {
   flex: 1;
+  min-width: 0;
+}
+
+.titleRow {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem; /* 살짝 더 촘촘하게 */
-}
-
-/* 이름 + 배지 한 줄 */
-.topRow {
-  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
-.name {
+.iconWrap {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  color: #4D9AFD;
+  /* 대표색 */
+  align-items: center;
+  justify-content: center;
+}
+
+.recipient {
   font-weight: 700;
-  font-size: 1rem;
   color: #111827;
 }
 
-/* 전화번호는 별도 줄 */
-.phoneRow {
-  line-height: 1;
+.badge {
+  margin-left: 4px;
+  background: #dbeafe;
+  /* 연한 블루 */
+  color: #1e40af;
+  /* 진한 블루 */
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.info {
+  display: grid;
+  gap: 3px;
 }
 
 .phone {
-  color: #6b7280;
-  font-weight: 500;
+  color: #111827;
+  font-weight: 600;
 }
 
-.badge {
-  font-size: 0.72rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 9999px;
-  background-color: #dbeafe;
-  color: #2563eb;
-}
-
-.address {
-  font-size: 0.875rem;
-  color: #6b7280;
+.addr {
+  color: #4b5563;
+  font-size: 0.95rem;
   line-height: 1.4;
 }
 
-.arrow {
-  font-size: 1.5rem;
-  color: #cbd5e1;
-  margin-left: 1rem;
-  padding-bottom: 0.25rem;
-  line-height: 1;
-  align-self: center;
-  display: flex;
+.actions {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: 8px;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.actionBtn:active {
+  transform: translateY(1px);
+}
+
+.editBtn {
+  border-color: #bfdbfe;
+  /* 연한 블루 */
+  color: #2563eb;
+  /* 파랑 계열 */
+  background: transparent;
+}
+
+.editBtn:hover {
+  background: #eff6ff;
+}
+
+.deleteBtn {
+  background: transparent;
 }

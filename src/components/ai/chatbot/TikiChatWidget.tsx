@@ -8,17 +8,19 @@ const TikiChatWidget: React.FC = () => {
 
   return (
     <>
-      {/* 플로팅 버튼 */}
       <button
         aria-label="Tiki customer chat"
         className={`${styles.fab} ${open ? styles.fabActive : ''}`}
         onClick={() => setOpen((v) => !v)}
       >
-        <img src={tikiLogo} alt="Tiki" className={styles.logo} />
+        {open ? (
+          <span className={styles.closeIcon}>×</span>
+        ) : (
+          <img src={tikiLogo} alt="Tiki" className={styles.logo} /> 
+        )}
       </button>
 
-      {/* 포털로 띄우는 채팅창 */}
-      <ChatWindow open={open} onClose={() => setOpen(false)} />
+      <ChatWindow open={open} />
     </>
   );
 };
