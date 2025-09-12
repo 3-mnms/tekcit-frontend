@@ -145,7 +145,7 @@ const NearbyShowsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className={styles.content}>
+        <div className={`${styles.content} ${selected ? styles.embedMode : ''}`}>
           {selected ? (
             <NearbySpotEmbed festival={selected} onBack={() => setSelected(null)} />
           ) : (

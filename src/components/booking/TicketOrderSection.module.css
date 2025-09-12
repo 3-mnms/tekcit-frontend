@@ -1,135 +1,318 @@
-.header {
-  /* 필요하면 제목 없애도 됨 */
-  font-size: 20px;
-  font-weight: 700;
-  color: #111827;
-  padding: 12px 16px;
-  border-bottom: 1px solid #eee;
-}
-
+/* ============ 레이아웃 + 카드 톤 ============ */
 .section {
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border: none;
-  border-radius: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, .06);
+  height: 100%;
 }
 
-/* ✅ 내부만 스크롤, 버튼이 가리지 않도록 아래 여백 확보 */
-.content{
+.header {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.content {
   flex: 1;
   overflow: auto;
-  padding: 16px;
-  padding-bottom: 0; 
+  padding: 16px 20px;
+  padding-bottom: 0;
 }
 
-/* 달력(왼쪽) + 시간(오른쪽) */
 .topGrid {
   display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 16px;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
   align-items: start;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.dpCard {
+  border-radius: 16px;
+}
+
+.dpCard :global(.react-datepicker__day:hover) {
+  border-radius: 10px !important;
+}
+
+.dpCard :global(.react-datepicker) {
+  border: none !important;
+  background: transparent !important;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Noto Sans KR", Roboto, sans-serif;
+  color: #0f172a;
+}
+
+.dpCard :global(.react-datepicker__month-container) {
+  background: #fff;
+  border: 1px solid #c0c1c4;
+  border-radius: 16px;
+}
+
+.dpCard :global(.react-datepicker__header) {
+  background: transparent !important;
+  border-bottom: none !important;
+  padding-top: 0 !important;
+}
+
+.dpHeader {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  background: #f8fafc;
+  color: #0f172a;
+  border-radius: 12px;
+  margin: 4px 6px 10px;
+  height: 44px;
+}
+
+.dpMonthTitle {
+  text-align: center;
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+.dpNavBtn {
+  height: 32px;
+  width: 32px;
+  margin: 0 auto;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+}
+
+.dpNavBtn:hover {
+  background: #f1f5f9;
+}
+
+.dpNavBtn:active {
+  transform: scale(.96);
+}
+
+.dpCard :global(.react-datepicker__day-names) {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.dpCard :global(.react-datepicker__day-name) {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #9aa4b2;
+}
+
+.dpCard :global(.react-datepicker__week) {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+:global(.custom-day) {
+  display: flex !important;
+  align-items: center;   
+  justify-content: center;
+  height: 30px;          
+  width: 30px;           
+  line-height: normal;
+  border-radius: 10px;
+  font-size: 13px;
+  user-select: none;
+}
+
+:global(.day-inactive),
+:global(.react-datepicker__day--outside-month) {
+  color: #cbd5e1 !important;
+  opacity: .8;
+}
+
+:global(.day-active) {
+  cursor: pointer;
+  color: #0f172a;
+}
+
+:global(.day-active):hover {
+  background: rgba(77, 154, 253, .10);
+}
+
+:global(.day-weekend.day-active) {
+  color: #334155;
+}
+
+:global(.day-selected),
+:global(.react-datepicker__day--selected) {
+  background: #4d9afd !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(77, 154, 253, .35);
+}
+
+:global(.day-selected:hover) {
+  transform: scale(.98);
+}
+
+.dpCard :global(.react-datepicker__day--disabled) {
+  color: #cbd5e1 !important;
 }
 
 .subTitle {
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 8px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 10px;
 }
 
 .timeList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
 }
 
 .timeBtn {
-  padding: 10px 14px;
-  border: 1px solid #d1d5db;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 14px;
-  text-align: left;
+  font-weight: 700;
+  text-align: center;
+  color: #0f172a;
+  transition: background .15s, border-color .15s, box-shadow .15s;
 }
-.timeBtnActive { border-color:#3b82f6; background:#eff6ff; color:#2563eb; }
 
-/* 매수/가격 */
+.timeBtn:hover {
+  background: #eef6ff;
+  border-color: #3b82f6;
+}
+
+.timeBtnActive {
+  border-color: #3b82f6;
+  background: #eef6ff;
+  color: #1d4ed8;
+}
+
+/* ============ 매수/가격/한줄 정렬 ============ */
 .row {
   display: grid;
-  grid-template-columns: 100px 1fr;
+  grid-template-columns: 110px 1fr;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 14px;
+  margin-bottom: 12px;
 }
-.label { color:#374151; font-weight:600; }
 
+.label {
+  color: #334155;
+  font-weight: 800;
+}
+
+/* 수량 스텝퍼 */
 .qtyBox {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
+  gap: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
   padding: 8px 12px;
-}
-.qtyBtn { width:32px; height:32px; border:1px solid #d1d5db; border-radius:50%; background:#fff; }
-.qtyBtn:disabled { opacity:.4; cursor:not-allowed; }
-.qtyVal { width:28px; text-align:center; }
-
-.limit { margin: 0 0 16px 100px; font-size:12px; color:#6b7280; }
-
-/* ✅ 총 가격: 내용 안에 포함 (스크롤 대상) */
-.totalBar {
-  display:flex; justify-content:space-between; align-items:center;
-  background:#f3f4f6; padding:16px; border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb;
-  font-weight:700; margin-top: 8px;
+  background: #fff;
 }
 
-/* 하단 버튼을 화면에 고정 */
-.footer {
+.qtyBtn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  transition: background .15s, border-color .15s, transform .06s;
+}
+
+.qtyBtn:hover {
+  background: #f8fafc;
+}
+
+.qtyBtn:active {
+  transform: scale(.96);
+}
+
+.qtyBtn:disabled {
+  opacity: .4;
+}
+
+.qtyVal {
+  width: 28px;
+  text-align: center;
+  font-weight: 800;
+}
+
+/* 제한 문구 */
+.limit {
+  margin: 2px 0 18px 110px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ============ 하단 도크 ============ */
+.bottomDock {
   position: sticky;
   bottom: 0;
   left: 0;
   right: 0;
   background: #fff;
-  box-shadow: 0 -1px 6px rgba(0,0,0,.06);
-}
-/* ✅ 하단 도크: 총 가격 + 다음 버튼을 한 덩어리로 고정 */
-.bottomDock{
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #fff;
-  box-shadow: 0 -1px 6px rgba(0,0,0,.06);
-  border-top: none; 
+  box-shadow: 0 -8px 24px rgba(2, 6, 23, .06);
   display: flex;
   flex-direction: column;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
 }
 
-/* 총 가격 바는 도크의 맨 위에 붙음 */
-.totalBar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:16px;
-  border-top:1px solid #e5e7eb; /* 위쪽 경계만 */
-  font-weight:700;
-  margin: 0;                  /* ✅ 마진 제거 */
+.totalBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-top: 1px solid #eef2f7;
+  font-weight: 800;
+  color: #0f172a;
 }
 
-/* 다음 버튼: 도크의 맨 아래 */
-.nextButton{
-  width:100%;
-  height:80px;
-  font-size:20px;
-  font-weight:800;
-  border:none;
-  border-radius:0 !important;
-  background:#4d9afd;
-  color:#fff;
+.totalBar strong {
+  font-size: 18px;
 }
-.nextButton:disabled{ opacity:.5; cursor:not-allowed; }
-.nextButton:not(:disabled):hover{ background:#3585ea; }
+
+.nextButton {
+  width: 100%;
+  height: 80px;
+  font-size: 20px;
+  font-weight: 800;
+  border: none;
+  border-radius: 0 !important;
+  background: #4d9afd;
+  color: #fff;
+}
+
+.nextButton:disabled {
+  opacity: .5;
+}
+
+.nextButton:not(:disabled):hover {
+  background: #3585ea;
+}
+
+.nextButton:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+/* ============ 반응형 ============ */
+@media (max-width: 640px) {
+  .topGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .dpCard {
+    margin-bottom: 8px;
+  }
+}
