@@ -1,6 +1,5 @@
 // src/components/my/sidebar/Sidebar.tsx
 import React from 'react'
-// import styles from './Sidebar.module.css';
 import SidebarElement from './element/SidebarElement'
 import type { TabKey } from '@/pages/my/MyPage'
 
@@ -16,14 +15,13 @@ const sidebarItems = {
 
 type Props = {
   activeTab: TabKey
-  setActiveTab: (k: TabKey) => void
+  setActiveTab: (k: TabKey) => void // 실제로는 navigate 하게 됨
 }
 
 const Sidebar: React.FC<Props> = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="min-h-screen  fixed border-red-100 ">
+    <div className="min-h-screen fixed border-red-100">
       <div className="flex">
-        {/* Sidebar */}
         <div className="w-80 bg-white shadow-sm border-r border-gray-200 min-h-screen">
           <div className="p-6">
             <div className="space-y-6">
@@ -38,7 +36,6 @@ const Sidebar: React.FC<Props> = ({ activeTab, setActiveTab }) => {
                     activeTab={activeTab}
                     onClick={() => setActiveTab(sidebarItems.profileInfo.key)}
                   />
-
                   <SidebarElement
                     title={sidebarItems.passwordChange.title}
                     tabKey={sidebarItems.passwordChange.key}
@@ -83,7 +80,7 @@ const Sidebar: React.FC<Props> = ({ activeTab, setActiveTab }) => {
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                   북마크
-                </h2>{' '}
+                </h2>
                 <div className="space-y-3">
                   <SidebarElement
                     title={sidebarItems.bookmark.title}
@@ -97,8 +94,6 @@ const Sidebar: React.FC<Props> = ({ activeTab, setActiveTab }) => {
           </div>
         </div>
 
-        {/* Main Content */}
-        {/* <div className="flex-1 p-8">{renderContent()}</div> */}
       </div>
     </div>
   )

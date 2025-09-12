@@ -1,4 +1,6 @@
+// src/components/my/sidebar/element/SidebarElement.tsx
 import React from 'react'
+import type { TabKey } from '@/pages/my/MyPage'
 
 const SidebarElement = ({
   activeTab,
@@ -6,14 +8,11 @@ const SidebarElement = ({
   title,
   onClick,
 }: {
-  activeTab: string
-  tabKey: string
+  activeTab: TabKey
+  tabKey: TabKey
   title: string
   onClick: () => void
 }) => {
-  console.log(tabKey)
-  console.log(activeTab)
-
   return (
     <div
       className={`cursor-pointer transition-colors px-3 py-2 rounded-lg ${
