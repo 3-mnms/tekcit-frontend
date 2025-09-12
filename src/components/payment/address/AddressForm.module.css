@@ -227,9 +227,7 @@ select:focus {
 /* 주소 input은 가능한 한 넓게 */
 .address-row input {
   flex: 1;
-  /* 남는 공간 모두 차지 */
-  min-width: 300px;
-  /* 최소 너비 보장 (필요 시 조정) */
+  width: 100%;
 }
 
 /* 버튼은 크기 고정 */
