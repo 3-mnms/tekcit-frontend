@@ -1,35 +1,24 @@
 /* ✅ 카드 전체: 여백·그림자·라운드, 가독성 향상 */
 .addressItem {
   inline-size: 100%;
-  /* 주석: 가로 100% (논리 프로퍼티) */
   text-align: start;
-  /* 주석: 좌측 정렬 */
   padding: 14px 16px;
-  /* 주석: 내부 여백 */
   border-radius: 12px;
-  /* 주석: 둥근 모서리 */
   background: #fff;
-  /* 주석: 흰 배경 */
   border: 1px solid #e5e7eb;
-  /* 주석: 기본 테두리(연한 회색) */
   box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
-  /* 주석: 아주 얕은 그림자 */
   transition:
     box-shadow .18s ease,
     border-color .18s ease,
     background-color .18s ease,
     transform .05s ease;
-  /* 주석: 인터랙션 부드럽게 */
   cursor: pointer;
-  /* 주석: 버튼 느낌 강화 */
   user-select: none;
-  /* 주석: 실수 드래그 방지 */
 }
 
 /* ✅ 호버: 테두리/그림자만 살짝 강조(눈에 띄지만 과하지 않게) */
 .addressItem:hover {
   border-color: #cbd5e1;
-  /* 주석: 1단계 진한 회색 */
   box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
 }
 
@@ -40,25 +29,13 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, .07);
 }
 
-/* ✅ 키보드 포커스: 명확한 포커스 링 */
-.addressItem:focus-visible {
-  outline: 3px solid #94c6ff;
-  /* 주석: 대표색 계열 포커스 링 */
-  outline-offset: 2px;
-}
-
 /* ✅ 선택됨: 대표색 하이라이트 + 은은한 배경 */
 .selected {
   border-color: #4D9AFD;
   /* 주석: 대표색 테두리 */
-  box-shadow: 0 8px 24px rgba(77, 154, 253, .18);
   background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
   /* 주석: 하이라이트 배경 */
 }
-
-/* ===============================
-   내부 레이아웃
-   =============================== */
 
 /* ✅ 정보 컨테이너: 세로 스택(충돌 적고 안전) */
 .addressInfo {
@@ -74,7 +51,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  /* 주석: 항목 간 간격 */
 }
 
 /* ✅ 오른쪽으로 배지 밀어내기용 유틸 (필요한 줄에만 추가) */
@@ -82,10 +58,6 @@
   margin-inline-start: auto;
   /* 주석: 우측 끝으로 밀기 */
 }
-
-/* ===============================
-   타이포그래피
-   =============================== */
 
 /* ✅ 이름: 가장 눈에 띄게(너무 굵지 않게) */
 .nameText {

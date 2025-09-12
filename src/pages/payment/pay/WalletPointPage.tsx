@@ -1,5 +1,4 @@
 // WalletPointPage.tsx
-// 주석: 월 드롭다운을 커스텀 컴포넌트(MonthDropdown)로 교체한 버전 멍
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
@@ -10,7 +9,8 @@ import { useWalletBalance, useWalletHistory } from '@/shared/api/payment/tekcitH
 import Header from '@/components/common/header/Header'
 import { confirmPointCharge } from '@/shared/api/payment/pointToss'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
-import MonthDropdown from '@/components/payment/dropdown/MonthDropdown' // 주석: 커스텀 드롭다운 임포트 유지 멍
+import MonthDropdown from '@/components/payment/dropdown/MonthDropdown'
+import { FaRegCreditCard } from 'react-icons/fa'
 import styles from './WalletPointPage.module.css'
 
 const PAGE_SIZE = 10
@@ -147,7 +147,7 @@ export default function WalletPointPage() {
         <section className={styles.summaryCard}>
           <div className={styles.summaryLeft}>
             <div className={styles.summaryLabelRow}>
-              <span className={styles.labelIcon} aria-hidden>▭</span> {/* 주석: 카드 아이콘 대체(이미지 없이) 멍 */}
+              <FaRegCreditCard className={styles.labelIcon} aria-hidden />
               <span className={styles.summaryLabel}>현재 잔액</span>
             </div>
             <div className={styles.summaryValue}>
