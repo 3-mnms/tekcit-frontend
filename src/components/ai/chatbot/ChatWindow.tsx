@@ -16,6 +16,7 @@ const seed: Msg[] = [
 ]
 
 const BOTTOM_TOLERANCE = 48
+const ANIM_MS = 220
 
 const ChatWindow: React.FC<Props> = ({ open }) => {
   const [container] = useState(() => document.createElement('div'))
@@ -24,10 +25,13 @@ const ChatWindow: React.FC<Props> = ({ open }) => {
 
   const bodyRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const [isAtBottom, setIsAtBottom] = useState(true)
   const { mutateAsync, isPending } = useChatbot()
+
+  const [visible, setVisible] = useState(open)
+  const [phase, setPhase] = useState<'open' | 'close' | 'idle'>('idle')
 
   useEffect(() => {
     container.setAttribute('data-tiki-portal', 'true')
@@ -36,6 +40,17 @@ const ChatWindow: React.FC<Props> = ({ open }) => {
       document.body.removeChild(container)
     }
   }, [container])
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true)
+      requestAnimationFrame(() => setPhase('open'))
+    } else {
+      setPhase('close')
+      const t = setTimeout(() => setVisible(false), ANIM_MS)
+      return () => clearTimeout(t)
+    }
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -65,17 +80,32 @@ const ChatWindow: React.FC<Props> = ({ open }) => {
     }
   }, [msgs, isAtBottom, open])
 
+  const autoSize = () => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px` // 최대 160px까지만 키우기
+  }
+
+  useEffect(() => {
+    autoSize()
+  }, [input])
+
   const send = async () => {
     const q = input.trim()
     if (!q || isPending) return
 
     setMsgs((m) => [...m, { id: crypto.randomUUID(), role: 'user', text: q }])
     setInput('')
-
-    requestAnimationFrame(() => inputRef.current?.focus())
+    requestAnimationFrame(() => {
+      if (inputRef.current) {
+        inputRef.current.style.height = 'auto' // 초기화
+        inputRef.current.focus()
+      }
+    })
 
     try {
-      const answer = await mutateAsync(q) // ← string 보장
+      const answer = await mutateAsync(q)
       setMsgs((m) => [...m, { id: crypto.randomUUID(), role: 'bot', text: answer }])
     } catch (e: any) {
       const msg = e?.response?.data?.detail || e?.message || '챗봇 호출 중 오류가 발생했어요.'
@@ -85,8 +115,15 @@ const ChatWindow: React.FC<Props> = ({ open }) => {
     }
   }
 
-  const content = open ? (
-    <div className={styles.wrap} role="dialog" aria-label="Tiki chat window">
+  const content = visible ? (
+    <div
+      className={`${styles.wrap} ${
+        phase === 'open' ? styles.enter : phase === 'close' ? styles.exit : ''
+      }`}
+      role="dialog"
+      aria-label="Tiki chat window"
+      aria-hidden={!open}
+    >
       <div className={styles.card}>
         <header className={styles.header}>
           <div className={styles.title}>
@@ -115,20 +152,22 @@ const ChatWindow: React.FC<Props> = ({ open }) => {
 
         <footer className={styles.footer}>
           <div className={styles.inputBar}>
-            <input
+            <textarea
               ref={inputRef}
-              className={styles.input}
+              className={styles.textarea} // ⬅️ 클래스명 변경
               placeholder="메시지를 입력하세요."
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onInput={autoSize}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  // ← IME 중복 방지
+                // Shift+Enter = 줄바꿈, Enter 단독 = 전송
+                if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
                   send()
                 }
               }}
               disabled={isPending}
+              rows={1}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"

@@ -8,7 +8,6 @@ const TikiChatWidget: React.FC = () => {
 
   return (
     <>
-      {/* 플로팅 버튼 */}
       <button
         aria-label="Tiki customer chat"
         className={`${styles.fab} ${open ? styles.fabActive : ''}`}
@@ -21,7 +20,6 @@ const TikiChatWidget: React.FC = () => {
         )}
       </button>
 
-      {/* 포털로 띄우는 채팅창 (닫기 버튼은 제거) */}
       <ChatWindow open={open} />
     </>
   );
