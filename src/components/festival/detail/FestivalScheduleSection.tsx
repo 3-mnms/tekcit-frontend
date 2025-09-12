@@ -37,10 +37,10 @@ const parseYMD = (s?: string): Date | undefined => {
 /** 요일 숫자→문자 (Sun=0) */
 const DOW_KEYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as const
 
-const WAIT_W = 480
-const WAIT_H = 720
+const WAIT_W = 1000
+const WAIT_H = 700
 const BOOK_W = 1000
-const BOOK_H = 600
+const BOOK_H = 700
 
 /** HH:mm → Date에 시분 합치기 */
 const __fs_combineDateTime = (day: Date, hhmm?: string | null): Date => {
@@ -407,7 +407,7 @@ const FestivalScheduleSection: React.FC = () => {
                 }
 
                 // 가상 대기열 추가 테스트 끝나면 삭제
-                const FORCE_WAIT = false // 테스트 끝나면 false
+                const FORCE_WAIT = true // 테스트 끝나면 false
                 if (FORCE_WAIT && selectedDate && fid) {
                   const fdfrom = startDate ? ymd(startDate) : null
                   const fdto = endDate ? ymd(endDate) : null

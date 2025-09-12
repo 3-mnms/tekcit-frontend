@@ -33,10 +33,10 @@ const USER_QUEUE_TOPIC = '/user/queue/waiting';
 /* =========================
    유틸
    ========================= */
-const SMALL_W = 480;
-const SMALL_H = 720;
+const SMALL_W = 1000;
+const SMALL_H = 700;
 const BOOKING_INNER_W = 1000;
-const BOOKING_INNER_H = 600;
+const BOOKING_INNER_H = 700;
 
 const parseYMD = (s?: string) => {
   if (!s) return undefined;

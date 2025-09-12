@@ -1,8 +1,8 @@
 // src/components/my/sidebar/Sidebar.tsx
-import React from 'react';
+import React from 'react'
 // import styles from './Sidebar.module.css';
-import SidebarElement from './element/SidebarElement';
-import type { TabKey } from '@/pages/my/MyPage';
+import SidebarElement from './element/SidebarElement'
+import type { TabKey } from '@/pages/my/MyPage'
 
 const sidebarItems = {
   profileInfo: { title: '기본정보', key: 'profileInfo' as TabKey },
@@ -11,13 +11,13 @@ const sidebarItems = {
   accountWithdrawal: { title: '회원 탈퇴', key: 'accountWithdrawal' as TabKey },
   bookingHistory: { title: '예매 / 취소 내역', key: 'bookingHistory' as TabKey },
   ticketTransfer: { title: '티켓 양도', key: 'ticketTransfer' as TabKey },
-  bookmark: { title: '북마크', key: 'bookmark' as TabKey },
-};
+  bookmark: { title: '관심목록', key: 'bookmark' as TabKey },
+}
 
 type Props = {
-  activeTab: TabKey;
-  setActiveTab: (k: TabKey) => void;
-};
+  activeTab: TabKey
+  setActiveTab: (k: TabKey) => void
+}
 
 const Sidebar: React.FC<Props> = ({ activeTab, setActiveTab }) => {
   return (
@@ -82,13 +82,16 @@ const Sidebar: React.FC<Props> = ({ activeTab, setActiveTab }) => {
 
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                  북마크
+                </h2>{' '}
+                <div className="space-y-3">
                   <SidebarElement
                     title={sidebarItems.bookmark.title}
                     tabKey={sidebarItems.bookmark.key}
                     activeTab={activeTab}
                     onClick={() => setActiveTab(sidebarItems.bookmark.key)}
                   />
-                </h2>
+                </div>
               </div>
             </div>
           </div>
@@ -101,4 +104,4 @@ const Sidebar: React.FC<Props> = ({ activeTab, setActiveTab }) => {
   )
 }
 
-export default Sidebar;
+export default Sidebar
