@@ -8,11 +8,11 @@ import AddressForm from '@/components/payment/address/AddressForm';
 import TicketBookerInfoSection from '@/components/booking/TicketBookerInfoSection';
 import OrderConfirmSection from '@/components/booking/OrderConfirmSection';
 
-import { usePhase2Detail, useSelectDelivery } from '@/models/booking/tanstack-query/useBookingDetail'; // ✅ 추가
+import { usePhase2Detail, useSelectDelivery } from '@/models/booking/tanstack-query/useBookingDetail';
 import { usePreReservation } from '@/models/booking/tanstack-query/useUser';
 import { useAuthStore } from '@/shared/storage/useAuthStore';
 
-// ✅ UI → BE 매핑 (API는 그대로!)
+// UI → BE 매핑 (API는 그대로!)
 import { mapUiToBeDelivery } from '@/models/booking/bookingTypes';
 
 type NavState = {
@@ -37,8 +37,8 @@ const TicketOrderInfoPage: React.FC = () => {
   const [address, setAddress] = useState<string>(''); // PAPER 저장용
   const isPaper = method === 'PAPER';
 
-  const STORE_KEY=import.meta.env.VITE_PORTONE_STORE_KEY
-  const CHANNEL_KEY=import.meta.env.VITE_PORTONE_CHANNEL_KEY
+  const STORE_KEY = import.meta.env.VITE_PORTONE_STORE_KEY;
+  const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY;
 
   const fid = state?.fid || fidFromPath || '';
 
@@ -46,7 +46,8 @@ const TicketOrderInfoPage: React.FC = () => {
   const reservationNumber = useMemo(() => {
     const fromState = state?.reservationNumber;
     const fromQuery = sp.get('resNo') || undefined;
-    const fromStorage = typeof window !== 'undefined' ? sessionStorage.getItem(RESNO_KEY) || undefined : undefined;
+    const fromStorage =
+      typeof window !== 'undefined' ? sessionStorage.getItem(RESNO_KEY) || undefined : undefined;
 
     const v = fromState || fromQuery || fromStorage;
     if (v && typeof window !== 'undefined') {
@@ -62,12 +63,7 @@ const TicketOrderInfoPage: React.FC = () => {
   });
 
   useEffect(() => {
-    if (isError) console.warn('[phase2] error ←', error);
-  }, [detail, isError, error]);
-
-  useEffect(() => {
     if (!fid || !reservationNumber) {
-      console.warn('[order-info] missing fid or reservationNumber → back');
       navigate(-1);
     }
   }, [fid, reservationNumber, navigate]);
@@ -100,6 +96,20 @@ const TicketOrderInfoPage: React.FC = () => {
   // PAPER일 때만 로딩/에러 표시
   const showDetailLoading = isPaper && isLoading;
   const showDetailError = isPaper && isError;
+
+  // ✅ 서버에서 온 ticketPick(1=둘 다, 2=QR만) → availabilityCode로 사용
+  type DeliveryAvailabilityCode = 1 | 2;
+  const availabilityCode: DeliveryAvailabilityCode | null = useMemo(() => {
+    const code = detail?.ticketPick;
+    return code === 1 || code === 2 ? code : null; // null이면 둘 다 허용 취급
+  }, [detail?.ticketPick]);
+
+  // ✅ 선택가능 옵션이 달라졌을 때 현재 method 보정 (QR만 가능한데 PAPER면 QR로)
+  useEffect(() => {
+    if (availabilityCode === 2 && method === 'PAPER') {
+      setMethod('QR');
+    }
+  }, [availabilityCode, method]);
 
   // ✅ 수령방법 저장 훅 (API는 그대로)
   const { mutate: saveDelivery, isPending: isSaving } = useSelectDelivery();
@@ -136,6 +146,12 @@ const TicketOrderInfoPage: React.FC = () => {
 
   // 결제 이동
   const handlePay = () => {
+    // 안전장치: QR만 가능한데 PAPER 선택되면 차단
+    if (availabilityCode === 2 && method === 'PAPER') {
+      alert('이 공연은 QR 수령만 가능합니다.');
+      return;
+    }
+
     const bookingId = reservationNumber;
 
     const payload = {
@@ -147,7 +163,7 @@ const TicketOrderInfoPage: React.FC = () => {
       unitPrice: display.unitPrice,
       quantity: display.quantity,
       bookerName: user?.name ?? '',
-      deliveryMethod: method,                       // 'QR' | 'PAPER' (API 유지)
+      deliveryMethod: method, // 'QR' | 'PAPER' (API 유지)
       address: method === 'PAPER' ? address : undefined,
       STORE_KEY,
       CHANNEL_KEY,
@@ -186,6 +202,8 @@ const TicketOrderInfoPage: React.FC = () => {
             value={method}
             onChange={handleMethodChange}   // ✅ API 트리거
             loading={isSaving}              // ✅ 저장 중 비활성
+            availabilityCode={availabilityCode} // ✅ ticketPick 반영 (1=둘 다, 2=QR만)
+            // hideUnavailable // ← 필요 시 주석 해제: 미지원 옵션 자체를 숨김
           />
         </div>
 
