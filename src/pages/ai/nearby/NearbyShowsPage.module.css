@@ -49,6 +49,9 @@
   gap: 18px;
 }
 
+.embedMode {
+  display: block;  
+}
 /* 리스트 */
 .list {
   display: flex;
