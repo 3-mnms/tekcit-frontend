@@ -97,7 +97,7 @@ const __fs_openBookingPopup = (
   if (fdfrom) params.set('fdfrom', fdfrom)
   if (fdto) params.set('fdto', fdto)
   params.set('nochat', '1')
-  __fs_openCenteredPopup(`/booking/${fid}?${params.toString()}`, BOOK_W, BOOK_H)
+  __fs_openCenteredPopup(`/booking/${fid}?${params.toString()}`, BOOK_W, BOOK_H) 
 }
 
 /** 대기열 팝업 */
@@ -411,7 +411,7 @@ const FestivalScheduleSection: React.FC = () => {
                 if (FORCE_WAIT && selectedDate && fid) {
                   const fdfrom = startDate ? ymd(startDate) : null
                   const fdto = endDate ? ymd(endDate) : null
-                  __fs_openWaitingPopup(fid, selectedDate, selectedTime, 1, fdfrom, fdto)
+                  __fs_openWaitingPopup(fid, selectedDate, selectedTime, 10000, fdfrom, fdto)
                   return
                 }
 

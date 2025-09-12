@@ -191,7 +191,7 @@ const CaptchaOverlay: React.FC<Props> = ({
                             />
 
                             <button type="button" className={styles.textBtn} onClick={onRefresh}>
-                                이미지가 잘 안 보이나요? 새로 고침
+                                보안문자 새로고침
                             </button>
                         </div>
                     </form>

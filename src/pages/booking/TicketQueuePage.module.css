@@ -1,6 +1,6 @@
 .page {
   width: 100%;
-  height: 100vh;         /* 뷰포트 꽉 채우기 */
+  height: 100%;         /* 뷰포트 꽉 채우기 */
   background: #f3f4f6;
   display: grid;
   grid-template-rows: 1fr; /* 헤더 제거 → 한 행 */
@@ -15,4 +15,9 @@
   /* ✅ 여기서 한 번만 값 바꾸면 됨 */
   --poster-max-w: 420px; /* 가로 최대 */
   --poster-max-h: 700px; /* 세로 최대 (예: 3:4이면 420x560) */
+  
+  /* background-color: red; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

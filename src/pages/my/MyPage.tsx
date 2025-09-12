@@ -3,6 +3,8 @@ import React from 'react'
 import Sidebar from '@/components/my/sidebar/Sidebar'
 import Header from '@/components/common/header/Header'
 import styles from './MyPage.module.css'
+import { Outlet } from 'react-router-dom'
+import { useOutlet, useNavigate, useLocation } from 'react-router-dom'
 
 // 실제 페이지 컴포넌트들 import
 import ProfileInfoPage from '@/pages/my/myInfo/basicinfo/DetailPage'
@@ -36,14 +38,28 @@ const MyPage: React.FC = () => {
   // 기본 탭은 예매/취소 내역
   const [activeTab, setActiveTab] = React.useState<TabKey>('bookingHistory')
 
+  const outletEl = useOutlet()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const handleTabChange = React.useCallback(
+    (k: TabKey) => {
+      setActiveTab(k)
+      if (location.pathname !== '/mypage') {
+        navigate('/mypage') // Outlet 비우고 탭 콘텐츠 노출
+      }
+    },
+    [location.pathname, navigate],
+  )
+
   return (
     <div className={styles.pageWrapper}>
       <Header />
       <div className={styles.wrapper}>
         <aside className={styles.sidebarSlot}>
-          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+          <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
         </aside>
-        <main className={styles.content}>{contentMap[activeTab]}</main>
+        <main className={styles.content}>{outletEl ?? contentMap[activeTab]}</main>
       </div>
     </div>
   )
