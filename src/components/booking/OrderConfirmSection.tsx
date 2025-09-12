@@ -92,7 +92,6 @@ const OrderConfirmSection: React.FC<Props> = ({
     };
 
     // ✅ navigate 전에 반드시 보이는 로그 + 세션 백업
-    console.log('[결제하기 payload → /payment][PRE-SEND]', payload);
     try {
       sessionStorage.setItem(`payment:${finalBookingId}`, JSON.stringify(payload));
       sessionStorage.setItem(RESNO_KEY, finalBookingId);
@@ -112,7 +111,6 @@ const OrderConfirmSection: React.FC<Props> = ({
         deliveryMethod: delivery,   // 'MOBILE' | 'PAPER'
       });
       console.timeEnd('[selectDelivery]');
-      console.log('[selectDelivery] OK');
 
       // 2) 그 다음 QR 발권 (/booking/qr : 3필드만)
       const req: IssueQrRequest = {
@@ -120,14 +118,10 @@ const OrderConfirmSection: React.FC<Props> = ({
         reservationNumber: String(finalBookingId),
         performanceDate: performanceDateTime, // ex) "2025-09-23T17:00:00"
       };
-      console.log('[apiReserveTicket req]', req);
       console.time('[reserveTicket]');
       await apiReserveTicket(req);
       console.timeEnd('[reserveTicket]');
-      console.log('[reserveTicket] OK');
 
-      // ✅ 페이지 이동 직전에도 한 번 더 찍기
-      console.log('[navigate → /payment][STATE]', payload);
       navigate('/payment', { state: payload });
     } catch (e: any) {
       console.error('[발권 실패] /booking/selectDeliveryMethod 또는 /booking/qr', e?.response?.data || e);

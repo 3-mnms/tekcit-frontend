@@ -9,11 +9,8 @@ export default function ResultLayout({
   title: string
   message: string
   primary: { label: string; to: string }
-  secondary?: { label: string; to: string }
 }) {
   const nav = useNavigate()
-
-
 
   // 주석: to가 'http'로 시작하면 외부 이동, 아니면 내부 라우팅 멍
   const go = (to: string) => {
@@ -41,11 +38,6 @@ export default function ResultLayout({
           <button className="px-5 py-3 rounded-xl border" onClick={() => self.close()}>
             확인
           </button>
-          {/* {secondary && (
-          <button className="px-5 py-3 rounded-xl border" onClick={() => go(secondary.to)}>
-            {secondary.label}
-          </button>
-        )} */}
         </div>
     </div>
   )

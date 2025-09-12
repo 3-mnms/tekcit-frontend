@@ -142,9 +142,6 @@ const WalletChargePage: React.FC = () => {
             onChange={handleInputChange}
             aria-label="충전 금액"
           />
-          <div className={styles.helperRow}>
-            <span>인식된 금액: <strong>{amountNumber.toLocaleString('ko-KR')}원</strong></span>
-          </div>
           <div className={styles.presetGroup}>
             {AMOUNT_PRESETS.map((preset) => (
               <button

@@ -1,0 +1,80 @@
+/* 주석: 셀렉트 컨테이너 멍 */
+.select {
+    position: relative;
+    width: 100%;
+    /* ✅ 240px → 100% 멍 */
+    height: 100%;
+    /* ✅ 부모 높이에 맞춤 멍 */
+}
+
+/* 주석: 트리거 버튼(닫힌 상태) 멍 */
+.trigger {
+    width: 100%;
+    /* ✅ 100% 유지 멍 */
+    height: 100%;
+    /* ✅ 42px → 100% 멍 (부모 높이 필요) */
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px 0 14px;
+    gap: 8px;
+    background: #fff;
+    border: 1.5px solid #dbe4f1;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(2, 6, 23, .06);
+    color: #0f172a;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .02s ease;
+}
+
+.trigger:hover {
+    border-color: #cdd9ea;
+}
+
+.trigger:focus {
+    outline: none;
+    border-color: #4D9AFD;
+    box-shadow: 0 0 0 3px rgba(77, 154, 253, .18), 0 6px 18px rgba(2, 6, 23, .06);
+}
+
+.caret {
+    color: #4D9AFD;
+}
+
+/* 주석: 펼쳐진 목록 멍 */
+.menu {
+    position: absolute;
+    left: 0;
+    right: auto;
+    top: calc(100% + 6px);
+    width: 100%;
+    /* ✅ 좌우를 width로 고정 멍 */
+    max-height: 60%;
+    /* ✅ 260px → 60% 멍 (상위 높이 기준) */
+    overflow: auto;
+    z-index: 20;
+    background: #fff;
+    border: 1px solid #dbe4f1;
+    border-radius: 12px;
+    box-shadow: 0 18px 36px rgba(2, 6, 23, .14);
+}
+
+/* 주석: 항목 멍 (width/height 지정 없음) */
+.item {
+    padding: 10px 14px;
+    font-weight: 700;
+    color: #0f172a;
+    cursor: pointer;
+}
+
+.item:hover,
+.focused {
+    background: #f6f9ff;
+}
+
+.selected {
+    color: #4D9AFD;
+    background: #f1f6ff;
+}
