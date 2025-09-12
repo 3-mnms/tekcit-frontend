@@ -6,8 +6,8 @@
 
 .address-container input,
 .address-container select {
-  height: auto;     
-  padding: 0 3%;    
+  /* height: auto;      */
+  /* padding: 0 3%;     */
   box-sizing: border-box;
   border-radius: 3%; 
   font-size: 90%;    
@@ -27,7 +27,7 @@
 }
 
 .address-header {
-  display: flex;            /* 멍 */
+  display: flex;           
   align-items: center;      /* 멍 */
   justify-content: space-between; /* 멍 */
   margin-bottom: 2%;        /* 멍 */

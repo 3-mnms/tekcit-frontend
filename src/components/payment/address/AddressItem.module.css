@@ -1,149 +1,111 @@
-/* ✅ 카드 전체: 여백·그림자·라운드, 가독성 향상 */
+/* 카드 버튼 자체: 가로 100%, 넉넉한 터치 영역, 오버플로우 방지 */
+button.addressItem,
 .addressItem {
-  inline-size: 100%;
+  display: flex;                 /* 수직 스택 컨테이너 */
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+
+  inline-size: 100%;             /* 가로 꽉 채움 */
+  min-height: 88px;              /* 터치 영역 확보 (원하면 72~96px로 조절) */
+  padding: 14px 16px;            /* 내부 여백 ↑ */
+  box-sizing: border-box;
+
   text-align: start;
-  padding: 14px 16px;
-  border-radius: 12px;
   background: #fff;
   border: 1px solid #e5e7eb;
+  border-radius: 12px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
-  transition:
-    box-shadow .18s ease,
-    border-color .18s ease,
-    background-color .18s ease,
-    transform .05s ease;
   cursor: pointer;
   user-select: none;
+  overflow: hidden;              /* 긴 텍스트가 밖으로 삐져나오는 것 방지 */
+
+  transition:
+    border-color .16s ease,
+    box-shadow .16s ease,
+    transform .04s ease,
+    background-color .16s ease;
 }
 
-/* ✅ 호버: 테두리/그림자만 살짝 강조(눈에 띄지만 과하지 않게) */
+/* 버튼 hover/active/selected 상태 */
 .addressItem:hover {
   border-color: #cbd5e1;
   box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
 }
 
-/* ✅ 활성(마우스 다운): 살짝 눌림 효과 */
 .addressItem:active {
   transform: translateY(1px);
-  /* 주석: 1px 아래로 */
   box-shadow: 0 4px 14px rgba(0, 0, 0, .07);
 }
 
-/* ✅ 선택됨: 대표색 하이라이트 + 은은한 배경 */
 .selected {
-  border-color: #4D9AFD;
-  /* 주석: 대표색 테두리 */
-  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
-  /* 주석: 하이라이트 배경 */
+  border-color: #4D9AFD;                           /* 대표색 */
+  background: linear-gradient(180deg,#ffffff 0%,#f7fbff 100%);
 }
 
-/* ✅ 정보 컨테이너: 세로 스택(충돌 적고 안전) */
+/* 포커스 접근성 */
+.addressItem:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(77,154,253, .25);
+  border-color: #4D9AFD;
+}
+
+/* 내부 정보 컨테이너 */
 .addressInfo {
   display: flex;
-  /* 주석: 세로 스택 */
   flex-direction: column;
   gap: 8px;
-  /* 주석: 줄 간격 */
 }
 
-/* ✅ 한 줄 레이아웃: 좌(텍스트) ↔ 우(배지) */
+/* 한 줄 레이아웃: 좌(텍스트) ↔ 우(배지) */
 .addressRow {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-/* ✅ 오른쪽으로 배지 밀어내기용 유틸 (필요한 줄에만 추가) */
-.pushEnd {
-  margin-inline-start: auto;
-  /* 주석: 우측 끝으로 밀기 */
-}
-
-/* ✅ 이름: 가장 눈에 띄게(너무 굵지 않게) */
+/* 이름/전화 텍스트 */
 .nameText {
   font-weight: 700;
-  /* 주석: 약간 더 굵게 */
   font-size: 14px;
-  /* 주석: 적당한 크기 */
-  line-height: 1.2;
-  /* 주석: 조밀하게 */
   color: #111827;
-  /* 주석: 거의 검정 */
   white-space: nowrap;
-  /* 주석: 한 줄 유지 */
   overflow: hidden;
-  /* 주석: 넘치면 … 처리 */
   text-overflow: ellipsis;
   max-inline-size: 40%;
-  /* 주석: 너무 길면 옆 요소 침식 방지 */
 }
 
-/* ✅ 전화번호: 보조 정보 톤다운 */
 .phoneText {
   font-size: 14px;
-  line-height: 1.2;
   color: #6b7280;
-  /* 주석: 회색 톤다운 */
   white-space: nowrap;
-  /* 주석: 한 줄 유지 */
 }
 
-/* ✅ 주소: 본문색, 여러 줄 허용 + 말줄임 2줄 */
+/* 주소: 2줄 말줄임 + 배지와 겹치지 않도록 수축 허용 */
 .addressText {
+  flex: 1;                 /* 남는 공간 차지 */
+  min-width: 0;            /* 줄어들기 허용(겹침 방지의 핵심) */
   font-size: 13px;
-  line-height: 1.35;
   color: #374151;
-  /* 주석: 본문색 */
   overflow: hidden;
-  /* 주석: 말줄임을 위한 숨김 */
   display: -webkit-box;
-  /* 주석: 2줄 말줄임 트릭 */
-  -webkit-line-clamp: 2;
-  /* 주석: 최대 2줄 */
+  -webkit-line-clamp: 2;   /* 최대 2줄 */
   -webkit-box-orient: vertical;
 }
 
-/* ===============================
-   배지(기본 배송지)
-   =============================== */
-
-/* ✅ 기본 배송지 뱃지: 시인성 좋게 */
+/* 기본 배송지 뱃지 */
 .defaultLabel {
+  margin-left: auto;       /* 오른쪽 끝 정렬 */
   background-color: #E8F1FF;
-  /* 주석: 연한 파랑 배경 */
-  color: #4D9AFD;
-  /* 주석: 대표색 텍스트 */
+  color: #4D9AFD;          /* 대표색 */
   border: 1px solid #CFE2FF;
-  /* 주석: 은은한 테두리 */
   font-size: 12px;
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 999px;
-  /* 주석: 알약 모양 */
   white-space: nowrap;
-  /* 주석: 줄바꿈 금지 */
 }
 
-/* ===============================
-   작은 유틸
-   =============================== */
-
-/* ✅ 공간 확보용 스페이서(필요 시 추가) */
-.spacer {
-  inline-size: 8px;
-  /* 주석: 가로 공간 */
-  block-size: 1px;
-  /* 주석: 라인 높이에 영향 거의 없음 */
-}
-
-/* ✅ 텍스트 컬러 유틸(상태 강조용) */
-.textMuted {
-  color: #6b7280;
-}
-
-/* 주석: 회색 */
-.textPrimary {
-  color: #4D9AFD;
-}
-
-/* 주석: 대표색 */
+/* 텍스트 유틸 */
+.textMuted { color: #6b7280; }
+.textPrimary { color: #4D9AFD; }
