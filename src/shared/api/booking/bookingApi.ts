@@ -47,6 +47,7 @@ export async function apiGetPhase1Detail(req: BookingSelect): Promise<FestivalDe
 /** 2차 상세 */
 export async function apiGetPhase2Detail(req: Booking): Promise<BookingDetail> {
   const res = await api.post<ApiResponse<BookingDetail>>('/booking/detail/phases/2', req)
+  console.log("배송 방법 : ", res.data);
   return unwrap(res.data)
 }
 

@@ -40,10 +40,6 @@ const TicketOrderInfoPage: React.FC = () => {
   const STORE_KEY=import.meta.env.VITE_PORTONE_STORE_KEY
   const CHANNEL_KEY=import.meta.env.VITE_PORTONE_CHANNEL_KEY
 
-  useEffect(() => {
-    console.log('넘겨받은 예매 state 👉', state);
-  }, [state]);
-
   const fid = state?.fid || fidFromPath || '';
 
   // 예약번호(reservationId/reservationNumber) 확보: state > query(resNo) > session
@@ -56,7 +52,6 @@ const TicketOrderInfoPage: React.FC = () => {
     if (v && typeof window !== 'undefined') {
       sessionStorage.setItem(RESNO_KEY, v);
     }
-    console.log('[session]', RESNO_KEY, '→', fromStorage);
     return v;
   }, [state?.reservationNumber, sp]);
 
@@ -67,11 +62,6 @@ const TicketOrderInfoPage: React.FC = () => {
   });
 
   useEffect(() => {
-    console.log('[phase2] request →', { festivalId: fid, reservationNumber });
-  }, [fid, reservationNumber]);
-
-  useEffect(() => {
-    if (detail) console.log('[phase2] detail ←', detail);
     if (isError) console.warn('[phase2] error ←', error);
   }, [detail, isError, error]);
 

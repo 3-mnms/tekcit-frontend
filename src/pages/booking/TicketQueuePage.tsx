@@ -199,7 +199,6 @@ const TicketQueuePage: React.FC = () => {
     })
 
     client.onConnect = () => {
-      console.log('✅ [WS] connected')
       lastMsgAtRef.current = Date.now()
       const topic = makeBroadcastTopic(String(fid), date, time || undefined)
       client.subscribe(topic, (msg: IMessage) => {
