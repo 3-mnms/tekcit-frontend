@@ -9,13 +9,15 @@
 
 .page {
   width: 1000px;
-  height: 600px;
+  height: 100%;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 620px 350px; /* 좌/우 */
+  grid-template-columns: 620px 350px;
+  /* 좌/우 */
   gap: 20px;
   padding: 12px;
-  overflow: hidden;  /* 내부 스크롤 금지 */
+  overflow: hidden;
+  /* 내부 스크롤 금지 */
   background: #fff;
   border-radius: 12px;
 }
@@ -23,23 +25,25 @@
 /* 좌/우 컬럼은 위쪽에만 붙고, 내부 스크롤 없음 */
 .leftCol {
   display: grid;
-  gap: 10px;        /* 🔽 간격 줄여서 전체 높이 절약 */
+  gap: 10px;
+  /* 🔽 간격 줄여서 전체 높이 절약 */
   align-content: start;
   min-height: 0;
 }
 
 .rightCol {
   display: grid;
-  gap: 10px;        /* 🔽 간격 줄여서 전체 높이 절약 */
+  gap: 10px;
+  /* 🔽 간격 줄여서 전체 높이 절약 */
   margin-right: 10px;
   align-content: start;
   min-height: 0;
 }
 
 /* 카드 내부에서 overflow:auto가 있어도 무시 */
-.noScroll { 
-  overflow: visible !important; 
-  max-height: none !important; 
+.noScroll {
+  overflow: visible !important;
+  max-height: none !important;
 }
 
 /* QR일 때 보이는 플레이스홀더 */
@@ -47,7 +51,8 @@
   border: 1px solid #e5e7eb;
   background: #f8f9fb;
   border-radius: 14px;
-  padding: 12px;    /* 🔽 줄이기 */
+  padding: 12px;
+  /* 🔽 줄이기 */
   color: #6b7280;
 }
 
@@ -60,12 +65,13 @@
 
 /* 수령 방법 카드 섹션의 패딩/타이포/간격을 컴팩트하게 조정 */
 .deliveryCompact {
-  padding: 16px !important;            /* Tailwind p-5 덮어쓰기 */
+  padding: 16px !important;
+  /* Tailwind p-5 덮어쓰기 */
   border-radius: 16px;
 }
 
 /* 섹션 타이틀 간격/크기 축소 */
-.deliveryCompact > h2 {
+.deliveryCompact>h2 {
   margin-bottom: 8px !important;
   font-size: 15px !important;
   line-height: 20px !important;
@@ -107,8 +113,8 @@
 }
 
 /* (선택) 좌측 컬럼 안의 카드들 여백을 살짝 더 조밀하게 */
-.leftCol > section,
-.leftCol > div {
+.leftCol>section,
+.leftCol>div {
   margin-bottom: 2px;
 }
 
@@ -162,6 +168,6 @@
 }
 
 /* 수령방법 컴포넌트가 내부에서 ring/border로 흔들려도 부모 카드 레이아웃은 고정 */
-.deliveryCard > * {
+.deliveryCard>* {
   width: 100%;
 }
