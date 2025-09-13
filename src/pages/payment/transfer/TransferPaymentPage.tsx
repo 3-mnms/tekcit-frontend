@@ -341,7 +341,7 @@ const TransferPaymentPage: React.FC = () => {
         <main className={styles.main}>
           <section className={styles.card}><BookingProductInfo info={productInfo} /></section>
 
-          <section className={styles.delierycard}>
+          <section className={styles.delieryCard}>
             <TicketDeliverySelectSection
               value={deliveryMethod}
               onChange={(v) => {
