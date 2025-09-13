@@ -8,12 +8,13 @@ import PortOne, { Currency, PayMethod } from '@portone/browser-sdk/v2'
 import styles from './WalletChargePage.module.css'
 import Input from '@/components/common/input/Input'
 import Button from '@/components/common/button/Button'
+import Header from '@/components/common/header/Header'
 
 import { requestTossPointCharge, type PointChargeRequest } from '@/shared/api/payment/pointToss'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
 import { getEnv } from '@/shared/config/env'
 
-const STORE_ID =getEnv("VITE_PORTONE_STORE_ID")
+const STORE_ID = getEnv("VITE_PORTONE_STORE_ID")
 const CHANNEL_KEY = getEnv("VITE_PORTONE_CHANNEL_KEY")
 
 const AmountSchema = z.number().int().positive().min(1000, '최소 1,000원 이상 충전해 주세요.')
@@ -129,44 +130,47 @@ const WalletChargePage: React.FC = () => {
 
   const disabled = !amountNumber || preRequestMutation.isPending
   return (
-    <div className={styles.container}>
-      <div className={styles.wrapper}>
-        <h1 className={styles.title}>포인트 충전하기</h1>
+    <>
+      <Header />
+      <div className={styles.container}>
+        <div className={styles.wrapper}>
+          <h1 className={styles.title}>포인트 충전하기</h1>
 
-        <section className={styles.section}>
-          <div className={styles.label}>포인트 충전 금액</div>
-          <Input
-            type="text"
-            placeholder="금액 입력"
-            value={amount}
-            onChange={handleInputChange}
-            aria-label="충전 금액"
-          />
-          <div className={styles.presetGroup}>
-            {AMOUNT_PRESETS.map((preset) => (
-              <button
-                key={preset}
-                type="button"
-                className={styles.presetBtn}
-                onClick={() => handlePresetClick(preset)}
-              >
-                +{preset >= 10000 ? `${preset / 10000}${preset % 10000 === 0 ? '만' : ''}` : preset}원
-              </button>
-            ))}
-          </div>
-        </section>
+          <section className={styles.section}>
+            <div className={styles.label}>포인트 충전 금액</div>
+            <Input
+              type="text"
+              placeholder="금액 입력"
+              value={amount}
+              onChange={handleInputChange}
+              aria-label="충전 금액"
+            />
+            <div className={styles.presetGroup}>
+              {AMOUNT_PRESETS.map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  className={styles.presetBtn}
+                  onClick={() => handlePresetClick(preset)}
+                >
+                  +{preset >= 10000 ? `${preset / 10000}${preset % 10000 === 0 ? '만' : ''}` : preset}원
+                </button>
+              ))}
+            </div>
+          </section>
 
-        <Button
-          type="button"
-          className={styles.chargeBtn}
-          onClick={handleCharge}
-          disabled={disabled}
-          aria-disabled={disabled}
-        >
-          {preRequestMutation.isPending ? '요청 중…' : '충전하기'}
-        </Button>
+          <Button
+            type="button"
+            className={styles.chargeBtn}
+            onClick={handleCharge}
+            disabled={disabled}
+            aria-disabled={disabled}
+          >
+            {preRequestMutation.isPending ? '요청 중…' : '충전하기'}
+          </Button>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 
