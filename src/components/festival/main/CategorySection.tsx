@@ -149,7 +149,7 @@ const CategorySection: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const pageParam = parseInt(searchParams.get('page') || '1', 10)
   const page1 = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam
-  const PAGE_SIZE = 15
+  const PAGE_SIZE = 20
 
   // ✅ 컨테이너 기준 칼럼 수(1~5) 계산
   const gridRef = useRef<HTMLDivElement | null>(null)

@@ -20,6 +20,8 @@
   color: #111827;
   margin-bottom: 1rem;
   margin-left: 7rem;
+  display:flex;
+  align-items: center;
 }
 
 /* ✅ 카테고리 탭 리스트 */
@@ -57,12 +59,12 @@
 .cardSlider {
   position: relative;
   /* ← 오버레이 기준 */
-  --cols: 5;
+  --cols: 4;
   --gap: 24px;
   display: grid;
 
   /* 한 줄 최대 5칸, 여러 줄 허용 */
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--gap);
 
   /* 가운데 정렬 & 좌우 동일 마진 */

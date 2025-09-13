@@ -58,7 +58,7 @@ const Header: React.FC = () => {
       else if (c === '대중음악') grouped.add('대중음악')
       else if (['뮤지컬', '연극'].includes(c)) grouped.add('뮤지컬/연극')
       else if (['서양음악(클래식)', '한국음악(국악)'].includes(c)) grouped.add('클래식/국악')
-      else if (['서커스/마술', '미술'].includes(c)) grouped.add('서커스/마술')
+      else if (['서커스/마술', '마술'].includes(c)) grouped.add('서커스/마술')
       else if (c === '복합') grouped.add('복합')
     })
     return CATEGORY_ORDER.filter((cat) => grouped.has(cat))

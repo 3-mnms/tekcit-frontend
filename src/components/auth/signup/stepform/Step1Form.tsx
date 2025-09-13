@@ -37,6 +37,7 @@ const Step1Form: React.FC<Props> = ({ acc, onNext, updateAcc }) => {
   })
 
   const checkLoginIdMut = useCheckLoginId()
+  console.log('로그인', checkLoginIdMut)
   const [idChecked, setIdChecked] = useState(false)
 
   const loginId = watch('loginId') ?? ''
@@ -61,8 +62,8 @@ const Step1Form: React.FC<Props> = ({ acc, onNext, updateAcc }) => {
     const id = getValues('loginId').trim()
     updateAcc({ loginId: id })
     checkLoginIdMut.mutate(id, {
-      onSuccess: (ok) => {
-        if (ok) {
+      onSuccess: (isAvailable) => {
+        if (isAvailable) {
           alert('사용 가능한 아이디입니다.')
           setIdChecked(true)
         } else {
@@ -144,7 +145,7 @@ const Step1Form: React.FC<Props> = ({ acc, onNext, updateAcc }) => {
             shouldDirty: true,
             shouldValidate: true,
             shouldTouch: true,
-          }) 
+          })
           updateAcc({ passwordConfirm: v })
         }}
         icon={<FaLock />}
