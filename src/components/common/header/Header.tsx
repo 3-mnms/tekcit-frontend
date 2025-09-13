@@ -114,7 +114,7 @@ const Header: React.FC = () => {
             title="내 주변 공연 추천"
           >
             <i className="fa-solid fa-location-dot" />
-            <span>공연 추천</span>
+            <span>AI PICK</span>
           </div>
         )}
 
