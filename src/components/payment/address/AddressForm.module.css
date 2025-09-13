@@ -1,27 +1,24 @@
 .address-container {
-  /* overflow: scroll; */
-  width: 100%;   /* 멍 */
-  height: 100%;  /* 멍: 부모들이 100%여야 실제로 작동 */
-  box-sizing: border-box; /* 멍 */
+  width: 100%;   
+  height: 100%;  
+  box-sizing: border-box; 
 }
 
-/* ===== 카드 컨테이너 ===== */
 .address-container input,
 .address-container select {
-  height: auto;      /* 멍: 50%가 부모 기준이라 잘림 유발 → auto로 두고 내부 패딩으로 높이 확보 */
-  padding: 0 3%;     /* 멍 */
-  box-sizing: border-box; /* 멍 */
-  border-radius: 3%; /* 멍: % 유지(컨테이너 크기에 따라 비율 변화) */
-  font-size: 90%;    /* 멍 */
+  /* height: auto;      */
+  /* padding: 0 3%;     */
+  box-sizing: border-box;
+  border-radius: 3%; 
+  font-size: 90%;    
 }
 
-/* ===== 상단 탭/헤더 ===== */
 .address-tabs {
-  display: flex;           /* 멍 */
-  align-items: center;     /* 멍 */
-  justify-content: space-between; /* 멍 */
-  margin-bottom: 3%;       /* 멍: 10% → 누적 여백 줄여서 잘림 방지 */
-  gap: 2%;                 /* 멍 */
+  display: flex;           
+  align-items: center;     
+  justify-content: space-between; 
+  margin-bottom: 3%;      
+  gap: 2%;                 
 }
 
 .tabs-label {
@@ -30,7 +27,7 @@
 }
 
 .address-header {
-  display: flex;            /* 멍 */
+  display: flex;           
   align-items: center;      /* 멍 */
   justify-content: space-between; /* 멍 */
   margin-bottom: 2%;        /* 멍 */
@@ -109,7 +106,7 @@
 
 .modal-content {
   width: 80%;          /* 멍 */
-  max-height: 90%;     /* 멍: 88% → 여유 */
+  max-height: 100%;     
   background: #fff;    /* 멍 */
   margin: 3% auto;     /* 멍: 상하 3%로 여백 총량 축소 */
   padding: 2%;         /* 멍 */

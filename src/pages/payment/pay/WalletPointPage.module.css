@@ -80,16 +80,10 @@
 
 /* 주석: 아이콘 박스(스샷 좌측 작은 카드 아이콘 느낌) 멍 */
 .labelIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 12px;
-  border: 2px solid #bcd0e6;
-  /* 주석: 외곽선 멍 */
-  border-radius: 3px;
-  color: transparent;
-  /* 주석: 내부 글리프 안 보이게 멍 */
+  font-size: 18px;
+  color: #000000;
+  margin-right: 6px;
+  vertical-align: middle;
 }
 
 /* 주석: 라벨 텍스트 멍 */

@@ -1,8 +1,8 @@
 /* ✅ 카드 리스트 래퍼: 스크롤바 정리 + 위아래 여백 멍 */
 .address-wrapper {
-  max-height: min(56vh, 540px); 
+  /* max-height: min(56vh, 540px);  */
   overflow: auto;
-  padding-right: 4px;                /* 스크롤바 공간 보정 멍 */
+  padding-right: 4px;                
   margin-top: 8px;
 }
 
@@ -22,14 +22,13 @@
 .address-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;                         /* 카드 간격 넉넉히 멍 */
+  gap: 20px;                     
   padding: 8px 0 4px;
-  margin: 0;
-  list-style: none;
 }
 
 .address-list-item {
   cursor: pointer;
+  /* height: auto; */
 }
 
 /* ✅ 선택된 아이템에는 외곽선 비활성, 내부 카드가 강조되므로 얇게만 멍 */

@@ -11,27 +11,24 @@ import styles from './DeliveryManageModal.module.css'
 interface DeliveryManageModalProps {
   onClose?: () => void
   onSelectAddress?: (addr: {
-    name?: string          // 수령인 이름
-    phone?: string         // 수령인 전화번호
-    address: string        // 선택된 주소
-    zipCode?: string       // 우편번호
-    isDefault?: boolean    // 기본 배송지 여부
+    name?: string         
+    phone?: string         
+    address: string        
+    zipCode?: string      
+    isDefault?: boolean    
   }) => void
 }
 
-// ✅ React.FC로 선언하되, JSX를 반드시 return 해야 함
 const DeliveryManageModal: React.FC<DeliveryManageModalProps> = ({
   onClose,
   onSelectAddress,
 }) => {
-  // 상태들
   const [addresses, setAddress] = useState<AddressDTO[]>([])         // 목록
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null) // 선택 인덱스
   const [loading, setLoading] = useState(false)                        // 로딩
   const [error, setError] = useState<string | null>(null)              // 에러 메시지
   const [authRequired, setAuthRequired] = useState(false)
 
-  // 목록 로드 함수
   const load = async () => {
     setLoading(true)
     setError(null)
@@ -83,12 +80,10 @@ const DeliveryManageModal: React.FC<DeliveryManageModalProps> = ({
     onClose?.()
   }
 
-  // ✅ 반드시 JSX를 반환해야 React.FC에 맞음
   return (
     <div className={styles.container}>
       <Header onClose={() => onClose?.()} />
 
-      {/* 상태 메시지 */}
       {loading && <p className={styles.info}>배송지 불러오는 중…</p>}
       {!loading && authRequired && (
         <p className={styles.info}>세션이 만료되었습니다. 다시 로그인해 주세요.</p>
@@ -100,18 +95,16 @@ const DeliveryManageModal: React.FC<DeliveryManageModalProps> = ({
         <p className={styles.info}>등록된 배송지가 없습니다.</p>
       )}
 
-      {/* 주소 목록 */}
-      {!loading && !authRequired && !error && addresses.length > 0 && (
+      {!loading && !authRequired && !error && (
         <div className={styles['address-wrapper']}>
           <ul className={styles['address-list']}>
             {addresses.map((addr, idx) => (
               <li
-                key={`${addr.address}-${addr.zipCode}-${idx}`} // id 대신 안전한 fallback 키
+                key={`${addr.address}-${addr.zipCode}-${idx}`} 
                 className={`${styles['address-list-item']} ${
                   selectedIndex === idx ? styles.selected : ''
                 }`}
                 onClick={() => setSelectedIndex(idx)}
-                style={{ cursor: 'pointer' }}
               >
                 <AddressItem
                   name={addr.name}
