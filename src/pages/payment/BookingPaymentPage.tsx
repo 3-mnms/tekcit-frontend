@@ -75,7 +75,7 @@ const BookingPaymentPage: React.FC = () => {
   const { data: tokenInfo } = useTokenInfoQuery()
   const userId = Number(tokenInfo?.userId)
 
-  const amountToPay = finalAmount ?? checkout.amount
+  const amountToPay = finalAmount
 
   const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState(false)
   const [isPaying, setIsPaying] = useState(false)

@@ -14,12 +14,12 @@ export const RESULT_CONFIG: Record<ResultType, Record<ResultStatus, View>> = {
     success: {
       title: '결제 성공',
       message: '예매 결제가 완료되었습니다.',
-      primary: { label: '내 예매 확인', to: '/mypage/ticket/history' },
+      primary: { label: '내 예매 확인', to: '/mypage/ticket/history' }, // to 경로:팝업 창으로 window.close()로 닫히지만 비워두면 안되서 놔둠
     },
     fail: {
       title: '결제 실패',
       message: '예매 결제에 실패했습니다. 다시 시도해 주세요.',
-      primary: { label: '다시 결제하기', to: '/festival' },
+      primary: { label: '다시 결제하기', to: '/festival' }, // to 경로:팝업 창으로 window.close()로 닫히지만 비워두면 안되서 놔둠
     },
   },
 

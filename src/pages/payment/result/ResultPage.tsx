@@ -55,9 +55,6 @@ export default function ResultPage() {
   // 기존 플로우 유지
   const needConfirm = type === 'booking' || type === 'transfer'
 
-  // ─────────────────────────────────────────────
-  // ✅ 결제 완료(성공/실패 모두) 시 release 1회 호출
-  // ─────────────────────────────────────────────
   const releaseMut = useReleaseWaitingMutation()
   const releasedOnceRef = useRef(false)
 
@@ -67,10 +64,6 @@ export default function ResultPage() {
     if (releasedOnceRef.current) return
     releasedOnceRef.current = true
 
-    // BookingPaymentPage에서 requestPay 직전에 저장해 둔 값 복구
-    // sessionStorage.setItem('tekcit:waitingRelease', JSON.stringify({
-    //   festivalId, performanceDate, performanceTime
-    // }))
     const raw = sessionStorage.getItem('tekcit:waitingRelease')
     if (!raw) return
 
@@ -98,14 +91,9 @@ export default function ResultPage() {
     }
   }, [type, releaseMut])
 
-  // ─────────────────────────────────────────────
-  // ✅ 네가 쓰던 confirm 플로우(transfer/booking 확인) 유지
-  // ─────────────────────────────────────────────
   const firedRef = useRef<string | null>(null)
   const confirmMut = useMutation({
     mutationFn: async () => {
-      // 여기에 결제 결과 확인 API가 있다면 호출
-      // ex) await apiConfirmPayment({ paymentId: qPaymentId })
       return true
     },
     onSuccess: () => {
