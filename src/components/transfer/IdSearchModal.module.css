@@ -29,10 +29,16 @@
 .inputAttached { border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: 0; }
 .searchBtn,
 .confirmBtn {
-  height: 44px !important;
-  font-size: 14px;
-  padding: 0 16px;
-  min-width: 84px;
+  width: auto;               /* 고정폭이면 해제 */
+  min-width: 88px;           /* "검색 중…"도 한 줄로 들어가게 살짝 여유 */
+  display: inline-flex;      /* 텍스트 수직/수평 중앙정렬 */
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;           /* px-4와 동일(선호면 그대로 두셔도 OK) */
+  white-space: nowrap;       /* ★ 줄바꿈 방지 */
+  word-break: keep-all;      /* 한국어 줄바꿈 방지 보강 */
+  line-height: 1;            /* 글자 세로밀림 방지 */
+  margin-left: -7px;
 }
 
 /* 결과 박스 */
