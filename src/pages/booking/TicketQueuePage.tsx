@@ -205,7 +205,7 @@ const TicketQueuePage: React.FC = () => {
         lastMsgAtRef.current = Date.now()
         handleQueueMessage(msg)
       })
-      client.subscribe("/user/queue/waitingNumber", (payload) => {
+      client.subscribe("/queue/waitingNumber", (payload) => {
         const data = JSON.parse(payload.body);
         console.log("데이터" ,data);
       });
