@@ -63,7 +63,7 @@ const TransferPaymentPage: React.FC = () => {
 
   // ✅ 서버에서 bookingId → db에 저장된 기존 예매 결제 정보(paymentId, amount) 조회
   const {
-    data: basePayment,                 // { paymentId, amount, ... }
+    data: basePayment,                 
     isLoading: isBasePayLoading,
     isError: isBasePayError,
     error: basePayError,
@@ -256,7 +256,7 @@ const TransferPaymentPage: React.FC = () => {
     address: deliveryMethod === 'PAPER' ? (address || '') : null,
   })
 
-  // “다음” 확인: 가족은 즉시 승인, 지인은 transfer를 먼저 생성(기존 결제ID + 서버 금액)
+  // “다음” 확인: 가족은 즉시 승인, 지인은 승인 후 비밀번호 모달
   const handleAlertConfirm = async () => {
     setIsAlertOpen(false)
     if (isSubmitting) return
@@ -272,27 +272,26 @@ const TransferPaymentPage: React.FC = () => {
         return
       }
 
-      // 지인: 비밀번호 모달 표시 (실제 결제는 모달 처리 이후)
+      // 지인: 가드 체크
       if (!userId) throw new Error('로그인이 필요합니다.')
       if (isBasePayLoading) throw new Error('결제 정보를 불러오는 중입니다.')
       if (!basePaymentId) throw new Error((basePayError as any)?.message || '기존 결제 정보를 찾을 수 없습니다.')
 
-      // 비밀번호 입력
+      // ✅ 변경: 비밀번호 입력 전에 양도 승인 먼저 호출
+      await respondOthers.mutateAsync(buildApproveDTO())
+
+      // 승인 성공 후 비밀번호 입력 모달 오픈
       setIsPwModalOpen(true)
     } catch (e: any) {
       console.log('[Transfer][handleAlertConfirm error]', e?.response?.data || e)
-      const msg = e?.message || ''
-      if (e?.response?.data?.errorMessage) {
-        alert(e.response.data.errorMessage)
-      } else {
-        alert(msg || '오류남.')
-      }
+      const msg = e?.response?.data?.errorMessage || e?.message || '승인 처리에 실패했습니다.'
+      alert(msg)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // 비번 입력 후 수수료, 양도 결제 모두 완료 -> 바로 결과 페이지로 이동
+  // 비번 입력 후: 결제만 수행
   const handlePasswordComplete = async (password: string) => {
     try {
       if (!userId || !basePaymentId) throw new Error('필수 정보가 없습니다.')
@@ -301,7 +300,7 @@ const TransferPaymentPage: React.FC = () => {
       const RATE = Number(import.meta.env.VITE_TRANSFER_FEE_RATE ?? 0.1)
       const commission = Math.max(1, Math.floor(baseAmount * RATE))
 
-      // 양도 결제 실행 (포인트 차감 + 양도 처리 + 수수료 처리)
+      // 결제 실행 (포인트 차감 + 정산 등 서버 구현에 따름)
       const transferReqBody: RequestTransferPaymentDTO = {
         sellerId: Number(navState.senderId) || 0,
         paymentId: basePaymentId, // db에 저장된 기존 결제 내역
@@ -311,15 +310,13 @@ const TransferPaymentPage: React.FC = () => {
       }
 
       console.log('transfer 호출 payload', transferReqBody)
-      // 실제 양도 결제 실행
       await requestTransferPayment(transferReqBody, userId)
       console.log('transfer api 성공')
 
-      // 양도 승인 처리
-      const approveDTO = buildApproveDTO()
-      await respondOthers.mutateAsync(approveDTO)
+      // ✅ 변경: 여기서의 승인 호출은 제거(이미 Alert 단계에서 수행됨)
+      // ✅ 변경: 결제 후 모달 재오픈 코드 제거
 
-      // ✅ WebSocket 메시지 누락 대비 추가
+      // WebSocket 메시지 누락 대비 추가 네비게이션
       setTimeout(() => {
         navigate('/payment/result?type=transfer&status=success')
       }, 2000)
@@ -478,14 +475,14 @@ const TransferPaymentPage: React.FC = () => {
         </AlertModal>
       )}
 
-      {/* 비가족: transfer 생성(basePaymentId 준비) 이후에만 모달 표시 - 검증만 수행 */}
+      {/* 비가족: 승인 완료 후에만 모달 표시 */}
       {!isFamily && isPwModalOpen && userId && basePaymentId && (
         <PasswordInputModal
           amount={baseAmount}            // 검증에는 서버 금액 사용
           paymentId={basePaymentId}
           userId={userId}
           onClose={() => setIsPwModalOpen(false)}
-          onComplete={handlePasswordComplete} // 결제X, 승인만
+          onComplete={handlePasswordComplete} // 비밀번호 입력 후 결제만 수행
         />
       )}
     </div>
