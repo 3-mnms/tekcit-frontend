@@ -8,7 +8,7 @@ import type { TossPaymentHandle } from '@/components/payment/pay/TossPayment'
 import PaymentInfo from '@/components/payment/pay/PaymentInfo'
 import BookingPaymentHeader from '@/components/payment/pay/BookingPaymentHeader'
 import ReceiveInfo from '@/components/payment/delivery/ReceiveInfo'
-
+import Spinner from '@/components/common/spinner/Spinner'
 import Button from '@/components/common/button/Button'
 import PasswordInputModal from '@/components/payment/modal/PasswordInputModal'
 import AlertModal from '@/components/common/modal/AlertModal'
@@ -419,13 +419,14 @@ const BookingPaymentPage: React.FC = () => {
             <PaymentInfo />
           </div>
           <div className={styles.buttonWrapper}>
+            {isPaying && <Spinner />} 
             <Button
               type="button"
               className={styles.payButton}
               onClick={handlePayment}
               aria-busy={isPaying}
             >
-              {isPaying ? '결제 중...' : '결제하기'}
+             결제하기
             </Button>
           </div>
         </aside>
