@@ -37,7 +37,7 @@ const FestivalDetailPage: React.FC = () => {
   }, [fid])
 
   const [activeTab, setActiveTab] = useState<'info' | 'sale' | 'review'>('info')
-  
+
   usePreloadImage(detail?.poster);
 
   if (!fid) {
@@ -107,9 +107,12 @@ const FestivalDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <div className={styles.tabContent}>
+            <div
+              className={`${styles.tabContent} ${activeTab === 'info' ? styles.infoTabContent : ''
+                }`}
+            >
               {activeTab === 'info' && <InfoDetail />}
-              {activeTab === 'sale' && <Statistics fid={fid} />}
+              {activeTab === 'sale' && <Statistics />}
               {activeTab === 'review' && <Review fid={fid} />}
             </div>
           </div>
