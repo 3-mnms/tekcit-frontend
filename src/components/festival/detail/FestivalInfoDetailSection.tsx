@@ -28,7 +28,7 @@ const FestivalInfoDetailSection: React.FC = () => {
     body = (
       <>
         <p className={styles.description}>
-          {story && story.length > 0 ? story : '등록된 소개가 없습니다.'}
+          {story && story.length > 0 ? story : ''}
         </p>
 
         {/* ✅ 이미지가 있을 때만 렌더 */}
