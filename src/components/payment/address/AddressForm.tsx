@@ -57,6 +57,20 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
     },
   })
 
+  const handleNumberInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // 입력된 값에서 숫자만 추출
+    const value = e.target.value.replace(/[^0-9]/g, '')
+    e.target.value = value
+  }
+
+  const handleNumberKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // 숫자가 아닌 경우 입력 차단
+    if (!/[0-9]/.test(e.key) &&
+      !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+      e.preventDefault()
+    }
+  }
+
   // ✅ 모달 상태 - 이름을 명확히 분리해서 혼선 방지
   const [isManageOpen, setIsManageOpen] = useState(false) // 배송지 관리 모달
   const [isSearchOpen, setIsSearchOpen] = useState(false) // 다음 주소 검색 모달
@@ -136,7 +150,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
         <button
           type="button"
           className={`${styles['btn']} ${styles['btn-outline']}`}
-          onClick={() => setIsManageOpen(true)} 
+          onClick={() => setIsManageOpen(true)}
         >
           배송지 관리
         </button>
@@ -157,7 +171,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
         {/* 좌측: 받는 사람/연락처 */}
         <div className={styles['form-left']}>
           <label>받는 사람</label>
-          <input type="text" {...register('name')} />
+          <input type="text" {...register('name')} placeholder='홍길동' />
           {errors.name && <p className={styles['error']}>{errors.name.message}</p>}
 
           <label>연락처</label>
@@ -170,8 +184,18 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
               <option value="018">018</option>
               <option value="019">019</option>
             </select>
-            <input type="text" maxLength={4} {...register('phonePart1')} />
-            <input type="text" maxLength={4} {...register('phonePart2')} />
+            <input type="text" maxLength={4}
+              {...register('phonePart1')}
+              onInput={handleNumberInput}
+              onKeyDown={handleNumberKeyPress}
+              placeholder="1234"
+            />
+            <input type="text" maxLength={4}
+              onInput={handleNumberInput}
+              onKeyDown={handleNumberKeyPress}
+              {...register('phonePart2')}
+              placeholder="5678"
+            />
           </div>
         </div>
 
@@ -195,10 +219,15 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
           </div>
           {errors.address && <p className={styles['error']}>{errors.address.message}</p>}
 
-          {/* 우편번호(선택) */}
-          <input type="text" placeholder="우편번호 (선택)" {...register('zipCode')} />
+          {/* 우편번호 */}
+          <input type="text"
+            placeholder="우편번호"
+            {...register('zipCode')}
+            onInput={handleNumberInput}
+            onKeyDown={handleNumberKeyPress}
+          />
 
-           <input
+          <input
             type="text"
             placeholder="상세 주소 (동/호수 등)"
             {...register('addressDetail')}
