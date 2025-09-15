@@ -139,7 +139,6 @@ export default function WalletPointPage() {
       return { value, label }
     })
   }, [])
-
   return (
     <>
       <Header />
@@ -164,11 +163,9 @@ export default function WalletPointPage() {
           {/* ✅ 커스텀 드롭다운 적용 */}
           <div className={styles.dropdownWrap /* 주석: 필요 시 페이지 CSS에 간단 래퍼 추가 가능 멍 */}>
             <MonthDropdown
-              value={month}                // 주석: 선택된 YYYY-MM 멍
-              onChange={(v) => {          // 주석: 변경 시 상태 갱신(서버 페이징은 그대로) 멍
-                setMonth(v)
-              }}
-              options={monthOptions}      // 주석: 최근 6개월 옵션 멍
+              value={month}
+              onChange={(v) => setMonth(v)}
+              months={6}  // 최근 6개월 자동 생성
               placeholder="월 선택"
             />
           </div>

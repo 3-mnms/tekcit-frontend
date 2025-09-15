@@ -90,7 +90,10 @@ export default function TeckitJoinPage() {
       <main className={styles.page}>
         {/* 상단 안내 — 대표색(#4D9AFD)은 CSS에서 처리 가정 멍 */}
         <section className={styles.header}>
-          <h1 className={styles.title}>테킷 페이 계정 개설</h1>
+          <div className={styles.titleRow}>
+            <h1 className={styles.title}>테킷 페이 계정 개설</h1>
+            <span className={styles.badge}>TECKIT PAY</span>
+          </div>
           <p className={styles.subtitle}>
             결제 PIN은 꼭 기억해 두세요. 분실 시 본인 확인 절차가 필요할 수 있어요.
           </p>
@@ -105,6 +108,7 @@ export default function TeckitJoinPage() {
               <span className={styles.pairVal}>{displayName}</span>
             </div>
           </div>
+          <hr className={styles.divider} />
 
           {/* 개설 폼 멍 */}
           <form className={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
