@@ -35,8 +35,8 @@ const AddressForm: React.FC = () => {
       })
       alert('주소가 저장되었습니다.')
       navigate('/mypage/myinfo/address')
-    } catch (e: any) {
-      alert(e?.message ?? '주소 저장에 실패했어요.')
+    } catch (e: unknown) {
+      alert((e as { message?: string }).message ?? '주소 저장에 실패했습니다.')
     }
   }
 
