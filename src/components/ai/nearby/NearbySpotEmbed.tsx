@@ -6,7 +6,7 @@ import {
   useNearbyActivities,
   pickRecommendForFestival,
 } from '@/models/ai/tanstack-query/useNearbyFestivals'
-import { loadKakaoMapSdk } from '@/shared/config/loadKakaoMap' // ✅ 로더 사용
+import { loadKakaoMapSdk } from '@/shared/config/loadKakaoMap'
 
 type TabKey = 'play' | 'eat' | 'course'
 
@@ -78,12 +78,10 @@ export default function NearbySpotEmbed({
     [items, selectedId],
   )
 
-  // ✅ Kakao Map refs (정확한 타입)
   const mapRef = useRef<HTMLDivElement | null>(null)
   const mapObjRef = useRef<kakao.maps.Map | null>(null)
   const markersRef = useRef<kakao.maps.Marker[]>([])
 
-  // ✅ Kakao Map init & marker render (로더 기반)
   useEffect(() => {
     let cancelled = false
     if (!mapRef.current) return
@@ -95,7 +93,6 @@ export default function NearbySpotEmbed({
       const centerLat = festival.lat ?? items[0]?.lat ?? 37.566826
       const centerLng = festival.lng ?? items[0]?.lng ?? 126.9786567
 
-      // init map once
       if (!mapObjRef.current) {
         mapObjRef.current = new kakao.maps.Map(mapRef.current, {
           center: new kakao.maps.LatLng(centerLat, centerLng),
@@ -104,14 +101,13 @@ export default function NearbySpotEmbed({
       }
       const map = mapObjRef.current
 
-      // clear old markers
       markersRef.current.forEach((m) => m.setMap(null))
       markersRef.current = []
 
-      // targets
       const targets: Array<{
         id?: string
         name?: string
+        address?: string
         lat: number
         lng: number
         label?: string
@@ -120,36 +116,55 @@ export default function NearbySpotEmbed({
           ? festival.lat && festival.lng
             ? [{ lat: festival.lat, lng: festival.lng, label: festival.name }]
             : []
-          : items.slice(0, 3).map((s) => ({ id: s.id, name: s.name, lat: s.lat, lng: s.lng }))
+          : items.slice(0, 3).map((s) => ({ id: s.id, name: s.name, address: s.address, lat: s.lat, lng: s.lng }))
 
       // bounds & marker helper
       const bounds = new kakao.maps.LatLngBounds()
-      const addMarker = (lat: number, lng: number, isSelected = false): kakao.maps.Marker => {
+      const addMarker = (lat: number, lng: number, label?: string, address?: string): kakao.maps.Marker => {
+        const map = mapObjRef.current
+        if (!map) throw new Error("mapObjRef.current is null")
+
         const pos = new kakao.maps.LatLng(lat, lng)
         const marker = new kakao.maps.Marker({
           position: pos,
           map,
-          image: isSelected
-            ? new kakao.maps.MarkerImage(
-              'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerRed.png',
-              new kakao.maps.Size(36, 37),
-            )
-            : undefined,
         })
         markersRef.current.push(marker)
         bounds.extend(pos)
+
+        if (label) {
+          const iw = new kakao.maps.InfoWindow({
+            content: `
+        <div style="
+          box-sizing:border-box;
+          max-width:240px;
+          padding:6px 8px;
+          font-size:12px;
+          line-height:1.4;
+          white-space:normal;
+          word-break:break-word;
+          overflow-wrap:anywhere;
+        ">
+          <b style="display:block;margin-bottom:2px;">${label}</b>
+          ${address ? `<span style="color:#666">${address}</span>` : ""}
+        </div>
+      `,
+          })
+
+          kakao.maps.event.addListener(marker, 'mouseover', () => iw.open(map, marker))
+          kakao.maps.event.addListener(marker, 'mouseout', () => iw.close())
+        }
+
         return marker
       }
 
-      // place/festival markers
-      targets.forEach((t) => addMarker(t.lat, t.lng, t.id === selected?.id))
-
-      // 공연장 마커(탭이 course가 아닐 때 함께 표시)
+      targets.forEach((t) =>
+        addMarker(t.lat, t.lng, t.name ?? t.label, t.address ?? festival.venue ?? "")
+      )
       if (active !== 'course' && festival.lat && festival.lng) {
-        addMarker(festival.lat, festival.lng, false)
+        addMarker(festival.lat, festival.lng, festival.name, festival.venue ?? "")
       }
 
-      // 클릭 핸들러
       if (active !== 'course') {
         markersRef.current.forEach((marker, i) => {
           kakao.maps.event.addListener(marker, 'click', () => {
@@ -161,7 +176,6 @@ export default function NearbySpotEmbed({
         })
       }
 
-      // 중심/경계
       if (!bounds.isEmpty()) {
         map.setBounds(bounds, 50, 50, 50, 50)
       } else {
@@ -176,7 +190,7 @@ export default function NearbySpotEmbed({
       markersRef.current.forEach((m) => m.setMap(null))
       markersRef.current = []
     }
-  }, [active, items, selected?.id, festival.lat, festival.lng, festival.name])
+  }, [active, items, selected?.id, festival.lat, festival.lng, festival.name, festival.venue])
 
   return (
     <section className={styles.page} aria-label="주변 추천">
@@ -228,7 +242,6 @@ export default function NearbySpotEmbed({
 
       {!isLoading && !isError && rec && (
         <div className={styles.body}>
-          {/* 좌측 리스트 */}
           <ul className={styles.list} role="list">
             {active !== 'course' ? (
               items.slice(0, 3).map((spot) => (
@@ -256,7 +269,6 @@ export default function NearbySpotEmbed({
             )}
           </ul>
 
-          {/* 우측: 카카오맵 */}
           <div className={styles.mapWrap}>
             <div className={styles.mapHeader}>지도</div>
             <div ref={mapRef} className={styles.mapBox} aria-label="카카오맵" />
