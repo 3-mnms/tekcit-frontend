@@ -64,7 +64,6 @@ import OperatManageUserPage from '@/pages/operatManageUser/OperatManageUserPage'
 import ProductDetailPage from '@/pages/productManage/ProductDetailPage'
 import TicketHolderListPage from '@/pages/productManage/TicketHolderListPage'
 import StatisticsPage from '@/pages/productManage/StatisticsPage'
-import Spinner from '@/components/common/spinner/Spinner'
 
 // ai
 import NearbyShowsPage from '@/pages/ai/nearby/NearbyShowsPage'
@@ -77,7 +76,6 @@ export const router = createBrowserRouter([
   { path: '/festival/:fid', element: <FestivalDetailPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/auth/signup', element: <SignupPage /> },
-  { path: '/spinner', element: <Spinner /> },
   {
     path: '/auth/signup/kakao',
     element: <KakaoAuthorizeGate />, // provider 검사 + 가드

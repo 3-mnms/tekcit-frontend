@@ -1,7 +1,6 @@
 .container {
   width: 100%;
   max-width: 768px;
-  padding: 1.5rem;
 }
 
 .title {
@@ -157,6 +156,7 @@
   color: #374151;
   user-select: none;
   margin-top: 0.25rem;
+  color-scheme: light;
 }
 
 .checkboxLabel input[type="checkbox"] {

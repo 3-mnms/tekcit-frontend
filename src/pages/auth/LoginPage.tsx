@@ -14,6 +14,7 @@ import { loginSchema, type LoginForm } from '@/models/auth/schema/loginSchema'
 import { useLoginMutation } from '@/models/auth/tanstack-query/useLogin'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 import { getAndSaveFcmToken } from '@/shared/api/auth/fcrmToken'
+import Spinner from '@/components/common/spinner/Spinner'
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate()
@@ -41,7 +42,7 @@ const LoginPage: React.FC = () => {
         const token = await getAndSaveFcmToken()
         console.log('fcm token:', token)
 
-        alert('로그인이 완료되었습니다!')
+        // alert('로그인이 완료되었습니다!')
         navigate('/')
       },
       onError: (e) => {
@@ -79,13 +80,13 @@ const LoginPage: React.FC = () => {
               },
             ]}
           />
-
+          {loginMut.isPending && <Spinner />}
           <Button
             className="w-full h-12 mt-2"
             type="submit"
             disabled={!isValid || loginMut.isPending}
           >
-            {loginMut.isPending ? '로그인 중...' : '로그인'}
+            로그인
           </Button>
         </form>
 

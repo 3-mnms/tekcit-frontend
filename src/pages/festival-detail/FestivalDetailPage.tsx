@@ -1,6 +1,6 @@
 // src/pages/festival/FestivalDetailPage.tsx
 import React, { useEffect, useRef, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import Header from '@components/common/header/Header'
 import Info from '@/components/festival/detail/FestivalInfoSection'
@@ -8,16 +8,17 @@ import Scheduler from '@/components/festival/detail/FestivalScheduleSection'
 import InfoDetail from '@/components/festival/detail/FestivalInfoDetailSection'
 import Statistics from '@/components/festival/detail/FestivalStatisticsSection'
 import Review from '@/components/festival/review/FestivalReviewSection'
+import { usePreloadImage } from '@/shared/config/usePreload'
 
 import {
   useFestivalDetail,
   useIncreaseViews,
 } from '@/models/festival/tanstack-query/useFestivalDetail'
+import Spinner from '@/components/common/spinner/Spinner'
 import styles from './FestivalDetailPage.module.css'
 
 const FestivalDetailPage: React.FC = () => {
   const { fid } = useParams<{ fid: string }>()
-  const navigate = useNavigate() // 팝업창에서 여기로 이동
   const { data: detail, isLoading, isError } = useFestivalDetail(fid ?? '')
 
   const { mutate: increaseViews } = useIncreaseViews()
@@ -37,6 +38,8 @@ const FestivalDetailPage: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'info' | 'sale' | 'review'>('info')
 
+  usePreloadImage(detail?.poster);
+
   if (!fid) {
     return (
       <div className={styles.pageWrapper}>
@@ -44,6 +47,14 @@ const FestivalDetailPage: React.FC = () => {
         <div className={styles.singleColumn}>잘못된 접근이에요(식별자 없음) 😿</div>
       </div>
     )
+  }
+  if (isLoading || !detail) {
+    return (
+      <div className={styles.pageWrapper}>
+        <Header />
+        <Spinner />
+      </div>
+    );
   }
 
   if (isError) {
@@ -65,7 +76,8 @@ const FestivalDetailPage: React.FC = () => {
       <div className={styles.layout}>
         {/* 좌측 메인 컬럼: Info + 탭 전체 */}
         <div className={styles.mainColumn}>
-          <Info detail={detail} loading={isLoading} />
+          {/* 전역 스피너로 처리하니 loading=false 전달 */}
+          <Info detail={detail} loading={false} />
 
           <div className={styles.tabWrapper}>
             <div className={styles.tabMenu}>
@@ -95,9 +107,12 @@ const FestivalDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <div className={styles.tabContent}>
+            <div
+              className={`${styles.tabContent} ${activeTab === 'info' ? styles.infoTabContent : ''
+                }`}
+            >
               {activeTab === 'info' && <InfoDetail />}
-              {activeTab === 'sale' && <Statistics fid={fid} />}
+              {activeTab === 'sale' && <Statistics />}
               {activeTab === 'review' && <Review fid={fid} />}
             </div>
           </div>
@@ -106,7 +121,8 @@ const FestivalDetailPage: React.FC = () => {
         {/* 우측 사이드 컬럼: 예매 달력 (스크롤 따라 sticky) */}
         <aside className={styles.sideColumn}>
           <div className={styles.schedulerSticky}>
-            <Scheduler />
+            {/* ✅ 페이지에서 가져온 detail을 그대로 주입, 내부 로딩문구 억제 */}
+            <Scheduler detailFromParent={detail} suppressLoading />
           </div>
         </aside>
       </div>

@@ -27,14 +27,15 @@ const TAB_TO_PATH: Record<TabKey, string> = {
 
 const PATH_TO_TAB: Array<[RegExp, TabKey]> = [
   [/^\/mypage\/?$/, 'profileInfo'],
-  [/^\/mypage\/myinfo\/detail$/, 'profileInfo'],
-  [/^\/mypage\/myinfo\/changepassword$/, 'passwordChange'],
-  [/^\/mypage\/myinfo\/address$/, 'deliveryManagement'],
-  [/^\/mypage\/myinfo\/withdraw$/, 'accountWithdrawal'],
-  [/^\/mypage\/ticket\/history$/, 'bookingHistory'],
-  [/^\/mypage\/ticket\/transfer$/, 'ticketTransfer'],
-  [/^\/mypage\/bookmark$/, 'bookmark'],
-]
+  [/^\/mypage\/myinfo\/?$/, 'profileInfo'],
+  [/^\/mypage\/myinfo\/detail\/?$/, 'profileInfo'],
+  [/^\/mypage\/myinfo\/changepassword(?:\/.*)?$/, 'passwordChange'],
+  [/^\/mypage\/myinfo\/address(?:\/.*)?$/, 'deliveryManagement'],
+  [/^\/mypage\/myinfo\/withdraw(?:\/.*)?$/, 'accountWithdrawal'],
+  [/^\/mypage\/ticket\/history(?:\/.*)?$/, 'bookingHistory'],
+  [/^\/mypage\/ticket\/transfer(?:\/.*)?$/, 'ticketTransfer'],
+  [/^\/mypage\/bookmark(?:\/.*)?$/, 'bookmark'],
+];
 
 const resolveTabFromPath = (path: string): TabKey => {
   for (const [re, tab] of PATH_TO_TAB) if (re.test(path)) return tab

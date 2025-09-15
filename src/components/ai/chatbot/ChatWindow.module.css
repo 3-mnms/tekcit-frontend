@@ -109,7 +109,8 @@
   resize: none;           
   overflow: hidden;       
   line-height: 1.4;
-  max-height: 160px;      
+  max-height: 160px;    
+  background-color: white;  
 }
 
 .textarea:disabled {

@@ -71,7 +71,10 @@
   border: 1px solid #ddd;
   border-radius: 0.75rem;
   min-height: 470px;
+}
 
+.infoTabContent {
+  min-height: 700px; 
 }
 
 /* 단일 컬럼 안내용 */

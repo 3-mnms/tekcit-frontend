@@ -1,17 +1,16 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+// src/components/ai/nearby/NearbySpotEmbed.tsx
+import React, { useMemo, useState, useEffect } from 'react'
 import styles from './NearbySpotEmbed.module.css'
-import { FiMapPin, FiCoffee, FiSmile } from 'react-icons/fi'
 import Button from '@/components/common/Button'
 import {
   useNearbyActivities,
   pickRecommendForFestival,
 } from '@/models/ai/tanstack-query/useNearbyFestivals'
-
-declare global {
-  interface Window {
-    kakao: any
-  }
-}
+import MapView from './MapView'
+import SpotCard, { type PlayEatSpot } from './SpotCard'
+import Spinner from '@/components/common/spinner/Spinner'
+import { PartyPopper, Utensils, MapPin } from 'lucide-react'
+import { loadKakaoMapSdk } from '@/shared/config/loadKakaoMap'
 
 type TabKey = 'play' | 'eat' | 'course'
 
@@ -23,17 +22,6 @@ export type NearbyFestivalMini = {
   lng?: number | null
 }
 
-type SpotBase = {
-  id: string
-  name: string
-  address: string
-  url?: string
-  lat: number
-  lng: number
-  distanceKm?: number
-}
-type PlayEatSpot = SpotBase & { kind: 'play' | 'eat' }
-
 export default function NearbySpotEmbed({
   festival,
   onBack,
@@ -44,7 +32,6 @@ export default function NearbySpotEmbed({
   const { data, isLoading, isError, refetch } = useNearbyActivities()
   const rec = useMemo(() => pickRecommendForFestival(data, festival.id), [data, festival.id])
 
-  // 좌표 기반 리스트
   const playItems: PlayEatSpot[] = useMemo(
     () =>
       (rec?.hotPlaces ?? []).map((a, i) => ({
@@ -71,194 +58,115 @@ export default function NearbySpotEmbed({
     [rec?.restaurants, festival.lat, festival.lng],
   )
 
-  const courseSteps = useMemo(() => {
+  const courseRows = useMemo(() => {
     const c = rec?.courseDTO
-    return [c?.course1, c?.course2, c?.course3].filter(Boolean) as string[]
+    const raws = [c?.course1, c?.course2, c?.course3].filter(Boolean) as string[]
+    return raws.map((raw) =>
+      raw
+        .split('→')
+        .map(s => s.trim())
+        .filter(Boolean)
+        .slice(0, 3)
+    )
   }, [rec?.courseDTO])
 
   const [active, setActive] = useState<TabKey>('play')
   const items = active === 'play' ? playItems : active === 'eat' ? eatItems : []
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const selected = useMemo(
-    () => items.find((x) => x.id === selectedId) ?? items[0],
-    [items, selectedId],
-  )
 
-  // ✅ Kakao Map refs
-  const mapRef = useRef<HTMLDivElement | null>(null)
-  const mapObjRef = useRef<any>(null)
-  const markersRef = useRef<any[]>([])
-
-  // ✅ Kakao Map init & marker render
   useEffect(() => {
-    if (!mapRef.current) return
-    if (!window.kakao?.maps) return
-
-    const load = () => {
-      const kakao = window.kakao
-      const centerLat = festival.lat ?? items[0]?.lat ?? 37.566826
-      const centerLng = festival.lng ?? items[0]?.lng ?? 126.9786567
-
-      // init map once
-      if (!mapObjRef.current) {
-        mapObjRef.current = new kakao.maps.Map(mapRef.current, {
-          center: new kakao.maps.LatLng(centerLat, centerLng),
-          level: 6,
-        })
-      }
-
-      const map = mapObjRef.current as any
-
-      // clear old markers
-      markersRef.current.forEach((m) => m.setMap(null))
-      markersRef.current = []
-
-      // course 탭: 공연장만
-      const targets: Array<{
-        id?: string
-        name?: string
-        lat: number
-        lng: number
-        label?: string
-      }> =
-        active === 'course'
-          ? festival.lat && festival.lng
-            ? [{ lat: festival.lat, lng: festival.lng, label: festival.name }]
-            : []
-          : items.slice(0, 3).map((s) => ({ id: s.id, name: s.name, lat: s.lat, lng: s.lng }))
-
-      // bounds 계산
-      const bounds = new kakao.maps.LatLngBounds()
-      const addMarker = (lat: number, lng: number, isSelected = false, text?: string) => {
-        const pos = new kakao.maps.LatLng(lat, lng)
-        const marker = new kakao.maps.Marker({
-          position: pos,
-          map,
-          // 선택된 마커 조금 크게(선택적)
-          image: isSelected
-            ? new kakao.maps.MarkerImage(
-                'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerRed.png',
-                new kakao.maps.Size(36, 37),
-              )
-            : undefined,
-        })
-        markersRef.current.push(marker)
-        bounds.extend(pos)
-        return marker
-      }
-
-      // place/festival markers
-      targets.forEach((t) => addMarker(t.lat, t.lng, t.id === selected?.id, t.label))
-
-      // 공연장 마커(항상 함께 보여주고 싶다면 아래 활성화)
-      if (active !== 'course' && festival.lat && festival.lng) {
-        addMarker(festival.lat, festival.lng, false, festival.name)
-      }
-
-      // 선택된 항목 클릭 핸들러
-      if (active !== 'course') {
-        markersRef.current.forEach((marker, i) => {
-          kakao.maps.event.addListener(marker, 'click', () => {
-            const t = targets[i]
-            if (t?.id) setSelectedId(t.id)
-            map.panTo(marker.getPosition())
-          })
-        })
-      }
-
-      // 지도 중심/줌
-      if (!bounds.isEmpty()) {
-        map.setBounds(bounds, 50, 50, 50, 50)
-      } else {
-        map.setCenter(new kakao.maps.LatLng(centerLat, centerLng))
-      }
-    }
-
-    // SDK가 load 함수를 제공할 때
-    if (window.kakao.maps.load) {
-      window.kakao.maps.load(load)
-    } else {
-      load()
-    }
-
-    // cleanup on unmount
-    return () => {
-      markersRef.current.forEach((m) => m.setMap(null))
-      markersRef.current = []
-    }
-  }, [active, items, selected?.id, festival.lat, festival.lng, festival.name])
+    setSelectedId(null)
+  }, [active])
 
   return (
     <section className={styles.page} aria-label="주변 추천">
       <header className={styles.headerRow}>
         <div className={styles.titleWrap}>
-          <h2 className={styles.pageTitle}>{festival.name} 주변 즐길거리 &amp; 맛집 추천</h2>
+          <h2 className={styles.pageTitle}>{festival.name}</h2>
           {festival.venue && <div className={styles.subtitle}>{festival.venue}</div>}
         </div>
         <div className={styles.headerActions}>
           <Button className={styles.backBtn} onClick={onBack}>
-            ← 공연 목록으로
+            공연 목록으로
           </Button>
         </div>
       </header>
 
+      {/* Tabs */}
       <div className={styles.tabs} role="tablist" aria-label="추천 탭">
         <TabButton
-          icon={<FiSmile aria-hidden />}
+          icon={<PartyPopper size={16} />}
           label="놀거리"
           active={active === 'play'}
           onClick={() => setActive('play')}
         />
         <TabButton
-          icon={<FiCoffee aria-hidden />}
+          icon={<Utensils size={16} />}
           label="먹거리"
           active={active === 'eat'}
           onClick={() => setActive('eat')}
         />
         <TabButton
-          icon={<FiMapPin aria-hidden />}
+          icon={<MapPin size={16} />}
           label="추천 코스"
           active={active === 'course'}
           onClick={() => setActive('course')}
         />
       </div>
+      {/* <Button className={styles.backBtn} onClick={onBack}>
+        공연 목록으로
+      </Button> */}
 
-      {isLoading && <div className={styles.skeleton}>추천 정보를 불러오는 중…</div>}
+      {/* Loading/Error/Empty */}
+      {isLoading && <Spinner />}
       {isError && (
         <div className={styles.error}>
-          불러오기에 실패했어요.{' '}
-          <button className={styles.retry} onClick={() => refetch()}>
-            다시 시도
-          </button>
+          불러오기에 실패했어요.
+          <button className={styles.retry} onClick={() => refetch()}>다시 시도</button>
         </div>
       )}
-      {!isLoading && !isError && !rec && (
-        <div className={styles.empty}>해당 공연장의 추천 데이터가 아직 없어요.</div>
-      )}
+      {!isLoading && !isError && !rec && <div className={styles.empty}>추천 데이터가 없어요.</div>}
 
+      {/* Body */}
       {!isLoading && !isError && rec && (
         <div className={styles.body}>
-          {/* 좌측 리스트 */}
           <ul className={styles.list} role="list">
             {active !== 'course' ? (
               items.slice(0, 3).map((spot) => (
                 <li key={spot.id}>
                   <SpotCard
                     spot={spot}
-                    active={spot.id === selected?.id}
+                    active={spot.id === selectedId}
                     onClick={() => setSelectedId(spot.id)}
                   />
                 </li>
               ))
             ) : (
-              <li className={styles.courseBox}>
-                <strong className={styles.courseTitle}>추천 코스</strong>
-                {courseSteps.length ? (
-                  <ol className={styles.courseSteps}>
-                    {courseSteps.map((st, i) => (
-                      <li key={i}>{st}</li>
+              <li>
+                {courseRows.length ? (
+                  <div className={styles.courseList}>
+                    {courseRows.map((steps, rowIdx) => (
+                      <div key={rowIdx} className={`${styles.courseRow} ${styles.courseAccent}`}>
+                        <div className={styles.courseNodes}>
+                          {steps.map((label, idx) => {
+                            const cls =
+                              idx === 0
+                                ? styles.nodeGreen
+                                : idx === steps.length - 1
+                                  ? styles.nodePurple
+                                  : styles.nodeBlue
+
+                            return (
+                              <React.Fragment key={idx}>
+                                <span className={`${styles.node} ${cls}`}>{label}</span>
+                                {idx < steps.length - 1 && <span className={styles.dash} />}
+                              </React.Fragment>
+                            )
+                          })}
+                        </div>
+                      </div>
                     ))}
-                  </ol>
+                  </div>
                 ) : (
                   <div className={styles.emptySmall}>등록된 코스가 없어요.</div>
                 )}
@@ -266,11 +174,13 @@ export default function NearbySpotEmbed({
             )}
           </ul>
 
-          {/* 우측: 카카오맵 */}
-          <div className={styles.mapWrap}>
-            <div className={styles.mapHeader}>지도</div>
-            <div ref={mapRef} className={styles.mapBox} aria-label="카카오맵" />
-          </div>
+          <MapView
+            festival={festival}
+            items={items}
+            active={active}
+            selectedId={selectedId}
+            setSelectedId={setSelectedId}
+          />
         </div>
       )}
     </section>
@@ -298,33 +208,6 @@ function TabButton({
     >
       <span className={styles.tabIcon}>{icon}</span>
       {label}
-    </button>
-  )
-}
-
-function SpotCard({
-  spot,
-  active,
-  onClick,
-}: {
-  spot: PlayEatSpot
-  active: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      className={`${styles.card} ${active ? styles.cardActive : ''}`}
-      onClick={onClick}
-      type="button"
-      aria-pressed={active}
-    >
-      <div className={styles.cardBadge} aria-hidden />
-      <div className={styles.cardMain}>
-        <div className={styles.cardTitleRow}>
-          <strong className={styles.cardTitle}>{spot.name}</strong>
-        </div>
-        <div className={styles.addr}>{spot.address}</div>
-      </div>
     </button>
   )
 }

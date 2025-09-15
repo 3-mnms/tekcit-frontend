@@ -1,5 +1,4 @@
 .container {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -21,7 +20,6 @@
 .card {
   max-width: 48rem;
   width: 100%;
-  margin: 0 auto;
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styles from './Keypad.module.css'
+import { FaBackspace, FaTrashAlt } from 'react-icons/fa'
 
 interface KeypadProps {
   onPress: (value: string) => void
@@ -34,8 +35,8 @@ const Keypad: React.FC<KeypadProps> = ({ onPress }) => {
       ))}
 
       {/* 삭제 버튼들 */}
-      <button className={styles.key} onClick={() => onPress('삭제')}>삭제</button>
-      <button className={styles.key} onClick={() => onPress('전체삭제')}>전체삭제</button>
+      <button className={styles.delete} onClick={() => onPress('삭제')}><FaBackspace /></button>
+      <button className={styles.deleteAll} onClick={() => onPress('전체삭제')}>전체삭제</button>
     </div>
   )
 }

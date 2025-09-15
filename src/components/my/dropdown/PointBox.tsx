@@ -56,13 +56,14 @@ const PointBox: React.FC = () => {
     >
       <span className={styles.label}>포인트</span>
       <div className={styles.right}>
-        <span className={styles.amount}>
-          {loading
-            ? '0P'
-            : balance !== null
-              ? `${balance.toLocaleString('ko-KR')}P`
-              : '0P'}
-        </span>
+        {balance !== null && (
+          <span className={styles.amount}>
+            {loading
+              ? '0P'
+              : `${balance.toLocaleString('ko-KR')}P`}
+          </span>
+        )}
+
         <button
           className={styles.charge}
           onClick={(e) => {
@@ -71,7 +72,7 @@ const PointBox: React.FC = () => {
           }}
           disabled={loading}
         >
-          충전하기 &gt;
+          {balance !== null ? '충전하기 >' : '테킷페이 가입하기'}
         </button>
       </div>
     </div>

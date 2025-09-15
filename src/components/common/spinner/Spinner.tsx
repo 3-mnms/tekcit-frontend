@@ -1,28 +1,16 @@
-// src/components/common/spinner/Spinner.tsx
-import { useMemo } from 'react'
-import { z } from 'zod'
-// import styles from './Spinner.module.css'
-import LoadingTikky from './LoadingTikky'
-
-// 주석: 스피너 문구 검증 스키마 (선택값, 공백만 있는 문자열은 허용하지 않음)
-const SpinnerTextSchema = z.object({
-  text: z.string().trim().min(1).optional(),
-})
-
-type SpinnerProps = z.infer<typeof SpinnerTextSchema>
-
-/** 풀스크린 스피너 컴포넌트 */
-export default function Spinner(props: SpinnerProps) {
-  // 주석: 런타임에서도 방어적으로 props 검증
-  const parsed = SpinnerTextSchema.safeParse(props)
-  const text = useMemo(() => (parsed.success ? parsed.data.text : undefined), [parsed])
-
+const Spinner = () => {
   return (
-    // <div className={styles.container} role="status" aria-live="polite" aria-busy="true">
-    //   <div className={styles.spinner} aria-hidden="true" />
-    //   {text && <p className={styles.text}>{text}</p>}
-    //   <span className="sr-only">Loading...</span>
-    // </div>
-    <LoadingTikky size={120} text="로딩 중..." />
+    // <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-[99999]">
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin"></div>
+          <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
+        <p className="text-muted-foreground text-sm">로딩 중...</p>
+      </div>
+    </div>
   )
 }
+
+export default Spinner;
