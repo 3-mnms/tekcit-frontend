@@ -66,6 +66,9 @@ type PagerProps = {
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
 
 const Pager: React.FC<PagerProps> = ({ page, totalPages, onChange }) => {
+  const { name: slug } = useParams<{ name?: string }>()
+    const selectedCategory = useMemo(() => (slug ? (SLUG_TO_GROUP[slug] ?? null) : null), [slug])
+  
   if (totalPages <= 1) return null
 
   const makePages = () => {
@@ -77,6 +80,7 @@ const Pager: React.FC<PagerProps> = ({ page, totalPages, onChange }) => {
   }
 
   const items = makePages()
+  
 
   return (
     <nav className={styles.pagination} aria-label="페이지 네비게이션">
@@ -149,7 +153,7 @@ const CategorySection: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const pageParam = parseInt(searchParams.get('page') || '1', 10)
   const page1 = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam
-  const PAGE_SIZE = 15
+  const PAGE_SIZE = 20
 
   // ✅ 컨테이너 기준 칼럼 수(1~5) 계산
   const gridRef = useRef<HTMLDivElement | null>(null)
@@ -184,7 +188,6 @@ const CategorySection: React.FC = () => {
     enabled: !isCategoryPage,
     queryFn: ({ signal }) => getAllFestivalsPaged(page1 - 1, PAGE_SIZE, signal),
     staleTime: 60_000,
-    keepPreviousData: true,
   })
 
   /* ── 카테고리 페이지 : 하위 원본 장르 버튼 + 해당 장르 페이지네이션 ── */
@@ -211,8 +214,6 @@ const CategorySection: React.FC = () => {
     return Array.from(set)
   }, [isCategoryPage, festivals, groupFromSlug])
 
-  const showChildButtons = isCategoryPage && presentChildren.length > 1
-
   useEffect(() => {
     if (!isCategoryPage || presentChildren.length === 0) {
       setActiveChild(null)
@@ -233,7 +234,6 @@ const CategorySection: React.FC = () => {
     enabled: !!genrenmForQuery,
     queryFn: ({ signal }) => getFestivalsByCategory(genrenmForQuery!, page1 - 1, PAGE_SIZE, signal),
     staleTime: 60_000,
-    keepPreviousData: true,
   })
 
   // 최종 데이터/페이지/로딩 상태
@@ -278,25 +278,8 @@ const CategorySection: React.FC = () => {
     <section ref={sectionRef} className={styles.section}>
       <div className={styles.sectionHeader}>
         <h2 className={styles.title}>{isCategoryPage ? '분야별 공연' : '전체 공연'}</h2>
-
-        {/* 카테고리 페이지: 하위 원본 장르 탭 (2개 이상일 때만) */}
-        {isCategoryPage && showChildButtons && (
-          <div className={styles.tabList}>
-            {presentChildren.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setActiveChild(c)}
-                className={`${styles.tabButton} ${canon(activeChild) === canon(c) ? styles.active : ''}`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* 카드 그리드 */}
       <div
         className={styles.cardSlider}
         ref={gridRef}

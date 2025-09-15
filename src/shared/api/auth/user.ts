@@ -7,7 +7,7 @@ export const signupUser = async (data: any) => {
 
 export const checkLoginId = async (loginId: string) => {
   const res = await api.get(`/users/checkLoginId?loginId=${loginId}`);
-  return res.data as boolean;
+  return Boolean(res.data?.data);
 };
 
 export const checkEmail = async (email: string) => {

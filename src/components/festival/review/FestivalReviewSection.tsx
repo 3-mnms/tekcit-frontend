@@ -147,7 +147,7 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
   return (
     <section className={styles.wrap}>
       <header className={styles.header}>
-        <h2 className={styles.title}>관람평</h2>
+        <h2 className={styles.title}>기대평</h2>
 
         <div className={styles.actions}>
           <select

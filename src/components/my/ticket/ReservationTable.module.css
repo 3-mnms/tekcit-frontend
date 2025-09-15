@@ -188,12 +188,14 @@
 }
 
 .errorBox {
-  border: 1px solid #fecaca;
-  background: #fff1f2;
-  color: #b91c1c;
-  padding: 1rem;
+  /* border: 1px solid #fecaca; */
+  /* background: #fff1f2; */
+  /* color: #b91c1c; */
+  /* padding: 1rem; */
+  margin-top: 10px;
+  text-align: center;
   border-radius: 10px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .empty {

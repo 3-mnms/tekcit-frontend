@@ -40,7 +40,7 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter })
   }
 
   if (isError) {
-    return <div className={styles.errorBox}>목록 조회 실패: {(error as Error)?.message ?? '알 수 없는 오류'}</div>
+    return <div className={styles.errorBox}>예매 내역이 없습니다.</div>
   }
 
   if (!filteredData.length) {
