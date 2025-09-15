@@ -13,6 +13,7 @@ import NotificationDropdown from '@/pages/my/dropdown/NotificationDropdown'
 import NotificationDetailDropdown from '@/pages/my/dropdown/NotificationDetailDropdown'
 import { useNotificationStore } from '@/models/dropdown/NotificationStore'
 import { useHydrateNotifications } from '@/models/dropdown/useNotificationQuery'
+import Spinner from '@/components/common/spinner/Spinner'
 
 const UserDropdown: React.FC = () => {
   const navigate = useNavigate()
@@ -38,19 +39,24 @@ const UserDropdown: React.FC = () => {
     window.location.href = '/mypage'
   }
   const handleLogout = async () => {
-    if (loading) return
-    setLoading(true)
-    try {
-      await logoutApi()
-    } catch (e) {
-      console.error(e)
-    } finally {
-      logout()
-      setLoading(false)
-      alert('로그아웃!')
-      navigate('/login')
-    }
+  if (loading) return;
+
+  const confirmed = window.confirm('정말 로그아웃 하시겠습니까?');
+  if (!confirmed) return; 
+
+  setLoading(true);
+  try {
+    await logoutApi();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    logout();
+    setLoading(false);
+    alert('로그아웃 되었습니다.');
+    navigate('/login');
   }
+};
+
 
   return (
     <div className={styles.dropdown}>
@@ -76,9 +82,9 @@ const UserDropdown: React.FC = () => {
           />
           <MenuItem label="내 티켓" onClick={() => (window.location.href = '/mypage/ticket/history')} />
           <MenuItem label="북마크" onClick={() => (window.location.href = '/mypage/bookmark')} />
-
+          {loading && <Spinner />}
           <button className={styles.logoutButton} onClick={handleLogout} disabled={loading}>
-            {loading ? '로그아웃 중...' : '로그아웃'}
+            로그아웃
           </button>
         </>
       )}

@@ -1,5 +1,5 @@
 .dropdown {
-  width: 320px;
+  /* width: 320px; */
   background-color: white;
   border-radius: 0.75rem;
   padding: 1rem;
@@ -33,6 +33,8 @@
 .list {
   max-height: 300px;
   overflow-y: auto;
+  width: 95%;
+  place-self: center;
 }
 
 .footer {
