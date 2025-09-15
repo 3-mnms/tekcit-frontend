@@ -79,7 +79,7 @@
 
 .content {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 18px;
 }
 
@@ -101,6 +101,10 @@
   border-radius: 12px;
   padding: 16px;
   background: #fff;
+}
+
+.cardAccent {
+  border-left: 4px solid #4D9AFD;
 }
 
 .poster {

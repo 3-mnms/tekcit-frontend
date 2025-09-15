@@ -1,6 +1,6 @@
+// src/components/ai/nearby/NearbySpotEmbed.tsx
 import React, { useMemo, useState, useEffect } from 'react'
 import styles from './NearbySpotEmbed.module.css'
-import { FiMapPin, FiCoffee, FiSmile } from 'react-icons/fi'
 import Button from '@/components/common/Button'
 import {
   useNearbyActivities,
@@ -8,6 +8,9 @@ import {
 } from '@/models/ai/tanstack-query/useNearbyFestivals'
 import MapView from './MapView'
 import SpotCard, { type PlayEatSpot } from './SpotCard'
+import Spinner from '@/components/common/spinner/Spinner'
+import { PartyPopper, Utensils, MapPin } from 'lucide-react'
+import { loadKakaoMapSdk } from '@/shared/config/loadKakaoMap'
 
 type TabKey = 'play' | 'eat' | 'course'
 
@@ -55,9 +58,16 @@ export default function NearbySpotEmbed({
     [rec?.restaurants, festival.lat, festival.lng],
   )
 
-  const courseSteps = useMemo(() => {
+  const courseRows = useMemo(() => {
     const c = rec?.courseDTO
-    return [c?.course1, c?.course2, c?.course3].filter(Boolean) as string[]
+    const raws = [c?.course1, c?.course2, c?.course3].filter(Boolean) as string[]
+    return raws.map((raw) =>
+      raw
+        .split('→')
+        .map(s => s.trim())
+        .filter(Boolean)
+        .slice(0, 3)
+    )
   }, [rec?.courseDTO])
 
   const [active, setActive] = useState<TabKey>('play')
@@ -70,28 +80,45 @@ export default function NearbySpotEmbed({
 
   return (
     <section className={styles.page} aria-label="주변 추천">
-      {/* Header */}
       <header className={styles.headerRow}>
         <div className={styles.titleWrap}>
-          <h2 className={styles.pageTitle}>{festival.name} 주변 즐길거리 &amp; 맛집 추천</h2>
+          <h2 className={styles.pageTitle}>{festival.name}</h2>
           {festival.venue && <div className={styles.subtitle}>{festival.venue}</div>}
         </div>
         <div className={styles.headerActions}>
           <Button className={styles.backBtn} onClick={onBack}>
-            ← 공연 목록으로
+            공연 목록으로
           </Button>
         </div>
       </header>
 
       {/* Tabs */}
       <div className={styles.tabs} role="tablist" aria-label="추천 탭">
-        <TabButton icon={<FiSmile />} label="놀거리" active={active === 'play'} onClick={() => setActive('play')} />
-        <TabButton icon={<FiCoffee />} label="먹거리" active={active === 'eat'} onClick={() => setActive('eat')} />
-        <TabButton icon={<FiMapPin />} label="추천 코스" active={active === 'course'} onClick={() => setActive('course')} />
+        <TabButton
+          icon={<PartyPopper size={16} />}
+          label="놀거리"
+          active={active === 'play'}
+          onClick={() => setActive('play')}
+        />
+        <TabButton
+          icon={<Utensils size={16} />}
+          label="먹거리"
+          active={active === 'eat'}
+          onClick={() => setActive('eat')}
+        />
+        <TabButton
+          icon={<MapPin size={16} />}
+          label="추천 코스"
+          active={active === 'course'}
+          onClick={() => setActive('course')}
+        />
       </div>
+      {/* <Button className={styles.backBtn} onClick={onBack}>
+        공연 목록으로
+      </Button> */}
 
-      {/* Loading/Error */}
-      {isLoading && <div className={styles.skeleton}>추천 정보를 불러오는 중…</div>}
+      {/* Loading/Error/Empty */}
+      {isLoading && <Spinner />}
       {isError && (
         <div className={styles.error}>
           불러오기에 실패했어요.
@@ -115,12 +142,31 @@ export default function NearbySpotEmbed({
                 </li>
               ))
             ) : (
-              <li className={styles.courseBox}>
-                <strong className={styles.courseTitle}>추천 코스</strong>
-                {courseSteps.length ? (
-                  <ol className={styles.courseSteps}>
-                    {courseSteps.map((st, i) => <li key={i}>{st}</li>)}
-                  </ol>
+              <li>
+                {courseRows.length ? (
+                  <div className={styles.courseList}>
+                    {courseRows.map((steps, rowIdx) => (
+                      <div key={rowIdx} className={`${styles.courseRow} ${styles.courseAccent}`}>
+                        <div className={styles.courseNodes}>
+                          {steps.map((label, idx) => {
+                            const cls =
+                              idx === 0
+                                ? styles.nodeGreen
+                                : idx === steps.length - 1
+                                  ? styles.nodePurple
+                                  : styles.nodeBlue
+
+                            return (
+                              <React.Fragment key={idx}>
+                                <span className={`${styles.node} ${cls}`}>{label}</span>
+                                {idx < steps.length - 1 && <span className={styles.dash} />}
+                              </React.Fragment>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   <div className={styles.emptySmall}>등록된 코스가 없어요.</div>
                 )}

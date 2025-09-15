@@ -258,7 +258,7 @@ const NearbyShowsPage: React.FC = () => {
                 <>
                   <div className={styles.list}>
                     {shows.map((s) => (
-                      <div key={s.id} className={styles.card}>
+                      <div key={s.id} className={`${styles.card} ${styles.cardAccent}`}>
                         <div className={styles.poster} aria-hidden>
                           {s.poster ? <img src={s.poster} alt={`${s.title} 포스터`} /> : <span>포스터</span>}
                         </div>
