@@ -1,5 +1,5 @@
 :root {
-  --ft-bg: #fafafa;
+  --ft-bg: #fdfdfd;
   --ft-fg: #222;
   --ft-sub: #60646c;
   --ft-line: #e9e9ee;
@@ -7,7 +7,7 @@
   --ft-link-hover: #2f7ce5;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
     --ft-bg: #0b0c10;
     --ft-fg: #e7eaf1;

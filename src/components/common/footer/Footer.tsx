@@ -16,10 +16,8 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
           </h3>
           <address className={styles.text}>
             팀원 소개?
-            <br />
-            팀원1
-            <br />
-            팀원2
+            {/* <br />
+            팀원1 */}
           </address>
           <p className={styles.copy}>© 2025 Tekcit Project. All rights reserved.</p>
         </section>
