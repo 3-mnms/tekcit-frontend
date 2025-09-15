@@ -6,12 +6,7 @@ import {
   useNearbyActivities,
   pickRecommendForFestival,
 } from '@/models/ai/tanstack-query/useNearbyFestivals'
-
-declare global {
-  interface Window {
-    kakao: any
-  }
-}
+import { loadKakaoMapSdk } from '@/shared/config/loadKakaoMap' // ✅ 로더 사용
 
 type TabKey = 'play' | 'eat' | 'course'
 
@@ -44,7 +39,6 @@ export default function NearbySpotEmbed({
   const { data, isLoading, isError, refetch } = useNearbyActivities()
   const rec = useMemo(() => pickRecommendForFestival(data, festival.id), [data, festival.id])
 
-  // 좌표 기반 리스트
   const playItems: PlayEatSpot[] = useMemo(
     () =>
       (rec?.hotPlaces ?? []).map((a, i) => ({
@@ -84,18 +78,20 @@ export default function NearbySpotEmbed({
     [items, selectedId],
   )
 
-  // ✅ Kakao Map refs
+  // ✅ Kakao Map refs (정확한 타입)
   const mapRef = useRef<HTMLDivElement | null>(null)
-  const mapObjRef = useRef<any>(null)
-  const markersRef = useRef<any[]>([])
+  const mapObjRef = useRef<kakao.maps.Map | null>(null)
+  const markersRef = useRef<kakao.maps.Marker[]>([])
 
-  // ✅ Kakao Map init & marker render
+  // ✅ Kakao Map init & marker render (로더 기반)
   useEffect(() => {
+    let cancelled = false
     if (!mapRef.current) return
-    if (!window.kakao?.maps) return
 
-    const load = () => {
-      const kakao = window.kakao
+    const init = async () => {
+      const kakao = await loadKakaoMapSdk()
+      if (cancelled || !mapRef.current) return
+
       const centerLat = festival.lat ?? items[0]?.lat ?? 37.566826
       const centerLng = festival.lng ?? items[0]?.lng ?? 126.9786567
 
@@ -106,14 +102,13 @@ export default function NearbySpotEmbed({
           level: 6,
         })
       }
-
-      const map = mapObjRef.current as any
+      const map = mapObjRef.current
 
       // clear old markers
       markersRef.current.forEach((m) => m.setMap(null))
       markersRef.current = []
 
-      // course 탭: 공연장만
+      // targets
       const targets: Array<{
         id?: string
         name?: string
@@ -127,19 +122,18 @@ export default function NearbySpotEmbed({
             : []
           : items.slice(0, 3).map((s) => ({ id: s.id, name: s.name, lat: s.lat, lng: s.lng }))
 
-      // bounds 계산
+      // bounds & marker helper
       const bounds = new kakao.maps.LatLngBounds()
-      const addMarker = (lat: number, lng: number, isSelected = false, text?: string) => {
+      const addMarker = (lat: number, lng: number, isSelected = false): kakao.maps.Marker => {
         const pos = new kakao.maps.LatLng(lat, lng)
         const marker = new kakao.maps.Marker({
           position: pos,
           map,
-          // 선택된 마커 조금 크게(선택적)
           image: isSelected
             ? new kakao.maps.MarkerImage(
-                'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerRed.png',
-                new kakao.maps.Size(36, 37),
-              )
+              'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerRed.png',
+              new kakao.maps.Size(36, 37),
+            )
             : undefined,
         })
         markersRef.current.push(marker)
@@ -148,25 +142,26 @@ export default function NearbySpotEmbed({
       }
 
       // place/festival markers
-      targets.forEach((t) => addMarker(t.lat, t.lng, t.id === selected?.id, t.label))
+      targets.forEach((t) => addMarker(t.lat, t.lng, t.id === selected?.id))
 
-      // 공연장 마커(항상 함께 보여주고 싶다면 아래 활성화)
+      // 공연장 마커(탭이 course가 아닐 때 함께 표시)
       if (active !== 'course' && festival.lat && festival.lng) {
-        addMarker(festival.lat, festival.lng, false, festival.name)
+        addMarker(festival.lat, festival.lng, false)
       }
 
-      // 선택된 항목 클릭 핸들러
+      // 클릭 핸들러
       if (active !== 'course') {
         markersRef.current.forEach((marker, i) => {
           kakao.maps.event.addListener(marker, 'click', () => {
             const t = targets[i]
             if (t?.id) setSelectedId(t.id)
-            map.panTo(marker.getPosition())
+            const pos = marker.getPosition()
+            map.setCenter(pos)
           })
         })
       }
 
-      // 지도 중심/줌
+      // 중심/경계
       if (!bounds.isEmpty()) {
         map.setBounds(bounds, 50, 50, 50, 50)
       } else {
@@ -174,15 +169,10 @@ export default function NearbySpotEmbed({
       }
     }
 
-    // SDK가 load 함수를 제공할 때
-    if (window.kakao.maps.load) {
-      window.kakao.maps.load(load)
-    } else {
-      load()
-    }
+    void init()
 
-    // cleanup on unmount
     return () => {
+      cancelled = true
       markersRef.current.forEach((m) => m.setMap(null))
       markersRef.current = []
     }
