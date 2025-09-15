@@ -2,11 +2,22 @@
 
 declare namespace kakao {
   namespace maps {
+    function load(callback: () => void): void;
+    /* ---------- Core ---------- */
     class LatLng {
       constructor(lat: number, lng: number)
       getLat(): number
       getLng(): number
     }
+
+    class LatLngBounds {
+      constructor(sw?: LatLng, ne?: LatLng)
+      extend(latlng: LatLng): void
+      isEmpty(): boolean
+    }
+
+    class Size { constructor(width: number, height: number) }
+    class MarkerImage { constructor(src: string, size: Size) }
 
     interface MapOptions {
       center: LatLng
@@ -17,14 +28,13 @@ declare namespace kakao {
       [key: string]: unknown
     }
 
-     interface Map {
-      setBounds(
-        bounds: LatLngBounds,
-        paddingTop?: number,
-        paddingRight?: number,
-        paddingBottom?: number,
-        paddingLeft?: number
-      ): void
+    /* ✅ 클래스(생성자 필요) */
+    class Map {
+      constructor(container: HTMLElement, options: MapOptions)
+      setBounds(bounds: LatLngBounds, pt?: number, pr?: number, pb?: number, pl?: number): void
+      setCenter(latlng: LatLng): void
+      setLevel(level: number): void
+      getLevel(): number
     }
 
     interface MarkerOptions {
@@ -44,18 +54,17 @@ declare namespace kakao {
       setPosition(latlng: LatLng): void
     }
 
-    class LatLngBounds {
-      constructor(sw?: LatLng, ne?: LatLng)
-      extend(latlng: LatLng): void
-      isEmpty(): boolean
+    class InfoWindow {
+      constructor(options: { content: string | HTMLElement; removable?: boolean; zIndex?: number })
+      open(map: Map, marker?: Marker): void
+      close(): void
     }
-    class Size { constructor(width: number, height: number) }
-    class MarkerImage { constructor(src: string, size: Size) }
 
     namespace event {
       function addListener(target: object, type: string, handler: (...args: unknown[]) => void): void
     }
 
+    /* ---------- Services ---------- */
     namespace services {
       const Status: {
         readonly OK: 'OK'
@@ -67,20 +76,19 @@ declare namespace kakao {
 
       interface AddressSearchResult {
         address_name: string
-        x: string   // lng
-        y: string   // lat
+        x: string // lng
+        y: string // lat
         road_address_name?: string
         [key: string]: unknown
       }
 
-      /* 장소 검색 결과 최소 필드 */
       interface PlacesSearchResult {
         id: string
         place_name: string
         address_name: string
         road_address_name?: string
-        x: string   // lng
-        y: string   // lat
+        x: string // lng
+        y: string // lat
         phone?: string
         place_url?: string
         [key: string]: unknown
@@ -114,6 +122,7 @@ declare namespace kakao {
   }
 }
 
+/* 전역 Window에 kakao 노출 */
 type KakaoNamespace = typeof kakao
 declare global {
   interface Window {
@@ -121,6 +130,7 @@ declare global {
   }
 }
 
+/* 스타일 모듈 선언 */
 declare module '*.css'
 declare module 'swiper/css'
 declare module 'swiper/css/navigation'

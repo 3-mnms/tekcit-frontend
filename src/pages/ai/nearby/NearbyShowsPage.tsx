@@ -6,7 +6,8 @@ import { useNavigate } from 'react-router-dom'
 import { useNearbyFestivalsQuery } from '@/models/ai/tanstack-query/useNearbyFestivals'
 import { useDefaultAddressQuery } from '@/models/auth/tanstack-query/useAddress'
 import NearbySpotEmbed, { type NearbyFestivalMini } from '@/components/ai/nearby/NearbySpotEmbed'
-import { loadKakaoMapSdk } from '@/shared/config/loadKakaoMap' // ✅ 로더 사용
+import { loadKakaoMapSdk } from '@/shared/config/loadKakaoMap'
+import Spinner from '@/components/common/spinner/Spinner'
 
 type UiShow = {
   id: string
@@ -18,7 +19,6 @@ type UiShow = {
   poster?: string | null
 }
 
-/** ---------- 타입 안전 파서들 ---------- */
 const isObj = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null
 
@@ -31,7 +31,6 @@ const asNum = (v: unknown): number | null => {
   return null
 }
 
-/** API → UiShow 매핑 (any 금지) */
 const toUi = (raw: unknown): UiShow => {
   const r = isObj(raw) ? raw : {}
   const id =
@@ -62,11 +61,11 @@ const toUi = (raw: unknown): UiShow => {
 const NearbyShowsPage: React.FC = () => {
   const navigate = useNavigate()
   const mapRef = useRef<HTMLDivElement | null>(null)
-  const mapObjRef = useRef<kakao.maps.Map | null>(null)                // ✅ 정확한 타입
-  const markersRef = useRef<kakao.maps.Marker[]>([])                   // ✅ map.__markers 대신 별도 ref
-  const infoWindowsRef = useRef<kakao.maps.InfoWindow[]>([])           // ✅ InfoWindow도 관리
+  const mapObjRef = useRef<kakao.maps.Map | null>(null)
+  const markersRef = useRef<kakao.maps.Marker[]>([])
+  const infoWindowsRef = useRef<kakao.maps.InfoWindow[]>([])
 
-  const { data: defaultAddr } = useDefaultAddressQuery()
+  const { data: defaultAddr, isLoading: isAddrLoading } = useDefaultAddressQuery()
   const { data, isLoading, isError, refetch } = useNearbyFestivalsQuery()
   const [selected, setSelected] = useState<NearbyFestivalMini | null>(null)
 
@@ -81,7 +80,14 @@ const NearbyShowsPage: React.FC = () => {
     return lat != null && lng != null ? { lat, lng } : null
   }, [data])
 
-  /** ---------- Kakao Map 렌더링 ---------- */
+  const hasDefaultAddress = useMemo(() => {
+    if (!defaultAddr) return false
+    const candidate =
+      defaultAddr.address ??
+      ''
+    return typeof candidate === 'string' && candidate.trim().length > 0
+  }, [defaultAddr])
+
   useEffect(() => {
     let cancelled = false
     if (!mapRef.current) return
@@ -90,12 +96,10 @@ const NearbyShowsPage: React.FC = () => {
       const kakao = await loadKakaoMapSdk()
       if (cancelled || !mapRef.current) return
 
-      // 중심 좌표
       const firstWithPos = shows.find(s => s.lat != null && s.lng != null)
       const centerLat = userCenter?.lat ?? firstWithPos?.lat ?? 37.566826
       const centerLng = userCenter?.lng ?? firstWithPos?.lng ?? 126.9786567
 
-      // 최초 1회 맵 생성
       if (!mapObjRef.current) {
         mapObjRef.current = new kakao.maps.Map(mapRef.current, {
           center: new kakao.maps.LatLng(centerLat, centerLng),
@@ -165,6 +169,13 @@ const NearbyShowsPage: React.FC = () => {
     }
   }, [shows, userCenter])
 
+  useEffect(() => {
+    if (isAddrLoading) return
+    if (!hasDefaultAddress) {
+      navigate('/mypage/myinfo/address', { replace: true, state: { from: 'nearby-shows' } })
+    }
+  }, [isAddrLoading, hasDefaultAddress, navigate])
+
   // 줌 컨트롤
   const zoomIn = () => {
     const m = mapObjRef.current
@@ -190,7 +201,7 @@ const NearbyShowsPage: React.FC = () => {
 
           <div className={styles.addr}>
             현재 주소:&nbsp;
-            {defaultAddr ? `${defaultAddr?.address || ''}`.trim() : '불러오는 중…'}
+            {defaultAddr ? `${defaultAddr?.address || ''}`.trim() : <Spinner />}
             <button
               className={styles.addrBtn}
               type="button"
@@ -208,7 +219,7 @@ const NearbyShowsPage: React.FC = () => {
             <>
               {/* 왼쪽 리스트 */}
               <div className={styles.list}>
-                {isLoading && <div className={styles.skeleton}>근처 공연을 불러오는 중…</div>}
+                {isLoading && <Spinner />}
                 {isError && (
                   <div className={styles.error}>
                     불러오기에 실패했어요.
