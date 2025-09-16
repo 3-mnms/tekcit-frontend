@@ -31,7 +31,38 @@ type SelectedAddressPayload = {
   phone?: string
   address: string
   zipCode?: string
+  addressDetail?: string
   id?: number
+}
+
+function parseAddressString(raw: string): {
+  base: string
+  detail?: string
+  zip?: string
+} {
+  if (!raw) return { base: '' }
+
+  let rest = raw.trim()
+  let zip: string | undefined
+
+  // "[06035]" 형태 우편번호 제거/추출
+  const zipMatch = rest.match(/^\s*\[(\d{5})\]\s*/)
+  if (zipMatch) {
+    zip = zipMatch[1]
+    rest = rest.replace(/^\s*\[\d{5}\]\s*/, '')
+  }
+
+  // 쉼표 기준으로 기본주소/상세주소 분리
+  // 예) "서울 강남구 가로수길 9, 111/111"
+  let base = rest
+  let detail: string | undefined
+  const commaIdx = rest.indexOf(',')
+  if (commaIdx !== -1) {
+    base = rest.slice(0, commaIdx).trim()
+    detail = rest.slice(commaIdx + 1).trim()
+  }
+
+  return { base, detail, zip }
 }
 
 // ✅ phonePrefix의 정확한 타입 별칭 (any 제거)
@@ -107,11 +138,16 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
   }, [])
 
   const handleAddressCompleteFromDaum = useCallback(
-    (data: { zipCode: string; address: string }) => {
-      // 선택된 주소/우편번호를 RHF에 주입
-      setValue('address', data.address ?? '', { shouldValidate: true })
-      setValue('zipCode', data.zipCode ?? '', { shouldValidate: true })
-      // 모달 닫기
+    (data: { zipCode: string; address: string; addressDetail?: string }) => {
+      // 다음(카카오)에서 기본/상세를 나눠줄 수도 있으니 우선 반영하고, 없으면 파서로 보완
+      const { base, detail, zip } = parseAddressString(data.address)
+
+      setValue('address', base || data.address || '', { shouldValidate: true })
+      setValue('zipCode', data.zipCode || zip || '', { shouldValidate: true })
+      if (data.addressDetail || detail) {
+        setValue('addressDetail', data.addressDetail || detail || '', { shouldValidate: false })
+      }
+
       setIsSearchOpen(false)
     },
     [setValue]
@@ -119,14 +155,17 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
 
   const handleAddressSelectFromManage = useCallback(
     (addr: SelectedAddressPayload) => {
-      // 주소/우편번호 주입
-      setValue('address', addr.address ?? '', { shouldValidate: true })
-      setValue('zipCode', addr.zipCode ?? '', { shouldValidate: true })
+      // 모달이 한 줄 주소만 주는 경우를 위해 파서 적용
+      const { base, detail, zip } = parseAddressString(addr.address)
 
-      // 선택한 배송지에 수령인/연락처가 있다면 함께 반영
-      if (addr.name) {
-        setValue('name', addr.name, { shouldValidate: false })
+      setValue('address', base, { shouldValidate: true })
+      setValue('zipCode', addr.zipCode || zip || '', { shouldValidate: true })
+      if (addr.addressDetail || detail) {
+        setValue('addressDetail', addr.addressDetail || detail || '', { shouldValidate: false })
       }
+
+      // 수령인/연락처 동시 반영 로직은 그대로 유지
+      if (addr.name) setValue('name', addr.name, { shouldValidate: false })
       if (addr.phone) {
         const { prefix, part1, part2 } = splitKoreanPhone(addr.phone)
         if (prefix) setValue('phonePrefix', prefix, { shouldValidate: false })
@@ -134,7 +173,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
         if (part2 !== undefined) setValue('phonePart2', part2, { shouldValidate: false })
       }
 
-      // 모달 닫기
       setIsManageOpen(false)
     },
     [setValue, splitKoreanPhone]

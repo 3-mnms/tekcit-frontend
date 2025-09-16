@@ -1,10 +1,17 @@
+import React from 'react'
 import styles from './WalletHistory.module.css'
 
+// ✅ 타입 단순화 - transfer 관련 타입 제거
 export type WalletHistoryViewItem = {
   id: string                              // 주석: 키용 식별자(paymentId 등) 멍
   createdAt: string                       // 주석: ISO 문자열 멍
-  type: 'charge' | 'refund' | 'use'       // 주석: 충전/환불/사용 멍
+  type: 'charge' | 'refund' | 'use'       // ✅ transfer 타입 제거, 모두 use로 통합
   amount: number                          // 주석: 금액(원) 멍
+  // ✅ 백엔드 API 응답에 맞게 추가 필드들
+  paymentStatus?: string                  // "PAID", "FAILED", "CANCELLED" 등
+  transactionType?: string                // "CREDIT", "DEBIT" 등  
+  payMethod?: string                      // "POINT_PAYMENT", "POINT_CHARGE" 등
+  currency?: string                       // "KRW" 등
 }
 
 export type WalletHistoryProps = {
@@ -32,6 +39,34 @@ const WalletHistory: React.FC<WalletHistoryProps> = ({ month, items, loading, er
       minute: '2-digit',
       hour12: false,
     })
+
+  // ✅ 더 정확한 타이틀 결정 함수 - transfer 로직 제거
+  const getTransactionTitle = (item: WalletHistoryViewItem): string => {
+    const { type, payMethod, transactionType } = item
+
+    if (type === 'charge') {
+      if (payMethod === 'POINT_CHARGE') {
+        return '포인트 충전'
+      } else if (payMethod === 'POINT_PAYMENT' && transactionType === 'CREDIT') {
+        return '양도 하기 수취'  // POINT_PAYMENT + CREDIT = 양도 수취
+      } else {
+        return '입금'
+      }
+    } else if (type === 'refund') {
+      return '환불'
+    } else if (type === 'use') {
+      if (payMethod === 'POINT_PAYMENT') {
+        return '포인트 결제'  // 일반 결제 또는 양도 지불
+      }
+      // 레거시 transfer 처리
+      if (item.paymentStatus?.includes('TRANSFER') || item.payMethod?.includes('TRANSFER')) {
+        return '포인트 결제'
+      }
+      return '사용'
+    }
+
+    return '거래'
+  }
 
   const hasAny = items.length > 0
 
@@ -65,16 +100,22 @@ const WalletHistory: React.FC<WalletHistoryProps> = ({ month, items, loading, er
       {!loading && !error && hasAny && (
         <ul className={styles.list}>
           {items.map((it, idx) => {
-            // 주석: 타입별 표시 텍스트/부호/색상 결정 멍
+            // ✅ 단순화된 타입 처리
             const sign = it.type === 'charge' || it.type === 'refund' ? '+' : '-'
-            const title = it.type === 'charge' ? '충전' : it.type === 'refund' ? '환불' : '사용'
+            const title = getTransactionTitle(it)
+
+            // ✅ 결제 상태가 실패/취소인 경우 표시 조정
+            const isFailedOrCancelled = it.paymentStatus === 'FAILED' || it.paymentStatus === 'CANCELLED'
+            const statusSuffix = isFailedOrCancelled ? ' (취소)' : ''
 
             return (
               <li key={it.id} className={`${styles.item} ${idx % 2 ? styles.alt : ''}`}>
                 <span className={styles.colDate}>{fmtDate(it.createdAt)}</span>
                 <span className={styles.colTime}>{fmtTime(it.createdAt)}</span>
-                <span className={`${styles.colDesc} ${it.type === 'use' ? styles.useText : ''}`}>{title}</span>
-                <span className={`${styles.colAmount} ${sign === '+' ? styles.amtPlus : styles.amtMinus}`}>
+                <span className={`${styles.colDesc} ${it.type === 'use' ? styles.useText : ''}`}>
+                  {title}{statusSuffix}
+                </span>
+                <span className={`${styles.colAmount} ${sign === '+' ? styles.amtPlus : styles.amtMinus} ${isFailedOrCancelled ? styles.cancelled : ''}`}>
                   {sign}{fmtCurrency(it.amount)}
                 </span>
               </li>

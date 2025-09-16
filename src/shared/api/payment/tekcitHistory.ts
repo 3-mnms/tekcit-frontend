@@ -22,6 +22,8 @@ const RawHistoryItem = z.object({
   type: z.string().optional(),
   payTime: z.string().optional(),
   createdAt: z.string().optional(),
+  paymentStatus: z.string().optional(),
+  transactionType: z.string().optional(),
 })
 const SpringPageRaw = z.object({
   totalElements: z.number().int(),
@@ -36,7 +38,15 @@ const SpringPageRaw = z.object({
   last: z.boolean(),
   empty: z.boolean(),
 })
-export type WalletHistoryItem = { paymentId?: string; amount: number; method?: string; time: string }
+export type WalletHistoryItem = {
+  paymentId?: string;
+  amount: number;
+  method?: string;
+  time: string;
+  paymentStatus?: string;
+  transactionType?: string;
+  Currency?: string;
+}
 export type WalletHistoryPage = Omit<z.infer<typeof SpringPageRaw>, 'content'> & { content: WalletHistoryItem[] }
 
 /* ───────── Normalizer ───────── */
@@ -48,12 +58,16 @@ function normalizePage(raw: z.infer<typeof SpringPageRaw>): WalletHistoryPage {
       amount: r.amount,
       method: r.payMethod ?? r.method ?? r.type,
       time: r.payTime ?? r.createdAt ?? new Date().toISOString(),
+      paymentStatus: r.paymentStatus,
+      transactionType: r.transactionType,
+      currency: r.currency,
     })),
   }
 }
 
 /* ───────── API ───────── */
 // 주석: ✅ 헤더 직접 세팅 제거 — 인터셉터가 자동 주입 멍
+// 테킷 페이 잔액 조회
 export async function fetchTekcitBalance(): Promise<TekcitBalance> {
   const { data } = await api.get('/tekcitpay')
   const parsed = Envelope(BalanceData).parse(data)
@@ -61,6 +75,7 @@ export async function fetchTekcitBalance(): Promise<TekcitBalance> {
   return parsed.data
 }
 
+// 페이 내역 조회
 export async function fetchTekcitHistory(params: { page?: number; size?: number }): Promise<WalletHistoryPage> {
   const page = params?.page ?? 0
   const size = Math.max(1, params?.size ?? 10)
