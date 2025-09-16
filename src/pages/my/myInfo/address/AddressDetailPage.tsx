@@ -136,27 +136,37 @@ const AddressDetailPage: React.FC = () => {
     )
   }
 
+  const formatPhone = (raw: string): string => {
+    const d = raw.replace(/\D/g, '').slice(0, 11)
+
+    if (d.length > 7) return d.replace(/(\d{3})(\d{4})(\d{0,4}).*/, '$1-$2-$3')
+    if (d.length > 3) return d.replace(/(\d{3})(\d{0,4}).*/, '$1-$2')
+    return d
+  }
+
   return (
     <section className={styles.container}>
       <h2 className={styles.title}>배송지 관리</h2>
 
       <div className={styles.panel}>
-      <div className={styles.cardHeader}>
-        <span className={styles.icon}><FaMapMarkerAlt /></span>
-        <h3 className={styles.cardTitle}>배송지 수정</h3>
-      </div>
+        <div className={styles.cardHeader}>
+          <span className={styles.icon}>
+            <FaMapMarkerAlt />
+          </span>
+          <h3 className={styles.cardTitle}>배송지 수정</h3>
+        </div>
         <div className={styles.form}>
           <Input
             label="수령인"
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={!editing}
-             className={styles.phoneInput}
+            className={styles.phoneInput}
           />
           <Input
             label="연락처"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => setPhone(formatPhone((e.target as HTMLInputElement).value))}
             disabled={!editing}
             type="tel"
             className={styles.phoneInput}

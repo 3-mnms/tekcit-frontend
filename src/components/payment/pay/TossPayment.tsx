@@ -59,14 +59,13 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
         }
 
         // 2) 리다이렉트 URL 구성(paymentId 쿼리 포함)
-        const finalRedirect = (() => {
-          const base = redirectUrl ??
-            successUrl ??
-            `${window.location.origin}/payment/result?type=booking`
-          const finalRedirect =
-            `${base}${base.includes('?') ? '&' : '?'}paymentId=${encodeURIComponent(paymentId)}`
+        // const finalRedirect = (() => {
+        //   const base = redirectUrl ?? successUrl ?? `${window.location.origin}/payment/result?type=booking`
+        //   const finalRedirect = `${base}${base.includes('?') ? '&' : '?'}`
+        // })()
 
-        })()
+        const finalSuccessRedirect = successUrl;
+        const finalFailRedirect = failUrl;
 
         // 3) 백엔드 사전요청 (구매자/판매자/주문 컨텍스트 저장)
         await paymentRequest(paymentId, bookingId, festivalId, sellerId, amount)
@@ -80,23 +79,20 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           totalAmount: amount,
           currency: Currency.KRW,
           payMethod: PayMethod.CARD,
-          redirectUrl: finalRedirect,
+          redirectUrl: finalSuccessRedirect,
         })
-        try {
-          const result = await paymentConfirm(paymentId);
+        // try {
+        //   const result = await paymentConfirm(paymentId);
 
+        //   if (result.success) {
+        //     navigate(`/payment/result?paymentId=${paymentId}`)
+        //   } else {
+        //     navigate(`/payments/result`)
+        //   }
 
-          // ✅ 동일 페이지에서 쿼리만 업데이트하여 결과 렌더 유도 멍
-
-          if (result.success) {
-            navigate(`/payment/result?paymentId=${paymentId}`)
-          } else {
-            navigate(`/payments/result`)
-          }
-
-        } catch (err) {
-          console.error("에러")
-        }
+        // } catch (err) {
+        //   console.error("에러")
+        // }
       },
     }))
 
