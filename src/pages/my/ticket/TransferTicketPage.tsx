@@ -223,7 +223,7 @@ const TransferTicketPage: React.FC = () => {
         {visibleTickets.map((t) => (
           <BeforeTransferTicket key={t.reservationNumber} item={t} onTransfer={handleTransfer} />
         ))}
-        {visibleTickets.length === 0 && <div className={styles.empty}>양도 가능한 티켓이 없어요.</div>}
+        {visibleTickets.length === 0 && <div className={styles.empty}>양도 가능한 티켓이 없습니다.</div>}
       </div>
     </div>
   )

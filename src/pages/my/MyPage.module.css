@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: #fff;
 }
 
 .wrapper {
@@ -12,6 +13,7 @@
   box-sizing: border-box;
   max-width: 1440px;
   margin: 0 auto;
+  background-color: #fff;
 }
 
 .sidebarSlot {
@@ -20,9 +22,16 @@
 }
 
 .content {
+  flex: 1;
+  min-width: 0;
+  background-color: #fff;
   min-width: 700px;         
   background: #fff;
   margin-left: 150px;
   margin-right: 100px;
   padding-top: 20px;
+}
+
+.content::-webkit-scrollbar{
+  display: none;
 }

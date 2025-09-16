@@ -7,7 +7,11 @@ import Button from '@/components/common/button/Button'
 import SignupInputField from '@/components/auth/signup/SignupInputFields'
 import { FaEnvelope, FaShieldHalved } from 'react-icons/fa6'
 import styles from '@/pages/auth/SignupPage.module.css'
-import { useCheckEmail, useSendEmailCode, useVerifyEmailCode } from '@/models/auth/tanstack-query/useSignup'
+import {
+  useCheckEmail,
+  useSendEmailCode,
+  useVerifyEmailCode,
+} from '@/models/auth/tanstack-query/useSignup'
 
 interface Props {
   acc: Partial<Step4>
@@ -38,7 +42,12 @@ const Step4Form: React.FC<Props> = ({
   isEmailCodeSent,
   updateAcc,
 }) => {
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<Step4>({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<Step4>({
     resolver: zodResolver(signupStep4),
     mode: 'onChange',
     defaultValues: { email: acc.email ?? '', emailCode: acc.emailCode ?? '' },
@@ -49,7 +58,9 @@ const Step4Form: React.FC<Props> = ({
   const verifyCodeMut = useVerifyEmailCode()
 
   // 분리 입력 상태
-  const [localPart, setLocalPart] = useState<string>(() => (acc.email ? acc.email.split('@')[0] : ''))
+  const [localPart, setLocalPart] = useState<string>(() =>
+    acc.email ? acc.email.split('@')[0] : '',
+  )
   const [domainSel, setDomainSel] = useState<string>(() => {
     const d = acc.email?.split('@')[1] ?? ''
     return d && DOMAIN_OPTIONS.includes(d) ? d : d ? CUSTOM : ''
@@ -69,8 +80,12 @@ const Step4Form: React.FC<Props> = ({
   // ✅ 2) 부모 콜백은 ref로 고정 (deps에서 제외)
   const updateAccRef = useRef(updateAcc)
   const setIsEmailCodeSentRef = useRef(setIsEmailCodeSent)
-  useEffect(() => { updateAccRef.current = updateAcc }, [updateAcc])
-  useEffect(() => { setIsEmailCodeSentRef.current = setIsEmailCodeSent }, [setIsEmailCodeSent])
+  useEffect(() => {
+    updateAccRef.current = updateAcc
+  }, [updateAcc])
+  useEffect(() => {
+    setIsEmailCodeSentRef.current = setIsEmailCodeSent
+  }, [setIsEmailCodeSent])
 
   // ✅ 3) 실제 email이 바뀔 때만 RHF/부모 업데이트
   const prevEmailRef = useRef<string>('')
@@ -140,6 +155,16 @@ const Step4Form: React.FC<Props> = ({
     onDone()
   }
 
+  const timerRightSlot = (
+    <span
+      aria-live="polite"
+      className={styles.timerBadge} // 밑에서 CSS 추가
+      title={codeLeft > 0 ? `남은 시간 ${mmss(codeLeft)}` : '만료됨'}
+    >
+      {isEmailCodeSent && (codeLeft > 0 ? mmss(codeLeft) : '만료')}
+    </span>
+  )
+
   return (
     <form onSubmit={handleSubmit(submit)} className={styles.formContent}>
       <div className={styles.emailRow}>
@@ -165,13 +190,19 @@ const Step4Form: React.FC<Props> = ({
             }}
             aria-label="이메일 도메인 선택"
           >
-            <option value="" disabled>선택</option>
+            <option value="" disabled>
+              선택
+            </option>
             {DOMAIN_OPTIONS.map((d) =>
               d === CUSTOM ? (
-                <option key={d} value={d}>직접 입력</option>
+                <option key={d} value={d}>
+                  직접 입력
+                </option>
               ) : (
-                <option key={d} value={d}>{d}</option>
-              )
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ),
             )}
           </select>
         ) : (
@@ -201,18 +232,22 @@ const Step4Form: React.FC<Props> = ({
             placeholder="인증 코드 입력"
             hasButton
             buttonText="인증 확인"
-            onButtonClick={() => onVerifyEmailCode((document.querySelector<HTMLInputElement>('input[name="emailCode"]')?.value) ?? '')}
+            onButtonClick={() =>
+              onVerifyEmailCode(
+                document.querySelector<HTMLInputElement>('input[name="emailCode"]')?.value ?? '',
+              )
+            }
             error={errors.emailCode?.message}
+            rightSlot={timerRightSlot}
           />
-          <div style={{ marginTop: -10, marginLeft: 30, fontSize: 12, color: '#111827' }}>
-            {codeLeft > 0 && <> 남은 시간 {mmss(codeLeft)}</>}
-            {codeLeft === 0 && isEmailCodeSent && <> (만료됨 · 재전송 후 다시 시도하세요)</>}
-          </div>
+
         </>
       )}
 
       <div className={styles.navButtons}>
-        <Button type="button" onClick={onPrev}>이전</Button>
+        <Button type="button" onClick={onPrev}>
+          이전
+        </Button>
         <Button type="submit">가입하기</Button>
       </div>
     </form>

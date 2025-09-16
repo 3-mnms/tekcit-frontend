@@ -64,10 +64,10 @@ import OperatManageUserPage from '@/pages/operatManageUser/OperatManageUserPage'
 import ProductDetailPage from '@/pages/productManage/ProductDetailPage'
 import TicketHolderListPage from '@/pages/productManage/TicketHolderListPage'
 import StatisticsPage from '@/pages/productManage/StatisticsPage'
-import Spinner from '@/components/common/spinner/Spinner';
 
 // ai
 import NearbyShowsPage from '@/pages/ai/nearby/NearbyShowsPage'
+import NotFound from '@/components/shared/NotFound'
 
 export const router = createBrowserRouter([
   { path: '/', element: <MainPage /> },
@@ -76,7 +76,6 @@ export const router = createBrowserRouter([
   { path: '/festival/:fid', element: <FestivalDetailPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/auth/signup', element: <SignupPage /> },
-  {path:'/spinner', element:<Spinner/>},
   {
     path: '/auth/signup/kakao',
     element: <KakaoAuthorizeGate />, // provider 검사 + 가드
@@ -203,5 +202,9 @@ export const router = createBrowserRouter([
       { path: '', element: <NearbyShowsPage /> },
       // { path: 'spot', element: <NearbySpotPage  /> },
     ],
+  },
+  {
+    path: '*',
+    element: <NotFound />,
   },
 ])

@@ -1,16 +1,16 @@
 /* ✅ 전체 섹션 레이아웃 */
 .section {
   width: 100%;
-  padding: 2rem 1.5rem;
+  padding-top: 30px;
+  padding-bottom: 30px;
 }
 
 /* ✅ 섹션 상단: 제목 + 탭 정렬 */
 .sectionHeader {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  width: 100%;
+  place-content: center;
 }
 
 /* ✅ 제목 스타일 */
@@ -19,7 +19,10 @@
   font-weight: 700;
   color: #111827;
   margin-bottom: 1rem;
-  margin-left: 7rem;
+  display:flex;
+  align-items: center;
+  width: 100%;
+  place-content: center;
 }
 
 /* ✅ 카테고리 탭 리스트 */
@@ -29,6 +32,7 @@
   gap: 0.5rem;
   margin-bottom: 1rem;
   margin-right: 6rem;
+  justify-content: flex-end;
 }
 
 /* ✅ 탭 버튼 스타일 */
@@ -56,16 +60,12 @@
 /* ✅ 카드 리스트 (반응형 너비 기반) */
 .cardSlider {
   position: relative;
-  /* ← 오버레이 기준 */
   --cols: 5;
-  --gap: 24px;
+  --gap: 2px;
   display: grid;
 
-  /* 한 줄 최대 5칸, 여러 줄 허용 */
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-  gap: var(--gap);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 
-  /* 가운데 정렬 & 좌우 동일 마진 */
   max-width: calc(var(--cols) * 220px + (var(--cols) - 1) * var(--gap));
   margin-left: auto;
   margin-right: auto;

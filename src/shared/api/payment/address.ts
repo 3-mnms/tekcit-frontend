@@ -1,4 +1,6 @@
+import { useAuth } from '@/models/auth/useAuth'
 import { api } from '@/shared/config/axios'
+import { useAuthStore } from '@/shared/storage/useAuthStore'
 
 // 🔹 백엔드 DTO
 export type AddressDTO = {
@@ -24,18 +26,16 @@ function unwrapOrThrow<T>(resp: ApiResponse<T>): T {
   return resp.data
 }
 
+const accessToken = useAuthStore.getState().accessToken
+
 // 주소 목록 조회
 export async function getAddress(): Promise<AddressDTO[]> {
-  // 🔹 발급받은 실제 JWT 토큰 그대로 넣기
-  const token =
-    "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJmZXN0aXZhbC11c2VyLXNlcnZpY2UiLCJzdWIiOiIxIiwicm9sZSI6IlVTRVIiLCJuYW1lIjoiXHVBRTQwXHVCQkZDXHVDODE1IiwiaWF0IjoxNzU2MTgwODIwLCJleHAiOjE4MTc1NjE4MDgyMH0.Uof_5MBYlOX7C63Fg7o2wCGA-DGikJf6reNcyUaHwO0AzeN02mI1jl04Y2CFe1d3eSGIP73hYB6IHpbLiRcosuZjfiM9k2kFCWjF5NnX3unh01r5lfrof52igJhzbR0-6wujeM6BSfyCAU_JclrXqczGxFwXeQ-dCKhHJ9FmA3eNv1AiL0cwJ5He1hfJW6gfL-5h5P9-hlxGKSbvlHYcfHhgKuiTT1Gf5ufpXiLZV21OHK7UKHDnqhvF48PloCd4YFCW7_a50PT5poNGGazAGVGDwEkLp6kMbI2Fk33MR1uZ_sMCJjT1KrQn_bSuvYF2xS9DALh8vs-b2T--3tqvVg"
-  
-    console.log('[getAddress] calling with token:', token?.slice(0, 12), '...');
+    console.log('[getAddress] calling with token:', accessToken?.slice(0, 12), '...');
   
     // 백엔드 api 엔드포인트 호출
     const { data } = await api.get<ApiResponse<AddressDTO[]>>('/addresses/allAddress', {
     params: { _: Date.now() },
-    headers: { Authorization: `Bearer ${token}` }, // 👈 토큰 직접 삽입
+    headers: { Authorization: `Bearer ${accessToken}` },
   })
 
   return unwrapOrThrow(data)

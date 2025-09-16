@@ -28,7 +28,7 @@ const SignupPage: React.FC = () => {
     if (!parsed.success) return alert('입력값을 다시 확인해주세요.')
     const dto = mapToSignupDto(parsed.data)
     signupMut.mutate(dto, {
-      onSuccess: () => { alert('회원가입 성공! 로그인 페이지로 이동합니다.'); nav('/login') },
+      onSuccess: () => { alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.'); nav('/login') },
       onError: () => alert('회원가입 실패'),
     })
   }

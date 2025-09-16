@@ -1,7 +1,7 @@
 // src/components/my/dropdown/NotificationDetailDropdown.tsx
 import React, { useEffect } from 'react'
 import styles from './NotificationDetailDropdown.module.css'
-import { FaChevronLeft } from 'react-icons/fa6'
+import { FaChevronLeft, FaClock } from 'react-icons/fa6'
 import { useQuery } from '@tanstack/react-query'
 import { fetchNotificationDetail } from '@/shared/api/my/notice'
 import { useNotificationStore } from '@/models/dropdown/NotificationStore'
@@ -41,7 +41,7 @@ const NotificationDetailDropdown: React.FC<Props> = ({ nid, onBack, contentOnly 
         <button className={styles.backBtn} onClick={onBack} aria-label="뒤로">
           <FaChevronLeft size={14} />
         </button>
-        <h3 className={styles.title}>공지사항</h3>
+        <h1 className={styles.title}>공지사항</h1>
       </div>
 
       {q.isLoading ? (
@@ -52,6 +52,7 @@ const NotificationDetailDropdown: React.FC<Props> = ({ nid, onBack, contentOnly 
         <div className={styles.detail}>
           <div className={styles.meta}>
             <span className={styles.fname}>{q.data.fname}</span>
+            <FaClock className={styles.clockIcon} />
             <span className={styles.time}>{timeAgoKorean(q.data.sentAt)}</span>
           </div>
           <h4 className={styles.detailTitle}>{q.data.title}</h4>

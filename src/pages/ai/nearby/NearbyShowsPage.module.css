@@ -10,22 +10,56 @@
 
 .headerRow {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 18px;
+  flex-wrap: wrap;
 }
 
 .titleWrap {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
 }
 
+.titleWrap i {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: #4d9afd;
+  color: #fff;
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 8px;
+}
+
+
 .titleWrap h1 {
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1.2;
   margin: 0;
-  font-weight: 600;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.titleBlock h1 {
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 0;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
 }
 
 .addr {
@@ -34,22 +68,25 @@
 }
 
 .addrBtn {
-  margin-left: 8px;
+  margin-left: 6px;
   font-size: 13px;
-  color: #4d9afd;
+  color: #0c5bc2;
   background: transparent;
   border: none;
   cursor: pointer;
-  text-decoration: underline;
+  /* text-decoration: underline; */
 }
 
 .content {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 18px;
 }
 
-/* 리스트 */
+.embedMode {
+  display: block;
+}
+
 .list {
   display: flex;
   flex-direction: column;
@@ -64,6 +101,10 @@
   border-radius: 12px;
   padding: 16px;
   background: #fff;
+}
+
+.cardAccent {
+  border-left: 4px solid #4D9AFD;
 }
 
 .poster {
@@ -87,25 +128,39 @@
 
 .cardTitle {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  /* line-height: 1.35; */
+}
+
+.navIcon {
+  width: 15px;
+  height: 15px;
+  margin-top: 3px;
+  margin-right: 3px;
+  color: gray;
 }
 
 .venue {
   color: #666;
   font-size: 13px;
+  display: flex;
+  margin: 10px 0;
 }
 
 .distance {
   color: #222;
   font-size: 13px;
+  display: flex;
 }
 
 .actions {
-  margin-top: 0;        
+  margin-top: 0;
   display: flex;
   gap: 8px;
-  flex-wrap: nowrap;       
-  align-self: end;          
+  flex-wrap: nowrap;
+  align-self: end;
   justify-self: end;
 }
 
@@ -136,7 +191,11 @@
   color: whitesmoke;
 }
 
-/* 지도 */
+.linkIcon {
+  width: 15px;
+  margin-right: 5px;
+}
+
 .mapWrap {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
@@ -144,8 +203,6 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 80vh;
-  /* margin-top: -50px; */
 }
 
 .mapHeader {

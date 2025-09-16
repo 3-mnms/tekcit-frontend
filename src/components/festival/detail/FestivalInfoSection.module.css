@@ -16,6 +16,9 @@
   width: 30%;
 }
 
+.posterHide { visibility: hidden; }
+/* .posterShow { visibility: visible; } */
+
 .poster {
   width: 100%;
   aspect-ratio: 3 / 4;

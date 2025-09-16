@@ -8,7 +8,7 @@ import type { TossPaymentHandle } from '@/components/payment/pay/TossPayment'
 import PaymentInfo from '@/components/payment/pay/PaymentInfo'
 import BookingPaymentHeader from '@/components/payment/pay/BookingPaymentHeader'
 import ReceiveInfo from '@/components/payment/delivery/ReceiveInfo'
-
+import Spinner from '@/components/common/spinner/Spinner'
 import Button from '@/components/common/button/Button'
 import PasswordInputModal from '@/components/payment/modal/PasswordInputModal'
 import AlertModal from '@/components/common/modal/AlertModal'
@@ -75,13 +75,15 @@ const BookingPaymentPage: React.FC = () => {
   const { data: tokenInfo } = useTokenInfoQuery()
   const userId = Number(tokenInfo?.userId)
 
-  const amountToPay = finalAmount ?? checkout.amount
+  const amountToPay = finalAmount
 
   const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState(false)
   const [isPaying, setIsPaying] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [paymentId, setPaymentId] = useState<string | null>(null)
   const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS)
+
+  const accessToken = useAuthStore.getState().accessToken
 
   // 최초 paymentId 생성 + 세션 저장
   useEffect(() => {
@@ -145,7 +147,9 @@ const BookingPaymentPage: React.FC = () => {
       // ✅ 최신 @stomp/stompjs Client 방식 사용
       const client = new Client({
         webSocketFactory: () => new SockJS('http://localhost:10000/ws'), // ✅ 포트 수정
-        connectHeaders: {},
+        connectHeaders: {
+          Authorization: `Bearer ${accessToken}`
+        },
         debug: (str) => {
           console.log('[STOMP Debug]', str)
         },
@@ -415,13 +419,14 @@ const BookingPaymentPage: React.FC = () => {
             <PaymentInfo />
           </div>
           <div className={styles.buttonWrapper}>
+            {isPaying && <Spinner />} 
             <Button
               type="button"
               className={styles.payButton}
               onClick={handlePayment}
               aria-busy={isPaying}
             >
-              {isPaying ? '결제 중...' : '결제하기'}
+             결제하기
             </Button>
           </div>
         </aside>

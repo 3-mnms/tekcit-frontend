@@ -1,4 +1,5 @@
-import React from 'react'
+// src/pages/my/myInfo/address/AddressListPage.tsx
+import React, { useMemo } from 'react'  // ✅ useMemo 추가
 import { useNavigate } from 'react-router-dom'
 import AddressItem from '@/components/my/myinfo/address/AddressItem'
 import AddressEmpty from '@/components/my/myinfo/address/AddressEmpty'
@@ -25,14 +26,27 @@ const AddressListPage: React.FC = () => {
         qc.invalidateQueries({ queryKey: ['addresses'] })
         qc.invalidateQueries({ queryKey: ['addresses', 'default'] })
       },
-      onError: (e: any) => {
-        alert(e?.response?.data?.message || '배송지 삭제에 실패했습니다.')
+      onError: (e: unknown) => {
+        const msg =
+          (e as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          '배송지 삭제에 실패했습니다.'
+        alert(msg)
       },
     })
   }
 
-  const hasAny =
-    (data && data.some((a) => (a.address ?? '').trim() !== '')) ?? false
+  const hasAny = useMemo(
+    () => (data && data.some((a) => (a.address ?? '').trim() !== '')) ?? false,
+    [data],
+  )
+
+  const sorted = useMemo(
+    () =>
+      (data ?? [])
+        .slice()
+        .sort((a, b) => Number(b?.isDefault ?? false) - Number(a?.isDefault ?? false)),
+    [data],
+  )
 
   return (
     <section className={styles.container}>
@@ -40,7 +54,6 @@ const AddressListPage: React.FC = () => {
         <h2 className={styles.title}>배송지 관리</h2>
       </div>
 
-      {/* 로딩/에러 */}
       {(isLoading || isError) && (
         <div className={styles.skelCard}>
           {isLoading && (
@@ -51,7 +64,7 @@ const AddressListPage: React.FC = () => {
           )}
           {isError && (
             <div className={styles.errorText}>
-              {(error as any)?.message ?? '주소 목록을 불러오지 못했어요.'}
+              {(error as { message?: string })?.message ?? '주소 목록을 불러오지 못했어요.'}
             </div>
           )}
         </div>
@@ -63,10 +76,10 @@ const AddressListPage: React.FC = () => {
             <AddressEmpty />
           ) : (
             <div className={styles.list}>
-              {(data ?? []).map((addr) => (
+              {sorted.map((addr) => (
                 <AddressItem
                   key={addr.id}
-                  id={String(addr.id)}
+                  id={Number(addr.id)}
                   name={addr.name}
                   phone={addr.phone}
                   zipCode={addr.zipCode}

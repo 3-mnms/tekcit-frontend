@@ -1,17 +1,25 @@
 .container {
-  display: grid;
-  gap: 1.2rem;
   width: 100%;
+  padding: 1.5rem 2%;
+  background-color: white;
+  border-radius: 1rem;
+  border: none;
+  margin-bottom: 2rem;
 }
 
 .title {
-  display: inline-flex;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 700;
 }
 
-.icon { color: #4d9afd; }
+.icon {
+  font-size: 1.2rem;
+  color: #4D9AFD;
+}
 
 .description { color: #6b7280; }
 
