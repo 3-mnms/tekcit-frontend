@@ -145,6 +145,11 @@ export async function apiWatchTransfer(
         ...it,
         status: normalizeBEStatus((it as any).status),
       }));
+      
+      console.log('[apiWatchTransfer] path:', path, 
+            '\nraw:', raw, 
+            '\nnormalized:', normalized);
+
       if (normalized.length) return normalized; // 첫 성공 경로 반환
     } catch (e) {
       lastErr = e;
