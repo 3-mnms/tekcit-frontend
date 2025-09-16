@@ -64,6 +64,7 @@ import OperatManageUserPage from '@/pages/operatManageUser/OperatManageUserPage'
 import ProductDetailPage from '@/pages/productManage/ProductDetailPage'
 import TicketHolderListPage from '@/pages/productManage/TicketHolderListPage'
 import StatisticsPage from '@/pages/productManage/StatisticsPage'
+import PaymentManagement from '@/components/manage/PaymentManagement'
 
 // ai
 import NearbyShowsPage from '@/pages/ai/nearby/NearbyShowsPage'
@@ -178,7 +179,7 @@ export const router = createBrowserRouter([
   },
 
   {
-    path: '/admin',
+    path: '/admin', 
     children: [
       { path: '', element: <ProductRegisterPage /> },
       { path: 'operatManage/user', element: <OperatManageUserPage /> },
@@ -190,6 +191,7 @@ export const router = createBrowserRouter([
       { path: 'product-detail/:fid', element: <ProductDetailPage /> },
       { path: 'productManage/TicketHolderList/:fid', element: <TicketHolderListPage /> },
       { path: 'productManage/Statistics/:fid', element: <StatisticsPage /> },
+      { path: 'paymentManage', element: <PaymentManagement /> },
 
       { path: 'button', element: <HomePage /> },
       { path: 'layout', element: <Layout /> },

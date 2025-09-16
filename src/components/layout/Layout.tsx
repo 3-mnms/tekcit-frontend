@@ -14,6 +14,7 @@ const adminMenuItems = [
   { path: '/admin/productRegist', name: '상품 등록' },
   { path: '/admin/productManage', name: '상품 관리' },
   { path: '/admin/announcement', name: '공지사항' },
+  { path: '/admin/paymentManage', name: '계좌 관리' },
   {
     name: '운영 관리',
     subMenu: [
