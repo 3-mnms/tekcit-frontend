@@ -12,9 +12,13 @@ export default function App() {
   useEffect(() => {
     onMessageListener()
       .then((payload) => {
-        if (document.visibilityState === "visible" && payload?.data) {
-          console.log("포그라운드 알림 도착:", payload);
-          alert(`${payload.data.title}\n${payload.data.body}`);
+        console.log("포그라운드 알림 도착:", payload);
+        const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+
+        if (!isMobile) {
+          const title = payload.notification?.title || payload.data?.title;
+          const body = payload.notification?.body || payload.data?.body;
+          alert(`${title}\n${body}`);
         }
       })
       .catch((err) => console.error("포그라운드 알림 처리 오류:", err));
