@@ -60,12 +60,8 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
 
         // 2) 리다이렉트 URL 구성(paymentId 쿼리 포함)
         const finalRedirect = (() => {
-          const base = redirectUrl ??
-            successUrl ??
-            `${window.location.origin}/payment/result?type=booking`
-          const finalRedirect =
-            `${base}${base.includes('?') ? '&' : '?'}paymentId=${encodeURIComponent(paymentId)}`
-
+          const base = redirectUrl ?? successUrl ?? `${window.location.origin}/payment/result?type=booking`
+          const finalRedirect = `${base}${base.includes('?') ? '&' : '?'}}`
         })()
 
         // 3) 백엔드 사전요청 (구매자/판매자/주문 컨텍스트 저장)
@@ -84,9 +80,6 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
         })
         try {
           const result = await paymentConfirm(paymentId);
-
-
-          // ✅ 동일 페이지에서 쿼리만 업데이트하여 결과 렌더 유도 멍
 
           if (result.success) {
             navigate(`/payment/result?paymentId=${paymentId}`)

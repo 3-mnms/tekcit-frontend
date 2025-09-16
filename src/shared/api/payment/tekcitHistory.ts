@@ -1,9 +1,8 @@
-// 주석: 테킷페이 잔액/내역 조회 + React Query 훅 멍
+// src/shared/api/payment/tekcitHistory.ts - 수정된 버전
 import { api } from '@/shared/config/axios'
 import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
 
-/* ───────── Envelope/Schema ───────── */
 const Envelope = <T extends z.ZodTypeAny>(data: T) =>
   z.object({ success: z.boolean(), data: data.nullable(), message: z.string().optional() })
 
@@ -13,18 +12,18 @@ const BalanceData = z.object({
 })
 export type TekcitBalance = z.infer<typeof BalanceData>
 
+// 백엔드 실제 응답에 맞는 정확한 스키마
 const RawHistoryItem = z.object({
-  paymentId: z.string().optional(),
-  amount: z.number().int(),
-  currency: z.string().optional(),
-  payMethod: z.string().optional(),
-  method: z.string().optional(),
-  type: z.string().optional(),
-  payTime: z.string().optional(),
-  createdAt: z.string().optional(),
-  paymentStatus: z.string().optional(),
-  transactionType: z.string().optional(),
+  paymentId: z.string(),                    // required
+  amount: z.number().int(),                 // required
+  currency: z.string(),                     // required
+  payMethod: z.string(),                    // required ("POINT_PAYMENT")
+  payTime: z.string(),                      // required (ISO string)
+  paymentStatus: z.string(),                // required ("PAID")
+  transactionType: z.string(),              // required ("CREDIT", "DEBIT", "UNKNOWN")
+  buyerId: z.number().int().nullable(),     // nullable! 중요함
 })
+
 const SpringPageRaw = z.object({
   totalElements: z.number().int(),
   totalPages: z.number().int(),
@@ -38,36 +37,37 @@ const SpringPageRaw = z.object({
   last: z.boolean(),
   empty: z.boolean(),
 })
-export type WalletHistoryItem = {
-  paymentId?: string;
-  amount: number;
-  method?: string;
-  time: string;
-  paymentStatus?: string;
-  transactionType?: string;
-  Currency?: string;
-}
-export type WalletHistoryPage = Omit<z.infer<typeof SpringPageRaw>, 'content'> & { content: WalletHistoryItem[] }
 
-/* ───────── Normalizer ───────── */
+// 정규화된 타입
+export type WalletHistoryItem = { 
+  paymentId: string
+  amount: number
+  method: string                            // payMethod -> method
+  time: string                              // payTime -> time
+  transactionType: 'CREDIT' | 'DEBIT' | 'UNKNOWN'
+  paymentStatus: string
+  buyerId: number | null
+}
+
+export type WalletHistoryPage = Omit<z.infer<typeof SpringPageRaw>, 'content'> & { 
+  content: WalletHistoryItem[] 
+}
+
 function normalizePage(raw: z.infer<typeof SpringPageRaw>): WalletHistoryPage {
   return {
     ...raw,
     content: raw.content.map((r) => ({
       paymentId: r.paymentId,
       amount: r.amount,
-      method: r.payMethod ?? r.method ?? r.type,
-      time: r.payTime ?? r.createdAt ?? new Date().toISOString(),
+      method: r.payMethod,                  // payMethod -> method
+      time: r.payTime,                      // payTime -> time
+      transactionType: r.transactionType as 'CREDIT' | 'DEBIT' | 'UNKNOWN',
       paymentStatus: r.paymentStatus,
-      transactionType: r.transactionType,
-      currency: r.currency,
+      buyerId: r.buyerId,
     })),
   }
 }
 
-/* ───────── API ───────── */
-// 주석: ✅ 헤더 직접 세팅 제거 — 인터셉터가 자동 주입 멍
-// 테킷 페이 잔액 조회
 export async function fetchTekcitBalance(): Promise<TekcitBalance> {
   const { data } = await api.get('/tekcitpay')
   const parsed = Envelope(BalanceData).parse(data)
@@ -75,32 +75,44 @@ export async function fetchTekcitBalance(): Promise<TekcitBalance> {
   return parsed.data
 }
 
-// 페이 내역 조회
 export async function fetchTekcitHistory(params: { page?: number; size?: number }): Promise<WalletHistoryPage> {
   const page = params?.page ?? 0
   const size = Math.max(1, params?.size ?? 10)
-  const { data } = await api.get('/tekcitpay/history', { params: { page, size } }) // 주석: yearMonth 안 보냄 멍
-
-  const parsed = Envelope(SpringPageRaw).safeParse(data)
-  if (!parsed.success || !parsed.data.data) {
-    return {
-      totalElements: 0,
-      totalPages: 0,
-      first: true,
-      size,
-      content: [],
-      number: page,
-      numberOfElements: 0,
-      last: true,
-      empty: true,
-      sort: undefined,
-      pageable: undefined,
+  
+  try {
+    const { data } = await api.get('/tekcitpay/history', { params: { page, size } })
+    
+    console.log('Raw API response:', data) // 디버깅용
+    
+    const parsed = Envelope(SpringPageRaw).safeParse(data)
+    if (!parsed.success) {
+      console.error('Schema validation failed:', parsed.error)
+      console.error('Raw data:', data)
+      throw new Error('API 응답 형식이 올바르지 않습니다.')
     }
+    
+    if (!parsed.data.data) {
+      console.warn('API returned null data')
+      return {
+        totalElements: 0,
+        totalPages: 0,
+        first: true,
+        size,
+        content: [],
+        number: page,
+        numberOfElements: 0,
+        last: true,
+        empty: true,
+      }
+    }
+    
+    return normalizePage(parsed.data.data)
+  } catch (error) {
+    console.error('fetchTekcitHistory error:', error)
+    throw error
   }
-  return normalizePage(parsed.data.data)
 }
 
-/* ───────── React Query ───────── */
 export const WalletQueryKeys = {
   balance: ['wallet', 'balance'] as const,
   history: (page: number, size: number) => ['wallet', 'history', page, size] as const,
@@ -111,7 +123,7 @@ export function useWalletBalance() {
     queryKey: WalletQueryKeys.balance,
     queryFn: fetchTekcitBalance,
     staleTime: 30_000,
-    retry: 0,
+    retry: 1,
     refetchOnWindowFocus: false,
   })
 }
@@ -122,8 +134,9 @@ export function useWalletHistory(opts: { page: number; size: number }) {
     queryKey: WalletQueryKeys.history(page, size),
     queryFn: () => fetchTekcitHistory({ page, size }),
     keepPreviousData: true,
-    retry: 0,
+    retry: 1,
     refetchOnWindowFocus: false,
+    staleTime: 10_000,
   })
 }
 
