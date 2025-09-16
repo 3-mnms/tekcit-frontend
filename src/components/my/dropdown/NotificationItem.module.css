@@ -1,55 +1,98 @@
 .item {
-  border: 1px solid #ddd;
-  border-radius: 0.75rem;
-  padding: 0.75rem;
-  margin-bottom: 0.75rem;
-  background-color: white;
   position: relative;
+  display: block;
+  border-radius: 12px;
+  padding: 12px 34px 12px 12px;
+  margin-bottom: 10px;
+  background: #fff;
+  border: 1px solid #e6e8ec;
+  transition: background-color .15s ease, border-color .15s ease, transform .04s ease;
+  cursor: pointer;
+}
+
+.unread {
+  background: #eef5ff;
+  border-color: #c7d2fe;
 }
 
 .read {
-  color: #999;
+  color: #8a93a0;
+}
+
+.item:hover {
+  border-color: #d1d5db;
+}
+
+.unread:hover {
+  background: #e6f0ff;
+  border-color: #b9c6ff;
+}
+
+.content {
+  min-width: 0;
 }
 
 .topRow {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
 .title {
-  font-weight: bold;
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.read .title {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.unreadDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #0551f5;
+  flex-shrink: 0;
+  margin-right: -20px;
+}
+
+.checkIcon {
+  font-size: 0.8rem;
+  color: #10b981;
+  flex-shrink: 0;
+  margin-right: -20px;
 }
 
 .message {
-  margin-top: 0.25rem;
-}
-
-.bottom {
-  margin-top: 0.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  margin-top: 4px;
+  color: #6b8cce;
+  font-size: 0.86rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bottomRight {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 0.75rem;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.clockIcon {
+  font-size: 0.75rem;
+  color: #9aa3af;
+  margin-left: 10px;
+  margin-top: 5px;
 }
 
 .time {
-  font-size: 0.75rem;
-  color: inherit;
-}
-
-.checkBtn {
-  border: none;
-  font-size: 0.75rem;
-  cursor: pointer;
-  color: white;
-}
-
-.checkBtn:focus {
-  outline: none;
+  font-size: 0.78rem;
+  color: #9aa3af;
+  margin-top: 3px;
 }

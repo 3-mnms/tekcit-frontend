@@ -26,6 +26,7 @@ const FestivalInfoSection: React.FC<Props> = ({ detail, loading }) => {
 
   // ✅ 로그인 토큰
   const accessToken = useAuthStore((s) => s.accessToken);
+  const [imgReady, setImgReady] = React.useState(false);
 
   // ✅ 찜 상태/카운트 + 토글 뮤테이션
   const { data: likedData } = useIsFavorite(fid, Boolean(accessToken)); // 내 찜 여부(로그인 필요)
@@ -81,11 +82,25 @@ const FestivalInfoSection: React.FC<Props> = ({ detail, loading }) => {
       {/* 왼쪽: 포스터 + 찜 */}
       <div className={styles.left}>
         {detail.poster ? (
-          <img src={detail.poster} alt={`${detail.prfnm} 포스터`} className={styles.poster} />
+          <>
+            <img
+              src={detail.poster}
+              alt={`${detail.prfnm} 포스터`}
+              className={`${styles.poster} ${imgReady ? styles.posterShow : styles.posterHide}`}
+              loading="eager"
+              decoding="sync"
+              fetchPriority="high"
+              onLoad={() => setImgReady(true)}
+            />
+            {!imgReady && (
+              <div
+                className={styles.posterPlaceholder}
+              />
+            )}
+          </>
         ) : (
           <div className={styles.posterPlaceholder}>No Image</div>
         )}
-
         <button
           className={`${styles.likeBtn} ${liked ? styles.likeBtnLiked : ''}`}
           type="button"

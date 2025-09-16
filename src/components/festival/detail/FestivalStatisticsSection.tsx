@@ -4,6 +4,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import styles from './FestivalStatisticsSection.module.css';
 import { FaChartBar } from 'react-icons/fa';
 import { useFestivalUserStatistics } from '@/models/statistics/tanstack-query/useFestivalUserStatisticsDetail';
+import Spinner from '@/components/common/spinner/Spinner';
 
 type Datum = { label: string; value: number };
 const AGE_ORDER = ['10대', '20대', '30대', '40대', '50대 이상'];
@@ -95,7 +96,7 @@ const FestivalStatisticsSection: React.FC = () => {
       )}
 
       {!!festivalId && isLoading && (
-        <div>예매자 통계를 불러오는 중…</div>
+          <Spinner />
       )}
 
       {!!festivalId && isError && (

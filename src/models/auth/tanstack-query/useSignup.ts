@@ -4,8 +4,9 @@ import { signupUser, checkLoginId, sendEmailCode, verifyEmailCode, checkEmail } 
 export const useSignupMutation = () =>
   useMutation({ mutationFn: signupUser });
 
-export const useCheckLoginId = () =>
-  useMutation({ mutationFn: (loginId: string) => checkLoginId(loginId) });
+export const useCheckLoginId = () => useMutation<boolean, unknown, string>({
+  mutationFn: (loginId: string) => checkLoginId(loginId),
+});
 
 export const useCheckEmail = () =>
   useMutation({ mutationFn: (email: string) => checkEmail(email) });

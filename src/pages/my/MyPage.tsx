@@ -3,17 +3,7 @@ import React from 'react'
 import Sidebar from '@/components/my/sidebar/Sidebar'
 import Header from '@/components/common/header/Header'
 import styles from './MyPage.module.css'
-import { Outlet } from 'react-router-dom'
 import { useOutlet, useNavigate, useLocation } from 'react-router-dom'
-
-// 실제 페이지 컴포넌트들 import
-import ProfileInfoPage from '@/pages/my/myInfo/basicinfo/DetailPage'
-import ChangePasswordPage from '@/pages/my/myInfo/changepassword/ChangePasswordPage'
-import AddressPage from '@/pages/my/myInfo/address/AddressListPage'
-import WithdrawPage from '@/pages/my/myInfo/withdraw/WithdrawPage'
-import TicketHistoryPage from '@/pages/my/ticket/TicketHistoryPage'
-import TransferTicketPage from '@/pages/my/ticket/TransferTicketPage'
-import BookmarkPage from '@/pages/my/myInfo/bookmark/BookmarkPage'
 
 export type TabKey =
   | 'profileInfo'
@@ -24,32 +14,48 @@ export type TabKey =
   | 'ticketTransfer'
   | 'bookmark'
 
-const contentMap: Record<TabKey, React.ReactNode> = {
-  profileInfo: <ProfileInfoPage />,
-  passwordChange: <ChangePasswordPage />,
-  deliveryManagement: <AddressPage />,
-  accountWithdrawal: <WithdrawPage />,
-  bookingHistory: <TicketHistoryPage />,
-  ticketTransfer: <TransferTicketPage />,
-  bookmark: <BookmarkPage />,
+// 탭 <-> 경로 매핑
+const TAB_TO_PATH: Record<TabKey, string> = {
+  profileInfo: '/mypage/myinfo/detail',
+  passwordChange: '/mypage/myinfo/changepassword',
+  deliveryManagement: '/mypage/myinfo/address',
+  accountWithdrawal: '/mypage/myinfo/withdraw',
+  bookingHistory: '/mypage/ticket/history',
+  ticketTransfer: '/mypage/ticket/transfer',
+  bookmark: '/mypage/bookmark',
+}
+
+const PATH_TO_TAB: Array<[RegExp, TabKey]> = [
+  [/^\/mypage\/?$/, 'profileInfo'],
+  [/^\/mypage\/myinfo\/?$/, 'profileInfo'],
+  [/^\/mypage\/myinfo\/detail\/?$/, 'profileInfo'],
+  [/^\/mypage\/myinfo\/changepassword(?:\/.*)?$/, 'passwordChange'],
+  [/^\/mypage\/myinfo\/address(?:\/.*)?$/, 'deliveryManagement'],
+  [/^\/mypage\/myinfo\/withdraw(?:\/.*)?$/, 'accountWithdrawal'],
+  [/^\/mypage\/ticket\/history(?:\/.*)?$/, 'bookingHistory'],
+  [/^\/mypage\/ticket\/transfer(?:\/.*)?$/, 'ticketTransfer'],
+  [/^\/mypage\/bookmark(?:\/.*)?$/, 'bookmark'],
+];
+
+const resolveTabFromPath = (path: string): TabKey => {
+  for (const [re, tab] of PATH_TO_TAB) if (re.test(path)) return tab
+  return 'profileInfo'
 }
 
 const MyPage: React.FC = () => {
-  // 기본 탭은 예매/취소 내역
-  const [activeTab, setActiveTab] = React.useState<TabKey>('bookingHistory')
-
   const outletEl = useOutlet()
   const navigate = useNavigate()
   const location = useLocation()
 
+  // ✅ URL 기준으로 항상 activeTab 계산
+  const activeTab = React.useMemo(() => resolveTabFromPath(location.pathname), [location.pathname])
+
   const handleTabChange = React.useCallback(
     (k: TabKey) => {
-      setActiveTab(k)
-      if (location.pathname !== '/mypage') {
-        navigate('/mypage') // Outlet 비우고 탭 콘텐츠 노출
-      }
+      const to = TAB_TO_PATH[k]
+      if (to && to !== location.pathname) navigate(to)
     },
-    [location.pathname, navigate],
+    [navigate, location.pathname],
   )
 
   return (
@@ -59,7 +65,8 @@ const MyPage: React.FC = () => {
         <aside className={styles.sidebarSlot}>
           <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
         </aside>
-        <main className={styles.content}>{outletEl ?? contentMap[activeTab]}</main>
+        {/* ✅ 라우트 아웃렛을 우선 사용 (중첩 라우팅) */}
+        <main className={styles.content}>{outletEl}</main>
       </div>
     </div>
   )

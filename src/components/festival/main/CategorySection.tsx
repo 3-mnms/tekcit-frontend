@@ -11,8 +11,8 @@ import {
   getFestivals, // ← 카테고리 페이지의 하위 탭 계산용(메인에선 안 씀)
 } from '@/shared/api/festival/festivalApi'
 import { useCategorySelection } from '@/shared/storage/useCategorySelection'
+import { getFestivalCategories } from '@/shared/api/festival/festivalApi'
 
-/* ───────────────────────── 유틸 ───────────────────────── */
 const canon = (s?: string) =>
   (s ?? '')
     .trim()
@@ -22,7 +22,6 @@ const canon = (s?: string) =>
 /** 카테고리 그룹 매핑(하위 탭 계산용) */
 const CATEGORY_MAP: Record<string, string> = {
   대중음악: '대중음악',
-  대중무용: '무용',
   '무용(서양/한국무용)': '무용',
   뮤지컬: '뮤지컬/연극',
   연극: '뮤지컬/연극',
@@ -66,6 +65,9 @@ type PagerProps = {
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
 
 const Pager: React.FC<PagerProps> = ({ page, totalPages, onChange }) => {
+  const { name: slug } = useParams<{ name?: string }>()
+  const selectedCategory = useMemo(() => (slug ? (SLUG_TO_GROUP[slug] ?? null) : null), [slug])
+
   if (totalPages <= 1) return null
 
   const makePages = () => {
@@ -149,7 +151,7 @@ const CategorySection: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const pageParam = parseInt(searchParams.get('page') || '1', 10)
   const page1 = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam
-  const PAGE_SIZE = 15
+  const PAGE_SIZE = 20
 
   // ✅ 컨테이너 기준 칼럼 수(1~5) 계산
   const gridRef = useRef<HTMLDivElement | null>(null)
@@ -176,15 +178,17 @@ const CategorySection: React.FC = () => {
   }, [])
 
   /* ── 메인(비카테고리) : 전체 공연 페이지네이션 ── */
-  const {
-    data: allResp,
-    isLoading: isLoadingAll,
-  } = useQuery<PageResp<Festival>>({
+  const { data: allResp, isLoading: isLoadingAll } = useQuery<PageResp<Festival>>({
     queryKey: ['allFestivals', page1, PAGE_SIZE],
     enabled: !isCategoryPage,
     queryFn: ({ signal }) => getAllFestivalsPaged(page1 - 1, PAGE_SIZE, signal),
     staleTime: 60_000,
-    keepPreviousData: true,
+  })
+
+  const { data: categoryList } = useQuery({
+    queryKey: ['festivalCategories.forChildren'], // 헤더의 키와 구분되게
+    queryFn: getFestivalCategories,
+    staleTime: 5 * 60_000,
   })
 
   /* ── 카테고리 페이지 : 하위 원본 장르 버튼 + 해당 장르 페이지네이션 ── */
@@ -204,36 +208,47 @@ const CategorySection: React.FC = () => {
 
   const presentChildren = useMemo(() => {
     if (!isCategoryPage) return []
-    const set = new Set<string>()
-    festivals
-      .filter((f) => normalizeGroup((f as any).genrenm) === groupFromSlug)
-      .forEach((f) => set.add(canon((f as any).genrenm)))
-    return Array.from(set)
-  }, [isCategoryPage, festivals, groupFromSlug])
+    // 1) festivals 샘플의 genrenm  2) 카테고리 목록  둘 중 있는 걸로 계산
+    const candidates: string[] = [
+      ...new Set([
+        ...festivals.map((f) => (f as any).genrenm).filter(Boolean),
+        ...(categoryList ?? []),
+      ]),
+    ] as string[]
 
-  const showChildButtons = isCategoryPage && presentChildren.length > 1
+    const set = new Set<string>()
+    candidates.filter((c) => normalizeGroup(c) === groupFromSlug).forEach((c) => set.add(canon(c)))
+
+    const arr = Array.from(set)
+    // 무용만 안 잡히는 경우를 위한 안전 폴백
+    if (arr.length === 0 && groupFromSlug === '무용') {
+      return ['무용(서양/한국무용)', '대중무용']
+    }
+    return arr
+  }, [isCategoryPage, festivals, categoryList, groupFromSlug])
 
   useEffect(() => {
-    if (!isCategoryPage || presentChildren.length === 0) {
+    if (!isCategoryPage) {
       setActiveChild(null)
+      return
+    }
+    if (presentChildren.length === 0) {
+      if (groupFromSlug === '무용') setActiveChild('무용(서양/한국무용)')
+      else setActiveChild(null)
       return
     }
     const canonList = presentChildren.map(canon)
     if (!activeChild || !canonList.includes(canon(activeChild))) {
       setActiveChild(presentChildren[0])
     }
-  }, [isCategoryPage, presentChildren, activeChild, setActiveChild])
+  }, [isCategoryPage, presentChildren, activeChild, setActiveChild, groupFromSlug])
 
   const genrenmForQuery = isCategoryPage ? (activeChild ?? undefined) : undefined
-  const {
-    data: catResp,
-    isLoading: isLoadingCat,
-  } = useQuery<PageResp<Festival>>({
+  const { data: catResp, isLoading: isLoadingCat } = useQuery<PageResp<Festival>>({
     queryKey: ['categoryPage', genrenmForQuery, page1, PAGE_SIZE],
     enabled: !!genrenmForQuery,
     queryFn: ({ signal }) => getFestivalsByCategory(genrenmForQuery!, page1 - 1, PAGE_SIZE, signal),
     staleTime: 60_000,
-    keepPreviousData: true,
   })
 
   // 최종 데이터/페이지/로딩 상태
@@ -278,25 +293,8 @@ const CategorySection: React.FC = () => {
     <section ref={sectionRef} className={styles.section}>
       <div className={styles.sectionHeader}>
         <h2 className={styles.title}>{isCategoryPage ? '분야별 공연' : '전체 공연'}</h2>
-
-        {/* 카테고리 페이지: 하위 원본 장르 탭 (2개 이상일 때만) */}
-        {isCategoryPage && showChildButtons && (
-          <div className={styles.tabList}>
-            {presentChildren.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setActiveChild(c)}
-                className={`${styles.tabButton} ${canon(activeChild) === canon(c) ? styles.active : ''}`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* 카드 그리드 */}
       <div
         className={styles.cardSlider}
         ref={gridRef}

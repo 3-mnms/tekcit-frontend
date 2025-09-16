@@ -8,11 +8,9 @@ import AddressForm from '@/components/payment/address/AddressForm';
 import TicketBookerInfoSection from '@/components/booking/TicketBookerInfoSection';
 import OrderConfirmSection from '@/components/booking/OrderConfirmSection';
 
-import { usePhase2Detail, useSelectDelivery } from '@/models/booking/tanstack-query/useBookingDetail'; // ✅ 추가
+import { usePhase2Detail, useSelectDelivery } from '@/models/booking/tanstack-query/useBookingDetail';
 import { usePreReservation } from '@/models/booking/tanstack-query/useUser';
-import { useAuthStore } from '@/shared/storage/useAuthStore';
-
-// ✅ UI → BE 매핑 (API는 그대로!)
+import Spinner from '@/components/common/spinner/Spinner'
 import { mapUiToBeDelivery } from '@/models/booking/bookingTypes';
 
 type NavState = {
@@ -26,23 +24,18 @@ type NavState = {
 const RESNO_KEY = 'reservationId';
 
 const TicketOrderInfoPage: React.FC = () => {
-  const accessToken = useAuthStore((s) => s.accessToken);
   const { state } = useLocation() as { state?: Partial<NavState> };
   const navigate = useNavigate();
   const { fid: fidFromPath } = useParams<{ fid: string }>();
   const [sp] = useSearchParams();
-  const { data: user } = usePreReservation(true);
+  const { data: user, isLoading: isUserLoading, error: userError } = usePreReservation(true);
 
   const [method, setMethod] = useState<DeliveryMethod>('QR');
   const [address, setAddress] = useState<string>(''); // PAPER 저장용
   const isPaper = method === 'PAPER';
 
-  const STORE_KEY=import.meta.env.VITE_PORTONE_STORE_KEY
-  const CHANNEL_KEY=import.meta.env.VITE_PORTONE_CHANNEL_KEY
-
-  useEffect(() => {
-    console.log('넘겨받은 예매 state 👉', state);
-  }, [state]);
+  const STORE_KEY = import.meta.env.VITE_PORTONE_STORE_KEY;
+  const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY;
 
   const fid = state?.fid || fidFromPath || '';
 
@@ -50,34 +43,24 @@ const TicketOrderInfoPage: React.FC = () => {
   const reservationNumber = useMemo(() => {
     const fromState = state?.reservationNumber;
     const fromQuery = sp.get('resNo') || undefined;
-    const fromStorage = typeof window !== 'undefined' ? sessionStorage.getItem(RESNO_KEY) || undefined : undefined;
+    const fromStorage =
+      typeof window !== 'undefined' ? sessionStorage.getItem(RESNO_KEY) || undefined : undefined;
 
     const v = fromState || fromQuery || fromStorage;
     if (v && typeof window !== 'undefined') {
       sessionStorage.setItem(RESNO_KEY, v);
     }
-    console.log('[session]', RESNO_KEY, '→', fromStorage);
     return v;
   }, [state?.reservationNumber, sp]);
 
   // Phase2 상세 조회
-  const { data: detail, isLoading, isError, error } = usePhase2Detail({
+  const { data: detail, isLoading: isDetailLoading } = usePhase2Detail({
     festivalId: fid,
     reservationNumber: reservationNumber ?? '',
   });
 
   useEffect(() => {
-    console.log('[phase2] request →', { festivalId: fid, reservationNumber });
-  }, [fid, reservationNumber]);
-
-  useEffect(() => {
-    if (detail) console.log('[phase2] detail ←', detail);
-    if (isError) console.warn('[phase2] error ←', error);
-  }, [detail, isError, error]);
-
-  useEffect(() => {
     if (!fid || !reservationNumber) {
-      console.warn('[order-info] missing fid or reservationNumber → back');
       navigate(-1);
     }
   }, [fid, reservationNumber, navigate]);
@@ -107,9 +90,19 @@ const TicketOrderInfoPage: React.FC = () => {
     return `${display.date}T${display.time}:00`;
   }, [display.date, display.time]);
 
-  // PAPER일 때만 로딩/에러 표시
-  const showDetailLoading = isPaper && isLoading;
-  const showDetailError = isPaper && isError;
+  // ✅ 서버에서 온 ticketPick(1=둘 다, 2=QR만) → availabilityCode로 사용
+  type DeliveryAvailabilityCode = 1 | 2;
+  const availabilityCode: DeliveryAvailabilityCode | null = useMemo(() => {
+    const code = detail?.ticketPick;
+    return code === 1 || code === 2 ? code : null; // null이면 둘 다 허용 취급
+  }, [detail?.ticketPick]);
+
+  // ✅ 선택가능 옵션이 달라졌을 때 현재 method 보정 (QR만 가능한데 PAPER면 QR로)
+  useEffect(() => {
+    if (availabilityCode === 2 && method === 'PAPER') {
+      setMethod('QR');
+    }
+  }, [availabilityCode, method]);
 
   // ✅ 수령방법 저장 훅 (API는 그대로)
   const { mutate: saveDelivery, isPending: isSaving } = useSelectDelivery();
@@ -146,6 +139,12 @@ const TicketOrderInfoPage: React.FC = () => {
 
   // 결제 이동
   const handlePay = () => {
+    // 안전장치: QR만 가능한데 PAPER 선택되면 차단
+    if (availabilityCode === 2 && method === 'PAPER') {
+      alert('이 공연은 QR 수령만 가능합니다.');
+      return;
+    }
+
     const bookingId = reservationNumber;
 
     const payload = {
@@ -157,7 +156,7 @@ const TicketOrderInfoPage: React.FC = () => {
       unitPrice: display.unitPrice,
       quantity: display.quantity,
       bookerName: user?.name ?? '',
-      deliveryMethod: method,                       // 'QR' | 'PAPER' (API 유지)
+      deliveryMethod: method, // 'QR' | 'PAPER' (API 유지)
       address: method === 'PAPER' ? address : undefined,
       STORE_KEY,
       CHANNEL_KEY,
@@ -170,10 +169,16 @@ const TicketOrderInfoPage: React.FC = () => {
         sessionStorage.setItem('payment:latest', JSON.stringify(payload));
       }
       sessionStorage.setItem(RESNO_KEY, bookingId ?? '');
-    } catch {}
+    } catch { /* */ }
 
     navigate('/payment', { state: payload });
   };
+
+  const booting = isUserLoading || isDetailLoading;
+
+  if (booting) {
+    return <Spinner />; // 화면 전체 오버레이
+  }
 
   return (
     <div className={styles.page}>
@@ -196,6 +201,8 @@ const TicketOrderInfoPage: React.FC = () => {
             value={method}
             onChange={handleMethodChange}   // ✅ API 트리거
             loading={isSaving}              // ✅ 저장 중 비활성
+            availabilityCode={availabilityCode} // ✅ ticketPick 반영 (1=둘 다, 2=QR만)
+          // hideUnavailable // ← 필요 시 주석 해제: 미지원 옵션 자체를 숨김
           />
         </div>
 
@@ -205,14 +212,6 @@ const TicketOrderInfoPage: React.FC = () => {
             {/* AddressForm이 onSubmit(address: string)을 받는다고 가정 */}
             <AddressForm onSubmit={handleAddressSubmit} />
           </section>
-        )}
-
-        {/* PAPER일 때만 로딩/에러 메시지 노출 */}
-        {showDetailLoading && <p className={styles.noScroll}>상세 불러오는 중…</p>}
-        {showDetailError && (
-          <p className={styles.noScroll} aria-live="polite">
-            상세 불러오기 실패: {(error as any)?.message ?? '에러'}
-          </p>
         )}
       </div>
 

@@ -1,23 +1,26 @@
 .page {
   width: 100%;
-  height: 100%;         /* 뷰포트 꽉 채우기 */
-  background: #f3f4f6;
+  height: 100dvh;            /* 뷰포트 꽉 채우기 */
+  overflow: hidden;          /* 스크롤 방지 */
+  overscroll-behavior: none; /* 모바일 튐 방지 */
   display: grid;
-  grid-template-rows: 1fr; /* 헤더 제거 → 한 행 */
+  grid-template-rows: 1fr;
+  background: #f3f4f6;
 }
 
-.center {
-  display: grid;
-  place-items: stretch;   /* 내부를 꽉 채움 */
+@supports not (height: 100dvh) {
+  .page {
+    height: 100vh;
+  }
 }
 
 .fullwrap {
-  /* ✅ 여기서 한 번만 값 바꾸면 됨 */
-  --poster-max-w: 420px; /* 가로 최대 */
-  --poster-max-h: 700px; /* 세로 최대 (예: 3:4이면 420x560) */
-  
-  /* background-color: red; */
+  --poster-max-w: min(90vw, 420px);
+  --poster-max-h: min(80dvh, 700px);
+
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
+  padding: 2vh 2vw;
 }

@@ -11,6 +11,7 @@ import { useFestivalDetail } from '@/models/festival/tanstack-query/useFestivalD
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 import { useUserAgeQuery } from '@/models/festival/tanstack-query/useUserAgeDetail'
 import { useEnterWaitingMutation } from '@/models/waiting/tanstack-query/useWaiting'
+import type { FestivalDetail } from '@/models/festival/festivalType'
 
 /** YYYY-MM-DD */
 const ymd = (d: Date) => {
@@ -75,8 +76,8 @@ const __fs_openCenteredPopup = (
 
   const feat = [
     'popup=yes',
-    'toolbar=0','menubar=0','location=0','status=0',
-    'scrollbars=1','resizable=1',
+    'toolbar=0', 'menubar=0', 'location=0', 'status=0',
+    'scrollbars=1', 'resizable=1',
     `width=${w}`, `height=${h}`, `left=${left}`, `top=${top}`,
   ].join(',');
 
@@ -97,7 +98,7 @@ const __fs_openBookingPopup = (
   if (fdfrom) params.set('fdfrom', fdfrom)
   if (fdto) params.set('fdto', fdto)
   params.set('nochat', '1')
-  __fs_openCenteredPopup(`/booking/${fid}?${params.toString()}`, BOOK_W, BOOK_H) 
+  __fs_openCenteredPopup(`/booking/${fid}?${params.toString()}`, BOOK_W, BOOK_H)
 }
 
 /** 대기열 팝업 */
@@ -120,9 +121,24 @@ const __fs_openWaitingPopup = (
   __fs_openCenteredPopup(`/booking/${fid}/queue?${params.toString()}`, WAIT_W, WAIT_H)
 }
 
-const FestivalScheduleSection: React.FC = () => {
-  const { fid } = useParams<{ fid: string }>()
-  const { data: detail, isLoading, isError, status } = useFestivalDetail(fid ?? '')
+type Props = {
+  /** 부모 페이지에서 이미 받아온 detail (있으면 내부 fetch 생략) */
+  detailFromParent?: FestivalDetail
+  /** 내부 로딩/에러 문구 숨김 */
+  suppressLoading?: boolean
+}
+
+const FestivalScheduleSection: React.FC<Props> = ({ detailFromParent, suppressLoading = false }) => {
+  const params = useParams<{ fid: string }>()
+  const fidParam = params.fid ?? ''
+
+  // ✅ detail 주입 여부에 따라 분기
+  const hook = useFestivalDetail(fidParam, { enabled: !detailFromParent })
+  const detail = (detailFromParent ?? (hook.data as FestivalDetail | undefined)) as FestivalDetail | undefined
+  const isLoading = detailFromParent ? false : hook.isLoading
+  const isError = detailFromParent ? false : hook.isError
+  const status = detailFromParent ? 'success' : hook.status
+
   const { refetch: refetchAge } = useUserAgeQuery({ enabled: false })
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -145,13 +161,11 @@ const FestivalScheduleSection: React.FC = () => {
   const endDate = useMemo(() => parseYMD((detail as any)?.prfpdto as any), [detail?.prfpdto])
   const isSingleDay = !!startDate && !!endDate && isSameDay(startDate, endDate)
 
-  // 과거 비활성: 시작일 vs 오늘 중 늦은 날
   const effectiveMinDate = useMemo(() => {
     if (!startDate) return today
     return startDate < today ? today : startDate
   }, [startDate, today])
 
-  // ✅ timesByDow가 있으면 그 키로 허용 요일 구성, 없으면 daysOfWeek로 구성
   const allowedDowSet = useMemo(() => {
     const set = new Set<number>()
     const tbd = detail?.timesByDow
@@ -163,10 +177,7 @@ const FestivalScheduleSection: React.FC = () => {
     } else {
       const src = ((detail as any)?.daysOfWeek ?? []) as Array<string | null | undefined>
       for (const v of src) {
-        const k = String(v ?? '')
-          .trim()
-          .slice(0, 3)
-          .toUpperCase()
+        const k = String(v ?? '').trim().slice(0, 3).toUpperCase()
         const idx = DOW_KEYS.indexOf(k as any)
         if (idx >= 0) set.add(idx)
       }
@@ -174,7 +185,6 @@ const FestivalScheduleSection: React.FC = () => {
     return set
   }, [detail?.timesByDow, detail?.daysOfWeek])
 
-  // ✅ 날짜 선택 가능 판정: 기간 + (단일일자 특례) + 허용 요일 + 해당 요일에 시간이 있어야 함
   const isSelectableDate = (date: Date) => {
     if (effectiveMinDate && date < effectiveMinDate) return false
     if (endDate && date > endDate) return false
@@ -190,13 +200,12 @@ const FestivalScheduleSection: React.FC = () => {
     return true
   }
 
-  // 네비 가능한 최소/최대
   const [minNavDate, maxNavDate] = useMemo(() => {
     const min = startDate ? (startDate < today ? today : startDate) : today
     const max = endDate ?? min
     return [min, max]
   }, [startDate, endDate, today])
-  // ✅ 선택된 날짜의 시간들(선택 날짜의 요일 → timesByDow)
+
   const availableTimes = useMemo(() => {
     if (!selectedDate) return [] as string[]
     const dowIdx = selectedDate.getDay()
@@ -210,13 +219,11 @@ const FestivalScheduleSection: React.FC = () => {
     [availableTimes],
   )
 
-  // 날짜 바뀌면 첫 시간 자동 선택
   useEffect(() => {
     if (!selectedDate) return
     setSelectedTime(availableTimes.length > 0 ? availableTimes[0] : null)
   }, [selectedDate, availableTimes])
 
-  // 최초 자동 선택
   useEffect(() => {
     if (!detail) return
     if (selectedDate && selectedTime) return
@@ -251,7 +258,6 @@ const FestivalScheduleSection: React.FC = () => {
     today,
     selectedDate,
     selectedTime,
-    isSelectableDate,
   ])
 
   const confirmDisabled = !selectedDate || !selectedTime
@@ -259,13 +265,14 @@ const FestivalScheduleSection: React.FC = () => {
   return (
     <>
       <div className={styles.container}>
-        {!fid && <div className={styles.notice}>잘못된 경로입니다.</div>}
+        {/* 🔇 내부 로딩/에러 문구는 suppressLoading 시 숨김 */}
+        {!suppressLoading && !fidParam && <div className={styles.notice}>잘못된 경로입니다.</div>}
 
-        {(isLoading || status === 'idle') && (
+        {!suppressLoading && (isLoading || status === 'idle') && (
           <div className={styles.notice}>일정을 불러오는 중… ⏳</div>
         )}
 
-        {(isError || (!isLoading && status !== 'idle' && !detail)) && (
+        {!suppressLoading && (isError || (!isLoading && status !== 'idle' && !detail)) && (
           <div className={styles.notice}>일정을 불러오지 못했어요 ㅠㅠ</div>
         )}
 
@@ -314,9 +321,7 @@ const FestivalScheduleSection: React.FC = () => {
                     </button>
                   </div>
                 )}
-                /* ✅ 추가 2: 요일 한 글자 */
                 formatWeekDay={(nameOfDay) => nameOfDay.slice(0, 1)}
-                /* ✅ 기존 dayClassName → 오늘/주말 표시 포함으로 강화 */
                 dayClassName={(date) => {
                   const selectable = isSelectableDate(date)
                   const isSel = selectedDate && isSameDay(date, selectedDate)
@@ -360,7 +365,7 @@ const FestivalScheduleSection: React.FC = () => {
               className={styles.confirmBtn}
               disabled={confirmDisabled}
               onClick={async () => {
-                // 1) 로그인 가드
+                // (기존 onClick 로직 그대로)
                 if (!accessToken) {
                   alert('로그인이 필요한 서비스입니다.')
                   const redirect = location.pathname + location.search
@@ -368,7 +373,6 @@ const FestivalScheduleSection: React.FC = () => {
                   return
                 }
 
-                // 2) 관람연령 가드
                 const ageText =
                   (detail as any)?.prfage ??
                   (detail as any)?.age ??
@@ -390,7 +394,7 @@ const FestivalScheduleSection: React.FC = () => {
                 const minAge = parseMinAge(ageText)
                 if (minAge !== null && minAge > 0) {
                   try {
-                    const { data: userAge } = await refetchAge() // GET /api/users/checkAge
+                    const { data: userAge } = await refetchAge()
                     if (userAge == null) {
                       alert('나이 확인에 실패했어요. 잠시 후 다시 시도해 주세요.')
                       return
@@ -406,31 +410,22 @@ const FestivalScheduleSection: React.FC = () => {
                   }
                 }
 
-                // 가상 대기열 추가 테스트 끝나면 삭제
-                const FORCE_WAIT = false // 테스트 끝나면 false
-                if (FORCE_WAIT && selectedDate && fid) {
-                  const fdfrom = startDate ? ymd(startDate) : null
-                  const fdto = endDate ? ymd(endDate) : null
-                  __fs_openWaitingPopup(fid, selectedDate, selectedTime, 10000, fdfrom, fdto)
-                  return
-                }
-
-                if (!selectedDate || !fid) return
                 const fdfrom = startDate ? ymd(startDate) : null
                 const fdto = endDate ? ymd(endDate) : null
+                if (!selectedDate) return
                 const reservationDateTime = __fs_combineDateTime(selectedDate, selectedTime)
 
                 try {
                   const res = await enterMut.mutateAsync({
-                    festivalId: fid,
+                    festivalId: fidParam,
                     reservationDate: reservationDateTime,
                   })
 
                   if (res.immediateEntry) {
-                    __fs_openBookingPopup(fid, selectedDate, selectedTime, fdfrom, fdto)
+                    __fs_openBookingPopup(fidParam, selectedDate, selectedTime, fdfrom, fdto)
                   } else {
                     __fs_openWaitingPopup(
-                      fid,
+                      fidParam,
                       selectedDate,
                       selectedTime,
                       res.waitingNumber,

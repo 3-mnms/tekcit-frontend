@@ -3,6 +3,7 @@ import Header from '@components/common/header/Header' // 실제 Header 경로에
 import Hot from '@/components/festival/main/HotSection'
 import Category from '@/components/festival/main/CategorySection'
 import KakaoPopupBridge from '@/components/auth/login/KakaoPopupBridge'
+import Footer from '@/components/common/footer/Footer';
 
 const MainPage: React.FC = () => {
   return (
@@ -11,6 +12,7 @@ const MainPage: React.FC = () => {
       <Header />
       <Hot />
       <Category />
+      <Footer />
     </div>
   )
 }

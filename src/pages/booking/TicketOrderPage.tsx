@@ -8,6 +8,7 @@ import { useSelectDate, usePhase1Detail } from '@/models/booking/tanstack-query/
 import type { BookingSelect } from '@/models/booking/bookingTypes';
 import { useAuthStore } from '@/shared/storage/useAuthStore';
 import CaptchaOverlay from '@/components/booking/captcha/CaptchaOverlay';
+import Spinner from '@/components/common/spinner/Spinner'
 
 // -------------------- utils --------------------
 const pad2 = (n: number) => String(n).padStart(2, '0');
@@ -273,7 +274,7 @@ const TicketOrderPage: React.FC = () => {
 
       {/* 로딩(phase1 없고 로딩 중) */}
       {!guardMessage && isLoading && !phase1 && (
-        <div className={styles.page}>불러오는 중…</div>
+        <Spinner />
       )}
 
       {/* 정상 UI */}
@@ -311,9 +312,7 @@ const TicketOrderPage: React.FC = () => {
             )}
 
             {isFetching && (
-              <div style={{ marginTop: 8, fontSize: 12, color: '#6b7280' }}>
-                정보 갱신 중…
-              </div>
+              <Spinner />
             )}
           </div>
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './TicketBookerInfoSection.module.css';
 import { usePreReservation } from '@/models/booking/tanstack-query/useUser'; 
-// ↑ 네가 만든 useUser 훅 import 경로 맞춰줘! (ex. usePreReservation → useUser)
+import Spinner from '@/components/common/spinner/Spinner'
 
 type Props = {
   className?: string;
@@ -36,7 +36,7 @@ const TicketBookerInfoSection: React.FC<Props> = ({
   const inputClass = `${styles.input} ${readOnly ? styles.readOnly : ''}`;
 
   if (isLoading) {
-    return <div className={styles.container}>불러오는 중…</div>;
+    return <Spinner />;
   }
   if (isError || !data) {
     return <div className={styles.container}>예매자 정보를 불러오지 못했어요.</div>;

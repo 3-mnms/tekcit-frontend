@@ -1,58 +1,114 @@
-/* 페이지 최상위 */
 .page {
   width: 100%;
-  min-height: 100vh;
+  min-height: 100%;
   box-sizing: border-box;
-  padding: 24px min(4vw, 28px) 40px;
-  background: #f8fafc;
+  background: #fff;
 }
 
-/* 타이틀 */
-.pageTitle {
-  font-size: clamp(18px, 2.2vw, 24px);
-  font-weight: 800;
-  color: #111827;
-  margin: 4px 0 14px;
-}
-
-/* 탭 */
-.tabs {
+.headerRow {
   display: flex;
-  gap: 10px;
-  margin: 8px 0 12px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0 14px;
 }
+
+.titleWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pageTitle {
+  font-size: clamp(18px, 2.1vw, 22px);
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.2px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.headerActions {
+  display: flex;
+  gap: 8px;
+}
+
+.backBtn {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #fff;
+  font-weight: 600;
+  color: #334155;
+  transition: box-shadow .2s ease, transform .15s ease;
+  margin-left: 10px;
+}
+
+.backBtn:hover {
+  transform: translateY(-1px);
+  background: #f8f8f8;
+}
+
+.tabs {
+  display: inline-flex;
+  gap: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 18px;
+  padding: 6px;
+  margin: 10px 0 16px;
+}
+
 .tab {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 600;
-  color: #374151;
+  font-weight: 700;
+  color: #334155;
+  background: transparent;
+  border: 0;
+  transition: background-color .2s ease, color .2s ease, transform .15s ease;
 }
-.tabActive {
-  background: #f1f5ff;
-  border-color: #cfe0ff;
-  color: #2563eb;
-}
-.tabIcon { display: inline-grid; place-items: center; }
 
-/* 본문 레이아웃 */
+.tab:hover {
+  background: #ecedf0;
+}
+
+.tabActive {
+  background: #2564ebe7;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, .2);
+}
+
+.tabActive:hover {
+  background: #2563eb;
+}
+
+.tabIcon {
+  display: inline-grid;
+  place-items: center;
+}
+
 .body {
   display: grid;
-  grid-template-columns: 1fr 33%;
+  grid-template-columns: 1fr 1fr;
   gap: 18px;
   align-items: start;
 }
 
 @media (max-width: 980px) {
-  .body { grid-template-columns: 1fr; }
+  .body {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* 리스트 */
 .list {
   display: grid;
   gap: 12px;
@@ -64,74 +120,242 @@
 /* 카드 */
 .card {
   width: 100%;
+  height: 80px;
   text-align: left;
   display: grid;
-  grid-template-columns: 8px 1fr;
-  border: 1px solid #e5e7eb;
+  grid-template-columns: 1fr;
+  border: 1px solid #eef2f7;
   background: #fff;
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 14px 14px 12px 0;
   cursor: pointer;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .15s ease;
+  align-items: stretch;
 }
+
+.cardAccent {
+  border-left: 7px solid #a78bfa;
+}
+
+.cardAccent2 {
+  border-left: 7px solid #10b981;
+}
+
+.card:hover {
+  border-color: #cfe0ff;
+  box-shadow: 0 10px 28px rgba(77, 154, 253, 0.12);
+  transform: translateY(-1px);
+}
+
 .cardActive {
   border-color: #a9c6ff;
-  box-shadow: 0 6px 20px rgba(77,154,253,0.12);
+  box-shadow: 0 12px 30px rgba(77, 154, 253, 0.16);
 }
+
 .cardBadge {
-  width: 8px;
-  border-radius: 14px 0 0 14px;
-  background: linear-gradient(180deg, #ff4d6d, #ff8fab);
+  width: 10px;
+  border-radius: 16px 0 0 16px;
+  height: auto;
+  align-self: stretch;
 }
-.cardMain { padding: 2px 6px 2px 14px; }
+
+.cardMain {
+  padding: 2px 10px 2px 16px;
+}
+
 .cardTitleRow {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
 }
-.cardTitle { font-size: 16px; color: #111827; }
-.distance { color: #2563eb; font-weight: 800; }
-.addr { margin-top: 4px; font-size: 13px; color: #6b7280; }
-.courseSteps { margin: 8px 0 0; padding-left: 16px; color: #4b5563; font-size: 13px; }
-.link {
-  display: inline-block;
-  margin-top: 8px;
+
+.cardTitle {
+  font-size: 15.5px;
+  color: #0f172a;
+  font-weight: 800;
+  letter-spacing: -0.1px;
+}
+
+.addr {
+  margin-top: 6px;
   font-size: 13px;
-  color: #2563eb;
-  text-decoration: underline;
-  word-break: break-all;
+  color: #64748b;
+  line-height: 1.45;
 }
 
-/* 지도 컬럼 */
-.mapWrap { display: grid; grid-template-rows: auto 1fr; }
-.mapHeader { font-weight: 800; color: #111827; margin: 2px 0 8px; }
-.mapBox {
+.courseHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.courseHeaderIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
   position: relative;
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400"><rect width="100%" height="100%" fill="%23ffffff"/><g stroke="%23e5e7eb" stroke-width="1"><path d="M0 40 H300" /><path d="M0 80 H300" /><path d="M0 120 H300" /><path d="M0 160 H300" /><path d="M0 200 H300" /><path d="M0 240 H300" /><path d="M0 280 H300" /><path d="M0 320 H300" /><path d="M0 360 H300" /><path d="M40 0 V400" /><path d="M80 0 V400" /><path d="M120 0 V400" /><path d="M160 0 V400" /><path d="M200 0 V400" /><path d="M240 0 V400" /><path d="M280 0 V400" /></g></svg>') center/cover no-repeat;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
-}
-.pin {
-  position: absolute;
-  transform: translate(-50%, -100%);
-  font-size: 18px;
-  color: #9ca3af;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,.1));
-}
-.pinActive { color: #111827; }
-.mapNote {
-  position: absolute;
-  left: 8px; bottom: 8px;
-  font-size: 12px; color: #6b7280;
-  background: rgba(255,255,255,.8);
-  padding: 2px 6px; border-radius: 6px;
 }
 
-.headerRow{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:6px}
-.titleWrap{display:flex;flex-direction:column;gap:4px}
-.subtitle{font-size:13px;color:#6b7280}
-.headerActions{display:flex;gap:8px}
-.backBtn{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:8px 12px}
+.courseHeaderIcon::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: .0;
+}
+
+.courseTitle {
+  font-weight: 800;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.courseList {
+  display: grid;
+  gap: 12px;
+}
+
+.courseRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
+  padding: 14px 16px;
+  height: 80px;
+}
+
+.courseAccent {
+  border-left: 7px solid #4968ce;
+}
+
+.courseNodes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* 점 + 텍스트 칩 */
+.node {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.node::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.nodeGreen::before {
+  background: #22c55e;
+}
+
+.nodeBlue::before {
+  background: #3b82f6;
+}
+
+.nodePurple::before {
+  background: #8b5cf6;
+}
+
+.dash {
+  width: 32px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #93c5fd, #d8b4fe);
+  opacity: .8;
+}
+
+@media (max-width: 640px) {
+  .courseRow {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .timePill {
+    margin-left: auto;
+  }
+}
+
+.mapWrap {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin-top: -70px;
+}
+
+.mapHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.mapTools {
+  display: flex;
+  gap: 6px;
+}
+
+.mapTools button {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+}
+
+.mapBox {
+  width: 100%;
+  height: 60vh;
+}
+
+.error,
+.empty,
+.emptySmall {
+  border: 1px dashed #e5e7eb;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 16px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.emptySmall {
+  font-size: 13px;
+}
+
+.error {
+  border-color: #fecaca;
+  color: #be123c;
+  background: #fff1f2;
+}
+
+.retry {
+  margin-left: 8px;
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #be123c;
+  border-radius: 8px;
+  padding: 4px 8px;
+}

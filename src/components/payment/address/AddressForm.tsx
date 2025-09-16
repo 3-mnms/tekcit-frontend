@@ -128,7 +128,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
 
   return (
     <form className={styles['address-container']}>
-      {/* ───────── 헤더: 타이틀 + '배송지 관리' 버튼 ───────── */}
       <div className={styles['address-header']}>
         <div className={styles['header-left']}>
           <span className={styles['header-title']}>배송지 선택</span>
@@ -137,18 +136,17 @@ const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
         <button
           type="button"
           className={`${styles['btn']} ${styles['btn-outline']}`}
-          onClick={() => setIsManageOpen(true)} // ❗ setIsModalOpen → setIsManageOpen 로 수정
+          onClick={() => setIsManageOpen(true)} 
         >
           배송지 관리
         </button>
 
-        {/* ✅ 배송지 관리 모달 */}
         {isManageOpen && (
           <div className={styles['modal-overlay']}>
             <div className={styles['modal-content']}>
               <DeliveryManageModal
                 onClose={() => setIsManageOpen(false)}
-                onSelectAddress={handleAddressSelectFromManage} // ❗ 미정의였던 핸들러 구현/연결
+                onSelectAddress={handleAddressSelectFromManage}
               />
             </div>
           </div>

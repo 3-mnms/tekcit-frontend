@@ -1,9 +1,11 @@
 .container {
   width: 100%;
-  border: 1px solid #e5e7eb;        /* tailwind border */
-  border-radius: 1rem;               /* rounded-2xl */
-  padding: 20px;                     /* p-5 */
+  height: 100%;              /* 부모(.rightCol)의 높이를 따라감 */
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 20px;
   background: #fff;
+  box-sizing: border-box;    /* padding 포함해 계산 */
 }
 
 .title {

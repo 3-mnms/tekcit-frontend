@@ -14,6 +14,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Button from '@/components/common/button/Button'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
+import { FaRegCommentDots, FaTrashAlt, FaEdit, FaUser } from 'react-icons/fa';
+import Spinner from '@/components/common/spinner/Spinner'
 
 type Props = { fid: string }
 
@@ -21,8 +23,7 @@ const reviewSchema = z.object({
   reviewContent: z
     .string()
     .trim()
-    .min(1, '한 글자 이상 입력해 주세요.')
-    .max(512, '내용은 512자까지 작성할 수 있어요.'),
+    .max(512, '내용은 512자까지 작성할 수 있습니다.'),
 })
 type ReviewForm = z.infer<typeof reviewSchema>
 
@@ -51,8 +52,9 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
     handleSubmit,
     formState: { errors, isValid },
     reset,
+    watch,
   } = useForm<ReviewForm>({ resolver: zodResolver(reviewSchema), mode: 'onChange' })
-
+  const content = watch('reviewContent', '')
   const onSubmit = (form: ReviewForm) => {
     createMut.mutate(form, {
       onSuccess: () => {
@@ -70,7 +72,7 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
   }
 
   const onClickDelete = (rId: number) => {
-    if (!confirm('정말 삭제할까요? 삭제 후 되돌릴 수 없어요.')) return
+    if (!confirm('삭제하시겠습니까?')) return
     deleteMut.mutate(
       { fid, rId },
       {
@@ -139,30 +141,25 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
 
   const maskUserName = (name: string) => {
     if (!name) return ''
-    if (name.length === 1) return name 
-    if (name.length === 2) return name[0] + '*' 
-    return name[0] + '*' + name.slice(2) 
+    if (name.length === 1) return name
+    if (name.length === 2) return name[0] + '*'
+    return name[0] + '*' + name.slice(2)
   }
 
-  return (
-    <section className={styles.wrap}>
-      <header className={styles.header}>
-        <h2 className={styles.title}>관람평</h2>
+  const busy =
+    isLoading ||
+    createMut.isPending ||
+    updateMut.isPending
 
-        <div className={styles.actions}>
-          <select
-            value={sort}
-            onChange={(e) => {
-              setPage(0)
-              setSort(e.target.value as ReviewSort)
-            }}
-            className={styles.select}
-            aria-label="정렬"
-          >
-            <option value="desc">최신순</option>
-            <option value="asc">오래된순</option>
-          </select>
+  return (
+    <section className={`${styles.wrap} ${styles.wrapRelative}`}>
+      {busy && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 pointer-events-auto">
+          <Spinner />
         </div>
+      )}
+      <header className={styles.header}>
+        <h2 className={styles.title}><FaRegCommentDots className={styles.icon} />기대평</h2>
       </header>
 
       {analyze && (
@@ -170,17 +167,17 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
           <p className={styles.analyzeContent}>{analyze.analyzeContent}</p>
           <div className={styles.analyzeBars}>
             <div className={styles.bar}>
-              <span className={styles.label}>긍정</span>
+              <span className={styles.label}><span className={styles.dotPositive} /> 긍정</span>
               <progress value={analyze.positive} max={100}></progress>
               <span className={styles.percent}>{analyze.positive.toFixed(1)}%</span>
             </div>
             <div className={styles.bar}>
-              <span className={styles.label}>부정</span>
+              <span className={styles.label}><span className={styles.dotNegative} /> 부정</span>
               <progress value={analyze.negative} max={100}></progress>
               <span className={styles.percent}>{analyze.negative.toFixed(1)}%</span>
             </div>
             <div className={styles.bar}>
-              <span className={styles.label}>중립</span>
+              <span className={styles.label}><span className={styles.dotNeutral} /> 중립</span>
               <progress value={analyze.neutral} max={100}></progress>
               <span className={styles.percent}>{analyze.neutral.toFixed(1)}%</span>
             </div>
@@ -188,23 +185,36 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
         </div>
       )}
 
+      <div className={styles.actions}>
+        <select
+          value={sort}
+          onChange={(e) => {
+            setPage(0)
+            setSort(e.target.value as ReviewSort)
+          }}
+          className={styles.select}
+          aria-label="정렬"
+        >
+          <option value="desc">최신순</option>
+          <option value="asc">오래된순</option>
+        </select>
+      </div>
+
       {/* 작성 박스 (로그인 시에만) */}
       {isLoggedIn ? (
-        <form onSubmit={handleSubmit(onSubmit)} className={styles.editor}>
+        <form onSubmit={handleSubmit(onSubmit)} className={`${styles.editor} ${styles.editorDashed}`}>
+
           <textarea
             className={styles.textarea}
             placeholder="이 공연에 대한 기대평을 남겨주세요 (최대 512자)"
+            maxLength={512}
             {...register('reviewContent')}
           />
-          {errors.reviewContent?.message && (
-            <p className={styles.error}>{errors.reviewContent.message}</p>
-          )}
+          {errors.reviewContent?.message && <p className={styles.error}>{errors.reviewContent.message}</p>}
+
           <div className={styles.editorFooter}>
-            <Button
-              type="submit"
-              className={styles.submitBtn}
-              disabled={!isValid || createMut.isPending}
-            >
+            <span className={styles.charCount}>{content.length}/512자</span>
+            <Button type="submit" className={styles.submitBtn} disabled={!isValid || createMut.isPending}>
               {createMut.isPending ? '등록 중...' : '등록'}
             </Button>
           </div>
@@ -213,15 +223,10 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
         <div className={styles.loginHint}>로그인 후 기대평을 작성할 수 있어요 😸</div>
       )}
 
-      {/* 목록 */}
       <div className={styles.list}>
-        {isLoading && <div className={styles.skeleton}>기대평을 불러오는 중...</div>}
-        {isError && (
-          <div className={styles.error}>목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>
-        )}
-        {!isLoading && !isError && orderedItems.length === 0 && (
-          <div className={styles.empty}>아직 기대평이 없어요.</div>
-        )}
+        {isLoading && <div className={styles.cardLoading}>기대평을 불러오는 중...</div>}
+        {isError && <div className={styles.error}>목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>}
+        {!isLoading && !isError && orderedItems.length === 0 && <div className={styles.empty}>아직 기대평이 없습니다.</div>}
 
         {orderedItems.map((rev, idx) => {
           const safeKey =
@@ -237,39 +242,48 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
           const displayTime = isEdited && updated ? updated : created
 
           return (
-            <article key={safeKey} className={styles.item}>
-              <div className={styles.meta}>
-                <span className={styles.user}>{maskUserName(rev.userName)}</span>
-                <time className={styles.time}>
-                  {displayTime.toLocaleString()}
-                  {isEdited && <span className={styles.edited}> (수정됨)</span>}
-                </time>
+            <article key={safeKey} className={`${styles.item} ${styles.card}`}>
+              <div className={styles.itemHead}>
+                <div className={styles.userBlock}>
+                  <div className={styles.avatar} aria-hidden>
+                    <FaUser className={styles.avatarIcon} />
+                  </div>
+                  <div className={styles.userInfo}>
+                    <p className={styles.user}>{maskUserName(rev.userName)}</p>
+                    <time className={styles.time}>
+                      {displayTime.toLocaleString()}
+                      {isEdited && <span className={styles.edited}> (수정됨)</span>}
+                    </time>
+                  </div>
+                </div>
 
-                {/* 내 댓글 + 편집중이 아닐 때만 액션 노출 */}
-                {isMine && !isEditingThis && rev.reviewId != null && (
-                  <>
-                    <button
-                      type="button"
-                      className={styles.editBtn}
-                      onClick={() => startInlineEdit(rev.reviewId!, rev.reviewContent)}
-                      title="기대평 수정"
-                    >
-                      수정
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.delBtn}
-                      onClick={() => onClickDelete(rev.reviewId!)}
-                      disabled={deleteMut.isPending}
-                      title="기대평 삭제"
-                    >
-                      {deleteMut.isPending ? '삭제 중...' : '삭제'}
-                    </button>
-                  </>
-                )}
+                <div className={styles.itemActions}>
+                  {isMine && !isEditingThis && rev.reviewId != null && (
+                    <>
+                      <button
+                        type="button"
+                        className={styles.iconBtn}
+                        onClick={() => startInlineEdit(rev.reviewId!, rev.reviewContent)}
+                        title="기대평 수정"
+                        aria-label="기대평 수정"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.iconBtnDanger}
+                        onClick={() => onClickDelete(rev.reviewId!)}
+                        disabled={deleteMut.isPending}
+                        title="기대평 삭제"
+                        aria-label="기대평 삭제"
+                      >
+                        <FaTrashAlt />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
 
-              {/* 인라인 편집 영역 vs 보기 영역 */}
               {isEditingThis ? (
                 <div className={styles.inlineEditor}>
                   <textarea
@@ -277,24 +291,26 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
                     value={editingValue}
                     onChange={(e) => setEditingValue(e.target.value)}
                     placeholder="내용을 수정하세요 (최대 512자)"
+                    maxLength={512}
                   />
-                  <div className={styles.editorFooter}>
-                    <button
+                  <div className={styles.inlineEditorFooter}>
+                    <span className={styles.charCount}>{editingValue.trim().length}/512자</span>
+                    <Button
                       type="button"
                       className={styles.modalCancel}
                       onClick={cancelInlineEdit}
                       disabled={updateMut.isPending}
                     >
                       취소
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       className={styles.modalSave}
                       onClick={saveInlineEdit}
                       disabled={!canEditSave}
                     >
                       {updateMut.isPending ? '저장 중...' : '저장'}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (

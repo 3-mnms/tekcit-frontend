@@ -272,8 +272,6 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
       '%c[TransferRecipientForm] Request → /api/transfer/request',
       'color:#2563eb;font-weight:700'
     );
-    console.log('timestamp:', new Date().toISOString());
-    console.log('payload:', payload);
     console.groupEnd();
 
     try {
