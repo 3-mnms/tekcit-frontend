@@ -6,6 +6,8 @@ import SubHeader from './SubHeader'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/models/auth/useAuth'
 import { USERROLE } from '@/models/admin/User'
+import { useAuthStore } from '@/shared/storage/useAuthStore'
+import { logout as logoutApi } from '@/shared/api/auth/login'
 
 const adminMenuItems = [
   { path: '/admin/productRegist', name: '상품 등록' },
@@ -28,11 +30,20 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => {
   const navigate = useNavigate()
   const { name, role } = useAuth()
+  const logout = useAuthStore((s) => s.logout)
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken')
-    alert('로그아웃 되었습니다')
-    navigate('/login')
+  const handleLogout = async () => {
+    const confirmed = window.confirm('로그아웃 하시겠습니까?')
+    if (!confirmed) return
+
+    try {
+      await logoutApi()
+    } catch (e) {
+      console.error(e)
+    } finally {
+      logout()
+      navigate('/login')
+    }
   }
 
   const [sidebarWidth, setSidebarWidth] = useState('18%')
@@ -57,11 +68,11 @@ const Layout: React.FC<LayoutProps> = ({ children, subTitle }) => {
   const headerHeight = '10vh'
   const subHeaderHeight = '5vh'
 
-  const filteredMenuItems = adminMenuItems.filter(item => {
+  const filteredMenuItems = adminMenuItems.filter((item) => {
     if (role === USERROLE.HOST) {
       return item.name === '상품 등록' || item.name === '상품 관리' || item.name === '공지사항'
     }
-    return true 
+    return true
   })
 
   return (
