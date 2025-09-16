@@ -26,10 +26,12 @@ const FestivalInfoSection: React.FC<Props> = ({ detail, loading }) => {
 
   // ✅ 로그인 토큰
   const accessToken = useAuthStore((s) => s.accessToken);
+  const role = useAuthStore((s) => s.user?.role);
+  const isUserRole = role === 'USER';
   const [imgReady, setImgReady] = React.useState(false);
 
   // ✅ 찜 상태/카운트 + 토글 뮤테이션
-  const { data: likedData } = useIsFavorite(fid, Boolean(accessToken)); // 내 찜 여부(로그인 필요)
+  const { data: likedData } = useIsFavorite(fid, Boolean(accessToken && isUserRole)); // 내 찜 여부(로그인 필요)
   const { data: countData } = useFavoriteCount(fid); // 공개
   const createMut = useCreateFavoriteMutation(fid || '');
   const deleteMut = useDeleteFavoriteMutation(fid || '');
@@ -41,7 +43,11 @@ const FestivalInfoSection: React.FC<Props> = ({ detail, loading }) => {
   const onToggleLike = () => {
     if (!fid) return;
     if (!accessToken) {
-      alert('로그인이 필요해요!');
+      alert('로그인이 필요한 서비스입니다.');
+      return;
+    }
+    if (!isUserRole) {
+      alert('관리자 또는 주최자 계정에서는 관심 등록을 사용할 수 없습니다.\n일반 사용자 계정으로 이용해 주세요.');
       return;
     }
     if (liked) deleteMut.mutate();

@@ -59,7 +59,7 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
     createMut.mutate(form, {
       onSuccess: () => {
         reset({ reviewContent: '' })
-        alert('기대평이 등록되었어요!')
+        alert('기대평이 등록되었습니다.')
       },
       onError: (e: any) => {
         const msg =
@@ -126,7 +126,18 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
   // 목록/페이지 정보
   const items = data?.reviews?.content ?? []
   const totalPages = data?.reviews?.totalPages ?? 0
-  const analyze = data?.analyze
+  const analyzeRaw = data?.analyze
+  const analyze = React.useMemo(() => {
+    const pos = Number(analyzeRaw?.positive ?? 0)
+    const neg = Number(analyzeRaw?.negative ?? 0)
+    const neu = Number(analyzeRaw?.neutral ?? 0)
+    return {
+      positive: isFinite(pos) ? Math.max(0, Math.min(100, pos)) : 0,
+      negative: isFinite(neg) ? Math.max(0, Math.min(100, neg)) : 0,
+      neutral: isFinite(neu) ? Math.max(0, Math.min(100, neu)) : 0,
+      analyzeContent: analyzeRaw?.analyzeContent ?? '아직 분석을 표시할 데이터가 충분하지 않습니다.',
+    }
+  }, [analyzeRaw])
 
   // ✅ 현재 페이지에서 "내가 쓴 리뷰"를 최상단으로 재정렬
   const orderedItems = useMemo(() => {
@@ -162,7 +173,8 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
         <h2 className={styles.title}><FaRegCommentDots className={styles.icon} />기대평</h2>
       </header>
 
-      {analyze && (
+
+      {!isLoading && !isError && (
         <div className={styles.analyzeBox}>
           <p className={styles.analyzeContent}>{analyze.analyzeContent}</p>
           <div className={styles.analyzeBars}>
@@ -185,20 +197,6 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
         </div>
       )}
 
-      <div className={styles.actions}>
-        <select
-          value={sort}
-          onChange={(e) => {
-            setPage(0)
-            setSort(e.target.value as ReviewSort)
-          }}
-          className={styles.select}
-          aria-label="정렬"
-        >
-          <option value="desc">최신순</option>
-          <option value="asc">오래된순</option>
-        </select>
-      </div>
 
       {/* 작성 박스 (로그인 시에만) */}
       {isLoggedIn ? (
@@ -223,10 +221,34 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
         <div className={styles.loginHint}>로그인 후 기대평을 작성할 수 있어요 😸</div>
       )}
 
+      {!isLoading && !isError && orderedItems.length > 0 && (
+        <div className={styles.actions}>
+          <select
+            value={sort}
+            onChange={(e) => {
+              setPage(0)
+              setSort(e.target.value as ReviewSort)
+            }}
+            className={styles.select}
+            aria-label="정렬"
+          >
+            <option value="desc">최신순</option>
+            <option value="asc">오래된순</option>
+          </select>
+        </div>
+      )}
+
+      {!isLoading && !isError && orderedItems.length === 0 &&
+        <div className={`${styles.card2} ${styles.empty}`}>
+          <div className={styles.emptyIcon} aria-hidden />
+          <h3 className={styles.emptyTitle}>아직 등록된 기대평이 없습니다.</h3>
+          <p className={styles.emptyDesc}>첫 기대평을 남겨주세요.</p>
+        </div>
+      }
+      
       <div className={styles.list}>
-        {isLoading && <div className={styles.cardLoading}>기대평을 불러오는 중...</div>}
         {isError && <div className={styles.error}>목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>}
-        {!isLoading && !isError && orderedItems.length === 0 && <div className={styles.empty}>아직 기대평이 없습니다.</div>}
+        {isLoading && <div className={styles.cardLoading}>기대평을 불러오는 중...</div>}
 
         {orderedItems.map((rev, idx) => {
           const safeKey =

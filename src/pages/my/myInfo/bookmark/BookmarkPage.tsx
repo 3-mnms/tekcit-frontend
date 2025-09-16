@@ -2,6 +2,7 @@ import React from 'react'
 import styles from './BookmarkPage.module.css'
 import BookmarkCard from '@/components/my/myinfo/BookmarkCard'
 import { useFavoriteToggle, useMyFavoritesInfinite } from '@/models/bookmark/useFavorite'
+import Spinner from '@/components/common/spinner/Spinner'
 
 const PAGE_SIZE = 20
 
@@ -23,7 +24,7 @@ const BookmarkPage: React.FC = () => {
         <h2 className={styles.title}>북마크</h2>
       </div>
 
-      {isLoading && <div className={styles.stateBox}>불러오는 중…</div>}
+      {isLoading && <Spinner/>}
       {isError && <div className={styles.stateBox}>불러오기에 실패했어요.</div>}
 
       {!isLoading && !isError && (
