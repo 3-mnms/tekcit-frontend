@@ -15,7 +15,6 @@ const categoryMap: Record<string, string> = {
   무용: 'dance',
   대중음악: 'pop',
   '뮤지컬/연극': 'theater',
-  // 복합: 'mix',
   '클래식/국악': 'classic',
   '서커스/마술': 'magic',
 }
