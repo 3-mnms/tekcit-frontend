@@ -1,14 +1,14 @@
-/* ===== 레이아웃 기본 ===== */
-
 .wrapper {
   display: flex;
   justify-content: center;
   /* 상위 레이아웃 여백이 만들어내는 스크롤 방지 */
   padding: 0;
+  place-content: center;
+  place-items: center;
 }
 
 .page {
-  width: 1000px;
+  width: 100%;
   height: 100%;
   box-sizing: border-box;
   display: grid;
@@ -20,7 +20,7 @@
   /* 내부 스크롤 금지 */
   background: #fff;
   border-radius: 12px;
-  align-items: stretch;
+  place-content: center;
 }
 
 /* 좌/우 컬럼은 위쪽에만 붙고, 내부 스크롤 없음 */

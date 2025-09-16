@@ -9,6 +9,7 @@ export default function useNoChatWidget() {
     const q = usp.get('nochat');
     if (q === '1' || q === 'true') return true;
     if (window.name?.includes('tekcit-popup')) return true;
+    if (window.location.pathname.startsWith('/admin')) return true;
     return false;
   };
 
