@@ -98,10 +98,10 @@
   resize: vertical;
 }
 
-/* ✅ 삐약! 발송 예약 시간 input을 한 줄에 배치하기 위한 스타일! */
 .dispatchTimeWrapper {
   display: flex;
   gap: 10px;
+  margin-bottom: 20px;
 }
 
 .dispatchTimeWrapper input {
