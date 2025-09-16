@@ -4,6 +4,7 @@ import { usePaymentOrdersQuery } from '@/models/my/ticket/tanstack-query/usePaym
 import styles from './PaymentInfoSection.module.css'
 import { useNavigate } from 'react-router-dom'
 import Button from '@/components/common/button/Button'
+import Spinner from '@/components/common/spinner/Spinner'
 
 type Props = {
   bookingId: string
@@ -101,7 +102,7 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
     <div>
       <h3 className={styles.title}>결제내역</h3>
 
-      {isLoading && <div className={styles.loading}>불러오는 중…</div>}
+      {isLoading && <Spinner />}
       {isError && (
         <div className={styles.error}>
           양도 받은 티켓은 결제 내역에서 제외됩니다.
