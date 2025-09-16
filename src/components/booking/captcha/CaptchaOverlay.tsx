@@ -178,7 +178,7 @@ const CaptchaOverlay: React.FC<Props> = ({
                                 className={styles.submitBtn}
                                 disabled={!canSubmit}   // ← 변경: 입력 5자리+이미지 로드+잔여시간>0일 때만 활성
                             >
-                                {isPending ? '확인 중…' : '인증하기'}
+                                인증하기
                             </Button>
 
                             {/* 숨은 네이티브 submit → requestSubmit 대상 */}

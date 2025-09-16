@@ -19,6 +19,20 @@
   font-weight: 600;
 }
 
+.snsButton2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  border-radius: 8px;
+  padding: 0.5rem;
+  border: 1px solid #eab308;
+  background-color: #facc15;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
 .icon {
   width: 20px;
   height: 20px;

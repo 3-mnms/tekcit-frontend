@@ -123,7 +123,8 @@ const SocialLogin: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <button className={styles.snsButton} onClick={handleKakaoLogin}>
+      {/* <button className={styles.snsButton} onClick={handleKakaoLogin}> */}
+      <button className={styles.snsButton2} onClick={handleKakaoLogin}>
         <img src={KaKao} alt="kakao" className={styles.icon} />
         카카오로 시작하기
       </button>

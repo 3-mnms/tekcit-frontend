@@ -1,4 +1,3 @@
-// src/components/my/dropdown/NotificationDropdown.tsx
 import React from 'react'
 import styles from './NotificationDropdown.module.css'
 import NotificationItem from '@components/my/dropdown/NotificationItem'
@@ -13,6 +12,7 @@ type Props = {
 
 const NotificationDropdown: React.FC<Props> = ({ onBack, onOpenDetail, contentOnly }) => {
   const { notifications, markAllAsRead } = useNotificationStore()
+  const unreadCount = notifications.filter(n => !n.read).length
 
   const Inner = (
     <>
@@ -21,6 +21,20 @@ const NotificationDropdown: React.FC<Props> = ({ onBack, onOpenDetail, contentOn
           <FaChevronLeft size={14} />
         </button>
         <h3 className={styles.title}>공지사항</h3>
+
+        <div className={styles.headerRight}>
+          {unreadCount > 0 && (
+            <button
+              type="button"
+              onClick={markAllAsRead}
+              className={styles.markAllBtn}
+              aria-label="전체 읽음"
+              title="전체 읽음"
+            >
+              전체 읽음
+            </button>
+          )}
+        </div>
       </div>
 
       <div className={styles.list}>
@@ -35,10 +49,6 @@ const NotificationDropdown: React.FC<Props> = ({ onBack, onOpenDetail, contentOn
             onOpen={() => onOpenDetail(n.id)}
           />
         ))}
-      </div>
-
-      <div className={styles.footer}>
-        <button onClick={markAllAsRead}>전체 읽음</button>
       </div>
     </>
   )

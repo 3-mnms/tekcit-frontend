@@ -10,9 +10,7 @@ import OrderConfirmSection from '@/components/booking/OrderConfirmSection';
 
 import { usePhase2Detail, useSelectDelivery } from '@/models/booking/tanstack-query/useBookingDetail';
 import { usePreReservation } from '@/models/booking/tanstack-query/useUser';
-import { useAuthStore } from '@/shared/storage/useAuthStore';
-
-// UI → BE 매핑 (API는 그대로!)
+import Spinner from '@/components/common/spinner/Spinner'
 import { mapUiToBeDelivery } from '@/models/booking/bookingTypes';
 
 type NavState = {
@@ -26,12 +24,11 @@ type NavState = {
 const RESNO_KEY = 'reservationId';
 
 const TicketOrderInfoPage: React.FC = () => {
-  const accessToken = useAuthStore((s) => s.accessToken);
   const { state } = useLocation() as { state?: Partial<NavState> };
   const navigate = useNavigate();
   const { fid: fidFromPath } = useParams<{ fid: string }>();
   const [sp] = useSearchParams();
-  const { data: user } = usePreReservation(true);
+  const { data: user, isLoading: isUserLoading, error: userError } = usePreReservation(true);
 
   const [method, setMethod] = useState<DeliveryMethod>('QR');
   const [address, setAddress] = useState<string>(''); // PAPER 저장용
@@ -57,7 +54,7 @@ const TicketOrderInfoPage: React.FC = () => {
   }, [state?.reservationNumber, sp]);
 
   // Phase2 상세 조회
-  const { data: detail, isLoading, isError, error } = usePhase2Detail({
+  const { data: detail, isLoading: isDetailLoading } = usePhase2Detail({
     festivalId: fid,
     reservationNumber: reservationNumber ?? '',
   });
@@ -92,10 +89,6 @@ const TicketOrderInfoPage: React.FC = () => {
     if (!display.date || !display.time) return '';
     return `${display.date}T${display.time}:00`;
   }, [display.date, display.time]);
-
-  // PAPER일 때만 로딩/에러 표시
-  const showDetailLoading = isPaper && isLoading;
-  const showDetailError = isPaper && isError;
 
   // ✅ 서버에서 온 ticketPick(1=둘 다, 2=QR만) → availabilityCode로 사용
   type DeliveryAvailabilityCode = 1 | 2;
@@ -176,10 +169,16 @@ const TicketOrderInfoPage: React.FC = () => {
         sessionStorage.setItem('payment:latest', JSON.stringify(payload));
       }
       sessionStorage.setItem(RESNO_KEY, bookingId ?? '');
-    } catch {}
+    } catch { /* */ }
 
     navigate('/payment', { state: payload });
   };
+
+  const booting = isUserLoading || isDetailLoading;
+
+  if (booting) {
+    return <Spinner />; // 화면 전체 오버레이
+  }
 
   return (
     <div className={styles.page}>
@@ -203,7 +202,7 @@ const TicketOrderInfoPage: React.FC = () => {
             onChange={handleMethodChange}   // ✅ API 트리거
             loading={isSaving}              // ✅ 저장 중 비활성
             availabilityCode={availabilityCode} // ✅ ticketPick 반영 (1=둘 다, 2=QR만)
-            // hideUnavailable // ← 필요 시 주석 해제: 미지원 옵션 자체를 숨김
+          // hideUnavailable // ← 필요 시 주석 해제: 미지원 옵션 자체를 숨김
           />
         </div>
 
@@ -213,14 +212,6 @@ const TicketOrderInfoPage: React.FC = () => {
             {/* AddressForm이 onSubmit(address: string)을 받는다고 가정 */}
             <AddressForm onSubmit={handleAddressSubmit} />
           </section>
-        )}
-
-        {/* PAPER일 때만 로딩/에러 메시지 노출 */}
-        {showDetailLoading && <p className={styles.noScroll}>상세 불러오는 중…</p>}
-        {showDetailError && (
-          <p className={styles.noScroll} aria-live="polite">
-            상세 불러오기 실패: {(error as any)?.message ?? '에러'}
-          </p>
         )}
       </div>
 

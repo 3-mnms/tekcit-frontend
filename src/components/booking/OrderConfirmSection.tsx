@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '@/components/common/button/Button';
 import type { DeliveryMethod } from '@/components/booking/TicketDeliverySelectSection';
 import styles from './OrderConfirmSection.module.css';
+import Spinner from '@/components/common/spinner/Spinner'
 
 import {
   apiReserveTicket,
@@ -146,14 +147,14 @@ const OrderConfirmSection: React.FC<Props> = ({
           <span className={styles.total}>{fmt(total)}</span>
         </div>
       </div>
-
+      {loading && <Spinner />} 
       <Button
         type="button"
         onClick={handlePayClick}
         className={styles.payButton}
         disabled={loading}
       >
-        {loading ? '처리 중…' : '결제하기'}
+        결제하기
       </Button>
     </section>
   );
