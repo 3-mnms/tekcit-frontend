@@ -19,17 +19,14 @@ const canon = (s?: string) =>
     .replace(/\s+/g, ' ')
     .replace(/[()（）]/g, (m) => (m === '(' || m === '（' ? '(' : ')'))
 
-/** 카테고리 그룹 매핑(하위 탭 계산용) */
-const CATEGORY_MAP: Record<string, string> = {
-  대중음악: '대중음악',
-  '무용(서양/한국무용)': '무용',
-  뮤지컬: '뮤지컬/연극',
-  연극: '뮤지컬/연극',
-  '서양음악(클래식)': '클래식/국악',
-  '한국음악(국악)': '클래식/국악',
-  '서커스/마술': '서커스/마술',
+const GROUP_CHILDREN: Record<string, string[]> = {
+  '대중음악': ['대중음악'],
+  '무용': ['무용(서양/한국무용)', '대중무용'],
+  '뮤지컬/연극': ['뮤지컬', '연극'],
+  '클래식/국악': ['서양음악(클래식)', '한국음악(국악)'],
+  '서커스/마술': ['서커스/마술', '마술'],
+  '복합': ['복합'],
 }
-const normalizeGroup = (o?: string) => (o ? (CATEGORY_MAP[canon(o)] ?? '복합') : '복합')
 
 /** slug -> 그룹(한글) */
 const SLUG_TO_GROUP: Record<string, string> = {
@@ -196,35 +193,33 @@ const CategorySection: React.FC = () => {
   const [festivals, setFestivals] = useState<Festival[]>([])
   useEffect(() => {
     if (!isCategoryPage) return
-    ;(async () => {
-      try {
-        const raw = await getFestivals() // 배열 반환(간단 샘플)
-        setFestivals(raw)
-      } catch (e) {
-        console.error('🚨 공연 리스트 불러오기 실패', e)
-      }
-    })()
+      ; (async () => {
+        try {
+          const raw = await getFestivals() // 배열 반환(간단 샘플)
+          setFestivals(raw)
+        } catch (e) {
+          console.error('🚨 공연 리스트 불러오기 실패', e)
+        }
+      })()
   }, [isCategoryPage])
 
   const presentChildren = useMemo(() => {
     if (!isCategoryPage) return []
-    // 1) festivals 샘플의 genrenm  2) 카테고리 목록  둘 중 있는 걸로 계산
+    // 데이터에 의존하지 않고 “정의된 하위 장르”를 기본으로 사용
+    const defined = GROUP_CHILDREN[groupFromSlug ?? '복합'] ?? []
+
+    // 있으면 먼저, 없어도 뒤에 표시(탭은 항상 노출)
     const candidates: string[] = [
       ...new Set([
         ...festivals.map((f) => (f as any).genrenm).filter(Boolean),
         ...(categoryList ?? []),
       ]),
-    ] as string[]
-
-    const set = new Set<string>()
-    candidates.filter((c) => normalizeGroup(c) === groupFromSlug).forEach((c) => set.add(canon(c)))
-
-    const arr = Array.from(set)
-    // 무용만 안 잡히는 경우를 위한 안전 폴백
-    if (arr.length === 0 && groupFromSlug === '무용') {
-      return ['무용(서양/한국무용)', '대중무용']
-    }
-    return arr
+    ]
+    const availableSet = new Set(candidates.map(canon))
+    const canonDefined = defined.map(canon)
+    const available = canonDefined.filter((c) => availableSet.has(c))
+    const unavailable = canonDefined.filter((c) => !availableSet.has(c))
+    return [...available, ...unavailable]
   }, [isCategoryPage, festivals, categoryList, groupFromSlug])
 
   useEffect(() => {
@@ -232,14 +227,12 @@ const CategorySection: React.FC = () => {
       setActiveChild(null)
       return
     }
-    if (presentChildren.length === 0) {
-      if (groupFromSlug === '무용') setActiveChild('무용(서양/한국무용)')
-      else setActiveChild(null)
-      return
-    }
+    const defined = GROUP_CHILDREN[groupFromSlug ?? '복합'] ?? []
     const canonList = presentChildren.map(canon)
+    // 우선순위: present(있음) > defined(첫 항목)
+    const fallback = presentChildren[0] ?? defined[0] ?? null
     if (!activeChild || !canonList.includes(canon(activeChild))) {
-      setActiveChild(presentChildren[0])
+      setActiveChild(fallback)
     }
   }, [isCategoryPage, presentChildren, activeChild, setActiveChild, groupFromSlug])
 
@@ -333,7 +326,7 @@ const CategorySection: React.FC = () => {
                         className={styles.image}
                         referrerPolicy="no-referrer"
                         onError={(e) => {
-                          ;(e.currentTarget as HTMLImageElement).src =
+                          ; (e.currentTarget as HTMLImageElement).src =
                             '@/shared/assets/placeholder-poster.png'
                         }}
                       />
@@ -355,7 +348,7 @@ const CategorySection: React.FC = () => {
                         className={styles.image}
                         referrerPolicy="no-referrer"
                         onError={(e) => {
-                          ;(e.currentTarget as HTMLImageElement).src =
+                          ; (e.currentTarget as HTMLImageElement).src =
                             '@/shared/assets/placeholder-poster.png'
                         }}
                       />
