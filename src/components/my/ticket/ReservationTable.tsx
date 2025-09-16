@@ -13,7 +13,7 @@ interface Props {
 
 const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter }) => {
   const navigate = useNavigate()
-  const { data, isLoading, isError, error } = useTicketsQuery()
+  const { data, isLoading, isError } = useTicketsQuery()
 
   const filteredData = useMemo(() => {
     if (!data) return []
@@ -27,7 +27,7 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter })
   }, [data, startDate, endDate, statusFilter])
 
   const goDetail = (row: TicketListItem) =>
-    navigate(`/mypage/ticket/detail/${row.reservationNumber}`)
+    navigate(`/mypage/ticket/history/${row.reservationNumber}`)
 
   if (isLoading) {
     return (
@@ -66,7 +66,7 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter })
                 <div className={styles.metaRow}>
                   <span className={styles.meta}><i className={styles.iTicket} />{item.number}</span>
                   <span className={styles.meta}><i className={styles.iCal} />{item.date}</span>
-                  <span className={styles.meta}><i className={styles.iClock} />{item.dateTime?.split(' ')[1] ?? ''}</span>
+                  <span className={styles.meta}><i className={styles.iClock} />{item.dateTime}</span>
                 </div>
               </div>
               <span

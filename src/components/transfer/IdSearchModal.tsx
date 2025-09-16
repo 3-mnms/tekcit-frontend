@@ -137,6 +137,18 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
   return (
     <div className={styles.backdrop} role="dialog" aria-modal="true" onClick={onClose}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
+         <div className={styles.topBar}>
+          <span aria-hidden="true" />
+          <button
+            type="button"
+            className={styles.closeBtn}
+            onClick={onClose}
+            aria-label="닫기"
+            title="닫기"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
         <div className={styles.title}>이메일로 계정 검색</div>
 
         <label className={styles.fieldLabel}>
