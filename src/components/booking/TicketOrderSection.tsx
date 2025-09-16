@@ -4,8 +4,6 @@ import { ko } from 'date-fns/locale'
 import 'react-datepicker/dist/react-datepicker.css'
 import Button from '@/components/common/button/Button'
 import styles from './TicketOrderSection.module.css'
-import { useAuthStore } from '@/shared/storage/useAuthStore'
-
 
 type NextPayload = {
   fid?: string
@@ -63,8 +61,6 @@ function makeDemo() {
   }
 }
 
-const role = useAuthStore((s) => s.user?.role);
-const isUserRole = role === 'USER';
 
 const TicketOrderSection: React.FC<Props> = ({
   fid,
