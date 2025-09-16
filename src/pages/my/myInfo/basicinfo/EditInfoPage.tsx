@@ -9,7 +9,7 @@ import styles from './EditInfoPage.module.css'
 
 import { isUser, type UpdateUserRequestDTO } from '@/models/my/userTypes'
 import { useMyPageUserQuery, useUpdateUserMutation } from '@/models/my/useMyPage'
-import { FaUser, FaPhone, FaIdCard } from 'react-icons/fa';
+import { FaUser, FaPhone, FaIdCard } from 'react-icons/fa'
 
 const schema = z.object({
   name: z.string().min(1, '이름은 필수입니다.'),
@@ -38,7 +38,7 @@ const EditInfoPage: React.FC = () => {
     reset({
       name: data.name ?? '',
       phone: data.phone ?? '',
-      residentNum: isUser(data) ? data.residentNum ?? '' : '',
+      residentNum: isUser(data) ? (data.residentNum ?? '') : '',
     })
   }, [data, reset])
 
@@ -79,61 +79,84 @@ const EditInfoPage: React.FC = () => {
         <h2 className={styles.title}>내 정보 수정</h2>
       </div>
 
-      <form className={`${styles.card} ${styles.cardAccent}`} onSubmit={handleSubmit(onSubmit)} noValidate>
-  <div className={styles.formGrid}>
-    <Controller
-      name="name"
-      control={control}
-      render={({ field }) => (
-        <Input
-          label={
-            <span className={styles.labelWithIcon}>
-              <FaUser className={styles.labelIcon} aria-hidden />
-              이름
-            </span>
-          }
-          className={styles.input}
-          {...field}
-        />
-      )}
-    />
+      <form
+        className={`${styles.card} ${styles.cardAccent}`}
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+      >
+        <div className={styles.formGrid}>
+          <Controller
+            name="name"
+            control={control}
+            render={({ field }) => (
+              <Input
+                label={
+                  <span className={styles.labelWithIcon}>
+                    <FaUser className={styles.labelIcon} aria-hidden />
+                    이름
+                  </span>
+                }
+                className={styles.input}
+                {...field}
+              />
+            )}
+          />
 
-    <Controller
-      name="phone"
-      control={control}
-      render={({ field }) => (
-        <Input
-          label={
-            <span className={styles.labelWithIcon}>
-              <FaPhone className={styles.labelIcon} aria-hidden />
-              전화번호
-            </span>
-          }
-          placeholder="010-1234-5678"
-          className={styles.input}
-          {...field}
-        />
-      )}
-    />
+          <Controller
+            name="phone"
+            control={control}
+            render={({ field: { onChange, value, ...rest } }) => {
+              const handleChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement> = (
+                e,
+              ) => {
+                let input = String((e.target as HTMLInputElement).value || '').replace(/\D/g, '')
+                if (input.length > 11) input = input.slice(0, 11) // 최대 11자리
+                if (input.length > 7) {
+                  input = input.replace(/(\d{3})(\d{4})(\d{0,4}).*/, '$1-$2-$3')
+                } else if (input.length > 3) {
+                  input = input.replace(/(\d{3})(\d{0,4}).*/, '$1-$2')
+                }
 
-    <Controller
-      name="residentNum"
-      control={control}
-      render={({ field }) => (
-        <Input
-          label={
-            <span className={styles.labelWithIcon}>
-              <FaIdCard className={styles.labelIcon} aria-hidden />
-              주민번호(앞6+뒤1)
-            </span>
-          }
-          placeholder="YYMMDD-#"
-          className={styles.input}
-          {...field}
-        />
-      )}
-    />
-  </div>
+                onChange(input) 
+              }
+
+              return (
+                <Input
+                  label={
+                    <span className={styles.labelWithIcon}>
+                      <FaPhone className={styles.labelIcon} aria-hidden />
+                      전화번호
+                    </span>
+                  }
+                  placeholder="010-1234-5678"
+                  className={styles.input}
+                  value={value ?? ''}
+                  onChange={handleChange}
+                  type="tel"
+                  {...rest}
+                />
+              )
+            }}
+          />
+
+          <Controller
+            name="residentNum"
+            control={control}
+            render={({ field }) => (
+              <Input
+                label={
+                  <span className={styles.labelWithIcon}>
+                    <FaIdCard className={styles.labelIcon} aria-hidden />
+                    주민번호(앞6+뒤1)
+                  </span>
+                }
+                placeholder="YYMMDD-#"
+                className={styles.input}
+                {...field}
+              />
+            )}
+          />
+        </div>
 
         {/* 버튼 영역: 오른쪽 정렬 */}
         <div className={styles.actions}>
