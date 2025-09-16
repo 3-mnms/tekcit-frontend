@@ -5,7 +5,7 @@ import { useAuthStore } from '@/shared/storage/useAuthStore'
 
 export function useAdminTotalAmountQuery() {
   // BE는 X-User-Id 헤더도 받지만, 내부에서 1L 고정 사용 중.
-  const userId = String(useAuthStore.getState().user?.id ?? '') // 없으면 빈 문자열
+  const userId = String(useAuthStore.getState().user ?? '') // 없으면 빈 문자열
   return useQuery<TekcitPayAccountResponseDTO>({
     queryKey: ['tekcitpay', 'admin', 'total-amount', userId],
     queryFn: ({ signal }) => getAdminTotalAmount({ userId, userRole: 'ADMIN' }, signal),
@@ -17,6 +17,5 @@ export function useAdminHistoryQuery(page: number, size: number) {
   return useQuery<PageResponse<PaymentOrderDTO>>({
     queryKey: ['tekcitpay', 'admin', 'history', page, size],
     queryFn: ({ signal }) => getAdminHistory({ page, size, userRole: 'ADMIN' }, signal),
-    // keepPreviousData: true,
   })
 }

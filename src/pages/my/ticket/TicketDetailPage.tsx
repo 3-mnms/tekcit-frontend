@@ -6,6 +6,7 @@ import PaymentInfoSection from '@/components/my/ticket/PaymentInfoSection'
 import { useTicketDetailQuery } from '@/models/my/ticket/tanstack-query/useTickets'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 import styles from './TicketHistoryPage.module.css'
+import Spinner from '@/components/common/spinner/Spinner'
 
 const TicketDetailPage: React.FC = () => {
   const { reservationNumber } = useParams<{ reservationNumber: string }>()
@@ -25,10 +26,10 @@ const TicketDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="w-full p-8">
-      <h2 className={styles.title}>예매내역 확인 · 취소</h2>
+    <div>
+      <h2 className={styles.title}>예매 내역 확인 · 취소</h2>
 
-      {isLoading && <div>불러오는 중…</div>}
+      {isLoading && <Spinner />}
       {isError && <div>불러오기 실패: {(error as Error)?.message ?? '알 수 없는 오류'}</div>}
 
       {data && (

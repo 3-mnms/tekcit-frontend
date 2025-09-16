@@ -31,9 +31,6 @@ const getTransactionTypeText = (type: string) =>
 const getPayMethodText = (method: string) =>
   method === 'POINT_PAYMENT' ? '포인트 결제' : method;
 
-/* =========================
-   Page Component
-   ========================= */
 export default function PaymentManagement() {
   const [page, setPage] = React.useState(0);
   const size = 10;
@@ -50,7 +47,6 @@ export default function PaymentManagement() {
   return (
     <Layout subTitle="계좌 관리">
       <div className={styles.wrapper}>
-        {/* 요약 카드 */}
         <div className={`${styles.card} ${styles.cardAccent} ${styles.statCard}`}>
           <CardHeader>
             <div className={styles.statRow}>
@@ -71,7 +67,6 @@ export default function PaymentManagement() {
           )}
         </div>
 
-        {/* 내역 테이블 */}
         <div className={styles.card}>
           <CardHeader>
             <h2 className={styles.cardTitle}>💳 결제 내역</h2>
@@ -151,7 +146,6 @@ export default function PaymentManagement() {
               </table>
             </div>
 
-            {/* 페이지네이션 */}
             <div className={styles.pager}>
               <span className={styles.pagerInfo}>
                 {pageResp ? `${pageResp.number + 1} / ${pageResp.totalPages} 페이지` : ''}

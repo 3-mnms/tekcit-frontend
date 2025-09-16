@@ -1,7 +1,6 @@
 /* TicketHistoryPage.module.css */
 .container {
   width: 100%;
-  gap: 1rem;
   box-sizing: border-box;
   margin-bottom: 50px;
 }
@@ -14,6 +13,7 @@
   font-size: 1.875rem;
   font-weight: 800;
   color: #0f172a;
+  margin-bottom: 10px;
 }
 
 .card {
