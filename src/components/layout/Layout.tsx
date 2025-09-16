@@ -9,6 +9,7 @@ import { USERROLE } from '@/models/admin/User'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 import { logout as logoutApi } from '@/shared/api/auth/login'
 
+
 const adminMenuItems = [
   { path: '/admin/productRegist', name: '상품 등록' },
   { path: '/admin/productManage', name: '상품 관리' },
