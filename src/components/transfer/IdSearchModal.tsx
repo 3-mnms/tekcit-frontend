@@ -11,38 +11,11 @@ type Props = {
   onSelect: (acc: AccountMini) => void;
 };
 
-type TransfereeCore = {
-  name?: string;
-  residentNum?: string;
-  userId?: number;
-};
-
-type Envelope = {
-  success?: boolean;
-  data?: TransfereeCore | null;
-  message?: string;
-};
-
-function isTransfereeCore(v: unknown): v is TransfereeCore {
-  if (typeof v !== 'object' || v === null) return false;
-  const o = v as Record<string, unknown>;
-  const userIdOk =
-    o.userId === undefined || typeof o.userId === 'number' || Number.isFinite(Number(o.userId));
-  const nameOk = o.name === undefined || typeof o.name === 'string';
-  const rnOk = o.residentNum === undefined || typeof o.residentNum === 'string';
-  return userIdOk && nameOk && rnOk;
-}
-
-function isEnvelope(v: unknown): v is Envelope {
-  if (typeof v !== 'object' || v === null) return false;
-  const o = v as Record<string, unknown>;
-  return 'data' in o;
-}
-
 const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
   const [q, setQ] = useState('');
   const [results, setResults] = useState<AccountMini[]>([]);
   const [sel, setSel] = useState<number>(-1);
+  const [errorMsg, setErrorMsg] = useState<string>('');
 
   const emailRef = useRef<HTMLInputElement>(null);
   const prevFocusRef = useRef<HTMLElement | null>(null);
@@ -51,7 +24,7 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
 
   useEffect(() => {
     if (!open) return;
-    prevFocusRef.current = (document.activeElement as HTMLElement) ?? null;
+    prevFocusRef.current = document.activeElement as HTMLElement | null;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     setTimeout(() => emailRef.current?.focus(), 0);
@@ -64,6 +37,7 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
       setQ('');
       setResults([]);
       setSel(-1);
+      setErrorMsg('');
     };
   }, [open, onClose]);
 
@@ -76,43 +50,32 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
       return;
     }
     try {
-      // mutateAsync의 반환을 unknown으로 보고 안전하게 파싱
-      const payload = (await mutateAsync(email)) as unknown;
+      setErrorMsg('');
+      const payload = await mutateAsync(email);
 
-      let core: TransfereeCore | null = null;
-      if (isEnvelope(payload)) {
-        core = payload.data ?? null;
-      } else if (isTransfereeCore(payload)) {
-        core = payload;
-      }
+      const dto =
+        payload && typeof payload === 'object' && 'data' in (payload as any)
+          ? (payload as any).data
+          : payload;
 
-      const list: AccountMini[] = core
-        ? [
-            {
-              id: email,
-              name: (core.name ?? '').trim(),
-              residentNum: (core.residentNum ?? '').trim() || undefined,
-              userId:
-                typeof core.userId === 'number'
-                  ? core.userId
-                  : Number.isFinite(Number(core.userId))
-                  ? Number(core.userId)
-                  : 0,
-            },
-          ]
-        : [];
+      const list: AccountMini[] = [
+        {
+          id: email,
+          name: dto?.name ?? '',
+          residentNum: dto?.residentNum ?? '',
+          userId: dto?.userId ?? '',
+        },
+      ];
 
       setResults(list);
       setSel(list.length ? 0 : -1);
-      if (!list.length) alert('일치하는 결과가 없습니다');
-    } catch (e: unknown) {
-      // Error 객체 안전 처리
-      const msg =
-        (typeof e === 'object' && e && 'message' in e && typeof (e as { message?: string }).message === 'string'
-          ? (e as { message?: string }).message
-          : undefined) || '검색 중 오류가 발생했어요';
+    } catch (e: any) {
       console.error(e);
-      alert(msg);
+      if (e?.response?.status === 404) {
+        setErrorMsg('존재하지 않는 이메일입니다. 다시 검색해주세요.');
+      } else {
+        setErrorMsg(e?.message || '검색 중 오류가 발생했어요');
+      }
       setResults([]);
       setSel(-1);
     }
@@ -129,25 +92,10 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
   return (
     <div className={styles.backdrop} role="dialog" aria-modal="true" onClick={onClose}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-        {/* ===== 상단 헤더 줄 + X 버튼 ===== */}
-        <div className={styles.topBar}>
-          <span aria-hidden="true" />
-          <button
-            type="button"
-            className={styles.closeBtn}
-            onClick={onClose}
-            aria-label="닫기"
-            title="닫기"
-          >
-            <span aria-hidden="true">×</span>
-          </button>
-        </div>
-
         <div className={styles.title}>이메일로 계정 검색</div>
 
-        {/* 🔧 전역 label 충돌 방지: fieldLabel 클래스로 한정 */}
         <label className={styles.fieldLabel}>
-          <span className={styles.srOnly}>검색할 이메일</span>
+          검색할 이메일
           <div className={styles.searchRow}>
             <input
               ref={emailRef}
@@ -157,7 +105,6 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && doSearch()}
               disabled={isPending}
-              aria-label="검색할 이메일"
             />
             <Button
               type="button"
@@ -170,7 +117,7 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
           </div>
         </label>
 
-        {/* 결과: 라디오 한 줄 + 이름 / 주민번호 */}
+        {/* 결과 */}
         <div className={styles.resultBox}>
           {results.length ? (
             <div
@@ -217,7 +164,9 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
               ))}
             </div>
           ) : (
-            <div className={styles.resultHint}>{isPending ? '검색 중…' : '검색 결과가 여기에 표시됩니다.'}</div>
+            <div className={styles.resultHint}>
+              {isPending ? '검색 중…' : errorMsg || '검색 결과가 여기에 표시됩니다.'}
+            </div>
           )}
         </div>
 

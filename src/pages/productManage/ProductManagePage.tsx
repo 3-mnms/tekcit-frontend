@@ -5,6 +5,8 @@ import Layout from '@/components/layout/Layout';
 import SearchBar from '@/components/common/SearchBox';
 import Table, {type Column} from '@/components/shared/Table';
 import Button from '@/components/common/Button';
+import { GrFormPrevious } from "react-icons/gr";
+import { GrFormNext } from "react-icons/gr";
 import styles from './ProductManagePage.module.css';
 
 import { getProducts } from '@/shared/api/admin/festival';
@@ -14,15 +16,22 @@ const ProductManagePage: React.FC = () => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
 
+    const [page, setPage] = useState(0); 
+    const pageSize = 13;
+
     const { 
         data: allProducts,
         isLoading, 
         isError,
     } = useQuery({
-        queryKey: ['products'], 
-        queryFn: getProducts, 
+        queryKey: ['products', page], 
+        queryFn: () => getProducts(page, pageSize), 
         select: (response) => {
-            const festivalList = response.data;
+            const festivalList = response?.data;
+
+            if (!festivalList || !Array.isArray(festivalList)) {
+                return [];
+            }            
             return festivalList.map(festival => ({
                 ...festival,
                 detail: {
@@ -32,7 +41,8 @@ const ProductManagePage: React.FC = () => {
                         : [],
                 }
             }));
-        }
+        },
+        placeholderData: (previousData) => previousData,
     });
 
     const filteredProducts = useMemo(() => {
@@ -96,6 +106,18 @@ const ProductManagePage: React.FC = () => {
         return <Layout subTitle="상품 관리"><div>삐약! 오류가 발생했어요. 다시 시도해 주세요.</div></Layout>;
     }
 
+    const handleNextPage = () => {
+        setPage(prevPage => prevPage + 1);
+    };
+
+    const handlePrevPage = () => {
+        setPage(prevPage => Math.max(0, prevPage - 1));
+    };
+
+    console.log('삐약! allProducts:', allProducts);
+    console.log('삐약! filteredProducts:', filteredProducts);
+    console.log('삐약! filteredProducts length:', filteredProducts.length);
+
     return (
         <Layout subTitle="상품 관리 ">
             <div className={styles.container}>
@@ -111,6 +133,12 @@ const ProductManagePage: React.FC = () => {
                     onRowClick={handleRowClick}
                     getUniqueKey={(item) => item.fid}
                 />
+                <div className={styles.paginationControls}>
+                    <GrFormPrevious onClick={handlePrevPage} disabled={page === 0}/>
+
+                    <span>현재 페이지: {page + 1}</span>
+                    <GrFormNext onClick={handleNextPage}/>
+                </div>
             </div>
         </Layout>
     );

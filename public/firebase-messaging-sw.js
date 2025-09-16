@@ -15,6 +15,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
+/*
 // 백그라운드 알림 처리
 messaging.onBackgroundMessage((payload) => {
   console.log("백그라운드 알림 도착:", payload);
@@ -23,9 +24,22 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.data.title;
     const notificationOptions = {
       body: payload.data.body,
-      icon: "/firebase-logo.png",
+      //icon: "/firebase-logo.png",
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
+    self.registration.showNotification(title, options);
   }
+});*/
+
+messaging.onBackgroundMessage((payload) => {
+  console.log("📱 백그라운드 알림 도착:", payload);
+
+  // ✅ 모바일 전용: 하드코딩 문구
+  const notificationTitle = "테킷에서 알림이 도착했습니다";
+  const notificationOptions = {
+    body: "홈페이지를 참고해주세요!",
+  };
+
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });
