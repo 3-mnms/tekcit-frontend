@@ -1,10 +1,11 @@
 // useLoginMutation.ts
 import { useMutation } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
-import { login, type LoginPayload, type LoginResponseDTO } from '@/shared/api/auth/login'
+import { type LoginResponseDTO } from '@/shared/api/auth/login'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 import { parseJwt } from '@/shared/storage/jwt'
 import { setAuthHeaderToken } from '@/shared/config/axios'
+import { login, confirmLogin, isLoginSuccess, isLoginConflict, type LoginPayload } from '@/shared/api/auth/login'
 
 type JwtRole = 'USER' | 'HOST' | 'ADMIN'
 type JwtPayload = { sub: string; userId: number; role: JwtRole; name: string; exp?: number; iat?: number }
@@ -36,4 +37,23 @@ export const useLoginMutation = () => {
       console.warn('[LOGIN FAIL]', err.response?.status, err.response?.data)
     },
   })
+}
+
+export function useLoginFlow() {
+  const m = useMutation({
+    mutationFn: (p: LoginPayload) => login(p),
+    onSuccess: async (res) => {
+      if (isLoginSuccess(res)) {
+        return
+      }
+      if (isLoginConflict(res)) {
+        const ok = window.confirm('이미 로그인된 세션이 있습니다.\n기존 세션을 로그아웃하고 이 기기에서 로그인하시겠습니까?')
+        if (!ok) return
+      await confirmLogin(res.loginTicket)
+        return
+      }
+      alert('알 수 없는 로그인 응답입니다.')
+    },
+  })
+  return m
 }
