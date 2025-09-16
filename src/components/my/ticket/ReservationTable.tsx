@@ -49,7 +49,7 @@ const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter })
         <div className={styles.emptyIcon} aria-hidden />
         <h3 className={styles.emptyTitle}>예매 내역이 없습니다</h3>
         <p className={styles.emptyDesc}>선택한 조건에 해당하는 예매 내역이 없습니다.</p>
-        <button className={styles.primaryBtn}>티켓 예매하기</button>
+        <button className={styles.primaryBtn} onClick={() => navigate('/')}>티켓 예매하기</button>
       </div>
     )
   }
