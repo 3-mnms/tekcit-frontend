@@ -14,6 +14,14 @@
   padding: 20px;
   gap: 20px;
   box-sizing: border-box;
+  align-items: stretch;
+  /* 추가: 좌/우를 컨테이너 높이에 맞춰 늘림 */
+}
+
+.left,
+.right {
+  min-height: 0;
+  /* 추가: 부모 높이 안에서 정확히 맞춰짐 */
 }
 
 /* 왼쪽 */
@@ -31,6 +39,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  height: 100%;
 }
 
 .sectionTitle {
@@ -45,6 +54,11 @@
   background: #ffffff;
   padding: 16px;
   border-radius: 10px;
+  flex: 1;
+  /* 추가: 오른쪽 컬럼의 남는 높이를 채움 */
+  min-height: 0;
+  /* 추가: 내부 스크롤 계산 정확도 향상 */
+  overflow: auto;
 }
 
 /* 수령 방법과 결제 수단 사이 여백 추가 */
@@ -101,7 +115,7 @@
 }
 
 .buttonWrapper {
-  margin-top: 8px;
+  margin-top: auto;
 }
 
 .payButton {
@@ -113,7 +127,8 @@
   border-radius: 6px;
   padding: 12px;
   font-size: 0.95rem;
-  min-height: 48px; /* ← 다시 추가 */
+  min-height: 48px;
+  /* ← 다시 추가 */
   cursor: pointer;
   transition: background 0.2s ease;
 }

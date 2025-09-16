@@ -44,5 +44,12 @@
 
 .table td.actions {
   max-width: 200px;
-  width: 200px; /* 삐약! 🐥 액션 버튼은 크기를 고정해요. */
+  width: 200px;
 }
+.paginationControls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  }

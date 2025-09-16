@@ -1,3 +1,4 @@
+
 // WalletPointPage.tsx
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'

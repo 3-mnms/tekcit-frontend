@@ -137,25 +137,10 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
   return (
     <div className={styles.backdrop} role="dialog" aria-modal="true" onClick={onClose}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-        {/* ===== 상단 헤더 줄 + X 버튼 ===== */}
-        <div className={styles.topBar}>
-          <span aria-hidden="true" />
-          <button
-            type="button"
-            className={styles.closeBtn}
-            onClick={onClose}
-            aria-label="닫기"
-            title="닫기"
-          >
-            <span aria-hidden="true">×</span>
-          </button>
-        </div>
-
         <div className={styles.title}>이메일로 계정 검색</div>
 
-        {/* 🔧 전역 label 충돌 방지: fieldLabel 클래스로 한정 */}
         <label className={styles.fieldLabel}>
-          <span className={styles.srOnly}>검색할 이메일</span>
+          검색할 이메일
           <div className={styles.searchRow}>
             <input
               ref={emailRef}
@@ -165,7 +150,6 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && doSearch()}
               disabled={isPending}
-              aria-label="검색할 이메일"
             />
             <Button
               type="button"
@@ -178,7 +162,7 @@ const IdSearchModal: React.FC<Props> = ({ open, onClose, onSelect }) => {
           </div>
         </label>
 
-        {/* 결과: 라디오 한 줄 + 이름 / 주민번호 */}
+        {/* 결과 */}
         <div className={styles.resultBox}>
           {results.length ? (
             <div

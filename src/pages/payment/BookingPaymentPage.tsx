@@ -75,15 +75,13 @@ const BookingPaymentPage: React.FC = () => {
   const { data: tokenInfo } = useTokenInfoQuery()
   const userId = Number(tokenInfo?.userId)
 
-  const amountToPay = finalAmount
+  const amountToPay = finalAmount ?? checkout.amount
 
   const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState(false)
   const [isPaying, setIsPaying] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [paymentId, setPaymentId] = useState<string | null>(null)
   const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS)
-
-  const accessToken = useAuthStore.getState().accessToken
 
   // 최초 paymentId 생성 + 세션 저장
   useEffect(() => {
@@ -142,14 +140,12 @@ const BookingPaymentPage: React.FC = () => {
 
     const connectWebSocket = () => {
       console.log('[WebSocket] 새 연결 시작...')
-      console.log('[WebSocket] 연결 URL: http://localhost:10000/ws') // ✅ 포트 수정
+      console.log('[WebSocket] 연결 URL: http://localhost:10000/ws')
 
       // ✅ 최신 @stomp/stompjs Client 방식 사용
       const client = new Client({
-        webSocketFactory: () => new SockJS('http://localhost:10000/ws'), // ✅ 포트 수정
-        connectHeaders: {
-          Authorization: `Bearer ${accessToken}`
-        },
+        webSocketFactory: () => new SockJS('http://localhost:10000/ws'),
+        connectHeaders: {},
         debug: (str) => {
           console.log('[STOMP Debug]', str)
         },
@@ -204,7 +200,7 @@ const BookingPaymentPage: React.FC = () => {
                 timestamp: new Date().toISOString()
               })
             })
-            console.log('📤 [WebSocket] 테스트 메시지 전송 완료')
+            console.log('📤 [WebSocket] 테스트 메시지 전송 완료' )
           } catch (error) {
             console.error('❌ [WebSocket] 테스트 메시지 전송 실패:', error)
           }
