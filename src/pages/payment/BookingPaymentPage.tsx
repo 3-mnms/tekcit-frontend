@@ -229,7 +229,6 @@ const BookingPaymentPage: React.FC = () => {
         return;
       }
 
-      // ✅ 토스페이먼츠: complete 콜백 제거하고 리다이렉트 방식 사용
       await tossRef.current?.requestPay({
         paymentId: ensuredId,
         amount: finalAmount,
@@ -237,8 +236,14 @@ const BookingPaymentPage: React.FC = () => {
         bookingId: checkout.bookingId,
         festivalId: festivalIdVal,
         sellerId: sellerId!,
-        successUrl: `${window.location.origin}/payment/booking-result?status=success&paymentId=${ensuredId}&bookingId=${checkout.bookingId}`,
-        failUrl: `${window.location.origin}/payment/booking-result?status=fail`,
+        complete: (paymentData) => {
+          if (paymentData.code === null) {
+            handlePostPayment(paymentData.paymentId);
+          } else {
+            setErr(paymentData.message || '결제에 실패했습니다.');
+            routeToResult(false);
+          }
+        },
       });
     } catch (e) {
       console.error('결제 준비 또는 요청 중 오류가 발생했습니다.', e);
@@ -338,7 +343,7 @@ const BookingPaymentPage: React.FC = () => {
         <AlertModal
           title="시간 만료"
           onConfirm={() => {
-            setIsTimeUpModalClose();
+            setIsTimeUpModalOpen(false);
             if (window.opener && !window.opener.closed) {
               window.close();
             }
