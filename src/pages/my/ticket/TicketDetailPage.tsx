@@ -4,6 +4,7 @@ import { useParams, Navigate } from 'react-router-dom'
 import TicketInfoCard from '@/components/my/ticket/TicketInfoCard'
 import PaymentInfoSection from '@/components/my/ticket/PaymentInfoSection'
 import { useTicketDetailQuery } from '@/models/my/ticket/tanstack-query/useTickets'
+import { usePaymentOrdersQuery } from '@/models/my/ticket/tanstack-query/usePaymentOrders'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 import styles from './TicketHistoryPage.module.css'
 import Spinner from '@/components/common/spinner/Spinner'
@@ -16,7 +17,7 @@ const TicketDetailPage: React.FC = () => {
   const reserverName = useAuthStore((s) => s.user?.name ?? '')
 
   const { data, isLoading, isError, error } = useTicketDetailQuery(reservationNumber)
-
+  
   if (!authReady) {
     return <div className="w-full p-8">초기화 중…</div>
   }

@@ -148,6 +148,8 @@ const FestivalScheduleSection: React.FC<Props> = ({ detailFromParent, suppressLo
   const location = useLocation()
   const accessToken = useAuthStore((s) => s.accessToken)
   const enterMut = useEnterWaitingMutation()
+  const role = useAuthStore((s) => s.user?.role);
+  const isUserRole = role === 'USER';
 
   // 오늘 00:00
   const today = useMemo(() => {
@@ -373,11 +375,12 @@ const FestivalScheduleSection: React.FC<Props> = ({ detailFromParent, suppressLo
                   return
                 }
 
-                const ageText =
-                  (detail as any)?.prfage ??
-                  (detail as any)?.age ??
-                  (detail as any)?.ageLimit ??
-                  null
+                if (!isUserRole) {
+                  alert('관리자 또는 주최자 계정으로는 예매를 진행할 수 없습니다.\n일반 사용자 계정으로 로그인해 주세요.');
+                  return;
+                }
+
+                const ageText = detail?.prfage ?? null
 
                 const parseMinAge = (raw?: string | null): number | null => {
                   if (!raw) return null

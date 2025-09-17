@@ -25,7 +25,6 @@ const computeSale = (start?: string, end?: string, now = new Date()): Sale => {
   return '공연중';
 };
 
-// (옵션) 포스터 URL 보정이 필요하다면 사용
 const fixPoster = (raw?: string) => {
   if (!raw) return '';
   if (raw.startsWith('http://') || raw.startsWith('https://')) {
@@ -40,23 +39,42 @@ const ResultPanel: React.FC = () => {
   const keyword = (params.get('keyword') || '').trim();
 
   const selectedGenres = (params.get('genres') || '')
-    .split(',').map((s) => s.trim()).filter(Boolean);
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   const selectedStatus = (
     params.get('status') || DEFAULT_STATUSES.join(',')
-  ).split(',').map((s) => s.trim()).filter(Boolean) as Sale[];
+  )
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean) as Sale[];
 
   const fromParam = params.get('from') || undefined;
   const toParam = params.get('to') || undefined;
 
   const genreForBackend = selectedGenres.length === 1 ? selectedGenres[0] : undefined;
 
-  const { data, isLoading, isError } = useQuery<FestivalItem[]>({
+  const { data = [], isLoading, isError } = useQuery<FestivalItem[]>({
     queryKey: ['searchResults', { keyword, genreForBackend }],
-    queryFn: () => searchFestivals({ keyword: keyword || undefined, genre: genreForBackend }),
+    // ✅ 404를 '결과 없음'으로 처리
+    queryFn: async () => {
+      try {
+        const res = await searchFestivals({
+          keyword: keyword || undefined,
+          genre: genreForBackend,
+        });
+        return Array.isArray(res) ? res : [];
+      } catch (e: any) {
+        if (e?.response?.status === 404) return []; // <- 핵심
+        throw e;
+      }
+    },
     enabled: !!keyword || !!selectedGenres.length,
     staleTime: 60_000,
     keepPreviousData: true,
+    retry: (failureCount, error: any) =>
+      error?.response?.status === 404 ? false : failureCount < 2, // 404는 재시도 불필요
   });
 
   const filtered = useMemo(() => {
@@ -96,8 +114,12 @@ const ResultPanel: React.FC = () => {
   const itemsToShow = filtered.slice(0, visibleCount);
   const canLoadMore = visibleCount < total;
 
-  if (!keyword && !selectedGenres.length) return <div className={styles.message}>검색어 또는 장르를 선택해 주세요.</div>;
+  if (!keyword && !selectedGenres.length)
+    return <div className={styles.message}>검색어 또는 장르를 선택해 주세요.</div>;
+
   if (isLoading) return <div className={styles.message}>로딩 중…</div>;
+
+  // 이제 여기까지 내려오면, 404는 data=[]로 처리되어 isError=false 상태!
   if (isError) return <div className={styles.message}>검색 중 오류가 발생했어요.</div>;
 
   return (
@@ -115,12 +137,11 @@ const ResultPanel: React.FC = () => {
               const poster = fixPoster(f.poster);
               const to = f.fid ? `/festival/${f.fid}` : undefined;
 
-              const dateRange =
-                f.prfpdfrom
-                  ? (f.prfpdto && f.prfpdto.slice(0, 10) !== f.prfpdfrom.slice(0, 10)
-                      ? `${f.prfpdfrom} ~ ${f.prfpdto}`
-                      : f.prfpdfrom)
-                  : undefined;
+              const dateRange = f.prfpdfrom
+                ? f.prfpdto && f.prfpdto.slice(0, 10) !== f.prfpdfrom.slice(0, 10)
+                  ? `${f.prfpdfrom} ~ ${f.prfpdto}`
+                  : f.prfpdfrom
+                : undefined;
 
               const CardInner = (
                 <>
@@ -131,11 +152,14 @@ const ResultPanel: React.FC = () => {
                       className={styles.poster}
                       referrerPolicy="no-referrer"
                       onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = '@/shared/assets/placeholder-poster.png';
+                        (e.currentTarget as HTMLImageElement).src =
+                          '/placeholder-poster.png'; // 프로젝트의 정적 경로로 교체 가능
                       }}
                     />
                   )}
-                  <h3 className={styles.cardTitle} title={f.prfnm}>{f.prfnm}</h3>
+                  <h3 className={styles.cardTitle} title={f.prfnm}>
+                    {f.prfnm}
+                  </h3>
                   {f.fcltynm && <p className={styles.venue}>{f.fcltynm}</p>}
                   {dateRange && <p className={styles.date}>{dateRange}</p>}
                 </>
@@ -147,10 +171,9 @@ const ResultPanel: React.FC = () => {
                     <Link
                       to={to}
                       state={{
-                        fid: f.fid,            // ① fid(백업)
-                        title: f.prfnm,        // ② 제목
-                        poster,                // ③ 포스터
-                        // 프리뷰 보너스
+                        fid: f.fid,
+                        title: f.prfnm,
+                        poster,
                         prfpdfrom: f.prfpdfrom,
                         prfpdto: f.prfpdto,
                         fcltynm: f.fcltynm,

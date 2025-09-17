@@ -10,75 +10,109 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    /* backdrop-filter: blur(5px); */
 }
 
 .modalContent {
     background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 400px;
-    max-height: 80%;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
     position: relative;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
+/* 삐약! 모달 제목 스타일이에요. 삐약! */
 .modalTitle {
     text-align: center;
-    margin-bottom: 20px;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.5rem;
 }
 
+/* 삐약! 제목 아래 부제목 스타일이에요. 삐약! */
+.modalSubtitle {
+    text-align: center;
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+/* 삐약! 입력 필드 그룹을 묶는 컨테이너예요. 삐약! */
+.formSection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+/* 삐약! 각 입력 필드 그룹 스타일이에요. 삐약! */
 .formGroup {
-    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .formGroup label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
 }
 
 .formGroup input {
     width: 100%;
-    padding: 8px;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
     box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    font-size: 1rem;
+    transition: all 0.2s ease-in-out;
 }
 
+.formGroup input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
+/* 삐약! 버튼 그룹 스타일이에요. 삐약! */
 .buttonGroup {
     display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 1.5rem;
+    border-top: 1px solid #eee;
+    padding-top: 1.5rem;
 }
 
-.saveButton, .cancelButton {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
-}
-
-.saveButton {
-    background-color: #007bff;
-    color: white;
-}
-
-.cancelButton {
-    background-color: #e9e9e9;
-    color: #333;
-}
-
+/* 삐약! 닫기 버튼 스타일이에요. 삐약! */
 .closeButton {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 15px;
+    right: 15px;
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 2rem;
     cursor: pointer;
-    color: #999;
+    color: #aaa;
+    transition: color 0.2s;
+}
+
+.closeButton:hover {
+    color: #555;
+}
+
+@media (max-width: 576px) {
+    .modalContent {
+        padding: 1.5rem;
+    }
+    .formSection {
+        grid-template-columns: 1fr;
+    }
 }
