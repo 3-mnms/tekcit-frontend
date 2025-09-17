@@ -71,12 +71,11 @@ const ProductDetailPage: React.FC = () => {
     }
 
     const handleEditClick = () => {
-        console.log('삐약! 수정 버튼 클릭!');
         navigate(`/admin/productRegist/${id}`); 
     };
 
     const handleDeleteClick = () => {
-        if (window.confirm('삐약! 정말로 이 상품을 삭제하시겠습니까?')) {
+        if (window.confirm('정말로 이 상품을 삭제하시겠습니까?')) {
             mutate(id as string);
         };
         

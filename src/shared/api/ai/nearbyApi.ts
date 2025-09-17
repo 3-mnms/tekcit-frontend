@@ -38,6 +38,24 @@ export type SuccessResponse<T> = {
 
 export type ActivityType = 'Restaurant' | 'HotPlace'; // BE enum 설명에 맞춤
 
+type RawActivityDTO = {
+  activity_name: string;
+  address_name: string;
+  latitude: number;
+  longitude: number;
+  activity_type: ActivityType;
+};
+
+function normalizeActivity(raw: RawActivityDTO): ActivityDTO {
+  return {
+    activityName: raw.activity_name,
+    addressName: raw.address_name,
+    latitude: raw.latitude,
+    longitude: raw.longitude,
+    activityType: raw.activity_type,
+  };
+}
+
 export type ActivityDTO = {
   activityName: string;
   addressName: string;
@@ -50,13 +68,22 @@ export type CourseDTO = {
   course1: string | null;
   course2: string | null;
   course3: string | null;
+  course4: string | null;
+  course5: string | null;
+};
+
+type RawRecommendDTO = {
+  festivalDetailId: string;
+  restaurants: RawActivityDTO[];
+  hotPlaces: RawActivityDTO[];
+  courseDTO: CourseDTO | null;
 };
 
 export type RecommendDTO = {
-  festivalDetailId: string;              // 대상 페스티벌 id
-  restaurants: ActivityDTO[];            // 3개
-  hotPlaces: ActivityDTO[];              // 3개
-  courseDTO: CourseDTO | null;           // 코스(문자 3단)
+  festivalDetailId: string;            
+  restaurants: ActivityDTO[];           
+  hotPlaces: ActivityDTO[];             
+  courseDTO: CourseDTO | null;          
 };
 
 export async function getNearbyFestivals(): Promise<NearbyFestivalListDTO> {
@@ -66,9 +93,17 @@ export async function getNearbyFestivals(): Promise<NearbyFestivalListDTO> {
   return payload as NearbyFestivalListDTO;
 }
 
-export async function apiGetNearbyActivities() {
-  const { data } = await api.get<SuccessResponse<RecommendDTO[]>>(
+export async function apiGetNearbyActivities(): Promise<RecommendDTO[]> {
+  const { data } = await api.get<SuccessResponse<RawRecommendDTO[]>>(
     '/festival/nearby/activities'
   );
-  return data.data ?? [];
+
+  const rows = data.data ?? [];
+
+  return rows.map((r) => ({
+    festivalDetailId: r.festivalDetailId, 
+    restaurants: (r.restaurants ?? []).map(normalizeActivity),
+    hotPlaces: (r.hotPlaces ?? []).map(normalizeActivity),
+    courseDTO: r.courseDTO ?? null,
+  }));
 }

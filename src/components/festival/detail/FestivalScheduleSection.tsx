@@ -76,10 +76,17 @@ const __fs_openCenteredPopup = (
 
   const feat = [
     'popup=yes',
-    'toolbar=0', 'menubar=0', 'location=0', 'status=0',
-    'scrollbars=1', 'resizable=1',
-    `width=${w}`, `height=${h}`, `left=${left}`, `top=${top}`,
-  ].join(',');
+    'toolbar=0',
+    'menubar=0',
+    'location=0',
+    'status=0',
+    'scrollbars=1',
+    'resizable=1',
+    `width=${w}`,
+    `height=${h}`,
+    `left=${left}`,
+    `top=${top}`,
+  ].join(',')
 
   window.open(url, name, feat)
 }
@@ -128,13 +135,19 @@ type Props = {
   suppressLoading?: boolean
 }
 
-const FestivalScheduleSection: React.FC<Props> = ({ detailFromParent, suppressLoading = false }) => {
+const FestivalScheduleSection: React.FC<Props> = ({
+  detailFromParent,
+  suppressLoading = false,
+}) => {
   const params = useParams<{ fid: string }>()
   const fidParam = params.fid ?? ''
+  const { fid } = useParams<{ fid: string }>()
 
   // ✅ detail 주입 여부에 따라 분기
   const hook = useFestivalDetail(fidParam, { enabled: !detailFromParent })
-  const detail = (detailFromParent ?? (hook.data as FestivalDetail | undefined)) as FestivalDetail | undefined
+  const detail = (detailFromParent ?? (hook.data as FestivalDetail | undefined)) as
+    | FestivalDetail
+    | undefined
   const isLoading = detailFromParent ? false : hook.isLoading
   const isError = detailFromParent ? false : hook.isError
   const status = detailFromParent ? 'success' : hook.status
@@ -148,8 +161,8 @@ const FestivalScheduleSection: React.FC<Props> = ({ detailFromParent, suppressLo
   const location = useLocation()
   const accessToken = useAuthStore((s) => s.accessToken)
   const enterMut = useEnterWaitingMutation()
-  const role = useAuthStore((s) => s.user?.role);
-  const isUserRole = role === 'USER';
+  const role = useAuthStore((s) => s.user?.role)
+  const isUserRole = role === 'USER'
 
   // 오늘 00:00
   const today = useMemo(() => {
@@ -179,7 +192,10 @@ const FestivalScheduleSection: React.FC<Props> = ({ detailFromParent, suppressLo
     } else {
       const src = ((detail as any)?.daysOfWeek ?? []) as Array<string | null | undefined>
       for (const v of src) {
-        const k = String(v ?? '').trim().slice(0, 3).toUpperCase()
+        const k = String(v ?? '')
+          .trim()
+          .slice(0, 3)
+          .toUpperCase()
         const idx = DOW_KEYS.indexOf(k as any)
         if (idx >= 0) set.add(idx)
       }
@@ -252,15 +268,7 @@ const FestivalScheduleSection: React.FC<Props> = ({ detailFromParent, suppressLo
       setSelectedDate((prev) => prev ?? initialDate)
       setSelectedTime((prev) => prev ?? list[0] ?? null)
     }
-  }, [
-    detail,
-    isSingleDay,
-    endDate,
-    effectiveMinDate,
-    today,
-    selectedDate,
-    selectedTime,
-  ])
+  }, [detail, isSingleDay, endDate, effectiveMinDate, today, selectedDate, selectedTime])
 
   const confirmDisabled = !selectedDate || !selectedTime
 
@@ -376,8 +384,10 @@ const FestivalScheduleSection: React.FC<Props> = ({ detailFromParent, suppressLo
                 }
 
                 if (!isUserRole) {
-                  alert('관리자 또는 주최자 계정으로는 예매를 진행할 수 없습니다.\n일반 사용자 계정으로 로그인해 주세요.');
-                  return;
+                  alert(
+                    '관리자 또는 주최자 계정으로는 예매를 진행할 수 없습니다.\n일반 사용자 계정으로 로그인해 주세요.',
+                  )
+                  return
                 }
 
                 const ageText = detail?.prfage ?? null
@@ -411,6 +421,14 @@ const FestivalScheduleSection: React.FC<Props> = ({ detailFromParent, suppressLo
                     alert('나이 확인에 실패했어요. 잠시 후 다시 시도해 주세요.')
                     return
                   }
+                }
+
+                const FORCE_WAIT = true // 테스트 끝나면 false
+                if (FORCE_WAIT && selectedDate && fid) {
+                  const fdfrom = startDate ? ymd(startDate) : null
+                  const fdto = endDate ? ymd(endDate) : null
+                  __fs_openWaitingPopup(fid, selectedDate, selectedTime, 1, fdfrom, fdto)
+                  return
                 }
 
                 const fdfrom = startDate ? ymd(startDate) : null

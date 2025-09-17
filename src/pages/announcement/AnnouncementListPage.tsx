@@ -8,9 +8,9 @@ import styles from './AnnouncementListPage.module.css';
 import type { Announcement, NewAnnouncement } from '@/models/admin/Announcement';
 import { getAnnouncements, updateAnnouncement, deleteAnnouncement, createAnnouncement } from '@/shared/api/admin/announcement';
 import Button from '@/components/common/Button';
+import Spinner from '@/components/common/spinner/Spinner';
 
 import {getProducts} from '@/shared/api/admin/festival'
-
 const AnnouncementListPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
@@ -116,7 +116,7 @@ const AnnouncementListPage: React.FC = () => {
   }, [announcements, searchTerm, showSent]); // 삐약! `showSent`를 의존성 배열에 추가!
 
 
-  if (isLoading) return <Layout subTitle="공지사항 목록"><div>로딩 중...</div></Layout>;
+  if (isLoading) return <Spinner />;
   if (isError) return <Layout subTitle="공지사항 목록"><div>에러 발생!</div></Layout>;
 
   return (

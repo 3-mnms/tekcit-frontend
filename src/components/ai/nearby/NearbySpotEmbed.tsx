@@ -10,7 +10,6 @@ import MapView from './MapView'
 import SpotCard, { type PlayEatSpot } from './SpotCard'
 import Spinner from '@/components/common/spinner/Spinner'
 import { PartyPopper, Utensils, MapPin } from 'lucide-react'
-import { loadKakaoMapSdk } from '@/shared/config/loadKakaoMap'
 
 type TabKey = 'play' | 'eat' | 'course'
 
@@ -44,6 +43,7 @@ export default function NearbySpotEmbed({
       })),
     [rec?.hotPlaces, festival.lat, festival.lng],
   )
+  console.log("play", playItems)
 
   const eatItems: PlayEatSpot[] = useMemo(
     () =>
@@ -60,7 +60,7 @@ export default function NearbySpotEmbed({
 
   const courseRows = useMemo(() => {
     const c = rec?.courseDTO
-    const raws = [c?.course1, c?.course2, c?.course3].filter(Boolean) as string[]
+    const raws = [c?.course1, c?.course2, c?.course3, c?.course4, c?.course5].filter(Boolean) as string[]
     return raws.map((raw) =>
       raw
         .split('→')
@@ -132,7 +132,7 @@ export default function NearbySpotEmbed({
         <div className={styles.body}>
           <ul className={styles.list} role="list">
             {active !== 'course' ? (
-              items.slice(0, 3).map((spot) => (
+              items.slice(0, 5).map((spot) => (
                 <li key={spot.id}>
                   <SpotCard
                     spot={spot}

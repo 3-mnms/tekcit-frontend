@@ -170,7 +170,7 @@ const FestivalReviewSection: React.FC<Props> = ({ fid }) => {
         </div>
       )}
       <header className={styles.header}>
-        <h2 className={styles.title}><FaRegCommentDots className={styles.icon} />기대평</h2>
+        <h2 className={styles.title}><FaRegCommentDots className={styles.icon} />AI 기대평</h2>
       </header>
 
 

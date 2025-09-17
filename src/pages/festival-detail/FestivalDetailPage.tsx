@@ -103,7 +103,7 @@ const FestivalDetailPage: React.FC = () => {
                 onClick={() => setActiveTab('review')}
                 className={`${styles.tab} ${activeTab === 'review' ? styles.active : ''}`}
               >
-                기대평
+                AI 기대평
               </div>
             </div>
 
