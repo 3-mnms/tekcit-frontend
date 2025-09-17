@@ -6,8 +6,8 @@ const WS_URL = 'http://localhost:10000/ws';
 
 export type LeaveWaitingPayload = {
   festivalId: string;
-  /** ISO string(KST라면 서버에서 변환), 없으면 생략 가능 */
-  reservationDateIso?: string;
+  reservationDate?: Date;
+  userId: string;
 };
 
 export type LeaveReservationPayload = {

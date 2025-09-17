@@ -186,8 +186,8 @@ const TicketOrderPage: React.FC = () => {
       };
     }
 
-    const fdFromStr = (sp.get('fdfrom') || phase1?.fdfrom || phase1?.period?.from) ?? undefined;
-    const fdToStr   = (sp.get('fdto')   || phase1?.fdto   || phase1?.period?.to)   ?? undefined;
+    const fdFromStr = sp.get('fdfrom') ?? undefined;
+    const fdToStr   = sp.get('fdto')   ?? undefined;
 
     const cal = buildCalendarData(phase1, fdFromStr, fdToStr);
 
