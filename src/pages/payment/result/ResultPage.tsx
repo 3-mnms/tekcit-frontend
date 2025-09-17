@@ -7,15 +7,9 @@ import { z } from 'zod'
 import ResultLayout from '@/components/common/result/ResultLayout'
 import { RESULT_CONFIG, type ResultType, type ResultStatus } from '@/shared/config/resultConfig'
 import { useReleaseWaitingMutation } from '@/models/waiting/tanstack-query/useWaiting'
+import { completePayment } from '@/shared/api/payment/payments'
 
-/** 쿼리 파싱 */
-const QuerySchema = z.object({
-  type: z.union([z.literal('booking'), z.literal('transfer'), z.literal('refund')]).optional(),
-  status: z.union([z.literal('success'), z.literal('fail')]).optional(),
-  paymentId: z.string().min(1).optional(),
-})
-
-/** YYYY-MM-DD -> Date(00:00) */
+// YYYY-MM-DD → Date(00:00)
 const parseYMD = (s?: string) => {
   if (!s) return undefined
   const t = s.trim().replace(/[./]/g, '-')
@@ -26,7 +20,7 @@ const parseYMD = (s?: string) => {
   return d
 }
 
-/** Date + "HH:mm" -> Date */
+// Date + "HH:mm" → Date
 const combineDateTime = (day?: Date, hhmm?: string | null) => {
   if (!day) return undefined
   const d = new Date(day)
@@ -40,26 +34,32 @@ const combineDateTime = (day?: Date, hhmm?: string | null) => {
   return d
 }
 
+const QuerySchema = z.object({
+  type: z.union([z.literal('booking'), z.literal('transfer'), z.literal('refund')]).optional(),
+  status: z.union([z.literal('success'), z.literal('fail')]).optional(),
+  paymentId: z.string().min(1).optional(),
+})
+
 export default function ResultPage() {
   const [sp] = useSearchParams()
   const nav = useNavigate()
 
-  const qType = sp.get('type') ?? undefined
-  const qStatus = sp.get('status') ?? undefined
-  const qPaymentId = sp.get('paymentId') ?? undefined
-
-  const parsed = QuerySchema.safeParse({ type: qType, status: qStatus, paymentId: qPaymentId })
+  const parsed = QuerySchema.safeParse({
+    type: sp.get('type') ?? undefined,
+    status: sp.get('status') ?? undefined,
+    paymentId: sp.get('paymentId') ?? undefined,
+  })
   const type = (parsed.success ? parsed.data.type : undefined) as ResultType | undefined
   const status = (parsed.success ? parsed.data.status : undefined) as ResultStatus | undefined
+  const paymentId = (parsed.success ? parsed.data.paymentId : undefined) as string | undefined
 
-  // 기존 플로우 유지
+  // booking/transfer는 서버 승인 확인 필요
   const needConfirm = type === 'booking' || type === 'transfer'
 
+  // 대기 해제 로직 (기존 유지)
   const releaseMut = useReleaseWaitingMutation()
   const releasedOnceRef = useRef(false)
-
   useEffect(() => {
-    // booking 결과 페이지에 들어왔을 때만 release 시도
     if (type !== 'booking') return
     if (releasedOnceRef.current) return
     releasedOnceRef.current = true
@@ -73,27 +73,22 @@ export default function ResultPage() {
         performanceDate?: string
         performanceTime?: string | null
       }
-
       const day = parseYMD(performanceDate)
       const dt = combineDateTime(day, performanceTime ?? null)
-
       if (festivalId && dt) {
-        releaseMut.mutate({
-          festivalId: String(festivalId),
-          reservationDate: dt,
-        })
+        releaseMut.mutate({ festivalId: String(festivalId), reservationDate: dt })
       }
-    } catch {
-      // noop
     } finally {
-      // 재호출 방지
       sessionStorage.removeItem('tekcit:waitingRelease')
     }
   }, [type, releaseMut])
 
-  const firedRef = useRef<string | null>(null)
+  // 서버 승인 확인
+  const firedRef = useRef(false)
   const confirmMut = useMutation({
     mutationFn: async () => {
+      if (!paymentId) throw new Error('Missing paymentId')
+      await completePayment(paymentId)
       return true
     },
     onSuccess: () => {
@@ -106,25 +101,21 @@ export default function ResultPage() {
 
   useEffect(() => {
     if (!needConfirm) return
-    if (status === 'fail') return // 실패는 확인 스킵(이미 결과 확정)
-    if (status === 'success') {
-      if (firedRef.current) return
-      firedRef.current = '1'
-      confirmMut.mutate()
-    }
-  }, [status, needConfirm, confirmMut])
+    if (!paymentId) return
+    if (firedRef.current) return
+    if (status === 'fail') return // 실패로 들어온 경우 그대로 둠
 
-  console.log(confirmMut);
-  
-  // ─────────────────────────────────────────────
-  // ✅ 뷰 구성 (기존 유지)
-  // ─────────────────────────────────────────────
+    firedRef.current = true
+    confirmMut.mutate()
+  }, [needConfirm, paymentId, status, confirmMut])
+
+  // 뷰 계산
   const view = useMemo(() => {
-    if (type && status === 'fail') return RESULT_CONFIG[type]?.fail ?? null
+    if (type && status) {
+      return RESULT_CONFIG[type]?.[status] ?? null
+    }
+    return null // status 확정 전에는 아무 것도 안 보여줌
+  }, [type, status])
 
-    if (type && status==="success") return RESULT_CONFIG[type]?.success ?? null
-
-  }, [type, status, confirmMut.isPending, needConfirm])
-
-  return <ResultLayout {...view} />
+  return view ? <ResultLayout {...view} /> : null
 }
