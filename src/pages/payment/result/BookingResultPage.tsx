@@ -58,22 +58,15 @@ const BookingResultPage: React.FC = () => {
               <div className={styles.infoBox}>
                 <p className={styles.infoText}>
                   📧 예매 확인 메일이 발송되었습니다.<br />
-                  🎫 티켓은 공연 당일 현장에서 수령하실 수 있습니다.
                 </p>
               </div>
               <div className={styles.buttons}>
-                <Button 
-                  onClick={handleGoToTickets}
-                  className={styles.primaryButton}
-                >
-                  내 티켓 보기
-                </Button>
                 <Button 
                   onClick={handleGoToHome}
                   variant="outline"
                   className={styles.secondaryButton}
                 >
-                  홈으로 가기
+                  확인
                 </Button>
               </div>
             </>
@@ -97,23 +90,16 @@ const BookingResultPage: React.FC = () => {
               </p>
               <div className={styles.warningBox}>
                 <p className={styles.warningText}>
-                  ⚠️ 결제가 완료되었다면 자동으로 취소됩니다.<br />
                   💳 결제 취소는 1-3일 소요될 수 있습니다.
                 </p>
               </div>
               <div className={styles.buttons}>
                 <Button 
-                  onClick={handleRetry}
-                  className={styles.primaryButton}
-                >
-                  다시 시도
-                </Button>
-                <Button 
                   onClick={handleGoToHome}
                   variant="outline"
                   className={styles.secondaryButton}
                 >
-                  홈으로 가기
+                  확인
                 </Button>
               </div>
             </>
