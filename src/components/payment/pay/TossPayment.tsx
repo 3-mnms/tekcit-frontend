@@ -1,5 +1,3 @@
-// TossPayment 버전2 (수정된 최종 코드)
-
 import { forwardRef, useImperativeHandle } from 'react'
 import PortOne, { Currency, PayMethod } from '@portone/browser-sdk/v2'
 import styles from './TossPayment.module.css'
