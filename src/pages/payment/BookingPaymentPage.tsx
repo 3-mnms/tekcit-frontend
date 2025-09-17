@@ -1,3 +1,5 @@
+// src/pages/payment/BookingPaymentPage.tsx
+
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -17,8 +19,8 @@ import { createPaymentId } from '@/models/payment/utils/paymentUtils';
 import { saveBookingSession } from '@/shared/api/payment/paymentSession';
 import { fetchBookingDetail } from '@/shared/api/payment/bookingDetail';
 
-// completePayment는 이제 PG 결제 로직에서만 사용됩니다.
-import { completePayment, getReservationStatus, requestPayment } from '@/shared/api/payment/payments';
+// completePayment is now used in the backend via webhook, not in the frontend.
+import { requestPayment } from '@/shared/api/payment/payments'; 
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery';
 import { useReleaseWaitingMutation } from '@/models/waiting/tanstack-query/useWaiting';
 
@@ -61,7 +63,8 @@ const BookingPaymentPage: React.FC = () => {
   const festivalIdVal = checkout?.festivalId;
 
   const [sellerId, setSellerId] = useState<number | null>(null);
-  // Removed `storeName` and `userName` memoization as it's not used in the final logic.
+  const storeName = useAuthStore((s) => s.user?.name) || undefined;
+  const userName = useMemo(() => storeName ?? getNameFromJwt(), [storeName]);
 
   const tossRef = useRef<TossPaymentHandle>(null);
   const [openedMethod, setOpenedMethod] = useState<PaymentMethod | null>(null);
@@ -79,7 +82,7 @@ const BookingPaymentPage: React.FC = () => {
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS);
 
-  // Initial paymentId creation + session saving
+  // 최초 paymentId 생성 + 세션 저장
   useEffect(() => {
     if (!paymentId) {
       const id = createPaymentId();
@@ -97,7 +100,7 @@ const BookingPaymentPage: React.FC = () => {
     }
   }, [paymentId, checkout, finalAmount, sellerId]);
 
-  // Fetch sellerId
+  // sellerId 확보
   useEffect(() => {
     (async () => {
       try {
@@ -111,7 +114,9 @@ const BookingPaymentPage: React.FC = () => {
         if (!sid) throw new Error('sellerId 누락');
         setSellerId(sid);
       } catch (e) {
-        // Error handling is commented out, but it's good practice to handle it.
+        // console.error('예매 상세 조회 실패', e)
+        // alert('결제 정보를 불러오지 못했습니다.')
+        // navigate(-1)
       }
     })();
   }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate]);
@@ -149,58 +154,10 @@ const BookingPaymentPage: React.FC = () => {
     setOpenedMethod((prev) => (prev === m ? null : m));
     setErr(null);
   };
+  
+  // NOTE: handlePostPayment is no longer needed in the frontend for Toss Payments.
+  // The backend should handle payment completion via webhooks.
 
-  // 💡 REFACTORED: Unified function for post-payment status check
-  const checkAndNavigate = async (bookingId: string) => {
-    try {
-      setIsPaying(true); // Ensure spinner is active during this check
-
-      // Use a polling mechanism instead of a fixed delay
-      let statusRes;
-      for (let i = 0; i < 5; i++) { // Check up to 5 times
-        statusRes = await getReservationStatus(bookingId);
-        if (statusRes.data === 'COMPLETED' || statusRes.data === 'CONFIRMED') {
-          routeToResult(true);
-          return;
-        }
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between checks
-      }
-
-      // If status is not confirmed after polling
-      setErr('예약 처리에 실패했습니다. 고객센터에 문의해주세요.');
-      routeToResult(false);
-
-    } catch (e) {
-      console.error('예약 상태 확인에 실패했습니다.', e);
-      setErr('예약 상태 확인에 실패했습니다. 고객센터에 문의해주세요.');
-      routeToResult(false);
-    } finally {
-      setIsPaying(false);
-    }
-  };
-
-  // 💡 REFACTORED: `handlePostPayment` logic is now simpler and more robust
-  const handlePostPayment = async (paymentId: string) => {
-    if (!checkout.bookingId) {
-      setErr('예약번호가 존재하지 않습니다.');
-      routeToResult(false);
-      return;
-    }
-
-    try {
-      // Ensure the final payment completion is awaited
-      await completePayment(paymentId);
-      // After completion, check the booking status with the new unified function
-      await checkAndNavigate(checkout.bookingId);
-    } catch (e) {
-      console.error('결제 후 처리에 실패했습니다.', e);
-      setErr('결제 후 처리에 실패했습니다. 고객센터에 문의해주세요.');
-      routeToResult(false);
-      setIsPaying(false); // Reset on error
-    }
-  };
-
-  // 💡 REFACTORED: `handlePayment` now handles state more reliably
   const handlePayment = async () => {
     if (!checkout) {
       setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.');
@@ -226,7 +183,7 @@ const BookingPaymentPage: React.FC = () => {
       return;
     }
 
-    setIsPaying(true); // Start paying state
+    setIsPaying(true);
 
     try {
       if (openedMethod === 'wallet') {
@@ -242,37 +199,33 @@ const BookingPaymentPage: React.FC = () => {
           payMethod: 'POINT_PAYMENT',
         };
         await requestPayment(dto, userId!);
-        // Wallet payment complete, open modal
         setIsPaying(false);
         setIsPasswordModalOpen(true);
         return;
       }
-
-      // For Toss, do not await the requestPay call directly
-      // The complete callback handles the rest of the flow
-      tossRef.current?.requestPay({
+      
+      // 💡 REFACTORED: Use redirection for Toss Payments
+      await tossRef.current?.requestPay({
         paymentId: ensuredId,
         amount: finalAmount,
         orderName,
         bookingId: checkout.bookingId,
         festivalId: festivalIdVal,
         sellerId: sellerId!,
-        complete: (paymentData) => {
-          if (paymentData.code === null) {
-            handlePostPayment(paymentData.paymentId);
-          } else {
-            setErr(paymentData.message || '결제에 실패했습니다.');
-            routeToResult(false);
-          }
-        },
+        // Pass the success and fail URLs directly to the Toss Payments SDK
+        successUrl: `${window.location.origin}/payment/booking-result?status=success`,
+        failUrl: `${window.location.origin}/payment/booking-result?status=fail`,
       });
+      // The code below this line won't execute if the redirection is successful.
     } catch (e) {
       console.error('결제 준비 또는 요청 중 오류가 발생했습니다.', e);
       setErr('결제 준비 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.');
       routeToResult(false);
     } finally {
-      // Do not reset isPaying here for Toss payments.
-      // The state is now managed within the complete callback or its called function.
+      // isPaying is now reset here for wallet payments, but the toss payment redirection handles the state change itself.
+      if (openedMethod === 'wallet') {
+          setIsPaying(false);
+      }
     }
   };
 
@@ -319,7 +272,7 @@ const BookingPaymentPage: React.FC = () => {
               type="button"
               className={styles.payButton}
               onClick={handlePayment}
-              disabled={isPaying} // 💡 disabled added
+              disabled={isPaying}
               aria-busy={isPaying}
             >
               결제하기
@@ -332,11 +285,12 @@ const BookingPaymentPage: React.FC = () => {
         <PasswordInputModal
           amount={amountToPay}
           paymentId={ensuredPaymentId}
-          // Removed userName and userId from props as they are not used inside the modal's onComplete logic
+          userName={userName}
+          userId={userId as number}
           onClose={() => setIsPasswordModalOpen(false)}
-          onComplete={async () => {
+          onComplete={() => {
             setIsPasswordModalOpen(false);
-            await checkAndNavigate(checkout.bookingId);
+            routeToResult(true);
           }}
         />
       )}
