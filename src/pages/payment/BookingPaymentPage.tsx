@@ -183,6 +183,17 @@ const BookingPaymentPage: React.FC = () => {
       return;
     }
 
+    // 카드/토스 결제 시 사용자에게 안내
+    if (openedMethod !== 'wallet') {
+      const proceed = confirm(
+        "결제 완료 후 자동으로 결과 페이지로 이동하지 않으면, " +
+        "결제창의 '완료' 또는 '쇼핑몰로 돌아가기' 버튼을 눌러주세요.\n\n" +
+        "계속 진행하시겠습니까?"
+      );
+      
+      if (!proceed) return;
+    }
+
     setIsPaying(true);
 
     try {
@@ -213,7 +224,7 @@ const BookingPaymentPage: React.FC = () => {
         festivalId: festivalIdVal,
         sellerId: sellerId!,
         // Pass the success and fail URLs directly to the Toss Payments SDK
-        successUrl: `${window.location.origin}/payment/booking-result?status=success`,
+        successUrl: `${window.location.origin}/payment/booking-result?status=success&paymentId=${ensuredId}&bookingId=${checkout.bookingId}`,
         failUrl: `${window.location.origin}/payment/booking-result?status=fail`,
       });
       // The code below this line won't execute if the redirection is successful.
@@ -226,6 +237,14 @@ const BookingPaymentPage: React.FC = () => {
       if (openedMethod === 'wallet') {
           setIsPaying(false);
       }
+    }
+  };
+
+  const handleCheckResult = () => {
+    if (ensuredPaymentId || paymentId) {
+      navigate(`/payment/booking-result?status=check&paymentId=${ensuredPaymentId || paymentId}&bookingId=${checkout.bookingId}`);
+    } else {
+      navigate('/payment/booking-result?status=check');
     }
   };
 
@@ -259,6 +278,20 @@ const BookingPaymentPage: React.FC = () => {
                 sellerId={sellerId}
               />
             </div>
+
+            {/* 결제 안내 문구 */}
+            {openedMethod === 'card' && (
+              <div className={styles.paymentNotice}>
+                <div className={styles.noticeIcon}>💳</div>
+                <div className={styles.noticeContent}>
+                  <h3 className={styles.noticeTitle}>결제 안내</h3>
+                  <p className={styles.noticeText}>
+                    결제 완료 후 자동으로 결과 페이지로 이동하지 않으면,<br />
+                    결제창의 <strong>'완료'</strong> 또는 <strong>'쇼핑몰로 돌아가기'</strong> 버튼을 눌러주세요.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
@@ -266,6 +299,22 @@ const BookingPaymentPage: React.FC = () => {
           <div className={styles.summaryCard}>
             <PaymentInfo />
           </div>
+          
+          {/* 비상 링크 */}
+          {(ensuredPaymentId || paymentId) && (
+            <div className={styles.emergencySection}>
+              <p className={styles.emergencyText}>결제 후 페이지 이동에 문제가 있다면:</p>
+              <Button
+                type="button"
+                variant="outline"
+                className={styles.emergencyButton}
+                onClick={handleCheckResult}
+              >
+                결제 결과 확인하기
+              </Button>
+            </div>
+          )}
+
           <div className={styles.buttonWrapper}>
             {isPaying && <Spinner />}
             <Button
@@ -299,7 +348,7 @@ const BookingPaymentPage: React.FC = () => {
         <AlertModal
           title="시간 만료"
           onConfirm={() => {
-            setIsTimeUpModalOpen(false);
+            setIsTimeUpModalClose();
             if (window.opener && !window.opener.closed) {
               window.close();
             }
