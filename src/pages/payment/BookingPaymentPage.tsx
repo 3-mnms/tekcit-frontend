@@ -19,8 +19,8 @@ import { createPaymentId } from '@/models/payment/utils/paymentUtils';
 import { saveBookingSession } from '@/shared/api/payment/paymentSession';
 import { fetchBookingDetail } from '@/shared/api/payment/bookingDetail';
 
-// completePayment is now used in the backend via webhook, not in the frontend.
-import { requestPayment } from '@/shared/api/payment/payments'; 
+// completePayment는 이제 PG 결제 로직에서만 사용됩니다.
+import { completePayment, getReservationStatus, requestPayment } from '@/shared/api/payment/payments';
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery';
 import { useReleaseWaitingMutation } from '@/models/waiting/tanstack-query/useWaiting';
 
@@ -154,9 +154,34 @@ const BookingPaymentPage: React.FC = () => {
     setOpenedMethod((prev) => (prev === m ? null : m));
     setErr(null);
   };
-  
-  // NOTE: handlePostPayment is no longer needed in the frontend for Toss Payments.
-  // The backend should handle payment completion via webhooks.
+
+  const handlePostPayment = async (paymentId: string) => {
+    if (!checkout.bookingId) {
+      setErr('예약번호가 존재하지 않습니다.');
+      routeToResult(false);
+      return;
+    }
+
+    try {
+      setIsPaying(true);
+      await completePayment(paymentId);
+      await new Promise(resolve => setTimeout(resolve, 10000));
+      const statusRes = await getReservationStatus(checkout.bookingId);
+
+      if (statusRes.data === 'COMPLETED' || statusRes.data === 'CONFIRMED') {
+        routeToResult(true);
+      } else {
+        setErr('예약 처리에 실패했습니다. 고객센터에 문의해주세요.');
+        routeToResult(false);
+      }
+    } catch (e) {
+      console.error('결제 후 처리에 실패했습니다.', e);
+      setErr('결제 후 처리에 실패했습니다. 고객센터에 문의해주세요.');
+      routeToResult(false);
+    } finally {
+      setIsPaying(false);
+    }
+  };
 
   const handlePayment = async () => {
     if (!checkout) {
@@ -183,17 +208,6 @@ const BookingPaymentPage: React.FC = () => {
       return;
     }
 
-    // 카드/토스 결제 시 사용자에게 안내
-    if (openedMethod !== 'wallet') {
-      const proceed = confirm(
-        "결제 완료 후 자동으로 결과 페이지로 이동하지 않으면, " +
-        "결제창의 '완료' 또는 '쇼핑몰로 돌아가기' 버튼을 눌러주세요.\n\n" +
-        "계속 진행하시겠습니까?"
-      );
-      
-      if (!proceed) return;
-    }
-
     setIsPaying(true);
 
     try {
@@ -214,8 +228,7 @@ const BookingPaymentPage: React.FC = () => {
         setIsPasswordModalOpen(true);
         return;
       }
-      
-      // 💡 REFACTORED: Use redirection for Toss Payments
+
       await tossRef.current?.requestPay({
         paymentId: ensuredId,
         amount: finalAmount,
@@ -223,28 +236,21 @@ const BookingPaymentPage: React.FC = () => {
         bookingId: checkout.bookingId,
         festivalId: festivalIdVal,
         sellerId: sellerId!,
-        // Pass the success and fail URLs directly to the Toss Payments SDK
-        successUrl: `${window.location.origin}/payment/booking-result?status=success&paymentId=${ensuredId}&bookingId=${checkout.bookingId}`,
-        failUrl: `${window.location.origin}/payment/booking-result?status=fail`,
+        complete: (paymentData) => {
+          if (paymentData.code === null) {
+            handlePostPayment(paymentData.paymentId);
+          } else {
+            setErr(paymentData.message || '결제에 실패했습니다.');
+            routeToResult(false);
+          }
+        },
       });
-      // The code below this line won't execute if the redirection is successful.
     } catch (e) {
       console.error('결제 준비 또는 요청 중 오류가 발생했습니다.', e);
       setErr('결제 준비 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.');
       routeToResult(false);
     } finally {
-      // isPaying is now reset here for wallet payments, but the toss payment redirection handles the state change itself.
-      if (openedMethod === 'wallet') {
-          setIsPaying(false);
-      }
-    }
-  };
-
-  const handleCheckResult = () => {
-    if (ensuredPaymentId || paymentId) {
-      navigate(`/payment/booking-result?status=check&paymentId=${ensuredPaymentId || paymentId}&bookingId=${checkout.bookingId}`);
-    } else {
-      navigate('/payment/booking-result?status=check');
+      setIsPaying(false);
     }
   };
 
@@ -278,20 +284,6 @@ const BookingPaymentPage: React.FC = () => {
                 sellerId={sellerId}
               />
             </div>
-
-            {/* 결제 안내 문구 */}
-            {openedMethod === 'card' && (
-              <div className={styles.paymentNotice}>
-                <div className={styles.noticeIcon}>💳</div>
-                <div className={styles.noticeContent}>
-                  <h3 className={styles.noticeTitle}>결제 안내</h3>
-                  <p className={styles.noticeText}>
-                    결제 완료 후 자동으로 결과 페이지로 이동하지 않으면,<br />
-                    결제창의 <strong>'완료'</strong> 또는 <strong>'쇼핑몰로 돌아가기'</strong> 버튼을 눌러주세요.
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
         </section>
 
@@ -299,29 +291,12 @@ const BookingPaymentPage: React.FC = () => {
           <div className={styles.summaryCard}>
             <PaymentInfo />
           </div>
-          
-          {/* 비상 링크 */}
-          {(ensuredPaymentId || paymentId) && (
-            <div className={styles.emergencySection}>
-              <p className={styles.emergencyText}>결제 후 페이지 이동에 문제가 있다면:</p>
-              <Button
-                type="button"
-                variant="outline"
-                className={styles.emergencyButton}
-                onClick={handleCheckResult}
-              >
-                결제 결과 확인하기
-              </Button>
-            </div>
-          )}
-
           <div className={styles.buttonWrapper}>
             {isPaying && <Spinner />}
             <Button
               type="button"
               className={styles.payButton}
               onClick={handlePayment}
-              disabled={isPaying}
               aria-busy={isPaying}
             >
               결제하기
@@ -337,9 +312,29 @@ const BookingPaymentPage: React.FC = () => {
           userName={userName}
           userId={userId as number}
           onClose={() => setIsPasswordModalOpen(false)}
-          onComplete={() => {
+          onComplete={async () => {
             setIsPasswordModalOpen(false);
-            routeToResult(true);
+            setIsPaying(true);
+
+            // ⭐ 대기 시간을 20초로 늘려서 백엔드 처리 시간을 충분히 확보
+            await new Promise(resolve => setTimeout(resolve, 10000));
+
+            try {
+              const statusRes = await getReservationStatus(checkout.bookingId);
+
+              if (statusRes.data === 'COMPLETED' || statusRes.data === 'CONFIRMED') {
+                routeToResult(true);
+              } else {
+                setErr('예약 처리에 실패했습니다. 고객센터에 문의해주세요.');
+                routeToResult(false);
+              }
+            } catch (e) {
+              console.error('예약 상태 확인에 실패했습니다.', e);
+              setErr('예약 상태 확인에 실패했습니다. 고객센터에 문의해주세요.');
+              routeToResult(false);
+            } finally {
+              setIsPaying(false);
+            }
           }}
         />
       )}
@@ -348,7 +343,7 @@ const BookingPaymentPage: React.FC = () => {
         <AlertModal
           title="시간 만료"
           onConfirm={() => {
-            setIsTimeUpModalClose();
+            setIsTimeUpModalOpen(false);
             if (window.opener && !window.opener.closed) {
               window.close();
             }
