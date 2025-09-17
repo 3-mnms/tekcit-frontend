@@ -89,6 +89,7 @@ const TransferPaymentPage: React.FC = () => {
   const [isAlertOpen, setIsAlertOpen] = useState(false)
   const [isPwModalOpen, setIsPwModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isWaitingStatus, setIsWaitingStatus] = useState(false)
 
   // QR-only면 자동 QR
   useEffect(() => {
@@ -198,6 +199,9 @@ const TransferPaymentPage: React.FC = () => {
         commission,
       }
       await requestTransferPayment(transferReqBody, userId)
+      
+      // 스피너 표시 시작
+      setIsWaitingStatus(true)
 
       // 10초 후에 예약 상태 조회
       setTimeout(async () => {
@@ -216,6 +220,8 @@ const TransferPaymentPage: React.FC = () => {
           console.error('예약 상태 확인 중 오류 발생:', e)
           alert('예약 상태 확인 중 오류가 발생했습니다.')
           navigate('/payment/transfer/result?status=fail')
+        } finally {
+          setIsWaitingStatus(false)
         }
       }, 10000) // 10초 지연
     } catch (e: any) {
@@ -360,6 +366,18 @@ const TransferPaymentPage: React.FC = () => {
           </div>
         </aside>
       </div>
+
+      {/* Spinner for waiting status */}
+      {isWaitingStatus && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-[99999]">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin"></div>
+              <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-blue-600 rounded-full animate-spin"></div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* AlertModal 추가 */}
       {isAlertOpen && (
