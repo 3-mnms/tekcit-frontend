@@ -1,10 +1,10 @@
-// src/components/payment/pay/WalletHistory.tsx - 수정된 타입
+// src/components/payment/pay/WalletHistory.tsx - 환불 지원 추가
 import styles from './WalletHistory.module.css'
 
 export type WalletHistoryViewItem = {
   id: string
   createdAt: string
-  type: 'charge' | 'use' | 'transfer_in' | 'transfer_out' | 'unknown'
+  type: 'charge' | 'use' | 'refund' | 'transfer_in' | 'transfer_out' | 'unknown' // refund 추가
   amount: number
   method?: string
   transactionType: 'CREDIT' | 'DEBIT' | 'UNKNOWN'
@@ -43,10 +43,10 @@ const WalletHistory: React.FC<WalletHistoryProps> = ({ month, items, loading, er
         return { title: '충전', sign: '+', className: styles.chargeText || '' }
       case 'use':
         return { title: '사용', sign: '-', className: styles.useText || '' }
+      case 'refund':
+        return { title: '환불', sign: '+', className: styles.refundText || '' } // 환불 케이스 추가
       case 'transfer_in':
-        return { title: '양도받음', sign: '+', className: styles.transferInText || '' }
-      case 'transfer_out':
-        return { title: '양도함', sign: '-', className: styles.transferOutText || '' }
+        return { title: '양도함', sign: '+', className: styles.transferInText || '' }
       default:
         return { title: '기타', sign: '-', className: styles.unknownText || '' }
     }
