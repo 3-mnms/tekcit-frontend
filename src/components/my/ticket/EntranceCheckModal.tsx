@@ -13,7 +13,7 @@ const EntranceCheckModal: React.FC<EntranceCheckModalProps> = ({
   isOpen,
   onClose,
   count,
-  totalCount = 10,
+  totalCount,
   title,
 }) => {
   if (!isOpen) return null
