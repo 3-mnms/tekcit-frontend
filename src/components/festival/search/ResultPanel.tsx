@@ -5,7 +5,7 @@ import { searchFestivals } from '@/shared/api/festival/searchApi';
 import type { FestivalItem } from '@/models/festival/festivalSearchTypes';
 import styles from './ResultPanel.module.css';
 
-const CHUNK = 6;
+const CHUNK = 9;
 type Sale = '공연중' | '공연예정' | '공연종료' | undefined;
 const DEFAULT_STATUSES: Sale[] = ['공연중', '공연예정'];
 

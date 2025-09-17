@@ -17,7 +17,7 @@ const TicketHistoryPage: React.FC = () => {
     const now = new Date()
     const from = new Date()
     from.setMonth(now.getMonth() - months)
-    setStartDate(months === 0 ? null : from) // 전체일 때는 null 처리도 가능
+    setStartDate(months === 0 ? null : from) 
     setEndDate(months === 0 ? null : now)
   }
 

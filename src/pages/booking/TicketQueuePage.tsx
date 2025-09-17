@@ -1,11 +1,4 @@
-import React, {
-  useMemo,
-  useRef,
-  useEffect,
-  useCallback,
-  useState,
-  startTransition,
-} from 'react'
+import React, { useMemo, useRef, useEffect, useCallback, useState, startTransition } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import WaitingQueue from '@/components/booking/waiting/WaitingQueue'
 import styles from './TicketQueuePage.module.css'
@@ -74,7 +67,7 @@ const centerAndResizeExact = (targetInnerW: number, targetInnerH: number) => {
 
     window.resizeTo(targetOuterW, targetOuterH)
     window.moveTo(left, top)
-  } catch { }
+  } catch {}
 }
 
 /* =========================
@@ -190,13 +183,15 @@ const TicketQueuePage: React.FC = () => {
     wsActiveRef.current = true
 
     const client = new Client({
-      webSocketFactory: () => new SockJS(WS_URL),
-      connectHeaders: connectHeadersRef.current,
-      debug: (s) => console.log('[STOMP]', s),
-      reconnectDelay: 3000,
-      heartbeatIncoming: 10000,
-      heartbeatOutgoing: 10000,
+      webSocketFactory: () => new SockJS(WS_URL + '?token=Bearer ' + accessToken),
+      connectHeaders: {
+        Authorization: 'Bearer ' + useAuthStore((s) => s.accessToken),
+      },
+      debug: (str) => console.log('[STOMP]', str),
+      reconnectDelay: 5000,
     })
+
+    client.activate()
 
     client.onConnect = () => {
       lastMsgAtRef.current = Date.now()
@@ -205,10 +200,10 @@ const TicketQueuePage: React.FC = () => {
         lastMsgAtRef.current = Date.now()
         handleQueueMessage(msg)
       })
-      client.subscribe("/queue/waitingNumber", (payload) => {
-        const data = JSON.parse(payload.body);
-        console.log("데이터" ,data);
-      });
+      client.subscribe('/queue/waitingNumber', (payload) => {
+        const data = JSON.parse(payload.body)
+        console.log('데이터', data)
+      })
     }
 
     client.onStompError = (frame) => {
@@ -233,7 +228,7 @@ const TicketQueuePage: React.FC = () => {
       // clearInterval(softFallback)
       try {
         client.deactivate()
-      } catch { }
+      } catch {}
       stompRef.current = null
       wsActiveRef.current = false
     }
@@ -258,7 +253,7 @@ const TicketQueuePage: React.FC = () => {
       if (proceedingToBookingRef.current || isUnmountedRef.current) return
       try {
         exitMut.mutate({ festivalId: String(fid), reservationDate })
-      } catch { }
+      } catch {}
     }
     window.addEventListener('pagehide', callExit)
     window.addEventListener('beforeunload', callExit)

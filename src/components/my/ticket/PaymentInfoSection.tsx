@@ -69,7 +69,7 @@ function normalizeOrder(input: any): any | undefined {
 
 const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) => {
   const navigate = useNavigate()
-  const { data, isLoading, isError, error } = usePaymentOrdersQuery(bookingId)
+  const { data, isLoading, isError } = usePaymentOrdersQuery(bookingId)
 
   const order = useMemo(() => normalizeOrder(data), [data])
 
@@ -104,8 +104,10 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
 
       {isLoading && <Spinner />}
       {isError && (
-        <div className={styles.error}>
-          양도 받은 티켓은 결제 내역에서 제외됩니다.
+        <div className={`${styles.card} ${styles.empty}`}>
+          <div className={styles.emptyIcon} aria-hidden />
+          <h3 className={styles.emptyTitle}>결제 내역이 없습니다</h3>
+          <p className={styles.emptyDesc}>양도 받은 티켓은 결제 내역에서 제외됩니다.</p>
         </div>
       )}
       {!isLoading && !isError && !order && (

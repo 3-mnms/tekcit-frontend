@@ -126,17 +126,6 @@ const TransferTicketPage: React.FC = () => {
     return list.filter((t) => t.rawStatus === 'CONFIRMED' && !hidden.has(t.reservationNumber))
   }, [myTickets, hidden])
 
-  if (visibleTickets.length === 0) {
-    return (
-      <div className={`${styles.card} ${styles.empty}`}>
-        <div className={styles.emptyIcon} aria-hidden />
-        <h3 className={styles.emptyTitle}>예매 내역이 없습니다</h3>
-        <p className={styles.emptyDesc}>양도 가능한 티켓 내역이 없습니다.</p>
-        <button className={styles.primaryBtn} onClick={() => navigate('/')}>티켓 예매하기</button>
-      </div>
-    )
-  }
-
   const handleTransfer = (reservationNumber: string) => {
     navigate(`/mypage/ticket/transfer/${encodeURIComponent(reservationNumber)}`)
   }
@@ -235,6 +224,15 @@ const TransferTicketPage: React.FC = () => {
           <BeforeTransferTicket key={t.reservationNumber} item={t} onTransfer={handleTransfer} />
         ))}
       </div>
+      {visibleTickets.length === 0 && (
+        <div className={`${styles.card} ${styles.empty}`}>
+          <div className={styles.emptyIcon} aria-hidden />
+          <h3 className={styles.emptyTitle}>예매 내역이 없습니다</h3>
+          <p className={styles.emptyDesc}>양도 가능한 티켓 내역이 없습니다.</p>
+          <button className={styles.primaryBtn} onClick={() => navigate('/')}>티켓 예매하기</button>
+        </div>
+      )
+      }
     </div>
   )
 }

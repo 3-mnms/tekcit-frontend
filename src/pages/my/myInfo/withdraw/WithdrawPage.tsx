@@ -5,7 +5,7 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { useDeleteAccountMutation } from '@/models/auth/tanstack-query/useDeleteAccount'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
-
+import Spinner from '@/components/common/spinner/Spinner'
 import { FaExclamationTriangle } from 'react-icons/fa'
 
 const WithdrawPage: React.FC = () => {
@@ -16,7 +16,7 @@ const WithdrawPage: React.FC = () => {
 
   const handleWithdraw = () => {
     if (!checked || delMut.isPending) return
-    if (!window.confirm('정말 탈퇴하시겠어요? 이 작업은 되돌릴 수 없습니다.')) return
+    if (!window.confirm('탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return
 
     delMut.mutate(undefined, {
       onSuccess: () => {
@@ -77,12 +77,13 @@ const WithdrawPage: React.FC = () => {
         </div>
       </div>
 
+      {delMut.isPending && <Spinner />}
       <Button
         className={`${styles.withdrawButton} ${checked && !delMut.isPending ? styles.withdrawButtonActive : ''}`}
         onClick={handleWithdraw}
         disabled={!checked || delMut.isPending}
       >
-        {delMut.isPending ? '탈퇴 처리 중…' : '탈퇴하기'}
+        탈퇴하기
       </Button>
     </section>
   )

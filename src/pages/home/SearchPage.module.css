@@ -12,27 +12,34 @@ html, body, #root {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr); /* 오른쪽 칼럼 줄바꿈 방지 */
   gap: 32px;
-  align-items: start;
+  /* align-items: start; */
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px 40px;
+  overflow: hidden;
+  box-sizing: border-box;
+  height: calc(100dvh - var(--header-height));
 }
 
-/* 왼쪽: 필터 컬럼 (데스크톱에서만 보임) */
-.filterCol {
-  grid-column: 1;
-  position: sticky;
-  top: var(--header-height);
-  align-self: start;
-}
-
-/* 오른쪽: 결과 컬럼 */
+.filterCol,
 .resultsCol {
-  grid-column: 2;
-  min-width: 0; /* 내부 그리드가 제대로 줄도록 */
+  min-height: 0;
+  display: block;
 }
 
+.colScroll {
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE/Edge(레거시) */
+}
+.colScroll::-webkit-scrollbar { 
+  width: 0;
+  height: 0;
+}
 /* 모바일: 필터 숨기고 결과만 1열 */
 @media (max-width: 1010px) {
   .page {
