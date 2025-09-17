@@ -1,200 +1,145 @@
 :root {
-  --page-max: 720px;
-  --radius: 16px;
-  --line: #e6e8ee;
-  --muted: #6b7280;
-  --text: #0f172a;
-  --bg: #ffffff;
-  --bg-soft: #f7f8fa;
-  --primary: #111827;
-  --primary-weak: #f3f4f6;
-  --shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
-  --focus: 0 0 0 3px rgba(37, 99, 235, 0.25);
+  --color-primary-light: #f0f4f9;
+  --color-primary-medium: #d4dceb;
+  --color-primary-dark: #3757a3;
+  --color-text-dark: #1a202c;
+  --color-text-medium: #4a5568;
+  --color-background: #ffffff;
+  --color-border: #e2e8f0;
+  --border-radius-card: 16px;
+  --border-radius-button: 12px;
+  --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --max-width: 480px;
 }
 
-/* Dark mode (optional) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --line: #2b2f38;
-    --muted: #9aa3b2;
-    --text: #e5eaf3;
-    --bg: #12141a;
-    --bg-soft: #171a22;
-    --primary: #e5eaf3;
-    --primary-weak: #222531;
-    --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  }
-}
-
-/* 레이아웃 */
 .page {
   width: 100%;
-  max-width: var(--page-max);
-  margin: 0 auto;
-  padding: clamp(16px, 2.8vw, 28px) 20px 110px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  max-width: var(--max-width);
+  margin: 40px auto;
+  padding: 24px;
+  background-color: var(--color-background);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-subtle);
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  text-align: center;
 }
 
-/* 헤더 */
 .header {
-  display: grid;
-  gap: 6px;
+  margin-bottom: 30px;
 }
+
 .title {
-  text-align: center;
-  font-size: clamp(20px, 2.2vw, 24px);
-  font-weight: 800;
-  color: var(--text);
-  margin: 0;
-  letter-spacing: -0.01em;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: 8px;
 }
+
 .subtitle {
-  text-align: center;
-  font-size: 13px;
-  color: var(--muted);
-  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-medium);
 }
 
-/* 카드 공통 */
 .card {
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border-radius: var(--border-radius-card);
+  padding: 24px;
+  margin-bottom: 20px;
+  text-align: left;
+  background-color: var(--color-primary-light);
+  border: 1px solid var(--color-primary-medium);
 }
 
-/* 요약 카드 */
-.summary {
-  padding: 18px 18px 14px;
-  display: grid;
-  gap: 12px;
-}
-.summaryHead {
+.cardHeader {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-.badge {
-  display: inline-flex;
-  align-items: center;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--text);
-  background: var(--primary-weak);
-  border: 1px solid var(--line);
-}
-.tip {
-  font-size: 12px;
-  color: var(--muted);
+  margin-bottom: 16px;
 }
 
-/* 리스트 */
-.list {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-}
-.row,
-.rowTotal {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 12px;
-}
-.label {
-  color: var(--muted);
-  font-weight: 600;
-  font-size: 14px;
-}
-.value {
-  font-weight: 800;
-  font-size: 15px;
-  color: var(--text);
-}
-.amount {
-  letter-spacing: 0.02em;
-  tab-size: 2;
-}
-
-.divider {
-  height: 1px;
-  background: var(--line);
-  margin: 4px 0;
-  border-radius: 1px;
-}
-
-.totalLabel {
-  font-weight: 800;
-  font-size: 15px;
-  color: var(--text);
-}
-.totalValue {
-  font-weight: 900;
+.cardHeaderTitle {
   font-size: 18px;
-  color: var(--text);
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-left: 8px;
 }
 
-/* 안내 */
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.label {
+  font-size: 15px;
+  color: var(--color-text-medium);
+}
+
+.value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+}
+
+.ticketPrice {
+  color: var(--color-primary-dark);
+}
+
+.finalAmount {
+  text-align: center;
+}
+
+.finalAmountLabel {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-bottom: 8px;
+}
+
+.finalAmountValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  margin-bottom: 12px;
+}
+
 .notice {
-  margin: 6px 0 0;
-  font-size: 12px;
-  color: var(--muted);
+  font-size: 13px;
+  color: var(--color-text-medium);
+  line-height: 1.5;
 }
 
-/* 하단 액션 (스티키) */
 .actions {
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin-top: 10px;
-  background:
-    linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--bg) 22px);
-  padding: 18px 0 10px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 16px;
+  margin-top: 30px;
 }
 
-/* 버튼 공통 */
-.btn {
-  height: 50px;
-  border-radius: 12px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
-  outline: none;
-}
-.btn:focus-visible {
-  box-shadow: var(--focus);
+.button {
+  flex: 1;
+  padding: 16px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--border-radius-button);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
-/* 고스트 버튼/프라이머리 버튼 */
-.btnGhost {
-  background: var(--bg) !important;
-  color: var(--text) !important;
-  border: 1px solid var(--line) !important;
-}
-.btnPrimary {
-  background: var(--primary) !important;
-  color: #fff !important;
-  border: 1px solid transparent !important;
+.cancelButton {
+  background-color: var(--color-primary-light);
+  color: var(--color-text-dark);
 }
 
-@media (hover: hover) {
-  .btnGhost:hover { background: var(--bg-soft); }
-  .btnPrimary:hover { filter: brightness(0.95); }
+.refundButton {
+  background-color: var(--color-primary-dark);
+  color: var(--color-background);
 }
-.btn:active { transform: translateY(1px); }
 
-/* 반응형 */
-@media (max-width: 560px) {
-  .page { padding-bottom: 100px; }
-  .actions { grid-template-columns: 1fr; }
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.button:active {
+  transform: translateY(0);
 }

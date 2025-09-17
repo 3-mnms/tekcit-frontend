@@ -49,9 +49,17 @@ export default function ResultPage() {
     status: sp.get('status') ?? undefined,
     paymentId: sp.get('paymentId') ?? undefined,
   })
-  const type = (parsed.success ? parsed.data.type : undefined) as ResultType | undefined
-  const status = (parsed.success ? parsed.data.status : undefined) as ResultStatus | undefined
+  
+  // ✅ paymentId가 있으면 기본값 설정
+  let type = (parsed.success ? parsed.data.type : undefined) as ResultType | undefined
+  let status = (parsed.success ? parsed.data.status : undefined) as ResultStatus | undefined
   const paymentId = (parsed.success ? parsed.data.paymentId : undefined) as string | undefined
+
+  // paymentId만 있고 type/status가 없으면 booking success로 처리
+  if (paymentId && !type && !status) {
+    type = 'booking'
+    status = 'success'
+  }
 
   // booking/transfer는 서버 승인 확인 필요
   const needConfirm = type === 'booking' || type === 'transfer'
