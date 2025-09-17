@@ -15,7 +15,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// ✅ 캐시 무효화 코드: 새 서비스워커가 오면 바로 적용
+// ✅ 캐시 무효화
 self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
@@ -27,10 +27,16 @@ self.addEventListener("activate", (event) => {
 messaging.onBackgroundMessage((payload) => {
   console.log("📱 백그라운드 알림 도착:", payload);
 
-  const notificationTitle = payload.data?.title || "테킷에서 알림이 도착했습니다.";
+  // notification payload가 있으면 OS가 알아서 알림 표시 → 따로 showNotification 안 함
+  if (payload.notification) {
+    console.log("OS가 자체적으로 알림 표시 (중복 방지)");
+    return;
+  }
+
+  // data-only fallback (웹 환경에서만 사용)
+  const notificationTitle = payload.data?.title || "테킷에서 공연 알림이 도착했습니다.";
   const notificationOptions = {
-    body: payload.data?.body || "홈페이지 알림 내역을 참고해주세요!",
-    // icon: "/firebase-logo.png", // 필요시 아이콘 추가
+    body: payload.data?.body || "홈페이지를 참고해주세요!",
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
