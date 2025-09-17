@@ -17,16 +17,19 @@ export default function App() {
         if (!subscribed) return;
         console.log("포그라운드 알림 도착:", payload);
 
-        const title = payload.data?.title || payload.notification?.title || "알림";
-        const body = payload.data?.body || payload.notification?.body || "";
+        // ✅ data payload 우선 사용
+        const title = payload.data?.title || "알림";
+        const body = payload.data?.body || "";
 
-        const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-
+        // ✅ OS 알림 권한 있으면 Notification, 없으면 alert
         if (Notification.permission === "granted") {
-          // ✅ 모바일/PC 구분 없이 OS 알림 우선
-          new Notification(title, { body });
+          try {
+            new Notification(title, { body });
+          } catch (err) {
+            console.warn("Notification API 실패 → alert fallback", err);
+            alert(`${title}\n${body}`);
+          }
         } else {
-          // ✅ 권한 없으면 alert()로 fallback
           alert(`${title}\n${body}`);
         }
       })
@@ -44,3 +47,4 @@ export default function App() {
     </>
   );
 }
+
