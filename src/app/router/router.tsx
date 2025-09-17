@@ -52,6 +52,8 @@ import WalletPointPage from '@/pages/payment/pay/WalletPointPage'
 import WalletChargePage from '@/pages/payment/pay/WalletChargePage'
 import ResultPage from '@/pages/payment/result/ResultPage'
 import TeckitJoinPage from '@/pages/payment/pay/TeckitJoinPage'
+import TransferResultPage from '@/pages/payment/result/TransferResultPage'
+import BookingResultPage from '@/pages/payment/result/BookingResultPage'
 
 // admin & host
 import HomePage from '@/pages/home/HomePage'
@@ -153,6 +155,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '', element: <BookingPaymentPage /> },
       { path: 'result', element: <ResultPage /> },
+      { path: 'booking-result', element: <BookingResultPage/>},
       {
         path: 'wallet/join', // 최종 경로: /payment/wallet/join
         element: <TeckitJoinPage />,
@@ -162,6 +165,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '', element: <TransferPaymentPage /> },
           { path: 'transfer-fee', element: <TransferFeePaymentPage /> },
+          { path: 'result', element: <TransferResultPage />}
         ],
       },
       {

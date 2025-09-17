@@ -1,10 +1,13 @@
-// TossPayment 버전1
+// TossPayment 버전2 (수정된 최종 코드)
 
 import { forwardRef, useImperativeHandle } from 'react'
 import PortOne, { Currency, PayMethod } from '@portone/browser-sdk/v2'
 import styles from './TossPayment.module.css'
-import { paymentRequest } from '@/shared/api/payment/toss'
+import { requestPayment, type PaymentRequestDTO } from '@/shared/api/payment/payments'
 import { getEnv } from '@/shared/config/env'
+
+// DUMMY_USER_ID는 실제 유저 ID로 대체되어야 합니다.
+const DUMMY_USER_ID = 1;
 
 export interface TossPaymentProps {
   isOpen: boolean
@@ -25,8 +28,6 @@ export type TossPaymentHandle = {
     bookingId: string
     festivalId: string
     sellerId: number
-    successUrl?: string
-    failUrl?: string
   }) => Promise<void>
 }
 
@@ -35,11 +36,14 @@ const CHANNEL_KEY = getEnv("VITE_PORTONE_CHANNEL_KEY")
 
 const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
   (
-    { isOpen, onToggle, amount, orderName, redirectUrl },
+    { isOpen, onToggle, amount, orderName, redirectUrl, bookingId, festivalId, sellerId },
     ref,
   ) => {
     useImperativeHandle(ref, () => ({
-      async requestPay({ paymentId, amount, orderName, bookingId, festivalId, sellerId, successUrl, failUrl }) {
+      async requestPay(args) {
+        // useImperativeHandle의 인자 타입을 명확히 했으므로 여기서 구조 분해 할당 오류가 사라집니다.
+        const { paymentId, amount, orderName, bookingId, festivalId, sellerId } = args;
+
         const hasSellerId = typeof sellerId === 'number' && Number.isFinite(sellerId) && sellerId >= 0
 
         if (!STORE_ID || !CHANNEL_KEY) {
@@ -52,10 +56,22 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           throw new Error('Invalid booking/festival/seller context')
         }
 
-        const baseUrl = redirectUrl ?? successUrl ?? `${window.location.origin}/payment/result`
-        const finalRedirect = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}type=booking&paymentId=${encodeURIComponent(paymentId)}`
+        const finalRedirect = `${window.location.origin}/payment/booking?paymentId=${encodeURIComponent(paymentId)}`;
 
-        await paymentRequest(paymentId, bookingId, festivalId, sellerId, amount)
+        // ✅ 불필요한 중복 호출을 제거하고, 올바른 인자를 전달하는 단일 호출로 수정
+        const dto: PaymentRequestDTO = {
+          paymentId,
+          bookingId,
+          festivalId,
+          paymentRequestType: 'GENERAL_PAYMENT_REQUESTED',
+          sellerId,
+          amount,
+          currency: 'KRW',
+          payMethod: 'CARD',
+          STORE_KEY: STORE_ID,
+          CHANNEL_KEY: CHANNEL_KEY,
+        };
+        await requestPayment(dto, DUMMY_USER_ID); // 두 번째 인자로 userId 추가
 
         await PortOne.requestPayment({
           storeId: STORE_ID,
