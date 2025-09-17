@@ -22,22 +22,18 @@ export default function App() {
 
         const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
 
-        if (isMobile) {
-          // 모바일 웹: OS 알림
-          if (Notification.permission === "granted") {
-            new Notification(title, { body });
-          } else {
-            console.warn("모바일: 알림 권한 없음");
-          }
+        if (Notification.permission === "granted") {
+          // ✅ 모바일/PC 구분 없이 OS 알림 우선
+          new Notification(title, { body });
         } else {
-          // PC 웹: alert
+          // ✅ 권한 없으면 alert()로 fallback
           alert(`${title}\n${body}`);
         }
       })
       .catch((err) => console.error("포그라운드 알림 처리 오류:", err));
 
     return () => {
-      subscribed = false; // ✅ unmount 시 cleanup
+      subscribed = false;
     };
   }, []);
 
