@@ -13,7 +13,6 @@
   place-content: center;
 }
 
-/* ✅ 제목 스타일 */
 .title {
   font-size: 1.5rem;
   font-weight: 700;
@@ -41,19 +40,11 @@
   cursor: pointer;
 }
 
-.subTabActive {
-  border-color: #111827;
-  background: #111827;
-  color: #fff;
-}
-
-
 .active {
   background-color: #4D9AFD;
   color: white;
 }
 
-/* ✅ 카드 리스트 (반응형 너비 기반) */
 .cardSlider {
   position: relative;
   --cols: 5;

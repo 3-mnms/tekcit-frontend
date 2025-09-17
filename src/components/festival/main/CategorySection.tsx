@@ -294,7 +294,7 @@ const CategorySection: React.FC = () => {
                 key={c}
                 role="tab"
                 aria-selected={isActive}
-                className={`${styles.subTab} ${isActive ? styles.subTabActive : ''}`}
+                className={`${styles.subTab} ${isActive ? styles.active : ''}`}
                 onClick={() => setActiveChild(c)}
               >
                 {c}
