@@ -1,4 +1,6 @@
 // src/shared/config/loadKakaoMap.ts
+import { getEnv } from '@/shared/config/env'
+
 function buildSdkUrl(appkey: string, bust?: string): string {
   const base = 'https://dapi.kakao.com/v2/maps/sdk.js'
   const qs = new URLSearchParams({ appkey, autoload: 'false', libraries: 'services' })
@@ -34,7 +36,9 @@ export async function loadKakaoMapSdk(): Promise<typeof kakao> {
   if (kakaoReadyPromise) return kakaoReadyPromise
 
   kakaoReadyPromise = (async () => {
-    const appkey = import.meta.env.VITE_KAKAO_MAP_APP_KEY as string | undefined
+
+    const appkey = getEnv('VITE_KAKAO_MAP_APP_KEY', '')
+
     if (!appkey) throw new Error('VITE_KAKAO_MAP_APP_KEY_MISSING')
 
     const url = buildSdkUrl(appkey)
