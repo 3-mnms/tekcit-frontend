@@ -427,7 +427,7 @@ const FestivalScheduleSection: React.FC<Props> = ({
                 if (FORCE_WAIT && selectedDate && fid) {
                   const fdfrom = startDate ? ymd(startDate) : null
                   const fdto = endDate ? ymd(endDate) : null
-                  __fs_openWaitingPopup(fid, selectedDate, selectedTime, 10000, fdfrom, fdto)
+                  __fs_openWaitingPopup(fid, selectedDate, selectedTime, 1, fdfrom, fdto)
                   return
                 }
 
