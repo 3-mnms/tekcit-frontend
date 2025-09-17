@@ -1,10 +1,32 @@
-/* ========= 프론트 표현 ========= */
+/* ========= 공통 ========= */
 export type TransferType = 'FAMILY' | 'OTHERS';
 export type TransferStatusFR = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 
 /* ========= 백엔드 표현 ========= */
 export type TransferStatusBEString = 'REQUESTED' | 'APPROVED' | 'COMPLETED' | 'CANCELED';
 export type TransferStatusBE = 0 | 1 | 2 | 3;
+
+/* ========= 새로 추가: 티켓 픽(수령 방식 제한) =========
+ * 1 = ALL(모두 허용), 2 = QR_ONLY(QR만)
+ */
+export type TicketPick = 1 | 2;
+export type DeliveryConstraint = 'ALL' | 'QR_ONLY';
+
+/** ticketPick → 제약 문자열 */
+export const deliveryConstraintFromPick = (tp?: unknown): DeliveryConstraint => {
+  const n = Number(tp);
+  return n === 2 ? 'QR_ONLY' : 'ALL';
+};
+
+/** 특정 수령 방식이 허용되는지 검사 */
+export const isDeliveryAllowed = (
+  method: 'QR' | 'PAPER' | '' | null | undefined,
+  tp?: TicketPick
+): boolean => {
+  if (!method) return true; // 미선택 단계는 통과
+  const cons = deliveryConstraintFromPick(tp);
+  return cons === 'ALL' ? true : method === 'QR';
+};
 
 /* ========= 요청 DTO ========= */
 export type TicketTransferRequest = {
@@ -14,29 +36,33 @@ export type TicketTransferRequest = {
   senderName: string;
 };
 
-export type PersonInfo = {
-  name: string;
-  rrnFront: string;
-};
-
-/* ========= 수신 아이템 ========= */
+/* ========= 수신 아이템(프론트에서 쓰는 정규화본) ========= */
 export type TransferWatchItem = {
-  transferId: number;   // 서버가 내려주도록 협의 권장
-  senderId: number;     // 반드시 "양도자"의 사용자 ID
+  transferId: number;
+  senderId: number;
   senderName: string;
-  type: TransferType | string | number;
+  type: TransferType | string; // 'FAMILY' | 'OTHERS' (정규화되지만 string 허용)
   createdAt: string;
   status: TransferStatusBE | TransferStatusBEString | string;
+
   fname: string;
   posterFile: string;
   fcltynm: string;
   ticketPrice: number;
+
   performanceDate: string;
   selectedTicketCount: number;
+
+  reservationNumber: string;
+
+  /** ✅ BE 원본 숫자 (1=ALL, 2=QR_ONLY). 누락 시 프론트에서 1로 보정 */
+  ticketPick: TicketPick;
+
+  /** ✅ 파생: 'ALL' | 'QR_ONLY' */
+  deliveryConstraint: DeliveryConstraint;
 };
 
 /* ========= 승인/거절 DTO ========= */
-// 프론트 표기로 호출 → API에서 서버 문자열로 변환해 전송
 export type UpdateTicketRequest = {
   transferId: number;
   senderId: number;
@@ -58,10 +84,8 @@ export type TransferOthersResponse = {
 };
 
 /* ========= OCR ========= */
-export type ExtractPayload = {
-  file: File;
-  targetInfo: Record<string, string>;
-};
+export type PersonInfo = { name: string; rrnFront: string };
+export type ExtractPayload = { file: File; targetInfo: Record<string, string> };
 export type ExtractResponse = PersonInfo[];
 
 /* ========= Envelope ========= */
@@ -72,24 +96,30 @@ export type ApiEnvelope<T> = ApiOk<T> | ApiErr | T;
 /* ========= 상태 매퍼 ========= */
 export const FRtoBEString = (s: TransferStatusFR): TransferStatusBEString => {
   switch (s) {
-    case 'ACCEPTED': return 'COMPLETED';   // 수락 완료 = BE COMPLETED
-    case 'REJECTED': return 'CANCELED';    // 거절 = BE CANCELED
+    case 'ACCEPTED': return 'COMPLETED';
+    case 'REJECTED': return 'CANCELED';
     case 'PENDING':
-    default: return 'REQUESTED';           // 요청/승인 대기 = BE REQUESTED
+    default: return 'REQUESTED';
   }
 };
 
 export const BEtoFR = (s: TransferStatusBE | string): TransferStatusFR => {
   const v = typeof s === 'string' ? s.trim().toUpperCase() : String(s);
-
-  if (v === '0' || v === 'REQUESTED' || v === '1' || v === 'APPROVED') {
-    return 'PENDING';
-  }
-  if (v === '2' || v === 'COMPLETED') {
-    return 'ACCEPTED';
-  }
-  if (v === '3' || v === 'CANCELED' || v === 'CANCELLED') {
-    return 'REJECTED';
-  }
+  if (v === '0' || v === 'REQUESTED' || v === '1' || v === 'APPROVED') return 'PENDING';
+  if (v === '2' || v === 'COMPLETED') return 'ACCEPTED';
+  if (v === '3' || v === 'CANCELED' || v === 'CANCELLED') return 'REJECTED';
   return 'PENDING';
+};
+
+/* ========= 상태 정규화 유틸 ========= */
+export const normalizeBEStatus = (s: unknown): TransferStatusBEString => {
+  if (typeof s === 'number') {
+    return (['REQUESTED', 'APPROVED', 'COMPLETED', 'CANCELED'][s] ?? 'REQUESTED') as TransferStatusBEString;
+  }
+  const v = String(s ?? '').trim().toUpperCase();
+  if (['0', 'REQUEST', 'REQUESTED', 'PENDING', 'WAITING'].includes(v)) return 'REQUESTED';
+  if (['1', 'APPROVED', 'ACCEPTED', 'OK'].includes(v)) return 'APPROVED';
+  if (['2', 'COMPLETED', 'DONE', 'SUCCESS'].includes(v)) return 'COMPLETED';
+  if (['3', 'CANCELED', 'CANCELLED', 'REJECTED', 'DENIED', 'DECLINED'].includes(v)) return 'CANCELED';
+  return 'REQUESTED';
 };
