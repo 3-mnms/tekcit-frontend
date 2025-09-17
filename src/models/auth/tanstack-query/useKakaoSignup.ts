@@ -10,14 +10,8 @@ export function useKakaoSignupMutation():
     mutationFn: postKakaoSignup,
     onError: (err) => {
       const data = err.response?.data;
-      const msg =
-        data?.errorMessage ??
-        data?.message ??
-        data?.error ??
-        err.message ??
-        '요청이 올바르지 않아요';
-      console.error('[KakaoSignup] error:', err.response ?? err);
-      alert(msg);
+      console.error('[KakaoSignup] error:', data?.success ?? err);
+      alert("해당 이메일은 가입된 계정이 있습니다.")
     },
   });
 }
