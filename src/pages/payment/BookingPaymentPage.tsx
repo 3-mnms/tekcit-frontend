@@ -364,8 +364,8 @@ const BookingPaymentPage: React.FC = () => {
         bookingId: checkout.bookingId,
         festivalId: festivalIdVal,
         sellerId: sellerId!,
-        successUrl: `${window.location.origin}/payment/result?type=booking&status=success&paymentId=${encodeURIComponent(ensuredId)}`,
-        failUrl: `${window.location.origin}/payment/result?type=booking&status=fail&paymentId=${encodeURIComponent(ensuredId)}`,
+        successUrl: `${window.location.origin}/payment/result?type=booking&status=success`,
+        failUrl: `${window.location.origin}/payment/result?type=booking&status=fail`,
       })
     } catch {
       setErr('결제 요청 중 오류가 발생했어요.')
