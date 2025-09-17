@@ -13,43 +13,31 @@
   place-content: center;
 }
 
-/* ✅ 제목 스타일 */
 .title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #111827;
   margin-bottom: 1rem;
-  display:flex;
+  display: flex;
   align-items: center;
   width: 100%;
   place-content: center;
 }
 
-/* ✅ 카테고리 탭 리스트 */
 .tabList {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  margin-right: 6rem;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
-/* ✅ 탭 버튼 스타일 */
-.tabButton {
-  padding: 0.4rem 0.9rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  background-color: #f3f4f6;
-  color: #374151;
-  transition: all 0.2s ease;
+.subTab {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
   cursor: pointer;
-  white-space: nowrap;
-}
-
-.tabButton:hover {
-  background-color: #e5e7eb;
 }
 
 .active {
@@ -57,7 +45,6 @@
   color: white;
 }
 
-/* ✅ 카드 리스트 (반응형 너비 기반) */
 .cardSlider {
   position: relative;
   --cols: 5;

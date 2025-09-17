@@ -20,12 +20,11 @@ const canon = (s?: string) =>
     .replace(/[()（）]/g, (m) => (m === '(' || m === '（' ? '(' : ')'))
 
 const GROUP_CHILDREN: Record<string, string[]> = {
-  '대중음악': ['대중음악'],
-  '무용': ['무용(서양/한국무용)', '대중무용'],
+  대중음악: ['대중음악'],
+  무용: ['무용(서양/한국무용)'],
   '뮤지컬/연극': ['뮤지컬', '연극'],
   '클래식/국악': ['서양음악(클래식)', '한국음악(국악)'],
-  '서커스/마술': ['서커스/마술', '마술'],
-  '복합': ['복합'],
+  '서커스/마술': ['서커스/마술'],
 }
 
 /** slug -> 그룹(한글) */
@@ -193,22 +192,20 @@ const CategorySection: React.FC = () => {
   const [festivals, setFestivals] = useState<Festival[]>([])
   useEffect(() => {
     if (!isCategoryPage) return
-      ; (async () => {
-        try {
-          const raw = await getFestivals() // 배열 반환(간단 샘플)
-          setFestivals(raw)
-        } catch (e) {
-          console.error('🚨 공연 리스트 불러오기 실패', e)
-        }
-      })()
+    ;(async () => {
+      try {
+        const raw = await getFestivals() // 배열 반환(간단 샘플)
+        setFestivals(raw)
+      } catch (e) {
+        console.error('🚨 공연 리스트 불러오기 실패', e)
+      }
+    })()
   }, [isCategoryPage])
 
   const presentChildren = useMemo(() => {
     if (!isCategoryPage) return []
-    // 데이터에 의존하지 않고 “정의된 하위 장르”를 기본으로 사용
     const defined = GROUP_CHILDREN[groupFromSlug ?? '복합'] ?? []
 
-    // 있으면 먼저, 없어도 뒤에 표시(탭은 항상 노출)
     const candidates: string[] = [
       ...new Set([
         ...festivals.map((f) => (f as any).genrenm).filter(Boolean),
@@ -229,7 +226,6 @@ const CategorySection: React.FC = () => {
     }
     const defined = GROUP_CHILDREN[groupFromSlug ?? '복합'] ?? []
     const canonList = presentChildren.map(canon)
-    // 우선순위: present(있음) > defined(첫 항목)
     const fallback = presentChildren[0] ?? defined[0] ?? null
     if (!activeChild || !canonList.includes(canon(activeChild))) {
       setActiveChild(fallback)
@@ -282,12 +278,31 @@ const CategorySection: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [genrenmForQuery])
 
+  const showSubTabs = isCategoryPage && presentChildren.filter(Boolean).length >= 2
+
   return (
     <section ref={sectionRef} className={styles.section}>
       <div className={styles.sectionHeader}>
         <h2 className={styles.title}>{isCategoryPage ? '분야별 공연' : '전체 공연'}</h2>
       </div>
-
+      {showSubTabs && (
+        <div className={styles.tabList} role="tablist" aria-label="하위 장르 선택">
+          {presentChildren.map((c) => {
+            const isActive = !!activeChild && canon(activeChild) === canon(c)
+            return (
+              <button
+                key={c}
+                role="tab"
+                aria-selected={isActive}
+                className={`${styles.subTab} ${isActive ? styles.active : ''}`}
+                onClick={() => setActiveChild(c)}
+              >
+                {c}
+              </button>
+            )
+          })}
+        </div>
+      )}
       <div
         className={styles.cardSlider}
         ref={gridRef}
@@ -326,7 +341,7 @@ const CategorySection: React.FC = () => {
                         className={styles.image}
                         referrerPolicy="no-referrer"
                         onError={(e) => {
-                          ; (e.currentTarget as HTMLImageElement).src =
+                          ;(e.currentTarget as HTMLImageElement).src =
                             '@/shared/assets/placeholder-poster.png'
                         }}
                       />
@@ -348,7 +363,7 @@ const CategorySection: React.FC = () => {
                         className={styles.image}
                         referrerPolicy="no-referrer"
                         onError={(e) => {
-                          ; (e.currentTarget as HTMLImageElement).src =
+                          ;(e.currentTarget as HTMLImageElement).src =
                             '@/shared/assets/placeholder-poster.png'
                         }}
                       />
