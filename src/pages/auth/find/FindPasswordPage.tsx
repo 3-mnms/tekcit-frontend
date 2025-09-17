@@ -11,6 +11,7 @@ import {
   useFindRegisteredEmailMutation, useSendPwFindCode, useVerifyPwFindCode,
 } from '@/models/auth/tanstack-query/useFindLoginInfo';
 import { useNavigate } from 'react-router-dom';
+import Spinner from '@/components/common/spinner/Spinner';
 
 const maskEmail = (email: string) => {
   const [id, domain] = email.split('@'); if (!domain) return email;
@@ -36,9 +37,8 @@ const FindPasswordPage: React.FC = () => {
       { loginId: f.loginId, name: f.name },
       {
         onSuccess: (registeredEmail) => { setEmail(registeredEmail); setStep(2); },
-        onError: (err: any) => {
-          const m = err?.response?.data?.message || err?.response?.data?.errorMessage || '일치하는 정보가 없습니다.';
-          alert(`❌ ${m}`);
+        onError: () => {
+          alert("해당 사용자를 칮을 수 없습니다.");
         },
       }
     );
@@ -51,7 +51,7 @@ const FindPasswordPage: React.FC = () => {
         const m = axios.isAxiosError(err)
           ? (err.response?.data as any)?.message || (err.response?.data as any)?.errorMessage
           : null;
-        alert(`❌ ${m || '메일 전송 실패'}`);
+        alert(` ${m || '메일 전송 실패'}`);
       },
     });
   };
@@ -67,7 +67,7 @@ const FindPasswordPage: React.FC = () => {
         const m = axios.isAxiosError(err)
           ? (err.response?.data as any)?.message || (err.response?.data as any)?.errorMessage
           : null;
-        alert(`❌ ${m || '인증 실패'}`);
+        alert(` ${m || '인증 실패'}`);
       },
     });
   };
@@ -93,7 +93,7 @@ const FindPasswordPage: React.FC = () => {
             className={styles.input}
           />
           {errors.name && <p className={styles.error}>{errors.name.message}</p>}
-
+          {findEmailMut.isPending && <Spinner />}
           <div className={styles.actions}>
             <Button type="submit" className="w-full h-11" disabled={!isValid || findEmailMut.isPending}>
               {findEmailMut.isPending ? '조회 중…' : '다음'}

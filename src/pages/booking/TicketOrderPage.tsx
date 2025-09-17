@@ -9,6 +9,7 @@ import type { BookingSelect } from '@/models/booking/bookingTypes';
 import { useAuthStore } from '@/shared/storage/useAuthStore';
 import CaptchaOverlay from '@/components/booking/captcha/CaptchaOverlay';
 import Spinner from '@/components/common/spinner/Spinner'
+import { sendLeaveMessage } from '@/shared/config/leave';
 
 // -------------------- utils --------------------
 const pad2 = (n: number) => String(n).padStart(2, '0');
@@ -134,6 +135,19 @@ const TicketOrderPage: React.FC = () => {
   const [selDate, setSelDate] = useState<Date | null>(initialDateYMD ? new Date(initialDateYMD) : null);
   const [selTime, setSelTime] = useState<string | null>(initialTime || null);
   const [selQty, setSelQty] = useState<number>(Number.isFinite(initialQty) ? initialQty : 1);
+
+   useEffect(() => {
+    if (!fid) return;
+    const payload = { festivalId: fid };
+    const onLeave = () => sendLeaveMessage('reservation', payload, { token: accessToken ?? undefined });
+    window.addEventListener('pagehide', onLeave);
+    window.addEventListener('beforeunload', onLeave);
+    return () => {
+      onLeave();
+      window.removeEventListener('pagehide', onLeave);
+      window.removeEventListener('beforeunload', onLeave);
+    };
+  }, [fid, accessToken]);
 
   const phase1Req: BookingSelect | null = useMemo(() => {
     if (!fid || !selDate || !selTime) return null;

@@ -35,6 +35,7 @@ declare namespace kakao {
       setCenter(latlng: LatLng): void
       setLevel(level: number): void
       getLevel(): number
+      relayout(): void
     }
 
     interface MarkerOptions {
