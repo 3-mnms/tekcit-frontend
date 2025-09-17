@@ -50,8 +50,8 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           throw new Error('Invalid booking/festival/seller context')
         }
 
-        const baseUrl = redirectUrl ?? successUrl ?? `${window.location.origin}/payment/result`
-        const finalRedirect = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}type=booking&paymentId=${encodeURIComponent(paymentId)}`
+        // ✅ successUrl 사용하고, 없으면 기본값으로 paymentId 포함한 URL 생성
+        const finalRedirectUrl = successUrl || `${window.location.origin}/payment/result?type=booking&status=success&paymentId=${encodeURIComponent(paymentId)}`
 
         await paymentRequest(paymentId, bookingId, festivalId, sellerId, amount)
 
@@ -63,7 +63,7 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           totalAmount: amount,
           currency: Currency.KRW,
           payMethod: PayMethod.CARD,
-          redirectUrl: finalRedirect,
+          redirectUrl: finalRedirectUrl, // ✅ 실제로 전달받은 successUrl 사용
         })
       },
     }))
