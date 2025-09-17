@@ -16,12 +16,6 @@ const TicketDetailPage: React.FC = () => {
   const reserverName = useAuthStore((s) => s.user?.name ?? '')
 
   const { data, isLoading, isError, error } = useTicketDetailQuery(reservationNumber)
-
-  useEffect(() => {
-    document.body.style.overflow = ''
-    document.documentElement.style.overflow = ''
-    document.body.classList.remove('noScroll', 'modal-open', 'lockScroll')
-  }, [])
   
   if (!authReady) {
     return <div className="w-full p-8">초기화 중…</div>
