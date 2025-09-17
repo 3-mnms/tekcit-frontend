@@ -5,8 +5,6 @@ import { loadKakaoMapSdk } from '@/shared/config/loadKakaoMap'
 type Props = { isOpen: boolean; onClose: () => void; query: string }
 
 const KakaoMapModal: React.FC<Props> = ({ isOpen, onClose, query }) => {
-  // ⬇️ isOpen이 false면 아예 렌더하지 않음 (핵심 수정)
-  if (!isOpen) return null
 
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<kakao.maps.Map | null>(null)
@@ -15,7 +13,6 @@ const KakaoMapModal: React.FC<Props> = ({ isOpen, onClose, query }) => {
   const [sdkError, setSdkError] = useState<string | null>(null)
   const [searchError, setSearchError] = useState<string | null>(null)
 
-  // ESC로 닫기 + 바디 스크롤 잠금
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     document.addEventListener('keydown', onKey)
@@ -37,7 +34,6 @@ const KakaoMapModal: React.FC<Props> = ({ isOpen, onClose, query }) => {
         const kakaoNS = await loadKakaoMapSdk()
         if (!containerRef.current || canceled) return
 
-        // 모달 오픈 직후 레이아웃 안정화
         await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
 
         const center = new kakaoNS.maps.LatLng(37.5665, 126.978)
@@ -83,7 +79,6 @@ const KakaoMapModal: React.FC<Props> = ({ isOpen, onClose, query }) => {
 
         const pos = (await tryAddress()) ?? (await tryKeyword())
 
-        // 기존 마커 제거
         if (markerRef.current) {
           markerRef.current.setMap(null)
           markerRef.current = null
@@ -121,11 +116,12 @@ const KakaoMapModal: React.FC<Props> = ({ isOpen, onClose, query }) => {
     }
   }, [isOpen, query])
 
+  if (!isOpen) return null
+
   const kakaoMapLink = `https://map.kakao.com/?q=${encodeURIComponent(query)}`
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      {/* 콘텐츠 클릭 시 닫히지 않도록 버블링 방지 */}
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.wrap}>
           <div ref={containerRef} className={styles.map} />
@@ -135,7 +131,7 @@ const KakaoMapModal: React.FC<Props> = ({ isOpen, onClose, query }) => {
             ) : searchError ? (
               <span className={styles.warn}>⚠️ {searchError}</span>
             ) : (
-              <span className={styles.hint}>드래그/휠로 지도를 움직일 수 있어요</span>
+              <span className={styles.hint}></span>
             )}
             <a className={styles.link} href={kakaoMapLink} target="_blank" rel="noreferrer">
               카카오맵에서 열기
