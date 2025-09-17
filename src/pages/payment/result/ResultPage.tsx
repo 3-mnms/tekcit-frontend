@@ -20,7 +20,6 @@ const parseYMD = (s?: string) => {
   return d
 }
 
-// Date + "HH:mm" → Date
 const combineDateTime = (day?: Date, hhmm?: string | null) => {
   if (!day) return undefined
   const d = new Date(day)
