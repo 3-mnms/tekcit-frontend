@@ -64,7 +64,7 @@ const KakaoSignupPage: React.FC = () => {
         navigate('/login', { replace: true })
       },
       onError: (err) => {
-        alert((err as Error)?.message || '회원가입에 실패했어요.')
+        // alert((err as Error)?.message || '회원가입에 실패했어요.')
       },
     })
   }, [acc2, acc3, signupMut, navigate])
@@ -85,7 +85,6 @@ const KakaoSignupPage: React.FC = () => {
             onPrev={goPrevFromStep2}
             onNext={handleStep2Next}
             updateAcc={(p) => setAcc2((s) => ({ ...s, ...p }))}
-            // Step2Form 내부에서도 kakaoStep2Schema를 사용해 validate 해줘!
           />
         )}
 
@@ -99,13 +98,6 @@ const KakaoSignupPage: React.FC = () => {
               openAddress={openAddress}
               // Step3Form도 kakaoStep3Schema 사용
             />
-
-            {signupMut.isError && (
-              <p className="mt-3 text-sm text-red-600">
-                {(signupMut.error as Error)?.message || '회원가입에 실패했어요.'}
-              </p>
-            )}
-            {/* {signupMut.isPending && <p className="mt-2 text-sm">가입 처리 중…</p>} */}
           </>
         )}
 
