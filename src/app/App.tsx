@@ -4,20 +4,39 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./router/router";
 import TikiChatWidget from '@/components/ai/chatbot/TikiChatWidget';
 import useNoChatWidget from "@/models/ai/useNoChatWidget";
-import { onMessageListener } from "../firebase";
+import { onMessage } from "firebase/messaging";
+import { messaging } from "../firebase"; // getMessaging(app) 해서 export 해둔 객체
 
 export default function App() {
   const noChat = useNoChatWidget();
 
   useEffect(() => {
-    onMessageListener()
-      .then((payload) => {
-        if (document.visibilityState === "visible" && payload?.data) {
-          console.log("포그라운드 알림 도착:", payload);
-          alert(`${payload.data.title}\n${payload.data.body}`);
+    console.log("📡 포그라운드 메시지 리스너 등록");
+
+    // ✅ 실시간 리스너 등록
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log("📩 포그라운드 알림 도착:", payload);
+
+      const title = payload.data?.title || payload.notification?.title || "알림";
+      const body = payload.data?.body || payload.notification?.body || "";
+
+      if (Notification.permission === "granted") {
+        try {
+          new Notification(title, { body });
+        } catch (err) {
+          console.warn("Notification API 실패 → alert fallback", err);
+          alert(`${title}\n${body}`);
         }
-      })
-      .catch((err) => console.error("포그라운드 알림 처리 오류:", err));
+      } else {
+        alert(`${title}\n${body}`);
+      }
+    });
+
+    // ✅ cleanup (메모리 누수 방지)
+    return () => {
+      console.log("❌ 포그라운드 메시지 리스너 해제");
+      unsubscribe();
+    };
   }, []);
 
   return (
@@ -27,3 +46,4 @@ export default function App() {
     </>
   );
 }
+

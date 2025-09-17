@@ -10,45 +10,52 @@ import type {
   ApiOk,
   ApiErr,
   TransferStatusBEString,
+  TransferStatusBE,
+  TicketPick,
+  TransferType,
 } from '@/models/transfer/transferTypes';
-import { FRtoBEString } from '@/models/transfer/transferTypes';
+import {
+  FRtoBEString,
+  deliveryConstraintFromPick,
+} from '@/models/transfer/transferTypes';
 
+/* ============== PATH ============== */
 const PATH = {
   extract: '/transfer/extract',
   request: '/transfer/request',
   watch: '/transfer/watch',
-  acceptanceFamily: '/transfer/acceptance/family', // @RequestBody UpdateTicketRequestDTO
-  acceptanceOthers: '/transfer/acceptance/others', // @RequestBody UpdateTicketRequestDTO
+  acceptanceFamily: '/transfer/acceptance/family',
+  acceptanceOthers: '/transfer/acceptance/others',
 };
 
-/** ✅ BE status 정규화: 숫자/철자 변형 → 표준 문자열(REQUESTED|APPROVED|COMPLETED|CANCELED) */
+/* ============== 상태 정규화(원래 스타일 유지) ============== */
 function normalizeBEStatus(s: unknown): TransferStatusBEString {
   if (typeof s === 'number') {
-    return (['REQUESTED','APPROVED','COMPLETED','CANCELED'][s] ?? 'REQUESTED') as TransferStatusBEString;
+    return (['REQUESTED', 'APPROVED', 'COMPLETED', 'CANCELED'][s] ?? 'REQUESTED') as TransferStatusBEString;
   }
   const v = String(s ?? '').trim().toUpperCase();
-  if (['0','REQUEST','REQUESTED','PENDING','WAITING'].includes(v)) return 'REQUESTED';
-  if (['1','APPROVED','ACCEPTED','OK'].includes(v)) return 'APPROVED';
-  if (['2','COMPLETED','DONE','SUCCESS'].includes(v)) return 'COMPLETED';
-  if (['3','CANCELED','CANCELLED','REJECTED','DENIED','DECLINED'].includes(v)) return 'CANCELED';
+  if (['0', 'REQUEST', 'REQUESTED', 'PENDING', 'WAITING'].includes(v)) return 'REQUESTED';
+  if (['1', 'APPROVED', 'ACCEPTED', 'OK'].includes(v)) return 'APPROVED';
+  if (['2', 'COMPLETED', 'DONE', 'SUCCESS'].includes(v)) return 'COMPLETED';
+  if (['3', 'CANCELED', 'CANCELLED', 'REJECTED', 'DENIED', 'DECLINED'].includes(v)) return 'CANCELED';
   return 'REQUESTED';
 }
 
-const stripNullish = <T extends object>(obj: T): Partial<T> => {
-  const out: any = {};
-  for (const [k, v] of Object.entries(obj)) if (v !== null && v !== undefined) out[k] = v;
-  return out;
-};
-
-function unwrap<T>(payload: unknown): T {
-  if (payload && typeof payload === 'object' && 'success' in (payload as any)) {
-    const p = payload as ApiOk<T> | ApiErr;
-    if ((p as ApiOk<T>).success === true) {
-      const ok = p as ApiOk<T>;
-      return (ok.data as T) ?? (undefined as unknown as T);
+/* ============== Envelope 유틸(원래 형태 유지) ============== */
+function isApiOk<T>(env: ApiEnvelope<T>): env is ApiOk<T> {
+  return typeof env === 'object' && env !== null && 'success' in env && (env as ApiOk<T>).success === true;
+}
+function isApiErr<T>(env: ApiEnvelope<T>): env is ApiErr {
+  return typeof env === 'object' && env !== null && 'success' in env && (env as ApiErr).success === false;
+}
+function unwrap<T>(payload: ApiEnvelope<T> | T): T {
+  if (typeof payload === 'object' && payload !== null && 'success' in (payload as any)) {
+    const env = payload as ApiEnvelope<T>;
+    if (isApiOk(env)) return env.data;
+    if (isApiErr(env)) {
+      const msg = env.errorMessage || env.message || env.errorCode || 'API error';
+      throw new Error(msg);
     }
-    const err = p as ApiErr;
-    throw new Error(err.errorMessage || err.message || err.errorCode || 'API error');
   }
   return payload as T;
 }
@@ -62,8 +69,13 @@ export async function apiExtractPersonInfo(payload: ExtractPayload): Promise<Ext
   const res = await api.post<ApiEnvelope<ExtractResponse> | ExtractResponse>(PATH.extract, form, {
     validateStatus: () => true,
   });
-  if (res.status >= 400) throw new Error(`${res.status} ${(res.data as any)?.message ?? res.statusText}`);
-  return unwrap<ExtractResponse>(res.data);
+  if (res.status >= 400) {
+    const msg = typeof res.data === 'object' && res.data !== null && 'message' in res.data
+      ? (res.data as { message?: string }).message ?? res.statusText
+      : res.statusText;
+    throw new Error(`${res.status} ${msg}`);
+  }
+  return unwrap<ExtractResponse>(res.data as ApiEnvelope<ExtractResponse> | ExtractResponse);
 }
 
 export async function apiVerifyFamily(payload: ExtractPayload): Promise<{ success: boolean; message?: string }> {
@@ -71,112 +83,122 @@ export async function apiVerifyFamily(payload: ExtractPayload): Promise<{ succes
   form.append('file', payload.file);
   form.append('targetInfo', JSON.stringify(payload.targetInfo));
 
-  // 👇 이 호출은 unwrap 하지 않는다!
+  // 이 호출은 unwrap 하지 않음 (원래 스타일 유지)
   const res = await api.post(PATH.extract, form, { validateStatus: () => true });
   if (res.status >= 400) {
-    throw new Error(`${res.status} ${(res.data as any)?.message ?? res.statusText}`);
+    const msg = typeof res.data === 'object' && res.data !== null && 'message' in res.data
+      ? (res.data as { message?: string }).message
+      : res.statusText;
+    throw new Error(`${res.status} ${msg}`);
   }
 
-  const d = res.data as any; // 예: { success: true, data: null, message: '...' }
+  const d = res.data as any; // { success: true, data: null, message: '...' }
   return { success: d?.success === true, message: d?.message };
 }
 
 /* ============== 요청/조회 ============== */
 export async function apiRequestTransfer(body: TicketTransferRequest): Promise<void> {
   const res = await api.post<ApiEnvelope<null> | null>(PATH.request, body, { validateStatus: () => true });
-  if (res.status >= 400) throw new Error(`${res.status} ${(res.data as any)?.message ?? res.statusText}`);
+  if (res.status >= 400) {
+    const msg = typeof res.data === 'object' && res.data !== null && 'message' in res.data
+      ? (res.data as { message?: string }).message
+      : res.statusText;
+    throw new Error(`${res.status} ${msg}`);
+  }
   unwrap<null>(res.data ?? null);
 }
 
+/** ✅ WATCH: ticketPick 미포함 응답도 안전하게 보정(1=ALL) */
 export async function apiWatchTransfer(
   userId?: number,
   includeCanceled?: boolean
 ): Promise<TransferWatchItem[]> {
-  const candidates = [
-    // 인박스형
-    '/transfer/watch',
-    '/transfer/requests/watch',
-    '/transfer/requests/inbox',
-    '/transfer/inbox',
-    // 히스토리/전체형(팀마다 네이밍 다름, 전부 시도)
-    '/transfer/history',
-    '/transfer/records',
-    '/transfer/watch/all',
-    '/transfer/requests/all',
-    '/transfer/list',
-  ];
+  // ✅ 오직 /transfer/watch 만 사용
+  const usp = new URLSearchParams();
 
-  // 공통 쿼리: recipient 기준이라고 가정
-  const uspBase = new URLSearchParams();
   if (typeof userId === 'number' && Number.isFinite(userId)) {
-    uspBase.set('userId', String(userId));       // 혹시 recipientId를 요구한다면 아래 줄도 켜보기
-    uspBase.set('recipientId', String(userId));  // ← 서버 구현 따라 한쪽만 보거나 둘 다 봄
+    usp.set('userId', String(userId));
+    usp.set('recipientId', String(userId)); // 서버가 둘 중 하나만 보더라도 대응
   }
 
-  // ❗ 완료/거절까지 포함하도록 최대한 많은 힌트 제공
   if (includeCanceled) {
-    uspBase.set('includeCanceled', '1');
-    uspBase.set('includeCancelled', '1');
-    uspBase.set('includeRejected', '1');
-    uspBase.set('includeCompleted', '1');
-    uspBase.set('all', '1');
-    uspBase.set('status', 'ALL');
-    uspBase.set('statuses', 'REQUESTED,APPROVED,COMPLETED,CANCELED');
+    usp.set('includeCanceled', '1');
+    usp.set('statuses', 'REQUESTED,APPROVED,COMPLETED,CANCELED');
   }
 
-  // 캐시버스터 (프록시/게이트웨이 캐시 무력화)
-  uspBase.set('_t', String(Date.now()));
+  // 캐시 버스터
+  usp.set('_t', String(Date.now()));
 
-  let lastErr: unknown = null;
+  const url = `${PATH.watch}?${usp.toString()}`;
 
-  for (const path of candidates) {
-    try {
-      const usp = new URLSearchParams(uspBase);
-      const url = `${path}${usp.toString() ? `?${usp.toString()}` : ''}`;
-      const res = await api.get<ApiEnvelope<TransferWatchItem[]> | TransferWatchItem[]>(url, {
-        validateStatus: () => true,
-      });
-      if (res.status === 404) continue;
-      if (res.status >= 400) { lastErr = new Error(`${res.status} ${(res.data as any)?.message ?? res.statusText}`); continue; }
-
-      const raw = unwrap<TransferWatchItem[]>(res.data) ?? [];
-      // 표준화(REQUESTED|APPROVED|COMPLETED|CANCELED)
-      const normalized = raw.filter(Boolean).map((it) => ({
-        ...it,
-        status: normalizeBEStatus((it as any).status),
-      }));
-      
-      console.log('[apiWatchTransfer] path:', path, 
-            '\nraw:', raw, 
-            '\nnormalized:', normalized);
-
-      if (normalized.length) return normalized; // 첫 성공 경로 반환
-    } catch (e) {
-      lastErr = e;
-      continue;
-    }
+  const res = await api.get<ApiEnvelope<any> | any>(url, { validateStatus: () => true });
+  if (res.status >= 400) {
+    const msg = (res.data && (res.data.message || res.data.errorMessage)) || res.statusText;
+    throw new Error(`${res.status} ${msg}`);
   }
 
-  // 마지막 에러 터뜨려서 침묵 실패 방지
-  if (lastErr) throw (lastErr instanceof Error ? lastErr : new Error(String(lastErr)));
-  return [];
+  // Envelope/Raw 모두 대응
+  const body = res.data as any;
+  const rawArr: any[] = Array.isArray(body)
+    ? body
+    : (body && typeof body === 'object' && Array.isArray(body.data))
+      ? body.data
+      : [];
+
+  // 정상화 (ticketPick 확실히 집어옴)
+  const list: TransferWatchItem[] = rawArr.filter(Boolean).map((r: any) => {
+    // status 표준화 (이 파일에 있는 normalizeBEStatus 사용)
+    const beStatus: TransferStatusBEString = normalizeBEStatus(r?.status);
+
+    // type 표준화
+    const tUpper = String(r?.transferType ?? r?.type ?? '').trim().toUpperCase();
+    const typeStd: TransferType | string = tUpper === 'FAMILY' ? 'FAMILY' : 'OTHERS';
+
+    // ✅ ticketPick: BE가 주는 camel/snake 둘 다 대응, 누락이면 1(ALL)
+    const rawPick = r?.ticketPick ?? r?.ticket_pick;
+    const pick: TicketPick = Number(rawPick) === 2 ? 2 : 1;
+    const derived = deliveryConstraintFromPick(pick);
+
+    const item: TransferWatchItem = {
+      transferId: Number(r?.transferId),
+      senderId: Number(r?.senderId),
+      senderName: String(r?.senderName ?? ''),
+      type: typeStd,
+      createdAt: String(r?.createdAt ?? ''),
+      status: beStatus,
+
+      fname: String(r?.fname ?? ''),
+      posterFile: String(r?.posterFile ?? ''),
+      fcltynm: String(r?.fcltynm ?? ''),
+      ticketPrice: Number(r?.ticketPrice ?? 0),
+
+      performanceDate: String(r?.performanceDate ?? ''),
+      reservationNumber: String(r?.reservationNumber ?? ''),
+      selectedTicketCount: Number(r?.selectedTicketCount ?? 0),
+
+      ticketPick: pick,                 // 1 | 2
+      deliveryConstraint: derived,      // 'ALL' | 'QR_ONLY'
+    };
+    return item;
+  });
+
+  return list;
 }
+
 
 /* ============== 공통 변환 ============== */
 type UpdateTicketRequestBE = {
   transferId: number;
   senderId: number;
-  transferStatus: TransferStatusBEString;        // 'REQUESTED' | 'APPROVED' | 'COMPLETED' | 'CANCELED'
+  transferStatus: TransferStatusBEString;
   deliveryMethod?: 'QR' | 'PAPER';
   address?: string;
 };
 
-// 프론트표기(ACCEPTED/REJECTED/PENDING) → 서버문자열(요청/승인/취소)
-// ⚠️ 비즈니스 흐름상 "수락 직후 = APPROVED", "최종 완료 = COMPLETED" 이면 아래 매핑 유지가 안전
+/** 프론트표기 → 서버문자열 매핑 (원래 비즈니스 흐름 유지) */
 function toBEBody(fr: UpdateTicketRequest): UpdateTicketRequestBE {
   const status = FRtoBEString(fr.transferStatus);
 
-  // ❌ 거절/PENDING이면 배송 관련 키 자체를 보내지 않음 (깨끗한 바디)
   if (fr.transferStatus !== 'ACCEPTED') {
     return {
       transferId: fr.transferId,
@@ -185,12 +207,11 @@ function toBEBody(fr: UpdateTicketRequest): UpdateTicketRequestBE {
     };
   }
 
-  // ✅ 수락(ACCEPTED)
   if (fr.deliveryMethod === 'PAPER') {
     return {
       transferId: fr.transferId,
       senderId: fr.senderId,
-      transferStatus: status, // 보통 APPROVED
+      transferStatus: status, // 보통 APPROVED/COMPLETED 중 정책대로
       deliveryMethod: 'PAPER',
       address: fr.address ?? '',
     };
@@ -198,7 +219,7 @@ function toBEBody(fr: UpdateTicketRequest): UpdateTicketRequestBE {
   return {
     transferId: fr.transferId,
     senderId: fr.senderId,
-    transferStatus: status,   // 보통 APPROVED
+    transferStatus: status,
     deliveryMethod: 'QR',
   };
 }
@@ -213,8 +234,11 @@ export async function apiRespondFamily(body: UpdateTicketRequest): Promise<void>
   );
 
   if (res.status >= 400) {
+    const err = res.data as ApiErr | undefined;
+    const msg = err?.message ?? err?.errorMessage ?? res.statusText;
+    // eslint-disable-next-line no-console
     console.error('[apiRespondFamily] 4xx/5xx', res.status, res.data, { url: PATH.acceptanceFamily, sent: mapped });
-    throw new Error(`${res.status} ${(res.data as any)?.message ?? (res.data as any)?.errorMessage ?? res.statusText}`);
+    throw new Error(`${res.status} ${msg}`);
   }
 }
 
@@ -228,10 +252,14 @@ export async function apiRespondOthers(body: UpdateTicketRequest): Promise<Trans
   );
 
   if (res.status >= 400) {
+    const err = res.data as ApiErr | undefined;
+    const msg = err?.message ?? err?.errorMessage ?? res.statusText;
+    // eslint-disable-next-line no-console
     console.error('[apiRespondOthers] 4xx/5xx', res.status, res.data, { url: PATH.acceptanceOthers, sent: mapped });
-    throw new Error(`${res.status} ${(res.data as any)?.message ?? (res.data as any)?.errorMessage ?? res.statusText}`);
+    throw new Error(`${res.status} ${msg}`);
   }
 
-  const data = (res.data && ((res.data as any).data ?? res.data)) as TransferOthersResponse;
+  const env = res.data as ApiEnvelope<TransferOthersResponse>;
+  const data = isApiOk(env) ? env.data : (res.data as TransferOthersResponse);
   return data;
 }

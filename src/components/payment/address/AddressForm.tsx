@@ -1,16 +1,22 @@
-import { useEffect, useState, useCallback } from 'react'
+// src/components/payment/address/AddressForm.tsx
+import React, { useEffect, useState, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-
 import AddressSearchModal from '@/components/auth/signup/AddressSearchModal'
 import DeliveryManageModal from '@/components/payment/modal/DeliveryManageModal'
-
 import styles from './AddressForm.module.css'
 
 interface AddressFormProps {
-  // 폼 유효 여부(주소 입력 여부) 상위로 전달
   onValidChange?: (isValid: boolean) => void
+}
+
+/** ✅ 상위에서 호출할 수 있는 메서드 타입 */
+export type AddressFormHandle = {
+  /** 한 줄 주소: "[우편번호] 기본주소, 상세주소" (빈 값은 생략) */
+  getAddress: () => string
+  /** 주소 유효성 */
+  isValid: () => boolean
 }
 
 const schema = z.object({
@@ -24,8 +30,8 @@ const schema = z.object({
 })
 
 type AddressFormInputs = z.infer<typeof schema>
+type PhonePrefix = NonNullable<AddressFormInputs['phonePrefix']>
 
-// ✅ 배송지 관리 모달에서 전달 받을 페이로드 타입
 type SelectedAddressPayload = {
   name?: string
   phone?: string
@@ -35,25 +41,15 @@ type SelectedAddressPayload = {
   id?: number
 }
 
-function parseAddressString(raw: string): {
-  base: string
-  detail?: string
-  zip?: string
-} {
+function parseAddressString(raw: string): { base: string; detail?: string; zip?: string } {
   if (!raw) return { base: '' }
-
   let rest = raw.trim()
   let zip: string | undefined
-
-  // "[06035]" 형태 우편번호 제거/추출
   const zipMatch = rest.match(/^\s*\[(\d{5})\]\s*/)
   if (zipMatch) {
     zip = zipMatch[1]
     rest = rest.replace(/^\s*\[\d{5}\]\s*/, '')
   }
-
-  // 쉼표 기준으로 기본주소/상세주소 분리
-  // 예) "서울 강남구 가로수길 9, 111/111"
   let base = rest
   let detail: string | undefined
   const commaIdx = rest.indexOf(',')
@@ -61,227 +57,213 @@ function parseAddressString(raw: string): {
     base = rest.slice(0, commaIdx).trim()
     detail = rest.slice(commaIdx + 1).trim()
   }
-
   return { base, detail, zip }
 }
 
-// ✅ phonePrefix의 정확한 타입 별칭 (any 제거)
-type PhonePrefix = NonNullable<AddressFormInputs['phonePrefix']>
+const AddressForm = forwardRef<AddressFormHandle, AddressFormProps>(
+  ({ onValidChange }, ref) => {
+    const {
+      register,
+      setValue,
+      watch,
+      formState: { errors, isValid },
+    } = useForm<AddressFormInputs>({
+      resolver: zodResolver(schema),
+      mode: 'onChange',
+      defaultValues: {
+        name: '',
+        phonePrefix: '010',
+        phonePart1: '',
+        phonePart2: '',
+        address: '',
+        zipCode: '',
+        addressDetail: '',
+      },
+    })
 
-const AddressForm: React.FC<AddressFormProps> = ({ onValidChange }) => {
-  // ✅ RHF 초기화
-  const {
-    register,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<AddressFormInputs>({
-    resolver: zodResolver(schema),
-    mode: 'onChange', // 입력 즉시 검증
-    defaultValues: {
-      name: '',
-      phonePrefix: '010',
-      phonePart1: '',
-      phonePart2: '',
-      address: '',
-      zipCode: '',
-    },
-  })
-
-  const handleNumberInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // 입력된 값에서 숫자만 추출
-    const value = e.target.value.replace(/[^0-9]/g, '')
-    e.target.value = value
-  }
-
-  const handleNumberKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // 숫자가 아닌 경우 입력 차단
-    if (!/[0-9]/.test(e.key) &&
-      !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
-      e.preventDefault()
+    const handleNumberInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, '')
     }
-  }
-
-  // ✅ 모달 상태 - 이름을 명확히 분리해서 혼선 방지
-  const [isManageOpen, setIsManageOpen] = useState(false) // 배송지 관리 모달
-  const [isSearchOpen, setIsSearchOpen] = useState(false) // 다음 주소 검색 모달
-
-  // ✅ RHF 값 구독
-  const watchAll = watch()
-
-  // ✅ 주소 입력 여부를 상위로 알림 (필요 없으면 onValidChange 전달 안 해도 됨)
-  useEffect(() => {
-    const isValid = !!watchAll.address?.trim()
-    onValidChange?.(isValid)
-  }, [watchAll, onValidChange])
-
-  const splitKoreanPhone = useCallback((raw?: string): {
-    prefix?: PhonePrefix
-    part1?: string
-    part2?: string
-  } => {
-    if (!raw) return {}
-    const digits = raw.replace(/\D/g, '') // 숫자만 추출
-    if (digits.length < 9) return {}
-
-    const pfx = digits.slice(0, 3) as PhonePrefix
-    if (digits.length === 11) {
-      // 예: 010-1234-5678
-      return { prefix: pfx, part1: digits.slice(3, 7), part2: digits.slice(7, 11) }
+    const handleNumberKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!/[0-9]/.test(e.key) &&
+        !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+        e.preventDefault()
+      }
     }
-    if (digits.length === 10) {
-      // 예: 011-123-4567
-      return { prefix: pfx, part1: digits.slice(3, 6), part2: digits.slice(6, 10) }
-    }
-    // 길이가 애매하면 best-effort로 3-4-나머지
-    return { prefix: pfx, part1: digits.slice(3, 7), part2: digits.slice(7) }
-  }, [])
 
-  const handleAddressCompleteFromDaum = useCallback(
-    (data: { zipCode: string; address: string; addressDetail?: string }) => {
-      // 다음(카카오)에서 기본/상세를 나눠줄 수도 있으니 우선 반영하고, 없으면 파서로 보완
-      const { base, detail, zip } = parseAddressString(data.address)
+    const [isManageOpen, setIsManageOpen] = useState(false)
+    const [isSearchOpen, setIsSearchOpen] = useState(false)
 
-      setValue('address', base || data.address || '', { shouldValidate: true })
-      setValue('zipCode', data.zipCode || zip || '', { shouldValidate: true })
-      if (data.addressDetail || detail) {
-        setValue('addressDetail', data.addressDetail || detail || '', { shouldValidate: false })
-      }
+    const all = watch()
 
-      setIsSearchOpen(false)
-    },
-    [setValue]
-  )
+    useEffect(() => {
+      onValidChange?.(!!all.address?.trim())
+    }, [all.address, onValidChange])
 
-  const handleAddressSelectFromManage = useCallback(
-    (addr: SelectedAddressPayload) => {
-      // 모달이 한 줄 주소만 주는 경우를 위해 파서 적용
-      const { base, detail, zip } = parseAddressString(addr.address)
+    const splitKoreanPhone = useCallback((raw?: string): {
+      prefix?: PhonePrefix; part1?: string; part2?: string
+    } => {
+      if (!raw) return {}
+      const digits = raw.replace(/\D/g, '')
+      if (digits.length < 9) return {}
+      const pfx = digits.slice(0, 3) as PhonePrefix
+      if (digits.length === 11) return { prefix: pfx, part1: digits.slice(3, 7), part2: digits.slice(7, 11) }
+      if (digits.length === 10) return { prefix: pfx, part1: digits.slice(3, 6), part2: digits.slice(6, 10) }
+      return { prefix: pfx, part1: digits.slice(3, 7), part2: digits.slice(7) }
+    }, [])
 
-      setValue('address', base, { shouldValidate: true })
-      setValue('zipCode', addr.zipCode || zip || '', { shouldValidate: true })
-      if (addr.addressDetail || detail) {
-        setValue('addressDetail', addr.addressDetail || detail || '', { shouldValidate: false })
-      }
+    const handleAddressCompleteFromDaum = useCallback(
+      (data: { zipCode: string; address: string; addressDetail?: string }) => {
+        const { base, detail, zip } = parseAddressString(data.address)
+        setValue('address', base || data.address || '', { shouldValidate: true })
+        setValue('zipCode', data.zipCode || zip || '', { shouldValidate: true })
+        if (data.addressDetail || detail) {
+          setValue('addressDetail', data.addressDetail || detail || '', { shouldValidate: false })
+        }
+        setIsSearchOpen(false)
+      },
+      [setValue]
+    )
 
-      // 수령인/연락처 동시 반영 로직은 그대로 유지
-      if (addr.name) setValue('name', addr.name, { shouldValidate: false })
-      if (addr.phone) {
-        const { prefix, part1, part2 } = splitKoreanPhone(addr.phone)
-        if (prefix) setValue('phonePrefix', prefix, { shouldValidate: false })
-        if (part1 !== undefined) setValue('phonePart1', part1, { shouldValidate: false })
-        if (part2 !== undefined) setValue('phonePart2', part2, { shouldValidate: false })
-      }
+    const handleAddressSelectFromManage = useCallback(
+      (addr: SelectedAddressPayload) => {
+        const { base, detail, zip } = parseAddressString(addr.address)
+        setValue('address', base, { shouldValidate: true })
+        setValue('zipCode', addr.zipCode || zip || '', { shouldValidate: true })
+        if (addr.addressDetail || detail) {
+          setValue('addressDetail', addr.addressDetail || detail || '', { shouldValidate: false })
+        }
+        if (addr.name) setValue('name', addr.name, { shouldValidate: false })
+        if (addr.phone) {
+          const { prefix, part1, part2 } = splitKoreanPhone(addr.phone)
+          if (prefix) setValue('phonePrefix', prefix, { shouldValidate: false })
+          if (part1 !== undefined) setValue('phonePart1', part1, { shouldValidate: false })
+          if (part2 !== undefined) setValue('phonePart2', part2, { shouldValidate: false })
+        }
+        setIsManageOpen(false)
+      },
+      [setValue, splitKoreanPhone]
+    )
 
-      setIsManageOpen(false)
-    },
-    [setValue, splitKoreanPhone]
-  )
+    /** ✅ 한 줄 주소 합성 */
+    const composedAddress = useMemo(() => {
+      const a = (all.address ?? '').trim()
+      const z = (all.zipCode ?? '').trim()
+      const d = (all.addressDetail ?? '').trim()
+      const parts: string[] = []
+      if (z) parts.push(`[${z}]`)
+      if (a) parts.push(a)
+      const base = parts.join(' ').trim()
+      return d ? `${base}, ${d}` : base
+    }, [all.address, all.zipCode, all.addressDetail])
 
-  return (
-    <form className={styles['address-container']}>
-      <div className={styles['address-header']}>
-        <div className={styles['header-left']}>
-          <span className={styles['header-title']}>배송지 선택</span>
+    /** ✅ 상위에서 ref로 현재 상태를 요청할 수 있게 노출 */
+    useImperativeHandle(ref, () => ({
+      getAddress: () => composedAddress.trim(),
+      isValid: () => !!all.address?.trim(),
+    }), [composedAddress, all.address])
+
+    return (
+      <form className={styles['address-container']}>
+        <div className={styles['address-header']}>
+          <div className={styles['header-left']}>
+            <span className={styles['header-title']}>배송지 선택</span>
+          </div>
+          <button
+            type="button"
+            className={`${styles['btn']} ${styles['btn-outline']}`}
+            onClick={() => setIsManageOpen(true)}
+          >
+            배송지 관리
+          </button>
+
+          {isManageOpen && (
+            <div className={styles['modal-overlay']}>
+              <div className={styles['modal-content']}>
+                <DeliveryManageModal
+                  onClose={() => setIsManageOpen(false)}
+                  onSelectAddress={handleAddressSelectFromManage}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
-        <button
-          type="button"
-          className={`${styles['btn']} ${styles['btn-outline']}`}
-          onClick={() => setIsManageOpen(true)}
-        >
-          배송지 관리
-        </button>
+        <div className={styles['form-grid']}>
+          {/* 좌측: 받는 사람/연락처 */}
+          <div className={styles['form-left']}>
+            <label>받는 사람</label>
+            <input type="text" {...register('name')} placeholder='홍길동' />
+            {errors.name && <p className={styles['error']}>{errors.name.message}</p>}
 
-        {isManageOpen && (
-          <div className={styles['modal-overlay']}>
-            <div className={styles['modal-content']}>
-              <DeliveryManageModal
-                onClose={() => setIsManageOpen(false)}
-                onSelectAddress={handleAddressSelectFromManage}
+            <label>연락처</label>
+            <div className={styles['phone-inputs']}>
+              <select {...register('phonePrefix')}>
+                <option value="010">010</option>
+                <option value="011">011</option>
+                <option value="016">016</option>
+                <option value="017">017</option>
+                <option value="018">018</option>
+                <option value="019">019</option>
+              </select>
+              <input type="text" maxLength={4}
+                {...register('phonePart1')}
+                onInput={handleNumberInput}
+                onKeyDown={handleNumberKeyPress}
+                placeholder="1234"
+              />
+              <input type="text" maxLength={4}
+                onInput={handleNumberInput}
+                onKeyDown={handleNumberKeyPress}
+                {...register('phonePart2')}
+                placeholder="5678"
               />
             </div>
           </div>
-        )}
-      </div>
 
-      <div className={styles['form-grid']}>
-        {/* 좌측: 받는 사람/연락처 */}
-        <div className={styles['form-left']}>
-          <label>받는 사람</label>
-          <input type="text" {...register('name')} placeholder='홍길동' />
-          {errors.name && <p className={styles['error']}>{errors.name.message}</p>}
+          {/* 우측: 주소 */}
+          <div className={styles['form-right']}>
+            <label>주소 *</label>
+            <div className={styles['address-row']}>
+              <input
+                type="text"
+                placeholder="주소를 선택하거나 입력해 주세요"
+                {...register('address')}
+              />
+              <button
+                type="button"
+                className={`${styles['btn']} ${styles['btn-secondary']}`}
+                onClick={() => setIsSearchOpen(true)}
+              >
+                주소 검색
+              </button>
+            </div>
+            {errors.address && <p className={styles['error']}>{errors.address.message}</p>}
 
-          <label>연락처</label>
-          <div className={styles['phone-inputs']}>
-            <select {...register('phonePrefix')}>
-              <option value="010">010</option>
-              <option value="011">011</option>
-              <option value="016">016</option>
-              <option value="017">017</option>
-              <option value="018">018</option>
-              <option value="019">019</option>
-            </select>
-            <input type="text" maxLength={4}
-              {...register('phonePart1')}
-              onInput={handleNumberInput}
-              onKeyDown={handleNumberKeyPress}
-              placeholder="1234"
-            />
-            <input type="text" maxLength={4}
-              onInput={handleNumberInput}
-              onKeyDown={handleNumberKeyPress}
-              {...register('phonePart2')}
-              placeholder="5678"
-            />
-          </div>
-        </div>
-
-        {/* 우측: 주소 + 주소 검색 버튼 */}
-        <div className={styles['form-right']}>
-          <label>주소 *</label>
-          <div className={styles['address-row']}>
             <input
               type="text"
-              placeholder="주소를 선택하거나 입력해 주세요"
-              {...register('address')}
+              placeholder="우편번호"
+              {...register('zipCode')}
+              onInput={handleNumberInput}
+              onKeyDown={handleNumberKeyPress}
             />
-            {/* ✅ 다음 주소 검색 모달 열기 멍 */}
-            <button
-              type="button"
-              className={`${styles['btn']} ${styles['btn-secondary']}`}
-              onClick={() => setIsSearchOpen(true)}
-            >
-              주소 검색
-            </button>
+            <input
+              type="text"
+              placeholder="상세 주소 (동/호수 등)"
+              {...register('addressDetail')}
+            />
           </div>
-          {errors.address && <p className={styles['error']}>{errors.address.message}</p>}
-
-          {/* 우편번호 */}
-          <input type="text"
-            placeholder="우편번호"
-            {...register('zipCode')}
-            onInput={handleNumberInput}
-            onKeyDown={handleNumberKeyPress}
-          />
-
-          <input
-            type="text"
-            placeholder="상세 주소 (동/호수 등)"
-            {...register('addressDetail')}
-          />
         </div>
-      </div>
 
-      {/* ✅ 다음 주소 검색 모달 */}
-      {isSearchOpen && (
-        <AddressSearchModal
-          onComplete={handleAddressCompleteFromDaum}
-          onClose={() => setIsSearchOpen(false)}
-        />
-      )}
-    </form>
-  )
-}
+        {isSearchOpen && (
+          <AddressSearchModal
+            onComplete={handleAddressCompleteFromDaum}
+            onClose={() => setIsSearchOpen(false)}
+          />
+        )}
+      </form>
+    )
+  }
+)
 
 export default AddressForm

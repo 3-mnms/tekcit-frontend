@@ -94,7 +94,12 @@ type InboxItem = {
   ticketPrice: number
   performanceDate: string
   selectedTicketCount: number
+  ticketPick?: 1 | 2 // ✅ 백엔드에서 오는 값(1=둘 다, 2=QR만)
 }
+
+/** ✅ util: ticketPick(1|2) → allowedDelivery */
+const pickToAllowed = (p: unknown): ('QR' | 'PAPER')[] =>
+  Number(p) === 2 ? ['QR'] : ['QR', 'PAPER']
 
 const TransferTicketPage: React.FC = () => {
   const navigate = useNavigate()
@@ -138,15 +143,24 @@ const TransferTicketPage: React.FC = () => {
 
       if (decision === 'ACCEPTED') {
         setPendingId(transferId)
+
         const unitPrice = Number(item.ticketPrice) || 0
         const count = Number(item.selectedTicketCount) || 0
         const totalPrice = unitPrice * count
+
+        // ✅ 핵심: watch에서 받은 ticketPick(1|2)→ allowedDelivery 계산 후 함께 전달
+        const pick: 1 | 2 = Number(item.ticketPick) === 2 ? 2 : 1
+        const allowedDelivery = pickToAllowed(pick)
+        console.log('[toPayment] ticketPick:', pick, 'allowedDelivery:', allowedDelivery)
+
         navigate('/payment/transfer', {
           state: {
             transferId,
             senderId: item.senderId,
             transferStatus: 'ACCEPTED' as const,
-            relation: tType,
+            relation: tType, // 'FAMILY' | 'OTHERS'
+
+            // 🧾 결제/요약 카드에서 사용할 상품정보
             title: item.fname,
             datetime: item.performanceDate,
             location: item.fcltynm,
@@ -155,6 +169,10 @@ const TransferTicketPage: React.FC = () => {
             totalPrice,
             posterFile: item.posterFile,
             reservationNumber: item.reservationNumber,
+
+            // ✅ 추가 전달
+            ticketPick: pick,                 // 1=둘 다, 2=QR만
+            allowedDelivery,                  // ['QR','PAPER'] or ['QR']
           },
         })
         return

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '@/components/common/button/Button';
 import type { DeliveryMethod } from '@/components/booking/TicketDeliverySelectSection';
 import styles from './OrderConfirmSection.module.css';
-import Spinner from '@/components/common/spinner/Spinner'
+import Spinner from '@/components/common/spinner/Spinner';
 
 import {
   apiReserveTicket,
@@ -16,15 +16,25 @@ import {
 type Props = {
   unitPrice: number;
   quantity: number;
-  method?: DeliveryMethod;         // 'QR' | 'PAPER'
+  method?: DeliveryMethod;          // 'QR' | 'PAPER'
   festivalId?: string;
   posterUrl?: string;
   title?: string;
-  performanceDate?: string;        // YYYY-MM-DD
-  performanceTime?: string;        // HH:mm
+  performanceDate?: string;         // YYYY-MM-DD
+  performanceTime?: string;         // HH:mm
   bookerName?: string;
-  bookingId?: string;              // reservationId(=reservationNumber)
+
+  /** ✅ 기존 호환: bookingId | reservationNumber 둘 다 허용 */
+  bookingId?: string;               // reservationId(=reservationNumber)
+  reservationNumber?: string;       // alias
+
+  /** ✅ 지류 배송 주소 */
+  address?: string;
+
   className?: string;
+
+  /** ✅ 페이지에서 외부로 결제 흐름을 제어하려면 전달 (있으면 내부 API는 스킵) */
+  onPay?: () => void;
 };
 
 const toLocalDateTimeISO = (dateYmd?: string, timeHm?: string) => {
@@ -47,7 +57,10 @@ const OrderConfirmSection: React.FC<Props> = ({
   performanceTime,
   bookerName,
   bookingId,
+  reservationNumber,
+  address,              // ✅ 추가
   className = '',
+  onPay,                // ✅ 추가
 }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -58,13 +71,19 @@ const OrderConfirmSection: React.FC<Props> = ({
   }, [unitPrice, quantity]);
 
   const handlePayClick = async () => {
-    // bookingId 우선순위: props.bookingId > sessionStorage['reservationId']
+    // ✅ 외부 핸들러가 오면 내부 로직은 건너뜀
+    if (onPay) {
+      onPay();
+      return;
+    }
+
+    // bookingId 우선순위: props.bookingId > props.reservationNumber > sessionStorage['reservationId']
     const ssResNo =
       (typeof window !== 'undefined' && sessionStorage.getItem(RESNO_KEY)) || undefined;
-    const finalBookingId = bookingId ?? ssResNo;
+    const finalBookingId = bookingId ?? reservationNumber ?? ssResNo;
 
     if (!finalBookingId) {
-      console.warn('[결제하기] bookingId 비어있음: props=', bookingId, 'session=', ssResNo);
+      console.warn('[결제하기] bookingId 비어있음:', { bookingId, reservationNumber, ssResNo });
       alert('결제 식별자(bookingId)를 찾을 수 없어요. 뒤로 가서 다시 시도해 주세요.');
       return;
     }
@@ -90,9 +109,9 @@ const OrderConfirmSection: React.FC<Props> = ({
       quantity,
       bookerName,
       deliveryMethod: method ?? 'QR',
+      address: method === 'PAPER' ? (address ?? '') : undefined, // ✅ 주소 포함
     };
 
-    // ✅ navigate 전에 반드시 보이는 로그 + 세션 백업
     try {
       sessionStorage.setItem(`payment:${finalBookingId}`, JSON.stringify(payload));
       sessionStorage.setItem(RESNO_KEY, finalBookingId);
@@ -103,17 +122,18 @@ const OrderConfirmSection: React.FC<Props> = ({
     setLoading(true);
 
     try {
-      // 1) 수령방법/주소 먼저 설정 (서버가 예약번호로 매수 등 조회한다고 가정)
+      // 1) 수령방법/주소 먼저 설정
       const delivery = mapUiDeliveryToBE((method ?? 'QR') as 'QR' | 'PAPER'); // 'QR' -> 'MOBILE'
       console.time('[selectDelivery]');
       await apiSelectDelivery({
         festivalId: festivalId!,
         reservationNumber: String(finalBookingId),
-        deliveryMethod: delivery,   // 'MOBILE' | 'PAPER'
+        deliveryMethod: delivery,                         // 'MOBILE' | 'PAPER'
+        ...(delivery === 'PAPER' && address ? { address } : {}), // ✅ 지류면 주소 전달
       });
       console.timeEnd('[selectDelivery]');
 
-      // 2) 그 다음 QR 발권 (/booking/qr : 3필드만)
+      // 2) QR 발권 (서버가 PAPER여도 동일 엔드포인트 사용한다고 가정)
       const req: IssueQrRequest = {
         festivalId: festivalId!,
         reservationNumber: String(finalBookingId),
@@ -124,9 +144,10 @@ const OrderConfirmSection: React.FC<Props> = ({
       console.timeEnd('[reserveTicket]');
 
       navigate('/payment', { state: payload });
-    } catch (e: any) {
-      console.error('[발권 실패] /booking/selectDeliveryMethod 또는 /booking/qr', e?.response?.data || e);
-      alert(e?.response?.data?.errorMessage || e?.response?.data?.message || '발권에 실패했어요. 잠시 후 다시 시도해 주세요.');
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { errorMessage?: string; message?: string } } };
+      console.error('[발권 실패] /booking/selectDeliveryMethod 또는 /booking/qr', err?.response?.data || e);
+      alert(err?.response?.data?.errorMessage || err?.response?.data?.message || '발권에 실패했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
       setLoading(false);
     }
@@ -147,7 +168,9 @@ const OrderConfirmSection: React.FC<Props> = ({
           <span className={styles.total}>{fmt(total)}</span>
         </div>
       </div>
-      {loading && <Spinner />} 
+
+      {loading && <Spinner />}
+
       <Button
         type="button"
         onClick={handlePayClick}

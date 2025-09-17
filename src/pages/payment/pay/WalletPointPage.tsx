@@ -111,18 +111,72 @@ export default function WalletPointPage() {
     return list.filter((it: any) => toYM(it.payTime ?? it.time) === month) // 주석: 월 필터링 멍
   }, [historyPage, month])
 
+  // WalletPointPage.tsx의 수정된 타입 매핑 로직
+
   const viewItems: WalletHistoryViewItem[] = useMemo(() => {
     return filteredItems.map((row: any, idx: number) => {
       const rawMethod = String(row.payMethod ?? row.method ?? '').toUpperCase()
-      const type: 'charge' | 'refund' | 'use' =
-        rawMethod.includes('CHARGE') ? 'charge'
-          : rawMethod.includes('REFUND') ? 'refund'
-            : 'use'
+      const transactionType = String(row.transactionType ?? '').toUpperCase()
+      const paymentStatus = String(row.paymentStatus ?? '').toUpperCase()
+      const buyerId = row.buyerId
+
+      const type: 'charge' | 'refund' | 'use' | 'transfer_in' | 'transfer_out' | 'unknown' = (() => {
+
+        // 0. 환불 상태 우선 체크 - paymentStatus가 CANCELLED이면 환불
+        if (paymentStatus.includes('CANCELLED') || paymentStatus.includes('CANCEL')) {
+          return 'refund'
+        }
+
+        // 1. 포인트 충전 - POINT_CHARGE 관련
+        if (rawMethod.includes('POINT_CHARGE') || rawMethod.includes('CHARGE')) {
+          return 'charge'
+        }
+
+        // 2. 양도 관련 - TRANSFER_PAID는 명확함
+        if (rawMethod.includes('TRANSFER')) {
+          if (transactionType === 'CREDIT') {
+            return 'transfer_in'   // 양도받음 (포인트 증가)
+          } else if (transactionType === 'DEBIT') {
+            return 'transfer_out'  // 양도함 (포인트 차감)
+          }
+          return 'unknown'
+        }
+
+        // 3. ⭐ POINT_PAYMENT 케이스 - buyerId 유무로 양도 여부 구분
+        if (rawMethod.includes('POINT_PAYMENT')) {
+          if (buyerId === null) {
+            if (transactionType === 'DEBIT') {
+              return 'transfer_in'   // 대금수취 (포인트 증가)
+            } else if (transactionType === 'CREDIT') {
+              return 'use'           // 사용 (포인트 차감)
+            }
+          }
+
+          // buyerId가 있으면 일반 구매/사용
+          return 'use'
+        }
+
+        // 4. 환불 관련 (payMethod 기반)
+        if (rawMethod.includes('REFUND') || rawMethod.includes('CANCEL')) {
+          return 'refund'
+        }
+
+        // 5. 기타 DEBIT은 사용으로
+        if (transactionType === 'DEBIT') {
+          return 'use'
+        }
+
+        // 6. 나머지는 unknown
+        return 'unknown'
+      })()
+
       return {
         id: String(row.paymentId ?? row.id ?? `tx-${page}-${idx}`),
         createdAt: String(row.payTime ?? row.time ?? new Date().toISOString()),
         type,
         amount: Math.abs(Number(row.amount ?? 0)),
+        transactionType: transactionType as 'CREDIT' | 'DEBIT' | 'UNKNOWN',
+        paymentStatus: String(row.paymentStatus ?? ''),
       }
     })
   }, [filteredItems, page])

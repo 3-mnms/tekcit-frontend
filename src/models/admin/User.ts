@@ -12,10 +12,9 @@ export interface Address {
     zipCode: string;
     default: boolean;
 }
-
 export interface BaseUser {
     userId: number; 
-    loginId: string;
+    loginId: string | null;
     loginPw?: string;
     name: string;
     phone: string;
