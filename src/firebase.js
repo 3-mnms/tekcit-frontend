@@ -12,9 +12,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
 
-// 토큰 요청
+export const messaging = getMessaging(app);
+
 export const requestForToken = async () => {
   try {
     const currentToken = await getToken(messaging, {
@@ -31,7 +31,6 @@ export const requestForToken = async () => {
   }
 };
 
-// 포그라운드 메시지 리스너
 export const onMessageListener = () =>
   new Promise((resolve, reject) => {
     try {
