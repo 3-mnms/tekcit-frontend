@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import styles from './TicketOrderInfoPage.module.css'
 
@@ -6,7 +6,7 @@ import TicketInfoSection from '@/components/booking/TicketInfoSection'
 import TicketDeliverySelectSection, {
   type DeliveryMethod,
 } from '@/components/booking/TicketDeliverySelectSection'
-import AddressForm from '@/components/payment/address/AddressForm'
+import AddressForm, { type AddressFormHandle } from '@/components/payment/address/AddressForm'
 import TicketBookerInfoSection from '@/components/booking/TicketBookerInfoSection'
 import OrderConfirmSection from '@/components/booking/OrderConfirmSection'
 
@@ -40,6 +40,7 @@ const TicketOrderInfoPage: React.FC = () => {
   const [method, setMethod] = useState<DeliveryMethod>('QR')
   const [address, setAddress] = useState<string>('') // PAPER 저장용
   const isPaper = method === 'PAPER'
+  const addrRef = useRef<AddressFormHandle | null>(null)
 
   const STORE_KEY = import.meta.env.VITE_PORTONE_STORE_KEY
   const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY
@@ -161,13 +162,30 @@ const TicketOrderInfoPage: React.FC = () => {
 
   // 결제 이동
   const handlePay = () => {
-    // 안전장치: QR만 가능한데 PAPER 선택되면 차단
+    // QR만 가능한데 PAPER면 차단
     if (availabilityCode === 2 && method === 'PAPER') {
       alert('이 공연은 QR 수령만 가능합니다.')
       return
     }
 
+    // ✅ 결제하기 시점에 주소를 “그때” 가져옴
+    const latestAddress = isPaper ? (addrRef.current?.getAddress() ?? '') : undefined
+    if (isPaper && !latestAddress) {
+      alert('지류 티켓은 배송지를 입력해 주세요.')
+      return
+    }
+
     const bookingId = reservationNumber
+
+    // ✅ PAPER면 여기서 저장(선택사항: 이미 QR 선택 때는 저장 훅이 동작)
+    if (isPaper && reservationNumber) {
+      saveDelivery({
+        festivalId: fid,
+        reservationNumber,
+        deliveryMethod: 'PAPER',
+        address: latestAddress!,
+      })
+    }
 
     const payload = {
       bookingId,
@@ -178,8 +196,8 @@ const TicketOrderInfoPage: React.FC = () => {
       unitPrice: display.unitPrice,
       quantity: display.quantity,
       bookerName: user?.name ?? '',
-      deliveryMethod: method, // 'QR' | 'PAPER' (API 유지)
-      address: method === 'PAPER' ? address : undefined,
+      deliveryMethod: method, // 'QR' | 'PAPER'
+      address: latestAddress,  // ✅ 클릭 시점의 최신 주소
       STORE_KEY,
       CHANNEL_KEY,
     }
@@ -191,9 +209,7 @@ const TicketOrderInfoPage: React.FC = () => {
         sessionStorage.setItem('payment:latest', JSON.stringify(payload))
       }
       sessionStorage.setItem(RESNO_KEY, bookingId ?? '')
-    } catch {
-      /* */
-    }
+    } catch { /* ignore */ }
 
     navigate('/payment', { state: payload })
   }
@@ -226,15 +242,15 @@ const TicketOrderInfoPage: React.FC = () => {
             onChange={handleMethodChange} // ✅ API 트리거
             loading={isSaving} // ✅ 저장 중 비활성
             availabilityCode={availabilityCode} // ✅ ticketPick 반영 (1=둘 다, 2=QR만)
-            // hideUnavailable // ← 필요 시 주석 해제: 미지원 옵션 자체를 숨김
+          // hideUnavailable // ← 필요 시 주석 해제: 미지원 옵션 자체를 숨김
           />
         </div>
 
         {/* 주소 입력 (PAPER일 때만) */}
         {isPaper && (
           <section className={`${styles.noScroll} ${styles.boxCard} ${styles.addressCard}`}>
-            {/* AddressForm이 onSubmit(address: string)을 받는다고 가정 */}
-            <AddressForm onSubmit={handleAddressSubmit} />
+            {/* ✅ ref로 현재 주소를 “요청 시점”에 가져온다 */}
+            <AddressForm ref={addrRef} />
           </section>
         )}
       </div>
@@ -242,7 +258,6 @@ const TicketOrderInfoPage: React.FC = () => {
       {/* 오른쪽: 예매자 + 총 가격/결제 버튼 */}
       <div className={styles.rightCol}>
         <TicketBookerInfoSection className={styles.noScroll} />
-
         <OrderConfirmSection
           unitPrice={display.unitPrice}
           quantity={display.quantity}
@@ -254,6 +269,10 @@ const TicketOrderInfoPage: React.FC = () => {
           performanceTime={display.time}
           reservationNumber={reservationNumber!}
           bookerName={user?.name ?? ''}
+
+          // ✅ 더 이상 상시 address 전달 불필요 (원하면 유지 가능)
+          // address는 handlePay 내부에서 최신값을 읽어서 payload에 넣음
+
           onPay={handlePay}
         />
       </div>
