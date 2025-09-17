@@ -83,8 +83,6 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
   const isCanceled = status === 'canceled' || status === 'cancelled' // 혹시 서버 철자 변형 여지 대비
   const isPaid = status === 'paid'
   const canRefund = Boolean(order?.paymentId) && isPaid
-  console.log(status)
-
   const goRefund = () => {
     if (!canRefund || !order?.paymentId) return
 

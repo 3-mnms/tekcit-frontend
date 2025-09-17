@@ -9,7 +9,7 @@ export function mapToSignupDto(acc: SignupFinal) {
     email: acc.email,
     userProfile: {
       residentNum: `${acc.rrnFront}-${acc.rrnBackFirst}`,
-      address: `${acc.address ?? ''} ${acc.detailAddress ?? ''}`.trim(),
+      address: `${acc.address ?? ''}`.trim(),
       zipCode: acc.zipCode ?? '',
     },
   }
