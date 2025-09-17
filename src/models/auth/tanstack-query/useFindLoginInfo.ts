@@ -11,6 +11,7 @@ export function useFindLoginIdMutation() {
 export function useFindRegisteredEmailMutation() {
   return useMutation({
     mutationFn: (dto: FindPwEmailDTO) => postFindRegisteredEmail(dto),
+    retry: 1,
   });
 }
 
