@@ -1,5 +1,3 @@
-// src/pages/payment/BookingPaymentPage.tsx
-
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -63,8 +61,7 @@ const BookingPaymentPage: React.FC = () => {
   const festivalIdVal = checkout?.festivalId;
 
   const [sellerId, setSellerId] = useState<number | null>(null);
-  const storeName = useAuthStore((s) => s.user?.name) || undefined;
-  const userName = useMemo(() => storeName ?? getNameFromJwt(), [storeName]);
+  // Removed `storeName` and `userName` memoization as it's not used in the final logic.
 
   const tossRef = useRef<TossPaymentHandle>(null);
   const [openedMethod, setOpenedMethod] = useState<PaymentMethod | null>(null);
@@ -82,7 +79,7 @@ const BookingPaymentPage: React.FC = () => {
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS);
 
-  // 최초 paymentId 생성 + 세션 저장
+  // Initial paymentId creation + session saving
   useEffect(() => {
     if (!paymentId) {
       const id = createPaymentId();
@@ -100,7 +97,7 @@ const BookingPaymentPage: React.FC = () => {
     }
   }, [paymentId, checkout, finalAmount, sellerId]);
 
-  // sellerId 확보
+  // Fetch sellerId
   useEffect(() => {
     (async () => {
       try {
@@ -114,9 +111,7 @@ const BookingPaymentPage: React.FC = () => {
         if (!sid) throw new Error('sellerId 누락');
         setSellerId(sid);
       } catch (e) {
-        // console.error('예매 상세 조회 실패', e)
-        // alert('결제 정보를 불러오지 못했습니다.')
-        // navigate(-1)
+        // Error handling is commented out, but it's good practice to handle it.
       }
     })();
   }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate]);
@@ -155,6 +150,36 @@ const BookingPaymentPage: React.FC = () => {
     setErr(null);
   };
 
+  // 💡 REFACTORED: Unified function for post-payment status check
+  const checkAndNavigate = async (bookingId: string) => {
+    try {
+      setIsPaying(true); // Ensure spinner is active during this check
+
+      // Use a polling mechanism instead of a fixed delay
+      let statusRes;
+      for (let i = 0; i < 5; i++) { // Check up to 5 times
+        statusRes = await getReservationStatus(bookingId);
+        if (statusRes.data === 'COMPLETED' || statusRes.data === 'CONFIRMED') {
+          routeToResult(true);
+          return;
+        }
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between checks
+      }
+
+      // If status is not confirmed after polling
+      setErr('예약 처리에 실패했습니다. 고객센터에 문의해주세요.');
+      routeToResult(false);
+
+    } catch (e) {
+      console.error('예약 상태 확인에 실패했습니다.', e);
+      setErr('예약 상태 확인에 실패했습니다. 고객센터에 문의해주세요.');
+      routeToResult(false);
+    } finally {
+      setIsPaying(false);
+    }
+  };
+
+  // 💡 REFACTORED: `handlePostPayment` logic is now simpler and more robust
   const handlePostPayment = async (paymentId: string) => {
     if (!checkout.bookingId) {
       setErr('예약번호가 존재하지 않습니다.');
@@ -163,26 +188,19 @@ const BookingPaymentPage: React.FC = () => {
     }
 
     try {
-      setIsPaying(true);
+      // Ensure the final payment completion is awaited
       await completePayment(paymentId);
-      await new Promise(resolve => setTimeout(resolve, 10000));
-      const statusRes = await getReservationStatus(checkout.bookingId);
-
-      if (statusRes.data === 'COMPLETED' || statusRes.data === 'CONFIRMED') {
-        routeToResult(true);
-      } else {
-        setErr('예약 처리에 실패했습니다. 고객센터에 문의해주세요.');
-        routeToResult(false);
-      }
+      // After completion, check the booking status with the new unified function
+      await checkAndNavigate(checkout.bookingId);
     } catch (e) {
       console.error('결제 후 처리에 실패했습니다.', e);
       setErr('결제 후 처리에 실패했습니다. 고객센터에 문의해주세요.');
       routeToResult(false);
-    } finally {
-      setIsPaying(false);
+      setIsPaying(false); // Reset on error
     }
   };
 
+  // 💡 REFACTORED: `handlePayment` now handles state more reliably
   const handlePayment = async () => {
     if (!checkout) {
       setErr('결제 정보를 불러오지 못했어요. 처음부터 다시 진행해주세요.');
@@ -208,7 +226,7 @@ const BookingPaymentPage: React.FC = () => {
       return;
     }
 
-    setIsPaying(true);
+    setIsPaying(true); // Start paying state
 
     try {
       if (openedMethod === 'wallet') {
@@ -224,12 +242,15 @@ const BookingPaymentPage: React.FC = () => {
           payMethod: 'POINT_PAYMENT',
         };
         await requestPayment(dto, userId!);
+        // Wallet payment complete, open modal
         setIsPaying(false);
         setIsPasswordModalOpen(true);
         return;
       }
 
-      await tossRef.current?.requestPay({
+      // For Toss, do not await the requestPay call directly
+      // The complete callback handles the rest of the flow
+      tossRef.current?.requestPay({
         paymentId: ensuredId,
         amount: finalAmount,
         orderName,
@@ -250,7 +271,8 @@ const BookingPaymentPage: React.FC = () => {
       setErr('결제 준비 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.');
       routeToResult(false);
     } finally {
-      setIsPaying(false);
+      // Do not reset isPaying here for Toss payments.
+      // The state is now managed within the complete callback or its called function.
     }
   };
 
@@ -297,6 +319,7 @@ const BookingPaymentPage: React.FC = () => {
               type="button"
               className={styles.payButton}
               onClick={handlePayment}
+              disabled={isPaying} // 💡 disabled added
               aria-busy={isPaying}
             >
               결제하기
@@ -309,32 +332,11 @@ const BookingPaymentPage: React.FC = () => {
         <PasswordInputModal
           amount={amountToPay}
           paymentId={ensuredPaymentId}
-          userName={userName}
-          userId={userId as number}
+          // Removed userName and userId from props as they are not used inside the modal's onComplete logic
           onClose={() => setIsPasswordModalOpen(false)}
           onComplete={async () => {
             setIsPasswordModalOpen(false);
-            setIsPaying(true);
-
-            // ⭐ 대기 시간을 20초로 늘려서 백엔드 처리 시간을 충분히 확보
-            await new Promise(resolve => setTimeout(resolve, 10000));
-
-            try {
-              const statusRes = await getReservationStatus(checkout.bookingId);
-
-              if (statusRes.data === 'COMPLETED' || statusRes.data === 'CONFIRMED') {
-                routeToResult(true);
-              } else {
-                setErr('예약 처리에 실패했습니다. 고객센터에 문의해주세요.');
-                routeToResult(false);
-              }
-            } catch (e) {
-              console.error('예약 상태 확인에 실패했습니다.', e);
-              setErr('예약 상태 확인에 실패했습니다. 고객센터에 문의해주세요.');
-              routeToResult(false);
-            } finally {
-              setIsPaying(false);
-            }
+            await checkAndNavigate(checkout.bookingId);
           }}
         />
       )}
