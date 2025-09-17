@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import WaitingQueue from '@/components/booking/waiting/WaitingQueue'
 import styles from './TicketQueuePage.module.css'
 import { useFestivalDetail } from '@/models/festival/tanstack-query/useFestivalDetail'
-import { useExitWaitingMutation } from '@/models/waiting/tanstack-query/useWaiting'
+import { sendLeaveMessage } from '@/shared/config/leave'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
 
 import SockJS from 'sockjs-client'
@@ -19,7 +19,6 @@ const makeBroadcastTopic = (fid: string, date: string, time?: string) => {
   const t = time?.trim()
   return t ? `/topic/waiting/${fid}/${d}/${t}` : `/topic/waiting/${fid}/${d}`
 }
-const USER_QUEUE_TOPIC = '/user/queue/waiting'
 
 /* =========================
    유틸
@@ -104,8 +103,6 @@ const TicketQueuePage: React.FC = () => {
   const stompRef = useRef<Client | null>(null)
   const lastMsgAtRef = useRef<number>(Date.now())
 
-  const exitMut = useExitWaitingMutation()
-
   const reservationDate = useMemo(
     () => combineDateTime(parseYMD(date || undefined), time || null),
     [date, time],
@@ -185,7 +182,7 @@ const TicketQueuePage: React.FC = () => {
     const client = new Client({
       webSocketFactory: () => new SockJS(WS_URL + '?token=Bearer ' + accessToken),
       connectHeaders: {
-        Authorization: 'Bearer ' + useAuthStore((s) => s.accessToken),
+        Authorization: 'Bearer ' + accessToken,
       },
       debug: (str) => console.log('[STOMP]', str),
       reconnectDelay: 5000,
@@ -249,21 +246,35 @@ const TicketQueuePage: React.FC = () => {
         isUnmountedRef.current = true
       }
     }
-    const callExit = () => {
+    const publishLeave = () => {
       if (proceedingToBookingRef.current || isUnmountedRef.current) return
+      const destination = '/app/queue/waiting/leave'
+      const body = {
+        festivalId: String(fid),
+        reservationDateIso: reservationDate.toISOString(),
+      }
+      // 1) 연결이 살아있다면 현재 STOMP로 발행
       try {
-        exitMut.mutate({ festivalId: String(fid), reservationDate })
+        const c = stompRef.current
+        if (c && c.connected) {
+          c.publish({ destination, body: JSON.stringify(body) })
+          return
+        }
       } catch {}
+      // 2) 아니면 one-shot로 발행
+      sendLeaveMessage('waiting', body, { token: accessToken ?? undefined })
     }
-    window.addEventListener('pagehide', callExit)
-    window.addEventListener('beforeunload', callExit)
+
+    window.addEventListener('pagehide', publishLeave)
+    window.addEventListener('beforeunload', publishLeave)
+
     return () => {
       isUnmountedRef.current = true
-      if (!proceedingToBookingRef.current) callExit()
-      window.removeEventListener('pagehide', callExit)
-      window.removeEventListener('beforeunload', callExit)
+      if (!proceedingToBookingRef.current) publishLeave()
+      window.removeEventListener('pagehide', publishLeave)
+      window.removeEventListener('beforeunload', publishLeave)
     }
-  }, [fid, reservationDate, exitMut])
+  }, [fid, reservationDate, accessToken])
 
   // ✅ body 스크롤 잠금
   useEffect(() => {
