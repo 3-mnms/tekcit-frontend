@@ -1,3 +1,5 @@
+// BookingPaymentPage 버전1
+
 // src/pages/payment/BookingPaymentPage.tsx
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
