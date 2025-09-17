@@ -47,6 +47,18 @@ export interface RequestTekcitPayDTO {
   toUserId?: number         // ▶︎ 입금 받을 사용자 ID(관리자 ID)
 }
 
+/**
+ * GET /api/booking/reservation/status → 예약 완료/취소 정보 조회
+ * @param reservationNumber 예약번호
+ * @returns 예약 상태 정보
+ */
+export async function getReservationStatus(reservationNumber: string) {
+    const { data } = await api.get(`/booking/reservation/status`, {
+        params: { reservationNumber },
+    });
+    return data;
+  }
+
 /** POST /api/payments/request */
 export async function requestPayment(dto: PaymentRequestDTO, userId: number): Promise<void> {
   await api.post('/payments/request', dto, {
@@ -108,4 +120,12 @@ export async function getPaymentIdByBookingId(
     headers: { 'X-User-Id': String(userId) },
   })
   return (data?.data ?? null) as PaymentInfoByBooking | null
+}
+
+// GET /api/transfer/reservation/status → 양도 결제 상태 조회
+export async function getTransferStatus(transferId: string) {
+    const { data } = await api.get(`/transfer/reservation/status`, {
+        params: { transferId },
+    });
+    return data;
 }
