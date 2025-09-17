@@ -9,7 +9,7 @@ import type { BookingSelect } from '@/models/booking/bookingTypes';
 import { useAuthStore } from '@/shared/storage/useAuthStore';
 import CaptchaOverlay from '@/components/booking/captcha/CaptchaOverlay';
 import Spinner from '@/components/common/spinner/Spinner'
-import { sendLeaveMessage } from '@/shared/config/leave';
+import { useReleaseWaitingMutation } from '@/models/waiting/tanstack-query/useWaiting'
 
 // -------------------- utils --------------------
 const pad2 = (n: number) => String(n).padStart(2, '0');
@@ -135,19 +135,7 @@ const TicketOrderPage: React.FC = () => {
   const [selDate, setSelDate] = useState<Date | null>(initialDateYMD ? new Date(initialDateYMD) : null);
   const [selTime, setSelTime] = useState<string | null>(initialTime || null);
   const [selQty, setSelQty] = useState<number>(Number.isFinite(initialQty) ? initialQty : 1);
-
-   useEffect(() => {
-    if (!fid) return;
-    const payload = { festivalId: fid };
-    const onLeave = () => sendLeaveMessage('reservation', payload, { token: accessToken ?? undefined });
-    window.addEventListener('pagehide', onLeave);
-    window.addEventListener('beforeunload', onLeave);
-    return () => {
-      onLeave();
-      window.removeEventListener('pagehide', onLeave);
-      window.removeEventListener('beforeunload', onLeave);
-    };
-  }, [fid, accessToken]);
+  const releaseMut = useReleaseWaitingMutation();
 
   const phase1Req: BookingSelect | null = useMemo(() => {
     if (!fid || !selDate || !selTime) return null;
@@ -187,7 +175,7 @@ const TicketOrderPage: React.FC = () => {
     }
 
     const fdFromStr = sp.get('fdfrom') ?? undefined;
-    const fdToStr   = sp.get('fdto')   ?? undefined;
+    const fdToStr = sp.get('fdto') ?? undefined;
 
     const cal = buildCalendarData(phase1, fdFromStr, fdToStr);
 
@@ -251,7 +239,7 @@ const TicketOrderPage: React.FC = () => {
       try {
         const res = await selMut.mutateAsync(payload);
         const reservationNumber = typeof res === 'string' ? res : (res?.data ?? res);
-        try { sessionStorage.setItem('reservationId', reservationNumber); } catch {}
+        try { sessionStorage.setItem('reservationId', reservationNumber); } catch { }
         navigate(`/booking/${fid}/order-info?res=${encodeURIComponent(reservationNumber)}`, {
           replace: true,
           state: {
@@ -273,6 +261,50 @@ const TicketOrderPage: React.FC = () => {
     },
     [fid, navigate, selMut]
   );
+
+  const selectedDateTime: Date | null = useMemo(() => {
+    const d = selDate ?? serverSelectedDate ?? null;
+    const t = selTime ?? serverSelectedTime ?? null;
+    if (!d || !t) return null;
+    const [hh, mm] = t.split(':').map(Number);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), hh, mm, 0, 0);
+  }, [selDate, serverSelectedDate, selTime, serverSelectedTime]);
+
+  useEffect(() => {
+    if (!fid || !selectedDateTime) return;
+
+    const firedRef = { current: false }; // 여러 이벤트 중복 방지
+
+    const fireOnce = () => {
+      if (firedRef.current) return;
+      firedRef.current = true;
+
+      // 1) BE에 대기열 해제 요청 (useMutation)
+      try {
+        releaseMut.mutate({
+          festivalId: String(fid),
+          reservationDate: selectedDateTime,
+        });
+      } catch { /* */ }
+    };
+
+    const onPageHide = () => fireOnce();
+    const onBeforeUnload = () => fireOnce();
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') fireOnce();
+    };
+
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('beforeunload', onBeforeUnload);
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      fireOnce();
+      window.removeEventListener('pagehide', onPageHide);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [fid, selectedDateTime, accessToken, releaseMut]);
 
   // ====== 렌더링 분기(훅 다음에서만) ======
   const guardMessage = !fid
