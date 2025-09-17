@@ -4,6 +4,7 @@ import styles from './TossPayment.module.css'
 import { requestPayment, type PaymentRequestDTO } from '@/shared/api/payment/payments'
 import { getEnv } from '@/shared/config/env'
 
+// DUMMY_USER_ID는 실제 유저 ID로 대체되어야 합니다.
 const DUMMY_USER_ID = 1;
 
 export interface TossPaymentProps {
@@ -25,8 +26,6 @@ export type TossPaymentHandle = {
     bookingId: string
     festivalId: string
     sellerId: number
-    successUrl?: string
-    failUrl?: string
   }) => Promise<void>
 }
 
@@ -40,7 +39,8 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
   ) => {
     useImperativeHandle(ref, () => ({
       async requestPay(args) {
-        const { paymentId, amount, orderName, bookingId, festivalId, sellerId, successUrl, failUrl } = args;
+        // useImperativeHandle의 인자 타입을 명확히 했으므로 여기서 구조 분해 할당 오류가 사라집니다.
+        const { paymentId, amount, orderName, bookingId, festivalId, sellerId } = args;
 
         const hasSellerId = typeof sellerId === 'number' && Number.isFinite(sellerId) && sellerId >= 0
 
@@ -54,11 +54,9 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           throw new Error('Invalid booking/festival/seller context')
         }
 
-        // BookingPaymentPage에서 전달한 successUrl 사용, 없으면 기본값
-        const finalRedirect = successUrl || `${window.location.origin}/payment/booking-result?status=success&paymentId=${encodeURIComponent(paymentId)}`;
+        const finalRedirect = `${window.location.origin}/payment/booking?paymentId=${encodeURIComponent(paymentId)}`;
 
-        console.log('포트원 리다이렉트 URL:', finalRedirect);
-
+        // ✅ 불필요한 중복 호출을 제거하고, 올바른 인자를 전달하는 단일 호출로 수정
         const dto: PaymentRequestDTO = {
           paymentId,
           bookingId,
@@ -68,8 +66,10 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           amount,
           currency: 'KRW',
           payMethod: 'CARD',
+          STORE_KEY: STORE_ID,
+          CHANNEL_KEY: CHANNEL_KEY,
         };
-        await requestPayment(dto, DUMMY_USER_ID);
+        await requestPayment(dto, DUMMY_USER_ID); // 두 번째 인자로 userId 추가
 
         await PortOne.requestPayment({
           storeId: STORE_ID,
