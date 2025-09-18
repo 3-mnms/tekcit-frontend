@@ -24,6 +24,7 @@ import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery';
 import { useReleaseWaitingMutation } from '@/models/waiting/tanstack-query/useWaiting';
 
 import styles from './BookingPaymentPage.module.css';
+import { log } from 'console';
 
 const DEADLINE_SECONDS = 5 * 60;
 
@@ -250,6 +251,7 @@ const BookingPaymentPage: React.FC = () => {
         return;
       }
 
+      console.log("결제 성공 요청 시작")
       await tossRef.current?.requestPay({
         paymentId: ensuredId,
         amount: finalAmount,
@@ -259,9 +261,10 @@ const BookingPaymentPage: React.FC = () => {
         sellerId: sellerId!,
         complete: (paymentData) => {
           // 💡 디버깅: toss complete 콜백 호출 로그
-          console.log('Toss complete 콜백 함수 호출됨', paymentData);
 
-          if (paymentData.code === null) {
+          console.log(" Payment Data Status ( 264 ) : " + paymentData?.status)
+
+          if (paymentData.status === "success") {
             console.log('Toss 결제 성공: handlePostPayment 호출');
             handlePostPayment(paymentData.paymentId);
           } else {
@@ -269,6 +272,8 @@ const BookingPaymentPage: React.FC = () => {
             setErr(paymentData.message || '결제에 실패했습니다.');
             routeToResult(false);
           }
+          
+          console.log("결제 성공 요청 종료");
         },
       });
     } catch (e) {
