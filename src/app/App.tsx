@@ -5,7 +5,7 @@ import { router } from "./router/router";
 import TikiChatWidget from '@/components/ai/chatbot/TikiChatWidget';
 import useNoChatWidget from "@/models/ai/useNoChatWidget";
 import { onMessage } from "firebase/messaging";
-import { messaging } from "../firebase"; // getMessaging(app) 해서 export 해둔 객체
+import { messaging } from "../firebase";
 
 export default function App() {
   const noChat = useNoChatWidget();
@@ -13,8 +13,6 @@ export default function App() {
   useEffect(() => {
     // ✅ 실시간 리스너 등록
     const unsubscribe = onMessage(messaging, (payload) => {
-      console.log("📩 포그라운드 알림 도착:", payload);
-
       const title = payload.data?.title || payload.notification?.title || "알림";
       const body = payload.data?.body || payload.notification?.body || "";
 

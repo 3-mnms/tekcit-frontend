@@ -1,4 +1,3 @@
-/* TicketHistoryPage.module.css */
 .container {
   width: 100%;
   box-sizing: border-box;
@@ -15,11 +14,14 @@
   color: #0f172a;
   margin-bottom: 10px;
 }
-
+/* 공용 카드 톤(섹션 헤더 아래 카드들에 사용될 수 있음) */
 .card {
-  border: 1px solid #615f5fa2;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #4D9AFD;
+  /* 왼쪽 컬러 보더 */
   border-radius: 12px;
   background: #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .04);
   margin-bottom: 1.25rem;
 }
 
@@ -29,11 +31,14 @@
 
 .filtersGrid {
   display: grid;
-  grid-template-columns: 1fr; 
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
+
 @media (min-width: 768px) {
-  .filtersGrid { grid-template-columns: 1fr 1fr; } /* 상단 2열 */
+  .filtersGrid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .block {
@@ -49,6 +54,7 @@
   color: #334155;
 }
 
+/* 작은 버튼 스타일(보조 필터 등) */
 .btnGroup {
   display: flex;
   flex-wrap: wrap;
@@ -60,10 +66,10 @@
   padding: 0 .75rem;
   border-radius: 8px;
   font-size: .875rem;
-  font-weight: 600;
-  border: 1px solid #8c9097;
+  font-weight: 700;
+  border: 1px solid #cbd5e1;
   background: #fff;
-  color: #6d737a;
+  color: #334155;
   box-shadow: 0 .5px 2px rgba(0, 0, 0, .02);
   transition: all .15s ease;
 }
@@ -71,7 +77,7 @@
 .filterBtn:hover {
   background: #f3f8ff;
   border-color: #4D9AFD;
-  color: #317fe0;
+  color: #2563eb;
 }
 
 .filterBtnActive {
