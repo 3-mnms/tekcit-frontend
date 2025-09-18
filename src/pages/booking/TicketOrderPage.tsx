@@ -123,6 +123,7 @@ const TicketOrderPage: React.FC = () => {
   const { state } = useLocation() as {
     state?: { fid?: string; dateYMD?: string; time?: string; quantity?: number };
   };
+    
   const [sp] = useSearchParams();
 
   const [captchaPassed, setCaptchaPassed] = useState(false);
@@ -206,12 +207,15 @@ const TicketOrderPage: React.FC = () => {
     };
   }, [phase1, sp]);
 
+  // 이건 문제 아님
   useEffect(() => {
     if (!selDate && serverSelectedDate) setSelDate(serverSelectedDate);
     if (!selTime && serverSelectedTime) setSelTime(serverSelectedTime);
   }, [selDate, selTime, serverSelectedDate, serverSelectedTime]);
 
   const selMut = useSelectDate(); // ✅ 훅 순서 고정
+
+    // 이건 문제 아님
 
   // 스크롤 락도 항상 호출되도록
   useEffect(() => {
@@ -223,7 +227,7 @@ const TicketOrderPage: React.FC = () => {
   }, [captchaPassed]);
 
   const clickLockRef = React.useRef(false);
-
+  // 이것도 문제 아님
   const handleNext = useCallback(
     async ({ date, time, quantity }: { date: Date; time: string; quantity: number }) => {
       if (!fid) return;
@@ -304,7 +308,7 @@ const TicketOrderPage: React.FC = () => {
       window.removeEventListener('beforeunload', onBeforeUnload);
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [fid, selectedDateTime, accessToken, releaseMut]);
+  }, []);
 
   // ====== 렌더링 분기(훅 다음에서만) ======
   const guardMessage = !fid
