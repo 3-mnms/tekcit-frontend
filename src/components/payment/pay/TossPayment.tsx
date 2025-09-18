@@ -35,12 +35,12 @@ const CHANNEL_KEY = getEnv("VITE_PORTONE_CHANNEL_KEY")
 
 const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
   (
-    { isOpen, onToggle, amount, orderName, redirectUrl, bookingId, festivalId, sellerId },
+    { isOpen, onToggle, amount, orderName, redirectUrl, bookingId, festivalId, sellerId, complete },
     ref,
   ) => {
     useImperativeHandle(ref, () => ({
       async requestPay(args) {
-        const { paymentId, amount, orderName, bookingId, festivalId, sellerId } = args;
+        const { paymentId, amount, orderName, bookingId, festivalId, sellerId, complete } = args;
 
         const hasSellerId = typeof sellerId === 'number' && Number.isFinite(sellerId) && sellerId >= 0
 
@@ -60,7 +60,7 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
         // 이 부분은 `BookingPaymentPage`에서 수정해야 합니다.
         // 현재는 빌드 오류를 방지하기 위해 간단한 URL로 대체합니다.
         // const finalRedirect = `${window.location.origin}/payment/booking-result?status=${ok ? 'success' : 'fail'}}`
-        // const finalRedirect = `${window.location.origin}/payment/booking-result?status=success`
+        const finalRedirect = `${window.location.origin}/payment/booking-result?status=success`
 
         const dto: PaymentRequestDTO = {
           paymentId,
@@ -91,7 +91,16 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
         try {
           // ✅ 포트원 결제 요청 시작 로그
           console.log('포트원 결제창 요청 시작: PortOne.requestPayment', { paymentId, totalAmount: amount });
-          await PortOne.requestPayment({
+          console.log(            "storeId: ",  STORE_ID,
+            "channelKey: ",  CHANNEL_KEY,
+            "bookingId: ", bookingId,
+            "paymentId: ", paymentId,
+            "orderName: ", orderName,
+            "totalAmount: ",  amount,
+            "currency: ",  Currency.KRW,
+            "payMethod: ",  PayMethod.CARD,
+            "redirectUrl: ", finalRedirect);
+          const portOneResult = await PortOne.requestPayment({
             storeId: STORE_ID,
             channelKey: CHANNEL_KEY,
             bookingId,
@@ -102,6 +111,19 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
             payMethod: PayMethod.CARD,
             redirectUrl: finalRedirect,
           })
+          console.log("portOneResult : ", portOneResult);
+          if (portOneResult?.paymentId) {
+            
+          console.log("args complete 준비 : ");
+            if(args.complete){
+              console.log("args complete 실행 : ");
+              args.complete({
+                paymentId: paymentId,
+                status:   'success' ,
+                message: "success",
+              });
+            }
+          }
           // ✅ 포트원 결제 요청 성공 로그 (이 로그는 리디렉션 때문에 거의 실행되지 않습니다)
           console.log('포트원 결제창 요청 성공: PortOne.requestPayment');
         } catch (err) {
