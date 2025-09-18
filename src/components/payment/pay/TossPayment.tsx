@@ -1,113 +1,150 @@
-// src/pages/payment/booking/BookingResultPage.tsx
-import { useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import Button from '@/components/common/button/Button'
-import styles from './BookingResultPage.module.css'
+import { forwardRef, useImperativeHandle } from 'react'
+import PortOne, { Currency, PayMethod } from '@portone/browser-sdk/v2'
+import styles from './TossPayment.module.css'
+import { requestPayment, type PaymentRequestDTO } from '@/shared/api/payment/payments'
+import { getEnv } from '@/shared/config/env'
 
-const BookingResultPage: React.FC = () => {
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const status = searchParams.get('status')
-  
-  const isSuccess = status === 'success'
+// DUMMY_USER_ID는 실제 유저 ID로 대체되어야 합니다.
+const DUMMY_USER_ID = 1;
 
-  useEffect(() => {
-    // 올바르지 않은 상태로 접근한 경우 홈으로 리디렉트
-    if (!status || (status !== 'success' && status !== 'fail')) {
-      navigate('/')
-    }
-  }, [status, navigate])
-
-  const handleGoToTickets = () => {
-    navigate('/mypage/ticket/history')
-  }
-
-  const handleGoToHome = () => {
-    navigate('/')
-  }
-
-  const handleRetry = () => {
-    navigate(-1)
-  }
-
-  if (!status) return null
-
-  return (
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <div className={styles.card}>
-          {isSuccess ? (
-            <>
-              <div className={styles.iconSuccess}>
-                <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-                  <circle cx="40" cy="40" r="40" fill="#22C55E"/>
-                  <path 
-                    d="M25 40L35 50L55 30" 
-                    stroke="white" 
-                    strokeWidth="4" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <h1 className={styles.title}>결제가 완료되었습니다!</h1>
-              <p className={styles.message}>
-                티켓 예매가 성공적으로 완료되었습니다.<br />
-                예매한 티켓은 마이페이지에서 확인하실 수 있습니다.
-              </p>
-              <div className={styles.infoBox}>
-                <p className={styles.infoText}>
-                  📧 예매 확인 메일이 발송되었습니다.<br />
-                </p>
-              </div>
-              <div className={styles.buttons}>
-                <Button 
-                  onClick={handleGoToHome}
-                  variant="outline"
-                  className={styles.secondaryButton}
-                >
-                  확인
-                </Button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className={styles.iconFail}>
-                <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-                  <circle cx="40" cy="40" r="40" fill="#EF4444"/>
-                  <path 
-                    d="M30 30L50 50M50 30L30 50" 
-                    stroke="white" 
-                    strokeWidth="4" 
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-              <h1 className={styles.title}>결제에 실패했습니다</h1>
-              <p className={styles.message}>
-                티켓 예매 처리 중 오류가 발생했습니다.<br />
-                잠시 후 다시 시도해 주시거나 고객센터에 문의해 주세요.
-              </p>
-              <div className={styles.warningBox}>
-                <p className={styles.warningText}>
-                  💳 결제 취소는 1-3일 소요될 수 있습니다.
-                </p>
-              </div>
-              <div className={styles.buttons}>
-                <Button 
-                  onClick={handleGoToHome}
-                  variant="outline"
-                  className={styles.secondaryButton}
-                >
-                  확인
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  )
+export interface TossPaymentProps {
+  isOpen: boolean
+  onToggle: () => void
+  amount: number
+  orderName: string
+  redirectUrl?: string
+  bookingId: string
+  festivalId: string
+  sellerId: number
 }
 
-export default BookingResultPage
+export type TossPaymentHandle = {
+  requestPay: (args: {
+    paymentId: string
+    amount: number
+    orderName: string
+    bookingId: string
+    festivalId: string
+    sellerId: number
+    complete?: (paymentData: { paymentId: string, status?: string | null, message?: string | null  }) => void
+  }) => Promise<void>
+}
+
+const STORE_ID = getEnv("VITE_PORTONE_STORE_ID")
+const CHANNEL_KEY = getEnv("VITE_PORTONE_CHANNEL_KEY")
+
+const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
+  (
+    { isOpen, onToggle, amount, orderName, redirectUrl, bookingId, festivalId, sellerId, complete },
+    ref,
+  ) => {
+    useImperativeHandle(ref, () => ({
+      async requestPay(args) {
+        const { paymentId, amount, orderName, bookingId, festivalId, sellerId, complete } = args;
+
+        const hasSellerId = typeof sellerId === 'number' && Number.isFinite(sellerId) && sellerId >= 0
+
+        if (!STORE_ID || !CHANNEL_KEY) {
+          console.error('결제 설정 오류: 포트원 키가 없습니다.');
+          alert('결제 설정이 올바르지 않습니다. 관리자에게 문의하세요.')
+          throw new Error('Missing PortOne credentials')
+        }
+
+        if (!bookingId || !festivalId || !hasSellerId) {
+          console.error('결제 정보 부족: bookingId, festivalId 또는 sellerId가 없습니다.');
+          alert('결제 정보가 부족합니다. 다시 시도해 주세요.')
+          throw new Error('Invalid booking/festival/seller context')
+        }
+
+        // 💡 주의: 이 `finalRedirect` 로직에 `ok`라는 변수가 정의되지 않았습니다.
+        // 이 부분은 `BookingPaymentPage`에서 수정해야 합니다.
+        // 현재는 빌드 오류를 방지하기 위해 간단한 URL로 대체합니다.
+        // const finalRedirect = `${window.location.origin}/payment/booking-result?status=${ok ? 'success' : 'fail'}}`
+        const finalRedirect = `${window.location.origin}/payment/booking-result?status=success`
+
+        const dto: PaymentRequestDTO = {
+          paymentId,
+          bookingId,
+          festivalId,
+          paymentRequestType: 'GENERAL_PAYMENT_REQUESTED',
+          sellerId,
+          amount,
+          currency: 'KRW',
+          payMethod: 'CARD',
+          STORE_KEY: STORE_ID,
+          CHANNEL_KEY: CHANNEL_KEY,
+        };
+
+        try {
+          // ✅ API 요청 시작 로그
+          console.log('API 요청 시작: requestPayment', { paymentId, userId: DUMMY_USER_ID });
+          await requestPayment(dto, DUMMY_USER_ID);
+          // ✅ API 요청 성공 로그
+          console.log('API 요청 성공: requestPayment');
+        } catch (err) {
+          // ✅ API 요청 실패 로그
+          console.error('API 요청 실패: requestPayment', err);
+          alert('결제 준비에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+          throw err;
+        }
+
+        try {
+          // ✅ 포트원 결제 요청 시작 로그
+          console.log('포트원 결제창 요청 시작: PortOne.requestPayment', { paymentId, totalAmount: amount });
+          console.log(            "storeId: ",  STORE_ID,
+            "channelKey: ",  CHANNEL_KEY,
+            "bookingId: ", bookingId,
+            "paymentId: ", paymentId,
+            "orderName: ", orderName,
+            "totalAmount: ",  amount,
+            "currency: ",  Currency.KRW,
+            "payMethod: ",  PayMethod.CARD,
+            "redirectUrl: ", finalRedirect);
+          const portOneResult = await PortOne.requestPayment({
+            storeId: STORE_ID,
+            channelKey: CHANNEL_KEY,
+            bookingId,
+            paymentId,
+            orderName,
+            totalAmount: amount,
+            currency: Currency.KRW,
+            payMethod: PayMethod.CARD,
+            redirectUrl: finalRedirect,
+          })
+          console.log("portOneResult : ", portOneResult);
+          if (portOneResult?.paymentId) {
+            
+          console.log("args complete 준비 : ");
+            if(args.complete){
+              console.log("args complete 실행 : ");
+              args.complete({
+                paymentId: paymentId,
+                status:   'success' ,
+                message: "success",
+              });
+            }
+          }
+          // ✅ 포트원 결제 요청 성공 로그 (이 로그는 리디렉션 때문에 거의 실행되지 않습니다)
+          console.log('포트원 결제창 요청 성공: PortOne.requestPayment');
+        } catch (err) {
+          // ✅ 포트원 결제 요청 실패 로그
+          console.error('포트원 결제창 요청 실패: PortOne.requestPayment', err);
+          alert('결제창을 여는 데 실패했습니다. 잠시 후 다시 시도해 주세요.');
+          throw err;
+        }
+      },
+    }))
+
+    return (
+      <div className={styles.wrapper}>
+        <button type="button" className={styles.header} onClick={onToggle} aria-expanded={isOpen}>
+          <span className={styles.title}>토스 페이먼츠</span>
+          <span className={styles.sub}>신용/체크카드 / 간편결제</span>
+        </button>
+      </div>
+    )
+  },
+)
+
+TossPayment.displayName = 'TossPayment'
+export default TossPayment
