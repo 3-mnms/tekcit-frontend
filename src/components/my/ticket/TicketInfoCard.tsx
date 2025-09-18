@@ -1,14 +1,14 @@
-// src/components/my/ticket/TicketInfoCard.tsx
 import React, { useMemo, useState } from 'react'
 import styles from './TicketInfoCard.module.css'
 import Modal from './QRModal'
-import EntranceCheckModalLoader from '@/components/my/ticket/EntranceCheckModalLoader' 
+import EntranceCheckModalLoader from '@/components/my/ticket/EntranceCheckModalLoader'
 import { format } from 'date-fns'
 import QRViewer from './QRViewer'
 import KakaoMapModal from '@/components/shared/kakao/KakaoMapModal'
+import { Calendar, Receipt, MapPin, Users, Ticket as TicketIcon } from 'lucide-react'
 
 type Props = {
-  festivalId: string;            
+  festivalId: string
   reservationNumber: string
   title: string
   place: string
@@ -18,8 +18,8 @@ type Props = {
   address?: string
   posterFile?: string
   reserverName?: string
-  selectedTicketCount?: number       
-  totalCountForGauge?: number        
+  selectedTicketCount?: number
+  totalCountForGauge?: number
 }
 
 const deliveryLabel = (t: 'MOBILE' | 'PAPER') => (t === 'MOBILE' ? '모바일 티켓' : '지류 티켓')
@@ -38,10 +38,11 @@ const TicketInfoCard: React.FC<Props> = ({
 }) => {
   const [showQR, setShowQR] = useState(false)
   const [showEntrance, setShowEntrance] = useState(false)
+  const [showMap, setShowMap] = useState(false)
 
   const ymd = useMemo(() => {
     const d = new Date(performanceDateISO)
-    return isNaN(d.getTime()) ? performanceDateISO : format(d, 'yyyy.MM.dd')
+    return isNaN(d.getTime()) ? performanceDateISO : format(d, 'yyyy.MM.dd (EEE)')
   }, [performanceDateISO])
 
   const hm = useMemo(() => {
@@ -54,79 +55,112 @@ const TicketInfoCard: React.FC<Props> = ({
     return src.length > 0 ? src : '/dummy-poster.jpg'
   }, [posterFile])
 
-  const [showMap, setShowMap] = useState(false)  
-
   return (
     <>
       <div className={styles.card}>
+        {/* 포스터 */}
         <div className={styles.left}>
-          <img
-            src={posterSrc}
-            alt={`포스터 - ${title}`}
-            className={styles.poster}
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/dummy-poster.jpg' }}
-          />
+          <div className={styles.posterWrap}>
+            <img
+              src={posterSrc}
+              alt={`포스터 - ${title}`}
+              className={styles.poster}
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                ;(e.currentTarget as HTMLImageElement).src = '/dummy-poster.jpg'
+              }}
+            />
+          </div>
         </div>
 
+        {/* 정보 */}
         <div className={styles.right}>
+          {/* 1열 */}
           <div className={styles.row}>
-            <span className={styles.label}>예매자</span>
-            <span className={styles.value}>{reserverName ?? '-'}</span>
+            <Users className={styles.rowIcon} />
+            <div className={styles.kv}>
+              <p className={styles.k}>예매자</p>
+              <p className={styles.v}>{reserverName ?? '-'}</p>
+            </div>
           </div>
+
           <div className={styles.row}>
-            <span className={styles.label}>예약번호</span>
-            <span className={styles.value}>{reservationNumber}</span>
+            <Receipt className={styles.rowIcon} />
+            <div className={styles.kv}>
+              <p className={styles.k}>예약번호</p>
+              <p className={`${styles.v} ${styles.mono}`}>{reservationNumber}</p>
+            </div>
           </div>
+
+          {/* 2열 */}
           <div className={styles.row}>
-            <span className={styles.label}>일시</span>
-            <span className={styles.value}>
-              {ymd} {hm && <>({/* 요일 필요시 */}) {hm}</>}
-            </span>
+            <Calendar className={styles.rowIcon} />
+            <div className={styles.kv}>
+              <p className={styles.k}>일시</p>
+              <p className={styles.v}>
+                {ymd} {hm && hm}
+              </p>
+            </div>
           </div>
+
           <div className={styles.row}>
-            <span className={styles.label}>장소</span>
-            <span className={styles.value}>
-              {place}
-              <button className={styles.subBtn} onClick={() => setShowMap(true)}>지도보기</button>
-            </span>
+            <MapPin className={styles.rowIcon} />
+            <div className={styles.kv}>
+              <p className={styles.k}>장소</p>
+              <p className={styles.v}>
+                {place}
+                <button type="button" className={styles.subBtnOutline} onClick={() => setShowMap(true)}>
+                  지도보기
+                </button>
+              </p>
+            </div>
           </div>
+
+          {/* 3열 */}
           <div className={styles.row}>
-            <span className={styles.label}>티켓수령 방법</span>
-            <span className={styles.value}>
-              {deliveryLabel(deliveryMethod)}
-              {deliveryMethod === 'MOBILE' && (
-                <button className={styles.subBtn} onClick={() => setShowQR(true)}>
+            <TicketIcon className={styles.rowIcon} />
+            <div className={styles.kv}>
+              <p className={styles.k}>티켓수령 방법</p>
+              <p className={styles.v}>
+                {deliveryLabel(deliveryMethod)}
+                <button type="button" className={styles.subBtn} onClick={() => setShowQR(true)}>
                   QR 보기
                 </button>
-              )}
-            </span>
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.row}>
+            <Users className={styles.rowIcon} />
+            <div className={styles.kv}>
+              <p className={styles.k}>입장 인원 수</p>
+              <p className={styles.v}>
+                <button type="button" className={styles.subBtn2} onClick={() => setShowEntrance(true)}>
+                  조회하기
+                </button>
+              </p>
+            </div>
           </div>
 
           {deliveryMethod === 'PAPER' && (
-            <div className={styles.row}>
-              <span className={styles.label}>배송지</span>
-              <span className={styles.value}>{address ?? '-'}</span>
+            <div className={`${styles.row} ${styles.span2}`}>
+              <Receipt className={styles.rowIcon} />
+              <div className={styles.kv}>
+                <p className={styles.k}>배송지</p>
+                <p className={styles.v}>{address ?? '-'}</p>
+              </div>
             </div>
           )}
-
-          <div className={styles.row}>
-            <span className={styles.label}>입장 인원 수</span>
-            <span className={styles.value}>
-              <button className={styles.subBtn} onClick={() => setShowEntrance(true)}>
-                조회하기
-              </button>
-            </span>
-          </div>
         </div>
       </div>
 
+      {/* QR 모달 */}
       <Modal isOpen={showQR} onClose={() => setShowQR(false)} title="티켓 QR">
         <QRViewer ids={qrIds} size={180} />
       </Modal>
 
-      {/* ⬇️ 여기서 실데이터 조회 후 기존 모달에 주입 */}
+      {/* 입장 인원 모달 */}
       <EntranceCheckModalLoader
         isOpen={showEntrance}
         onClose={() => setShowEntrance(false)}
@@ -135,11 +169,8 @@ const TicketInfoCard: React.FC<Props> = ({
         title={title}
       />
 
-      <KakaoMapModal
-        isOpen={showMap}
-        onClose={() => setShowMap(false)}
-        query={place}
-      />
+      {/* 지도 모달 */}
+      <KakaoMapModal isOpen={showMap} onClose={() => setShowMap(false)} query={place} />
     </>
   )
 }

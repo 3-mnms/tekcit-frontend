@@ -14,6 +14,7 @@ const KakaoMapModal: React.FC<Props> = ({ isOpen, onClose, query }) => {
   const [searchError, setSearchError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     document.addEventListener('keydown', onKey)
     const prev = document.body.style.overflow
@@ -22,9 +23,10 @@ const KakaoMapModal: React.FC<Props> = ({ isOpen, onClose, query }) => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = prev
     }
-  }, [onClose])
+  }, [isOpen, onClose])
 
   useEffect(() => {
+    if (!isOpen) return;
     let canceled = false
     setSdkError(null)
     setSearchError(null)

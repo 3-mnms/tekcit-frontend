@@ -34,7 +34,7 @@ const PaymentSection = forwardRef<TossPaymentHandle, Props>(function PaymentMeth
           <span
             className={styles.radio + (openedMethod === 'wallet' ? ` ${styles.radioOn}` : '')}
           />
-          <span className={styles.methodText}>킷페이 (포인트 결제)</span>
+          <span className={styles.methodText}>테킷페이 (포인트 결제)</span>
         </button>
 
         {openedMethod === 'wallet' && (

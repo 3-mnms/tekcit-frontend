@@ -1,7 +1,8 @@
 :root {
   --color-primary-light: #f0f4f9;
   --color-primary-medium: #d4dceb;
-  --color-primary-dark: #3757a3;
+  --color-primary-dark: #4D9AFD;
+  /* ✅ 대표 색상으로 변경 */
   --color-text-dark: #1a202c;
   --color-text-medium: #4a5568;
   --color-background: #ffffff;

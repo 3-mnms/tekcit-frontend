@@ -1,10 +1,8 @@
 // src/pages/payment/TransferPaymentPage.tsx
-import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
+import { useMemo, useState, useEffect, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
-import SockJS from 'sockjs-client'
-import { Client } from '@stomp/stompjs'
 
 import BookingProductInfo from '@/components/payment/BookingProductInfo'
 import AddressForm from '@/components/payment/address/AddressForm'
@@ -19,7 +17,7 @@ import TicketDeliverySelectSection, {
 
 import { useRespondFamilyTransfer, useRespondOthersTransfer } from '@/models/transfer/tanstack-query/useTransfer'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
-import { requestTransferPayment, type RequestTransferPaymentDTO, getPaymentIdByBookingId } from '@/shared/api/payment/payments'
+import { requestTransferPayment, type RequestTransferPaymentDTO, getPaymentIdByBookingId, getReservationStatus } from '@/shared/api/payment/payments'
 
 import styles from './TransferPaymentPage.module.css'
 
@@ -45,8 +43,6 @@ type TransferState = {
 const BookingIdSchema = z.string().min(1)
 
 const TransferPaymentPage: React.FC = () => {
-  const stompClientRef = useRef<Client | null>(null)
-
   const navigate = useNavigate()
   const location = useLocation()
   const navState = (location.state ?? {}) as Partial<TransferState>
@@ -84,44 +80,6 @@ const TransferPaymentPage: React.FC = () => {
     staleTime: 60_000,
   })
 
-  // WebSocket
-  useEffect(() => {
-    if (!navState.transferId) return
-
-    if (stompClientRef.current?.connected) {
-      stompClientRef.current.deactivate()
-      stompClientRef.current = null
-    }
-
-    const client = new Client({
-      webSocketFactory: () => new (SockJS as any)('http://localhost:10000/ws'),
-      connectHeaders: {},
-      reconnectDelay: 5000,
-      heartbeatIncoming: 10000,
-      heartbeatOutgoing: 10000,
-    })
-
-    client.onConnect = () => {
-      stompClientRef.current = client
-      client.subscribe('/user/queue/transfer-status', (message) => {
-        const data = JSON.parse(message.body)
-        if (data.reservationNumber === navState.reservationNumber) {
-          if (data.status === 'COMPLETED') navigate('/payment/result?type=transfer&status=success')
-          else if (data.status === 'FAILED' || data.status === 'CANCELED')
-            navigate('/payment/result?type=transfer&status=fail')
-        }
-      })
-    }
-
-    client.activate()
-    return () => {
-      if (stompClientRef.current?.connected) {
-        stompClientRef.current.deactivate()
-        stompClientRef.current = null
-      }
-    }
-  }, [navState.transferId, navState.reservationNumber, userId, navigate])
-
   // UI 상태
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod | null>(null)
   const [address, setAddress] = useState('')
@@ -131,6 +89,7 @@ const TransferPaymentPage: React.FC = () => {
   const [isAlertOpen, setIsAlertOpen] = useState(false)
   const [isPwModalOpen, setIsPwModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isWaitingStatus, setIsWaitingStatus] = useState(false)
 
   // QR-only면 자동 QR
   useEffect(() => {
@@ -240,12 +199,34 @@ const TransferPaymentPage: React.FC = () => {
         commission,
       }
       await requestTransferPayment(transferReqBody, userId)
-      setTimeout(() => {
-        navigate('/payment/result?type=transfer&status=success')
-      }, 2000)
+      
+      // 스피너 표시 시작
+      setIsWaitingStatus(true)
+
+      // 10초 후에 예약 상태 조회
+      setTimeout(async () => {
+        try {
+          const statusResult = await getReservationStatus(navState.reservationNumber!)
+          console.log('🔍 Status result:', statusResult)
+          
+          if (statusResult.success) {
+            console.log('✅ Success - navigating to success page')
+            navigate('/payment/transfer/result?status=success')
+          } else {
+            console.log('❌ Not successful - navigating to fail page')
+            navigate('/payment/transfer/result?status=fail')
+          }
+        } catch (e: any) {
+          console.error('예약 상태 확인 중 오류 발생:', e)
+          alert('예약 상태 확인 중 오류가 발생했습니다.')
+          navigate('/payment/transfer/result?status=fail')
+        } finally {
+          setIsWaitingStatus(false)
+        }
+      }, 10000) // 10초 지연
     } catch (e: any) {
       alert(e?.response?.data?.errorMessage || e?.message || '양도 처리에 실패했습니다.')
-      navigate('/payment/result?type=transfer&status=fail')
+      navigate('/payment/transfer/result?status=fail')
     }
   }
 
@@ -292,7 +273,7 @@ const TransferPaymentPage: React.FC = () => {
                   >
                     <span className={`${styles.radio} ${openedMethod === '킷페이' ? styles.radioOn : ''}`} />
                     <span className={styles.methodText}>
-                      킷페이 (포인트 결제)
+                      테킷페이 (포인트 결제)
                       {isBasePayLoading ? ' - 결제정보 조회중...' : ''}
                     </span>
                   </button>
@@ -386,6 +367,33 @@ const TransferPaymentPage: React.FC = () => {
         </aside>
       </div>
 
+      {/* Spinner for waiting status */}
+      {isWaitingStatus && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-[99999]">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin"></div>
+              <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-blue-600 rounded-full animate-spin"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AlertModal 추가 */}
+      {isAlertOpen && (
+        <AlertModal 
+          title="안내" 
+          onCancel={() => setIsAlertOpen(false)} 
+          onConfirm={handleAlertConfirm}
+        >
+          {isFamily 
+            ? '가족 간 양도는 결제 없이 진행됩니다. 계속하시겠습니까?' 
+            : '승인 후 결제를 진행합니다. 계속하시겠습니까?'
+          }
+        </AlertModal>
+      )}
+
+      {/* PasswordInputModal */}
       {!isFamily && isPwModalOpen && userId && basePaymentId && (
         <PasswordInputModal
           amount={baseAmount}

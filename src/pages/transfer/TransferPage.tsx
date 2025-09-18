@@ -19,7 +19,6 @@ const TransferPage: React.FC = () => {
     <div className={styles.wrap}>
       <div className={styles.page}>
         <section className={`${styles.col} ${styles.info}`}>
-          {/* ✅ 상세 API로 자동 조회 */}
           <TransferTicketInfo reservationNumber={reservationNumber} />
         </section>
 
@@ -28,13 +27,10 @@ const TransferPage: React.FC = () => {
         </section>
 
         <section className={`${styles.col} ${styles.form}`}>
-          {/* ✅ 양도 요청 시 reservationNumber 전달 */}
           <TransferRecipientForm
             reservationNumber={reservationNumber}
             onNext={() => {
-              // 목록에서 해당 예매번호 숨기기(선택)
               window.dispatchEvent(new CustomEvent(TRANSFER_DONE_EVENT, { detail: reservationNumber }));
-              // 완료 후 목록으로
               navigate('/mypage/ticket/transfer');
             }}
           />

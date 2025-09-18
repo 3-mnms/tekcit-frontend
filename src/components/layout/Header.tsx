@@ -19,15 +19,14 @@ const AdminHeader: React.FC<HeaderProps> = ({ userName, onLogout, ...props }) =>
   const logout = useAuthStore((s) => s.logout)
 
   const handleLogout = async () => {
-    const confirmed = window.confirm('로그아웃 하시겠습니까?')
-    if (!confirmed) return
-
+    
     try {
       await logoutApi()
     } catch (e) {
       console.error(e)
     } finally {
       logout()
+      alert("시간이 만료되어 로그아웃 되었습니다.")
       navigate('/login')
     }
   }

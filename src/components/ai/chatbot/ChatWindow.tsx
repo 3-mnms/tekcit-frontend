@@ -127,8 +127,8 @@ const ChatWindow: React.FC<Props> = ({ open }) => {
       <div className={styles.card}>
         <header className={styles.header}>
           <div className={styles.title}>
-            <span className={styles.brand}>Tiki</span>
-            <span className={styles.subtitle}>tekcit 고객센터 챗봇</span>
+            <span className={styles.brand}>Tiki - AI</span>
+            <span className={styles.subtitle}>tekcit 고객센터 HAIKU 챗봇</span>
           </div>
         </header>
 

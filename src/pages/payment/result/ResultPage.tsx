@@ -1,4 +1,3 @@
-// src/pages/payment/ResultPage.tsx
 import { useEffect, useMemo, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
@@ -49,22 +48,14 @@ export default function ResultPage() {
     status: sp.get('status') ?? undefined,
     paymentId: sp.get('paymentId') ?? undefined,
   })
-  
-  // ✅ paymentId가 있으면 기본값 설정
-  let type = (parsed.success ? parsed.data.type : undefined) as ResultType | undefined
-  let status = (parsed.success ? parsed.data.status : undefined) as ResultStatus | undefined
-  const paymentId = (parsed.success ? parsed.data.paymentId : undefined) as string | undefined
+  const type = (parsed.success ? parsed.data.type : undefined)
+  const status = (parsed.success ? parsed.data.status : undefined)
+  const paymentId = (parsed.success ? parsed.data.paymentId : undefined)
 
-  // paymentId만 있고 type/status가 없으면 booking success로 처리
-  if (paymentId && !type && !status) {
-    type = 'booking'
-    status = 'success'
-  }
+  const isSuccess = status === 'success'
 
-  // booking/transfer는 서버 승인 확인 필요
   const needConfirm = type === 'booking' || type === 'transfer'
 
-  // 대기 해제 로직 (기존 유지)
   const releaseMut = useReleaseWaitingMutation()
   const releasedOnceRef = useRef(false)
   useEffect(() => {
@@ -91,7 +82,6 @@ export default function ResultPage() {
     }
   }, [type, releaseMut])
 
-  // 서버 승인 확인 (실패한 경우에는 실행하지 않음)
   const firedRef = useRef(false)
   const confirmMut = useMutation({
     mutationFn: async () => {
@@ -99,39 +89,37 @@ export default function ResultPage() {
       await completePayment(paymentId)
       return true
     },
-    // 네비게이션 제거 - 결과는 현재 페이지에서 바로 표시
+    onSuccess: () => {
+      nav(`/payment/result?type=${type}&status=success`, { replace: true })
+    },
+    onError: () => {
+      nav(`/payment/result?type=${type}&status=fail`, { replace: true })
+    },
   })
 
   useEffect(() => {
     if (!needConfirm) return
     if (!paymentId) return
     if (firedRef.current) return
-    if (status === 'fail') return // 실패로 들어온 경우 그대로 둠
-    if (status !== 'success') return // 성공이 아니면 실행하지 않음
-
+    if (status === 'fail') return
     firedRef.current = true
     confirmMut.mutate()
   }, [needConfirm, paymentId, status, confirmMut])
 
-  // 뷰 계산
   const view = useMemo(() => {
-    // API 호출 중이면 로딩 표시 (또는 null로 대기)
-    if (needConfirm && confirmMut.isPending) {
-      return null // 또는 로딩 컴포넌트
-    }
-    
-    // API 실패 시 실패 화면
-    if (needConfirm && confirmMut.isError) {
-      return RESULT_CONFIG[type as ResultType]?.fail ?? null
-    }
-    
-    // 그 외에는 URL 파라미터 기준으로 표시
     if (type && status) {
-      return RESULT_CONFIG[type]?.[status] ?? null
+      const config = RESULT_CONFIG[type]?.[status]
+      if (!config) return null
+      return {
+        title: config.title,
+        message: config.message,
+        primary: config.primary,
+        isSuccess: status === 'success',
+        warningMessage: config.warning, // warning 속성 추가
+      }
     }
-    
     return null
-  }, [type, status, needConfirm, confirmMut.isPending, confirmMut.isError])
+  }, [type, status])
 
   return view ? <ResultLayout {...view} /> : null
 }

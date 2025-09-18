@@ -8,7 +8,7 @@ import Button from '@/components/common/Button';
 import { GrFormPrevious } from "react-icons/gr";
 import { GrFormNext } from "react-icons/gr";
 import styles from './ProductManagePage.module.css';
-
+import Spinner from '@/components/common/spinner/Spinner';
 import { getProducts } from '@/shared/api/admin/festival';
 import type { Festival } from '@/models/admin/festival';
 
@@ -99,7 +99,7 @@ const ProductManagePage: React.FC = () => {
     ];
 
     if (isLoading) {
-        return <Layout subTitle="상품 관리"><div>삐약! 상품 목록을 불러오는 중...</div></Layout>;
+        return <Spinner />
     }
 
     if (isError) {
@@ -113,10 +113,6 @@ const ProductManagePage: React.FC = () => {
     const handlePrevPage = () => {
         setPage(prevPage => Math.max(0, prevPage - 1));
     };
-
-    console.log('삐약! allProducts:', allProducts);
-    console.log('삐약! filteredProducts:', filteredProducts);
-    console.log('삐약! filteredProducts length:', filteredProducts.length);
 
     return (
         <Layout subTitle="상품 관리 ">
