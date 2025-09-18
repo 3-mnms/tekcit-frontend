@@ -46,6 +46,7 @@ export type TransferListItem = {
 export type TicketType = 'MOBILE' | 'PAPER';
 
 export type TicketDetailResponseDTO = {
+  userName: string;
   id: number;
   reservationNumber: string;   
   performanceDate: string;  
@@ -55,5 +56,6 @@ export type TicketDetailResponseDTO = {
   posterFile: string;
   festivalId: string;
   fname: string;              
-  fcltynm: string;           
+  fcltynm: string; 
+  qrUsed: boolean;          
 };
