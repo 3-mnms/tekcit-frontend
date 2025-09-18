@@ -9,7 +9,7 @@ import type { Announcement, NewAnnouncement } from '@/models/admin/Announcement'
 import { getAnnouncements, updateAnnouncement, deleteAnnouncement, createAnnouncement } from '@/shared/api/admin/announcement';
 import Button from '@/components/common/Button';
 
-import {getProducts} from '@/shared/api/admin/festival'
+import {getProductsFull} from '@/shared/api/admin/festival'
 
 const AnnouncementListPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -25,9 +25,9 @@ const AnnouncementListPage: React.FC = () => {
   });
 
   const { data: festivals } = useQuery({
-    queryKey: ['festivals'],
-    queryFn: getProducts,
-    select: (response) => response.data || [],
+    queryKey: ['allFestivals'],
+    queryFn: getProductsFull,
+    select: (response) => response.data.data || [],
   });
 
   const saveMutation = useMutation({
@@ -49,7 +49,7 @@ const AnnouncementListPage: React.FC = () => {
     },
     onError: (error) => {
       const status = error.response?.status;
-      if (status === 500) {
+      if (status === 403) {
           alert('지금은 관리자 계정으로 로그인되어 있습니다. 다시 시도해주세요.');
       } else {
           console.error('상품 등록/수정 실패:', error);

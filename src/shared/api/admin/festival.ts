@@ -14,12 +14,17 @@ export const getProducts = async (page: number, size: number) => {
   return response.data;
 };
 
+export const getProductsFull = async () => {
+    const response = await api.get('/festival/manage');
+    return response.data;
+};
+
 export const getProductsAdmin = async (): Promise<Festival> => {
   const response = await api.get<Festival>('/festival/manage');
   if (response.data && !Array.isArray(response.data.data)) {
     return {
       ...response.data,
-      data: [response.data.data], // 삐약! 🐥 배열로 바꿔서 반환해요.
+      data: [response.data.data], 
     };
   }
   return response.data;
