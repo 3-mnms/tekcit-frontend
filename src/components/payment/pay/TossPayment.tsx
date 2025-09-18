@@ -26,7 +26,7 @@ export type TossPaymentHandle = {
     bookingId: string
     festivalId: string
     sellerId: number
-    complete?: (paymentData: { code: string | null; message?: string; paymentId: string }) => void
+    complete?: (paymentData: { paymentId: string, status?: string | null, message?: string | null  }) => void
   }) => Promise<void>
 }
 
@@ -60,7 +60,7 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
         // 이 부분은 `BookingPaymentPage`에서 수정해야 합니다.
         // 현재는 빌드 오류를 방지하기 위해 간단한 URL로 대체합니다.
         // const finalRedirect = `${window.location.origin}/payment/booking-result?status=${ok ? 'success' : 'fail'}}`
-        const finalRedirect = `${window.location.origin}/payment/booking-result?status=success`
+        // const finalRedirect = `${window.location.origin}/payment/booking-result?status=success`
 
         const dto: PaymentRequestDTO = {
           paymentId,
@@ -94,6 +94,7 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           await PortOne.requestPayment({
             storeId: STORE_ID,
             channelKey: CHANNEL_KEY,
+            bookingId,
             paymentId,
             orderName,
             totalAmount: amount,
