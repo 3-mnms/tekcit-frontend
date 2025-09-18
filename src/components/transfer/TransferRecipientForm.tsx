@@ -11,8 +11,13 @@ import { useTekcitPayAccountQuery } from '@/models/transfer/tanstack-query/useTe
 import { isNoTekcitPayAccountError } from '@/shared/api/transfer/tekcitPay';
 import { Users } from 'lucide-react'
 
-
 type Relation = 'FAMILY' | 'FRIEND' | null;
+
+// ✅ 라우팅 state 타입 (양도 페이지 진입 시 함께 넘어오는 값)
+type TransferNavigateState = {
+  reservationNumber?: string;
+  othersTransferAvailable?: boolean; // 지인 양도 가능 여부
+};
 
 function toRrn7WithHyphen(input?: string): string {
   const raw = (input ?? '').toString().trim();
@@ -62,9 +67,15 @@ const POPUP_WIDTH = 520;
 const POPUP_HEIGHT = 720;
 
 const TransferRecipientForm: React.FC<Props> = (props) => {
+  const navigate = useNavigate();
+
+  // ✅ 라우팅 state에서 othersTransferAvailable 가져오기
+  const location = useLocation();
+  const navState = (location.state ?? null) as TransferNavigateState | null;
+  const othersTransferAvailableFromNav = navState?.othersTransferAvailable;
+
   const propName = props.currentName?.trim();
   const propRrn7 = props.currentRrn7?.trim();
-  const navigate = useNavigate();
 
   const needFetchMe = !(propName && propRrn7);
   const { data: me, isLoading: meLoading, isError: meError, error: meErr } = useTransferor({ enabled: needFetchMe });
@@ -208,9 +219,10 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
         setProgress(100);
 
         setHintMsg(ok ? null : (result?.message ?? '인증에 실패했어요.'));
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!cancelled) {
-          setErrorMsg(err?.message || 'OCR 인증 실패');
+          const e = err as Error;
+          setErrorMsg(e?.message || 'OCR 인증 실패');
           setVerifyOk(false);
           setVerifyDone(true);
           setProgress(100);
@@ -228,13 +240,11 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
     };
   }, [modalOpen, previewLoading, relation, tempFile, donorName, donorRrn7, name, recipientRrn7, verifyFamily]);
 
-  function pickErr(e: any) {
-    const status = e?.response?.status ?? e?.status;
-    const code = e?.response?.data?.errorCode || e?.response?.data?.code;
-    const message =
-      e?.response?.data?.message ||
-      e?.message ||
-      '';
+  function pickErr(e: unknown) {
+    const anyE = e as { response?: { status?: number; data?: { errorCode?: string; code?: string; message?: string } }, status?: number, message?: string };
+    const status = anyE?.response?.status ?? anyE?.status;
+    const code = anyE?.response?.data?.errorCode || anyE?.response?.data?.code;
+    const message = anyE?.response?.data?.message || anyE?.message || '';
     return { status, code, message };
   }
 
@@ -277,7 +287,7 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
         'color:#16a34a;font-weight:700',
         { reservationNumber: props.reservationNumber, recipientId, transferType }
       );
-    } catch (e: any) {
+    } catch (e: unknown) {
       const { status, code, message } = pickErr(e);
 
       const msgHasTransferOnce =
@@ -312,7 +322,7 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
       if (ev.origin !== window.location.origin) return;
       if (!ev.data || typeof ev.data !== 'object') return;
 
-      if (ev.data.type === 'TEKCIT_PAY_ACCOUNT_CREATED') {
+      if ((ev.data as { type?: string }).type === 'TEKCIT_PAY_ACCOUNT_CREATED') {
         try {
           const res = await refetchAccount();
           if (res?.data) {
@@ -365,7 +375,7 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
           await submitRequest();
           props.onNext?.();
         }
-      } catch (e) {
+      } catch {
         // keep polling
       }
     }, 2000);
@@ -377,7 +387,7 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
     if (meError)
       return (
         <div className={styles.card} style={{ color: '#b91c1c' }}>
-          내 정보 조회 실패: {(meErr as any)?.message ?? '알 수 없는 오류'}
+          내 정보 조회 실패: {(meErr as { message?: string })?.message ?? '알 수 없는 오류'}
         </div>
       );
   }
@@ -386,6 +396,12 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
+
+    // ✅ 지인(FRIEND) 선택 시, 15분 경과로 지인 양도 불가한 상태면 바로 차단
+    if (relation === 'FRIEND' && othersTransferAvailableFromNav === false) {
+      alert('15분이 지나 지인에게 양도가 불가합니다.');
+      return;
+    }
 
     try {
       if (relation === 'FAMILY') {
@@ -402,13 +418,14 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
         props.onNext?.();
         return;
       }
-      if (isNoTekcitPayAccountError(res.error as any)) {
+      if (isNoTekcitPayAccountError(res.error as unknown)) {
         openTekcitPayJoinPopup();
         return;
       }
       throw (res.error || new Error('계정 조회 실패'));
-    } catch (err: any) {
-      alert(err?.message || '양도 요청 중 오류가 발생했어요.');
+    } catch (err) {
+      const e2 = err as Error & { message?: string };
+      alert(e2?.message || '양도 요청 중 오류가 발생했어요.');
     }
   };
 
@@ -439,6 +456,13 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
           친구에게
         </label>
       </div>
+
+      {/* (선택) 배너: 지인 양도 불가 안내 */}
+      {othersTransferAvailableFromNav === false && (
+        <div className={styles.bannerWarn} role="alert" aria-live="polite">
+          현재 이 예약건은 15분이 지나 지인에게 양도가 불가합니다.
+        </div>
+      )}
 
       {/* 전송할 EMAIL */}
       <label className={styles.label}>
