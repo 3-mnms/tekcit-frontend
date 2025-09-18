@@ -70,13 +70,14 @@ export default function ResultLayout({
                 >
                   확인
                 </Button>
-                <Button
+                {/* 환불 페이지에서는 '예매 티켓 확인' 버튼이 필요 없으므로 조건부 렌더링 */}
+                {/* <Button
                   onClick={handleGoToTickets}
                   variant="primary"
                   className={styles.primaryButton}
                 >
                   예매 티켓 확인
-                </Button>
+                </Button> */}
               </div>
             </>
           ) : (
@@ -110,6 +111,13 @@ export default function ResultLayout({
                   className={styles.secondaryButton}
                 >
                   확인
+                </Button>
+                <Button
+                  onClick={handleRetry}
+                  variant="primary"
+                  className={styles.primaryButton}
+                >
+                  다시 시도
                 </Button>
               </div>
             </>
