@@ -7,22 +7,13 @@ import IdSearchModal, { type AccountMini } from './IdSearchModal';
 import { useVerifyFamilyCert, useTransferor, useRequestTransfer } from '@/models/transfer/tanstack-query/useTransfer';
 import { normalizeRrn7 } from '@/shared/api/transfer/userApi';
 import type { PersonInfo } from '@/models/transfer/transferTypes';
-
-// ⬇️ 테킷페이
 import { useTekcitPayAccountQuery } from '@/models/transfer/tanstack-query/useTekcitPay';
 import { isNoTekcitPayAccountError } from '@/shared/api/transfer/tekcitPay';
+import { Users } from 'lucide-react'
+
 
 type Relation = 'FAMILY' | 'FRIEND' | null;
 
-/** 'YYMMDD-#' 또는 'YYMMDD#' → {front6, back1} */
-function parseRrn7(input?: string): { front6?: string; back1?: string } {
-  const raw = (input ?? '').toString().trim();
-  const m = raw.match(/^(\d{6})-?(\d)$/);
-  if (!m) return {};
-  return { front6: m[1], back1: m[2] };
-}
-
-/** 'YYMMDD-#'로 강제 표준화 */
 function toRrn7WithHyphen(input?: string): string {
   const raw = (input ?? '').toString().trim();
   const m = raw.match(/^(\d{6})-?(\d)$/);
@@ -423,7 +414,8 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
 
   return (
     <form className={styles.card} onSubmit={handleSubmit}>
-      <h2 className={styles.title}>양도자 선택</h2>
+      <h2 className={styles.title}><Users className={styles.iconTitle} aria-hidden />
+        양도/환불 안내</h2>
 
       <div className={styles.radioRow}>
         <label className={styles.radio}>
