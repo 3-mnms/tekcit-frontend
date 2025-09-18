@@ -231,6 +231,12 @@
   height: 80px;
 }
 
+.courseRow:hover {
+  border-color: #cfe0ff;
+  box-shadow: 0 10px 28px rgba(77, 154, 253, 0.12);
+  transform: translateY(-1px);
+}
+
 .courseAccent {
   border-left: 7px solid #4968ce;
 }
