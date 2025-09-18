@@ -298,7 +298,6 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  margin-top: -70px;
 }
 
 .mapHeader {
@@ -327,7 +326,7 @@
 
 .mapBox {
   width: 100%;
-  height: 60vh;
+  height: 57vh;
 }
 
 .error,
