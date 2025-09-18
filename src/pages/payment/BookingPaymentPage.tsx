@@ -166,6 +166,7 @@ const BookingPaymentPage: React.FC = () => {
   };
 
   const handlePostPayment = async (paymentId: string) => {
+    setIsPaying(true)
     if (!checkout.bookingId) {
       console.error('결제 후 처리 실패: 예약번호가 존재하지 않습니다.');
       setErr('예약번호가 존재하지 않습니다.');
