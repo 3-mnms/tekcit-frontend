@@ -111,8 +111,12 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
             payMethod: PayMethod.CARD,
             redirectUrl: finalRedirect,
           })
+          console.log("portOneResult : ", portOneResult);
           if (portOneResult?.code === 'success') {
+            
+            console.log("args complete 준비 : ");
             if(args.complete){
+              console.log("args complete 실행 : ");
               args.complete({
                 paymentId: paymentId,
                 status:   'success' ,
