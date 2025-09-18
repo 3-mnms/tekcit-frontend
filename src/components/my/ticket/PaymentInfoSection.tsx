@@ -9,7 +9,7 @@ import { Calendar, CreditCard, Receipt, RefreshCw } from 'lucide-react'
 type Props = {
   bookingId: string
   reservationNumber: string
-  qrUsed: string
+  qrUsed: boolean
 }
 
 const methodLabel = (m?: string) => {
