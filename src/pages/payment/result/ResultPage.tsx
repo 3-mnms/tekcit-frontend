@@ -1,4 +1,3 @@
-// src/pages/payment/ResultPage.tsx
 import { useEffect, useMemo, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
@@ -49,14 +48,14 @@ export default function ResultPage() {
     status: sp.get('status') ?? undefined,
     paymentId: sp.get('paymentId') ?? undefined,
   })
-  const type = (parsed.success ? parsed.data.type : undefined) as ResultType | undefined
-  const status = (parsed.success ? parsed.data.status : undefined) as ResultStatus | undefined
-  const paymentId = (parsed.success ? parsed.data.paymentId : undefined) as string | undefined
+  const type = (parsed.success ? parsed.data.type : undefined)
+  const status = (parsed.success ? parsed.data.status : undefined)
+  const paymentId = (parsed.success ? parsed.data.paymentId : undefined)
 
-  // booking/transfer는 서버 승인 확인 필요
+  const isSuccess = status === 'success'
+
   const needConfirm = type === 'booking' || type === 'transfer'
 
-  // 대기 해제 로직 (기존 유지)
   const releaseMut = useReleaseWaitingMutation()
   const releasedOnceRef = useRef(false)
   useEffect(() => {
@@ -83,7 +82,6 @@ export default function ResultPage() {
     }
   }, [type, releaseMut])
 
-  // 서버 승인 확인
   const firedRef = useRef(false)
   const confirmMut = useMutation({
     mutationFn: async () => {
@@ -103,18 +101,24 @@ export default function ResultPage() {
     if (!needConfirm) return
     if (!paymentId) return
     if (firedRef.current) return
-    if (status === 'fail') return // 실패로 들어온 경우 그대로 둠
-
+    if (status === 'fail') return
     firedRef.current = true
     confirmMut.mutate()
   }, [needConfirm, paymentId, status, confirmMut])
 
-  // 뷰 계산
   const view = useMemo(() => {
     if (type && status) {
-      return RESULT_CONFIG[type]?.[status] ?? null
+      const config = RESULT_CONFIG[type]?.[status]
+      if (!config) return null
+      return {
+        title: config.title,
+        message: config.message,
+        primary: config.primary,
+        isSuccess: status === 'success',
+        warningMessage: config.warning, // warning 속성 추가
+      }
     }
-    return null // status 확정 전에는 아무 것도 안 보여줌
+    return null
   }, [type, status])
 
   return view ? <ResultLayout {...view} /> : null
