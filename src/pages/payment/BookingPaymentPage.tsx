@@ -19,7 +19,6 @@ import { createPaymentId } from '@/models/payment/utils/paymentUtils';
 import { saveBookingSession } from '@/shared/api/payment/paymentSession';
 import { fetchBookingDetail } from '@/shared/api/payment/bookingDetail';
 
-// completePayment는 이제 PG 결제 로직에서만 사용됩니다.
 import { completePayment, getReservationStatus, requestPayment } from '@/shared/api/payment/payments';
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery';
 import { useReleaseWaitingMutation } from '@/models/waiting/tanstack-query/useWaiting';
@@ -88,6 +87,8 @@ const BookingPaymentPage: React.FC = () => {
       const id = createPaymentId();
       setPaymentId(id);
       if (checkout?.bookingId && checkout?.festivalId && sellerId) {
+        // 💡 디버깅: saveBookingSession 시작
+        console.log('API 요청 시작: saveBookingSession', { paymentId: id });
         saveBookingSession({
           paymentId: id,
           bookingId: checkout.bookingId,
@@ -96,6 +97,7 @@ const BookingPaymentPage: React.FC = () => {
           amount: finalAmount,
           createdAt: Date.now(),
         });
+        // NOTE: saveBookingSession은 응답이 없으므로 완료 로그는 불필요
       }
     }
   }, [paymentId, checkout, finalAmount, sellerId]);
@@ -104,19 +106,26 @@ const BookingPaymentPage: React.FC = () => {
   useEffect(() => {
     (async () => {
       try {
+        // 💡 디버깅: fetchBookingDetail 시작
+        console.log('API 요청 시작: fetchBookingDetail', { festivalId: checkout.festivalId, bookingId: checkout.bookingId });
         const res = await fetchBookingDetail({
           festivalId: checkout.festivalId,
           performanceDate: checkout.performanceDate,
           reservationNumber: checkout.bookingId,
         });
-        if (!res.success) throw new Error(res.message || '상세 조회 실패');
+        if (!res.success) {
+          console.error('API 응답 실패: fetchBookingDetail', res.message);
+          throw new Error(res.message || '상세 조회 실패');
+        }
         const sid = (res.data?.sellerId ?? res.data?.sellerId) as number | undefined;
-        if (!sid) throw new Error('sellerId 누락');
+        if (!sid) {
+          console.error('API 응답 오류: sellerId 누락', res.data);
+          throw new Error('sellerId 누락');
+        }
         setSellerId(sid);
+        console.log('API 요청 성공: fetchBookingDetail', { sellerId: sid });
       } catch (e) {
-        // console.error('예매 상세 조회 실패', e)
-        // alert('결제 정보를 불러오지 못했습니다.')
-        // navigate(-1)
+        console.error('API 요청 실패: 예매 상세 조회 실패', e);
       }
     })();
   }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate]);
@@ -157,6 +166,7 @@ const BookingPaymentPage: React.FC = () => {
 
   const handlePostPayment = async (paymentId: string) => {
     if (!checkout.bookingId) {
+      console.error('결제 후 처리 실패: 예약번호가 존재하지 않습니다.');
       setErr('예약번호가 존재하지 않습니다.');
       routeToResult(false);
       return;
@@ -164,18 +174,27 @@ const BookingPaymentPage: React.FC = () => {
 
     try {
       setIsPaying(true);
+      // 💡 디버깅: completePayment 시작
+      console.log('API 요청 시작: completePayment', { paymentId });
       await completePayment(paymentId);
+      console.log('API 요청 성공: completePayment');
+
       await new Promise(resolve => setTimeout(resolve, 10000));
+
+      // 💡 디버깅: getReservationStatus 시작
+      console.log('API 요청 시작: getReservationStatus', { bookingId: checkout.bookingId });
       const statusRes = await getReservationStatus(checkout.bookingId);
 
       if (statusRes.data === 'COMPLETED' || statusRes.data === 'CONFIRMED') {
+        console.log('API 요청 성공: 예약 상태 확인 (완료)');
         routeToResult(true);
       } else {
+        console.error('API 응답 오류: 예약 상태가 실패입니다.', statusRes.data);
         setErr('예약 처리에 실패했습니다. 고객센터에 문의해주세요.');
         routeToResult(false);
       }
     } catch (e) {
-      console.error('결제 후 처리에 실패했습니다.', e);
+      console.error('API 요청 실패: 결제 후 처리', e);
       setErr('결제 후 처리에 실패했습니다. 고객센터에 문의해주세요.');
       routeToResult(false);
     } finally {
@@ -207,11 +226,12 @@ const BookingPaymentPage: React.FC = () => {
       setErr('로그인이 필요합니다.');
       return;
     }
-
     setIsPaying(true);
 
     try {
       if (openedMethod === 'wallet') {
+        // 💡 디버깅: 지갑 결제 API 요청 시작
+        console.log('API 요청 시작: requestPayment (지갑)', { paymentId: ensuredId, userId });
         const dto = {
           paymentId: ensuredId,
           bookingId: checkout.bookingId ?? null,
@@ -224,6 +244,7 @@ const BookingPaymentPage: React.FC = () => {
           payMethod: 'POINT_PAYMENT',
         };
         await requestPayment(dto, userId!);
+        console.log('API 요청 성공: requestPayment (지갑)');
         setIsPaying(false);
         setIsPasswordModalOpen(true);
         return;
@@ -237,9 +258,14 @@ const BookingPaymentPage: React.FC = () => {
         festivalId: festivalIdVal,
         sellerId: sellerId!,
         complete: (paymentData) => {
+          // 💡 디버깅: toss complete 콜백 호출 로그
+          console.log('Toss complete 콜백 함수 호출됨', paymentData);
+
           if (paymentData.code === null) {
+            console.log('Toss 결제 성공: handlePostPayment 호출');
             handlePostPayment(paymentData.paymentId);
           } else {
+            console.error('Toss 결제 실패', paymentData.message);
             setErr(paymentData.message || '결제에 실패했습니다.');
             routeToResult(false);
           }
@@ -315,21 +341,25 @@ const BookingPaymentPage: React.FC = () => {
           onComplete={async () => {
             setIsPasswordModalOpen(false);
             setIsPaying(true);
+            // 💡 디버깅: 지갑 결제 onComplete 로직 시작
+            console.log('지갑 결제 완료 모달: onComplete 시작');
 
-            // ⭐ 대기 시간을 20초로 늘려서 백엔드 처리 시간을 충분히 확보
             await new Promise(resolve => setTimeout(resolve, 10000));
 
             try {
+              console.log('API 요청 시작: getReservationStatus (지갑 onComplete)');
               const statusRes = await getReservationStatus(checkout.bookingId);
 
               if (statusRes.data === 'COMPLETED' || statusRes.data === 'CONFIRMED') {
+                console.log('API 요청 성공: 예약 상태 확인 (지갑 완료)');
                 routeToResult(true);
               } else {
+                console.error('API 응답 오류: 지갑 결제 후 예약 상태가 실패입니다.');
                 setErr('예약 처리에 실패했습니다. 고객센터에 문의해주세요.');
                 routeToResult(false);
               }
             } catch (e) {
-              console.error('예약 상태 확인에 실패했습니다.', e);
+              console.error('API 요청 실패: 지갑 결제 후 예약 상태 확인', e);
               setErr('예약 상태 확인에 실패했습니다. 고객센터에 문의해주세요.');
               routeToResult(false);
             } finally {

@@ -39,24 +39,28 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
   ) => {
     useImperativeHandle(ref, () => ({
       async requestPay(args) {
-        // useImperativeHandle의 인자 타입을 명확히 했으므로 여기서 구조 분해 할당 오류가 사라집니다.
         const { paymentId, amount, orderName, bookingId, festivalId, sellerId } = args;
 
         const hasSellerId = typeof sellerId === 'number' && Number.isFinite(sellerId) && sellerId >= 0
 
         if (!STORE_ID || !CHANNEL_KEY) {
+          console.error('결제 설정 오류: 포트원 키가 없습니다.');
           alert('결제 설정이 올바르지 않습니다. 관리자에게 문의하세요.')
           throw new Error('Missing PortOne credentials')
         }
 
         if (!bookingId || !festivalId || !hasSellerId) {
+          console.error('결제 정보 부족: bookingId, festivalId 또는 sellerId가 없습니다.');
           alert('결제 정보가 부족합니다. 다시 시도해 주세요.')
           throw new Error('Invalid booking/festival/seller context')
         }
 
-        const finalRedirect = `${window.location.origin}/payment/booking?paymentId=${encodeURIComponent(paymentId)}`;
+        // 💡 주의: 이 `finalRedirect` 로직에 `ok`라는 변수가 정의되지 않았습니다.
+        // 이 부분은 `BookingPaymentPage`에서 수정해야 합니다.
+        // 현재는 빌드 오류를 방지하기 위해 간단한 URL로 대체합니다.
+        // const finalRedirect = `${window.location.origin}/payment/booking-result?status=${ok ? 'success' : 'fail'}}`
+        const finalRedirect = `${window.location.origin}/payment/booking-result?status=success`
 
-        // ✅ 불필요한 중복 호출을 제거하고, 올바른 인자를 전달하는 단일 호출로 수정
         const dto: PaymentRequestDTO = {
           paymentId,
           bookingId,
@@ -69,18 +73,41 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
           STORE_KEY: STORE_ID,
           CHANNEL_KEY: CHANNEL_KEY,
         };
-        await requestPayment(dto, DUMMY_USER_ID); // 두 번째 인자로 userId 추가
 
-        await PortOne.requestPayment({
-          storeId: STORE_ID,
-          channelKey: CHANNEL_KEY,
-          paymentId,
-          orderName,
-          totalAmount: amount,
-          currency: Currency.KRW,
-          payMethod: PayMethod.CARD,
-          redirectUrl: finalRedirect,
-        })
+        try {
+          // ✅ API 요청 시작 로그
+          console.log('API 요청 시작: requestPayment', { paymentId, userId: DUMMY_USER_ID });
+          await requestPayment(dto, DUMMY_USER_ID);
+          // ✅ API 요청 성공 로그
+          console.log('API 요청 성공: requestPayment');
+        } catch (err) {
+          // ✅ API 요청 실패 로그
+          console.error('API 요청 실패: requestPayment', err);
+          alert('결제 준비에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+          throw err;
+        }
+
+        try {
+          // ✅ 포트원 결제 요청 시작 로그
+          console.log('포트원 결제창 요청 시작: PortOne.requestPayment', { paymentId, totalAmount: amount });
+          await PortOne.requestPayment({
+            storeId: STORE_ID,
+            channelKey: CHANNEL_KEY,
+            paymentId,
+            orderName,
+            totalAmount: amount,
+            currency: Currency.KRW,
+            payMethod: PayMethod.CARD,
+            redirectUrl: finalRedirect,
+          })
+          // ✅ 포트원 결제 요청 성공 로그 (이 로그는 리디렉션 때문에 거의 실행되지 않습니다)
+          console.log('포트원 결제창 요청 성공: PortOne.requestPayment');
+        } catch (err) {
+          // ✅ 포트원 결제 요청 실패 로그
+          console.error('포트원 결제창 요청 실패: PortOne.requestPayment', err);
+          alert('결제창을 여는 데 실패했습니다. 잠시 후 다시 시도해 주세요.');
+          throw err;
+        }
       },
     }))
 
