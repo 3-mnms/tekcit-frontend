@@ -9,7 +9,7 @@ import { GrFormPrevious } from "react-icons/gr";
 import { GrFormNext } from "react-icons/gr";
 import styles from './ProductManagePage.module.css';
 import Spinner from '@/components/common/spinner/Spinner';
-import { getProducts } from '@/shared/api/admin/festival';
+import { getProductsFull } from '@/shared/api/admin/festival';
 import type { Festival } from '@/models/admin/festival';
 
 const ProductManagePage: React.FC = () => {
@@ -17,7 +17,6 @@ const ProductManagePage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const [page, setPage] = useState(0); 
-    const pageSize = 13;
 
     const { 
         data: allProducts,
@@ -25,7 +24,7 @@ const ProductManagePage: React.FC = () => {
         isError,
     } = useQuery({
         queryKey: ['products', page], 
-        queryFn: () => getProducts(page, pageSize), 
+        queryFn: () => getProductsFull(page), 
         select: (response) => {
             const festivalList = response?.data;
 

@@ -14,8 +14,8 @@ export const getProducts = async (page: number, size: number) => {
   return response.data;
 };
 
-export const getProductsFull = async () => {
-    const response = await api.get('/festival/manage');
+export const getProductsFull = async (page:number) => {
+    const response = await api.get(`/festival/manage?page=${page}&size=15`);
     return response.data;
 };
 
@@ -73,7 +73,6 @@ export const deleteProduct = async (fid: string): Promise<void> => {
  * @param fid 조회할 공연의 ID
  */
 export const getProductDetail = async (fid: string): Promise<Festival> => {
-    console.log(`삐약! ${fid}번 공연 상세 정보를 서버에 요청해요!`);
     const response = await api.get<Festival>(`/festival/manage/${fid}`);
     return response.data;
 };
