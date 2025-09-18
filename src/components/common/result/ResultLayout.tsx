@@ -1,18 +1,23 @@
-// src/pages/result/ResultLayout.tsx
 import { useNavigate } from 'react-router-dom'
+import Button from '@/components/common/button/Button'
+import styles from '@/pages/payment/result/BookingResultPage.module.css'
 
 export default function ResultLayout({
-  title, message, primary,
+  title,
+  message,
+  primary,
+  isSuccess,
+  warningMessage,
 }: {
   title: string
   message: string
   primary: { label: string; to: string }
+  isSuccess: boolean
+  warningMessage?: string
 }) {
   const navigate = useNavigate()
 
-  // 확인 버튼 클릭 시: 팝업이면 닫고, 아니면 내부 라우팅
   const handleConfirm = () => {
-    // window.opener가 존재하고 부모 창이 살아있으면 팝업으로 간주
     if (typeof window !== 'undefined' && window.opener && !window.opener.closed) {
       window.close()
     } else {
@@ -20,14 +25,96 @@ export default function ResultLayout({
     }
   }
 
+  const handleGoToTickets = () => {
+    navigate('/mypage/ticket/history')
+  }
+
+  const handleRetry = () => {
+    navigate(-1)
+  }
+
   return (
-    <div className="mx-auto max-w-[520px] h-[700px] p-8 text-center flex flex-col justify-center items-center">
-      <h2 className="text-2xl font-bold mb-2">{title}</h2>
-      <p className="text-gray-600 mb-8">{message}</p>
-      <div className="flex gap-3 justify-center items-center">
-        <button className="px-5 py-3 rounded-xl border" onClick={handleConfirm}>
-          확인
-        </button>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.card}>
+          {isSuccess ? (
+            <>
+              <div className={styles.iconSuccess}>
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                  <circle cx="40" cy="40" r="40" fill="#22C55E"/>
+                  <path 
+                    d="M25 40L35 50L55 30" 
+                    stroke="white" 
+                    strokeWidth="4" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              <h1 className={styles.title}>{title}</h1>
+              <p className={styles.message}>
+                {message}
+              </p>
+              {warningMessage && (
+                <div className={styles.infoBox}>
+                  <p className={styles.infoText}>
+                    {warningMessage}
+                  </p>
+                </div>
+              )}
+              <div className={styles.buttons}>
+                <Button 
+                  onClick={handleConfirm}
+                  variant="outline"
+                  className={styles.secondaryButton}
+                >
+                  확인
+                </Button>
+                <Button
+                  onClick={handleGoToTickets}
+                  variant="primary"
+                  className={styles.primaryButton}
+                >
+                  예매 티켓 확인
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.iconFail}>
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                  <circle cx="40" cy="40" r="40" fill="#EF4444"/>
+                  <path 
+                    d="M30 30L50 50M50 30L30 50" 
+                    stroke="white" 
+                    strokeWidth="4" 
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+              <h1 className={styles.title}>{title}</h1>
+              <p className={styles.message}>
+                {message}
+              </p>
+              {warningMessage && (
+                <div className={styles.warningBox}>
+                  <p className={styles.warningText}>
+                    {warningMessage}
+                  </p>
+                </div>
+              )}
+              <div className={styles.buttons}>
+                <Button 
+                  onClick={handleConfirm}
+                  variant="outline"
+                  className={styles.secondaryButton}
+                >
+                  확인
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )
