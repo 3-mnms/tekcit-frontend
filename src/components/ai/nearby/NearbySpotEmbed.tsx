@@ -43,7 +43,6 @@ export default function NearbySpotEmbed({
       })),
     [rec?.hotPlaces, festival.lat, festival.lng],
   )
-  console.log("play", playItems)
 
   const eatItems: PlayEatSpot[] = useMemo(
     () =>

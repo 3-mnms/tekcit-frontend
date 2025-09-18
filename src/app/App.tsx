@@ -11,8 +11,6 @@ export default function App() {
   const noChat = useNoChatWidget();
 
   useEffect(() => {
-    console.log("📡 포그라운드 메시지 리스너 등록");
-
     // ✅ 실시간 리스너 등록
     const unsubscribe = onMessage(messaging, (payload) => {
       console.log("📩 포그라운드 알림 도착:", payload);
@@ -34,7 +32,6 @@ export default function App() {
 
     // ✅ cleanup (메모리 누수 방지)
     return () => {
-      console.log("❌ 포그라운드 메시지 리스너 해제");
       unsubscribe();
     };
   }, []);

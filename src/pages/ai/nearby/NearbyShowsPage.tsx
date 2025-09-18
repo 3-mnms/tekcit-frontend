@@ -92,7 +92,6 @@ const NearbyShowsPage: React.FC = () => {
     return typeof candidate === 'string' && candidate.trim().length > 0
   }, [defaultAddr])
 
-  // 기본 주소 없으면 이동
   useEffect(() => {
     if (isAddrLoading) return
     if (!hasDefaultAddress) {
