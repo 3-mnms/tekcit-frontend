@@ -9,6 +9,7 @@ import { Calendar, CreditCard, Receipt, RefreshCw } from 'lucide-react'
 type Props = {
   bookingId: string
   reservationNumber: string
+  qrUsed: string
 }
 
 const methodLabel = (m?: string) => {
@@ -59,7 +60,7 @@ function normalizeOrder(input: any): any | undefined {
   return undefined
 }
 
-const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) => {
+const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber, qrUsed }) => {
   const navigate = useNavigate()
   const { data, isLoading, isError } = usePaymentOrdersQuery(bookingId)
   const order = useMemo(() => normalizeOrder(data), [data])
@@ -67,7 +68,8 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
   const getMethodIcon = (m?: string) => {
     const label = methodLabel(m)
     if (label.includes('포인트')) return <Receipt className={styles.icon16} />
-    if (label.includes('신용') || label.includes('체크카드')) return <CreditCard className={styles.icon16} />
+    if (label.includes('신용') || label.includes('체크카드'))
+      return <CreditCard className={styles.icon16} />
     return <RefreshCw className={styles.icon16} />
   }
 
@@ -77,7 +79,15 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
   const isPaid = status === 'paid'
   const statusText = isPaid ? '결제완료' : isCanceled ? '환불완료' : '결제대기'
 
-  const canRefund = Boolean(order?.paymentId) && isPaid
+  const isQrUsed = useMemo(() => {
+    const v = String(qrUsed ?? '')
+      .trim()
+      .toLowerCase()
+    return v === 'true' || v === 'y' || v === 'yes' || v === '1'
+  }, [qrUsed])
+
+  const canRefund = Boolean(order?.paymentId) && isPaid && !isCanceled && !isQrUsed
+
   const onRefund = () => {
     if (!canRefund) return
     const paymentId = order.paymentId ?? order.id ?? order.paymentid
@@ -103,7 +113,9 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
       <section className={styles.card} aria-label="결제내역">
         <div className={styles.head}>
           <div className={styles.headL}>
-            <span className={styles.iconBadge}><Receipt className={styles.icon14} /></span>
+            <span className={styles.iconBadge}>
+              <Receipt className={styles.icon14} />
+            </span>
             <span className={styles.headTitle}>예매 결제내역</span>
           </div>
           <span className={`${styles.pill} ${styles.pillGray}`}>결제대기</span>
@@ -117,7 +129,9 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
       <section className={styles.card} aria-label="결제내역">
         <div className={styles.head}>
           <div className={styles.headL}>
-            <span className={styles.iconBadge}><Receipt className={styles.icon14} /></span>
+            <span className={styles.iconBadge}>
+              <Receipt className={styles.icon14} />
+            </span>
             <span className={styles.headTitle}>예매 결제내역</span>
           </div>
           <span className={`${styles.pill} ${styles.pillGray}`}>결제대기</span>
@@ -129,13 +143,12 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
 
   return (
     <section className={styles.card} aria-label="결제내역">
-      {/* 헤더 */}
       <div className={styles.head}>
         <div className={styles.headL}>
           <span className={styles.iconBadge}>
             <Receipt className={styles.icon14} />
           </span>
-        <span className={styles.headTitle}>예매 결제내역</span>
+          <span className={styles.headTitle}>예매 결제내역</span>
         </div>
         <span
           className={`${styles.pill} ${
@@ -146,9 +159,7 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
         </span>
       </div>
 
-      {/* 본문 그리드 (참고 코드 레이아웃) */}
       <div className={styles.grid}>
-        {/* 예매일 */}
         <div className={styles.item}>
           <Calendar className={styles.icon18Muted} />
           <div>
@@ -157,7 +168,6 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
           </div>
         </div>
 
-        {/* 결제수단 */}
         <div className={styles.item}>
           <span className={styles.icon18Wrap}>{getMethodIcon(order.payMethod)}</span>
           <div>
@@ -166,7 +176,6 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
           </div>
         </div>
 
-        {/* 예매번호 */}
         <div className={styles.item}>
           <Receipt className={styles.icon18Muted} />
           <div>
@@ -175,7 +184,6 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
           </div>
         </div>
 
-        {/* 결제금액 */}
         <div className={styles.item}>
           <span className={styles.wonCircle}>₩</span>
           <div>
@@ -185,13 +193,13 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) =
         </div>
       </div>
 
-      {/* 구분선 */}
       <div className={styles.divider} />
 
-      {/* 액션 */}
       <div className={styles.actions}>
         {isCanceled ? (
           <span className={styles.badgeGray}>환불완료</span>
+        ) : isQrUsed ? (
+          <span className={styles.badgeGray}>사용완료 · 환불불가</span>
         ) : (
           <button
             type="button"

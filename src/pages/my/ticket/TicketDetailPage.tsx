@@ -1,5 +1,5 @@
 // src/pages/mypage/ticket/TicketDetailPage.tsx
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useParams, Navigate } from 'react-router-dom'
 import TicketInfoCard from '@/components/my/ticket/TicketInfoCard'
 import PaymentInfoSection from '@/components/my/ticket/PaymentInfoSection'
@@ -13,7 +13,6 @@ const TicketDetailPage: React.FC = () => {
   const { reservationNumber } = useParams<{ reservationNumber: string }>()
   const authReady = useAuthStore((s) => s.authReady)
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
-  const reserverName = useAuthStore((s) => s.user?.name ?? '')
 
   const { data, isLoading, isError, error } = useTicketDetailQuery(reservationNumber)
   
@@ -45,11 +44,12 @@ const TicketDetailPage: React.FC = () => {
               qrIds={data.qrId}
               address={data.address ?? undefined}
               posterFile={data.posterFile}
-              reserverName={reserverName}
+              reserverName={data.userName}
             />
             <PaymentInfoSection
               bookingId={data.reservationNumber}
               reservationNumber={data.reservationNumber}
+              qrUsed={data.qrUsed}
             />
           </>
         )}
