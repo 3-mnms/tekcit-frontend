@@ -5,7 +5,7 @@ import { router } from "./router/router";
 import TikiChatWidget from '@/components/ai/chatbot/TikiChatWidget';
 import useNoChatWidget from "@/models/ai/useNoChatWidget";
 import { onMessage } from "firebase/messaging";
-import { messaging } from "../firebase"; // getMessaging(app) 해서 export 해둔 객체
+import { messaging } from "../firebase";
 
 export default function App() {
   const noChat = useNoChatWidget();

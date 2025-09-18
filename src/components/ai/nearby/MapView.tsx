@@ -95,7 +95,7 @@ export default function MapView({ festival, items, active, selectedId, setSelect
         }
       }
 
-      items.slice(0, 3).forEach(s =>
+      items.slice(0, 5).forEach(s =>
         addMarker(s.id, s.lat, s.lng, s.name, s.address ?? festival.venue ?? '')
       )
 

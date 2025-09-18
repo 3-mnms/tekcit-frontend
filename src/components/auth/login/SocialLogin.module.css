@@ -26,11 +26,12 @@
   gap: 1rem;
   border-radius: 8px;
   padding: 0.5rem;
-  border: 1px solid #eab308;
-  background-color: #facc15;
+  /* border: 1px solid #eab308; */
+  background-color: #f5d418;
   font-size: 0.95rem;
   cursor: pointer;
   font-weight: 600;
+  height: 44px;
 }
 
 .icon {
