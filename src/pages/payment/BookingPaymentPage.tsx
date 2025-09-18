@@ -180,7 +180,7 @@ const BookingPaymentPage: React.FC = () => {
       await completePayment(paymentId);
       console.log('API 요청 성공: completePayment');
 
-      await new Promise(resolve => setTimeout(resolve, 10000));
+      await new Promise(resolve => setTimeout(resolve, 15000));
 
       // 💡 디버깅: getReservationStatus 시작
       console.log('API 요청 시작: getReservationStatus', { bookingId: checkout.bookingId });
@@ -349,7 +349,7 @@ const BookingPaymentPage: React.FC = () => {
             // 💡 디버깅: 지갑 결제 onComplete 로직 시작
             console.log('지갑 결제 완료 모달: onComplete 시작');
 
-            await new Promise(resolve => setTimeout(resolve, 10000));
+            await new Promise(resolve => setTimeout(resolve, 15000));
 
             try {
               console.log('API 요청 시작: getReservationStatus (지갑 onComplete)');
