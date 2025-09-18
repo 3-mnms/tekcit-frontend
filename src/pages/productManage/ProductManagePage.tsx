@@ -5,10 +5,10 @@ import Layout from '@/components/layout/Layout';
 import SearchBar from '@/components/common/SearchBox';
 import Table, {type Column} from '@/components/shared/Table';
 import Button from '@/components/common/Button';
-import { GrFormPrevious } from "react-icons/gr";
-import { GrFormNext } from "react-icons/gr";
+// import { GrFormPrevious } from "react-icons/gr";
+// import { GrFormNext } from "react-icons/gr";
 import styles from './ProductManagePage.module.css';
-import Spinner from '@/components/common/spinner/Spinner';
+
 import { getProductsFull } from '@/shared/api/admin/festival';
 import type { Festival } from '@/models/admin/festival';
 
@@ -16,44 +16,30 @@ const ProductManagePage: React.FC = () => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
 
-    const [page, setPage] = useState(0); 
+    // const [page, setPage] = useState(0); 
 
     const { 
-        data: allProducts,
-        isLoading, 
-        isError,
-    } = useQuery({
-        queryKey: ['products', page], 
-        queryFn: () => getProductsFull(page), 
-        select: (response) => {
-            const festivalList = response?.data;
-
-            if (!festivalList || !Array.isArray(festivalList)) {
-                return [];
-            }            
-            return festivalList.map(festival => ({
-                ...festival,
-                detail: {
-                    ...festival.detail,
-                    fcast: typeof festival.detail.fcast === 'string' 
-                        ? festival.detail.fcast.split(',').map(s => s.trim()) 
-                        : [],
-                }
-            }));
-        },
-        placeholderData: (previousData) => previousData,
-    });
+    data: allProducts, 
+    isLoading, 
+    isError 
+  } = useQuery({
+    queryKey: ['products-full'],
+    queryFn: getProductsFull,
+    staleTime: Infinity, // 한 번 불러온 데이터는 무한히 유효
+    select: (response) => {
+      // API 응답이 { data: [] } 형태이거나 바로 배열일 경우 모두 처리
+      return (response?.data && Array.isArray(response.data)) ? response.data : [];
+    },
+  });
 
     const filteredProducts = useMemo(() => {
-        const lowercasedTerm = searchTerm.toLowerCase();
-        if (!allProducts) return [];
-        if (!lowercasedTerm) return allProducts; 
-
-        return allProducts.filter(product =>
-            product.fname?.toLowerCase().includes(lowercasedTerm) ||
-            product.detail?.entrpsnmH?.toLowerCase().includes(lowercasedTerm)
-        );
-    }, [allProducts, searchTerm]);
+    const lowercasedTerm = searchTerm.toLowerCase();
+    return (allProducts || []).filter(
+      (product) =>
+        product.fname?.toLowerCase().includes(lowercasedTerm) ||
+        product.detail?.entrpsnmH?.toLowerCase().includes(lowercasedTerm)
+    );
+  }, [allProducts, searchTerm]);
 
     const handleRowClick = (item: Festival) => {
         navigate(`/admin/product-detail/${item.fid}`);
@@ -98,20 +84,16 @@ const ProductManagePage: React.FC = () => {
     ];
 
     if (isLoading) {
-        return <Spinner />
+        return <Layout subTitle="상품 관리"><div>삐약! 상품 목록을 불러오는 중...</div></Layout>;
     }
 
     if (isError) {
         return <Layout subTitle="상품 관리"><div>삐약! 오류가 발생했어요. 다시 시도해 주세요.</div></Layout>;
     }
 
-    const handleNextPage = () => {
-        setPage(prevPage => prevPage + 1);
-    };
-
-    const handlePrevPage = () => {
-        setPage(prevPage => Math.max(0, prevPage - 1));
-    };
+    console.log('삐약! allProducts:', allProducts);
+    console.log('삐약! filteredProducts:', filteredProducts);
+    console.log('삐약! filteredProducts length:', filteredProducts.length);
 
     return (
         <Layout subTitle="상품 관리 ">
@@ -128,12 +110,6 @@ const ProductManagePage: React.FC = () => {
                     onRowClick={handleRowClick}
                     getUniqueKey={(item) => item.fid}
                 />
-                <div className={styles.paginationControls}>
-                    <GrFormPrevious onClick={handlePrevPage} disabled={page === 0}/>
-
-                    <span>현재 페이지: {page + 1}</span>
-                    <GrFormNext onClick={handleNextPage}/>
-                </div>
             </div>
         </Layout>
     );

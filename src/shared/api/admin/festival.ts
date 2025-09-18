@@ -4,7 +4,7 @@ import { api } from '@/shared/config/axios';
 
 
 // 공연 조회
-export const getProducts = async (page: number, size: number) => {
+export const getProducts = async (page: number, size?: number) => {
   const response = await api.get('/festival/manage', {
     params: {
       page: page,
@@ -14,8 +14,8 @@ export const getProducts = async (page: number, size: number) => {
   return response.data;
 };
 
-export const getProductsFull = async (page:number) => {
-    const response = await api.get(`/festival/manage?page=${page}&size=15`);
+export const getProductsFull = async () => {
+    const response = await api.get(`/festival/manage`);
     return response.data;
 };
 

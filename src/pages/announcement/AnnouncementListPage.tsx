@@ -28,7 +28,7 @@ const AnnouncementListPage: React.FC = () => {
   const { data: festivals } = useQuery({
     queryKey: ['allFestivals'],
     queryFn: getProductsFull,
-    select: (response) => response.data.data || [],
+    select: (response) => response.data || [],
   });
 
   const saveMutation = useMutation({
