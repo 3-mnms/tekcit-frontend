@@ -66,7 +66,7 @@ export async function requestPayment(dto: PaymentRequestDTO, userId: number): Pr
   })
 }
 
-/** POST /api/payments/complete/{paymentId} (선택) */
+/** POST /api/payments/complete/{paymentId} */
 export async function completePayment(paymentId: string): Promise<void> {
   await api.post(`/payments/complete/${encodeURIComponent(paymentId)}`)
 }
