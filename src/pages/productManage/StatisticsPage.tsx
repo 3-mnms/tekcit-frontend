@@ -1,31 +1,25 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import Layout from '@components/layout/Layout'
-import { useQuery } from '@tanstack/react-query'
-import { getProducts as getProductsAdmin } from '@/shared/api/admin/festival'
-import {
-  getFestivalSchedules,
-  getBookingStatsData,
-  getUserStatsData,
-  getEntranceCount,
-} from '@/shared/api/admin/statistics'
-import StatisticsContent from '@/components/operatManage/statistics/StatisticsSection'
-import EntranceCount from '@/components/operatManage/statistics/EntranceCount'
-import styles from './StatisticsPage.module.css'
-import TicketProgressGraph from '@/components/operatManage/statistics/TicketProgressGraph'
-import { useNavigate, useParams } from 'react-router-dom'
-import Button from '@/components/common/Button'
+import React, {useEffect, useMemo, useState } from 'react';
+import Layout from '@components/layout/Layout';
+import { useQuery } from '@tanstack/react-query';
+import { getProductsFull as getProductsAdmin } from '@/shared/api/admin/festival'; 
+import { getFestivalSchedules, getBookingStatsData, getUserStatsData, getEntranceCount  } from '@/shared/api/admin/statistics'; 
+import StatisticsContent from '@/components/operatManage/statistics/StatisticsSection';
+import EntranceCount from '@/components/operatManage/statistics/EntranceCount'; 
+import styles from './StatisticsPage.module.css';
+import TicketProgressGraph from '@/components/operatManage/statistics/TicketProgressGraph';
+import { useNavigate, useParams } from 'react-router-dom';
+import {type Festival } from '@/models/admin/festival';
+import Button from '@/components/common/Button';
 
-type TabType = '통계' | '입장 인원 수 조회'
-
-const POLL_MS = 2000 
+type TabType = '통계' | '입장 인원 수 조회';
 
 const StatisticsPage: React.FC = () => {
-  const { fid } = useParams<{ fid: string }>()
-  const [activeTab, setActiveTab] = useState<TabType>('통계')
-  const [selectedSchedule, setSelectedSchedule] = useState<string | null>(null)
-  const navigate = useNavigate()
-
-  const { data: festival } = useQuery({
+  const { fid } = useParams<{ fid: string }>(); 
+  const [activeTab, setActiveTab] = useState<TabType>('통계');
+  const [selectedSchedule, setSelectedSchedule] = useState<string | null>(null);
+  const navigate = useNavigate();
+  
+  const { data: festival } = useQuery<Festival>({
     queryKey: ['festival', fid],
     queryFn: () => getProductsAdmin(0, 100), 
     select: (response) => response.data.find((f: any) => f.fid === fid),
@@ -134,12 +128,12 @@ const StatisticsPage: React.FC = () => {
           <StatisticsContent data={userStatsData.data} />
         </>
       )}
-
-      {activeTab === '입장 인원 수 조회' && entranceStatsData && (
+      {activeTab === '입장 인원 수 조회' && entranceStatsData  && festival && (
         <EntranceCount
-          count={entranceStatsData.data.checkedInCount}
-          totalCount={entranceStatsData.data.availableNOP}
-          title={festival?.fname || ''}
+          count={entranceStatsData.data.checkedInCount} 
+          totalCount={entranceStatsData.data.availableNOP} 
+          title={festival.fname}
+
         />
       )}
 
