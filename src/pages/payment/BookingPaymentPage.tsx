@@ -175,11 +175,12 @@ const BookingPaymentPage: React.FC = () => {
     }
 
     try {
-      setIsPaying(true);
       // 💡 디버깅: completePayment 시작
       console.log('API 요청 시작: completePayment', { paymentId });
       await completePayment(paymentId);
       console.log('API 요청 성공: completePayment');
+
+      setIsPaying(true);
 
       await new Promise(resolve => setTimeout(resolve, 15000));
 
