@@ -125,6 +125,7 @@ const RefundPage: React.FC = () => {
         {isRefundModalOpen && (
           <AlertModal
             title="환불 확인"
+            children="정말 환불 하시겠습니까?"
             onCancel={handleRefundModalCancel}
             onConfirm={handleRefundConfirm}
             confirmText="확인"

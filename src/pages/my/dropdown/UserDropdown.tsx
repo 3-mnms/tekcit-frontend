@@ -54,7 +54,11 @@ const UserDropdown: React.FC = () => {
       logout()
       setLoading(false)
       alert('로그아웃 되었습니다.')
-      navigate('/login')
+      if (window.location.pathname === "/") {
+      window.location.reload()
+    } else {
+      navigate("/", { replace: true })
+    }
     }
   }
 
