@@ -330,6 +330,7 @@ const BookingPaymentPage: React.FC = () => {
               type="button"
               className={styles.payButton}
               onClick={handlePayment}
+              disabled={isPaying} 
               aria-busy={isPaying}
             >
               결제하기
