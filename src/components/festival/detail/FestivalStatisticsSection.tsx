@@ -38,7 +38,7 @@ const FestivalStatisticsSection: React.FC = () => {
   // DTO -> 시각화 데이터 (훅 이후에 메모만)
   const genderData: Datum[] = useMemo(() => {
     const gc = data?.genderCount ?? {};
-    const male   = gc.male   ?? gc.MALE   ?? gc['남'] ?? gc['남성'] ?? 0;
+    const male = gc.male ?? gc.MALE ?? gc['남'] ?? gc['남성'] ?? 0;
     const female = gc.female ?? gc.FEMALE ?? gc['여'] ?? gc['여성'] ?? 0;
     return [
       { label: '남', value: male },
@@ -58,6 +58,10 @@ const FestivalStatisticsSection: React.FC = () => {
   );
 
   const genderPercent = useMemo(() => {
+    if (genderTotal === 0) {
+      // 아무도 없으면 0% / 0%
+      return genderData.map(() => 0);
+    }
     const p = genderData.map((d) =>
       genderTotal === 0 ? 0 : Math.round((d.value / genderTotal) * 100)
     );
@@ -67,6 +71,10 @@ const FestivalStatisticsSection: React.FC = () => {
   }, [genderData, genderTotal]);
 
   const genderGradient = useMemo(() => {
+    if (genderTotal === 0) {
+      // 중립(회색) 한 색으로 표시해서 '데이터 없음' 느낌
+      return 'conic-gradient(#e5e7eb 0% 100%)'; // tailwind gray-200 정도 느낌
+    }
     const colors = ['#4D9AFD', '#FF7EB9'];
     let start = 0;
     const stops: string[] = [];
@@ -96,7 +104,7 @@ const FestivalStatisticsSection: React.FC = () => {
       )}
 
       {!!festivalId && isLoading && (
-          <Spinner />
+        <Spinner />
       )}
 
       {!!festivalId && isError && (
