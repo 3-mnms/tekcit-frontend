@@ -59,6 +59,9 @@ const NearbyShowsPage: React.FC = () => {
   const infoWindowsRef = useRef<kakao.maps.InfoWindow[]>([])
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
 
+  const [gateOpen, setGateOpen] = useState(false);
+  const askedRef = useRef(false);
+
   const { data: defaultAddr, isLoading: isAddrLoading } = useDefaultAddressQuery()
   const { data, isLoading, isError } = useNearbyFestivalsQuery()
   const [selected, setSelected] = useState<NearbyFestivalMini | null>(null)
@@ -94,20 +97,28 @@ const NearbyShowsPage: React.FC = () => {
 
   useEffect(() => {
     if (isAddrLoading) return
-    if (!hasDefaultAddress) {
-      const confirmAdd = window.confirm(
-        '이 서비스는 기본 배송지가 필요합니다.\n현재 등록된 배송지가 없습니다. 추가하시겠습니까?',
-      )
-      if (confirmAdd) {
-        navigate('/mypage/myinfo/address', {
-          replace: true,
-          state: { from: 'nearby-shows' },
-        })
-      } else {
-        return
-      }
+    if (askedRef.current) return;
+    if (hasDefaultAddress) {
+      askedRef.current = true;
+      setGateOpen(true);
+      return;
     }
-  }, [isAddrLoading, hasDefaultAddress, navigate])
+    askedRef.current = true;
+
+    const ok = window.confirm(
+      '이 서비스는 기본 배송지가 필요합니다.\n현재 등록된 배송지가 없습니다. 추가하시겠습니까?'
+    );
+
+    if (ok) {
+      navigate('/mypage/myinfo/address', {
+        replace: true,
+        state: { from: 'nearby-shows' },
+      });
+    } else {
+      if (window.history.length > 1) navigate(-1);
+      else navigate('/', { replace: true });
+    }
+  }, [isAddrLoading, hasDefaultAddress, navigate]);
 
   const pageReady = !isAddrLoading && hasDefaultAddress && !isLoading && !isError && sdkLoaded
 
