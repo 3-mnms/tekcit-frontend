@@ -35,12 +35,12 @@ const CHANNEL_KEY = getEnv("VITE_PORTONE_CHANNEL_KEY")
 
 const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
   (
-    { isOpen, onToggle, amount, orderName, redirectUrl, bookingId, festivalId, sellerId },
+    { isOpen, onToggle, amount, orderName, redirectUrl, bookingId, festivalId, sellerId, complete },
     ref,
   ) => {
     useImperativeHandle(ref, () => ({
       async requestPay(args) {
-        const { paymentId, amount, orderName, bookingId, festivalId, sellerId } = args;
+        const { paymentId, amount, orderName, bookingId, festivalId, sellerId, complete } = args;
 
         const hasSellerId = typeof sellerId === 'number' && Number.isFinite(sellerId) && sellerId >= 0
 
@@ -100,7 +100,7 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
             "currency: ",  Currency.KRW,
             "payMethod: ",  PayMethod.CARD,
             "redirectUrl: ", finalRedirect);
-          await PortOne.requestPayment({
+          const portOneResult = await PortOne.requestPayment({
             storeId: STORE_ID,
             channelKey: CHANNEL_KEY,
             bookingId,
@@ -111,6 +111,15 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
             payMethod: PayMethod.CARD,
             redirectUrl: finalRedirect,
           })
+          if (portOneResult?.code === 'success') {
+            if(args.complete){
+              args.complete({
+                paymentId: paymentId,
+                status:   'success' ,
+                message: "success",
+              });
+            }
+          }
           // ✅ 포트원 결제 요청 성공 로그 (이 로그는 리디렉션 때문에 거의 실행되지 않습니다)
           console.log('포트원 결제창 요청 성공: PortOne.requestPayment');
         } catch (err) {
