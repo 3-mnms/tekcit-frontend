@@ -273,7 +273,7 @@ const TransferPaymentPage: React.FC = () => {
                   >
                     <span className={`${styles.radio} ${openedMethod === '킷페이' ? styles.radioOn : ''}`} />
                     <span className={styles.methodText}>
-                      킷페이 (포인트 결제)
+                      테킷페이 (포인트 결제)
                       {isBasePayLoading ? ' - 결제정보 조회중...' : ''}
                     </span>
                   </button>

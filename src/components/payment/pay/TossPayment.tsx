@@ -26,6 +26,7 @@ export type TossPaymentHandle = {
     bookingId: string
     festivalId: string
     sellerId: number
+    complete?: (paymentData: { code: string | null; message?: string; paymentId: string }) => void
   }) => Promise<void>
 }
 
