@@ -1,10 +1,10 @@
-// src/components/my/ticket/PaymentInfoSection.tsx
+// 모바일 카드형 결제내역 (참고 코드 스타일 적용)
 import React, { useMemo } from 'react'
 import { usePaymentOrdersQuery } from '@/models/my/ticket/tanstack-query/usePaymentOrders'
 import styles from './PaymentInfoSection.module.css'
 import { useNavigate } from 'react-router-dom'
-import Button from '@/components/common/button/Button'
 import Spinner from '@/components/common/spinner/Spinner'
+import { Calendar, CreditCard, Receipt, RefreshCw } from 'lucide-react'
 
 type Props = {
   bookingId: string
@@ -15,8 +15,6 @@ const methodLabel = (m?: string) => {
   switch (m) {
     case 'CARD':
       return '신용/체크카드'
-    case 'BANK_TRANSFER':
-      return '무통장입금/계좌이체'
     case 'KAKAO_PAY':
       return '카카오페이'
     case 'POINT':
@@ -49,19 +47,13 @@ function normalizeOrder(input: any): any | undefined {
   if (!input) return undefined
   if (Array.isArray(input)) {
     if (input.length === 0) return undefined
-    // 최신 1건
     return [...input].sort((a, b) => {
       const ta = new Date(String(a.payTime ?? a.createdAt ?? 0)).getTime()
       const tb = new Date(String(b.payTime ?? b.createdAt ?? 0)).getTime()
       return tb - ta
     })[0]
   }
-  // 래퍼 형태 방어
-  const wrapped =
-    input?.content ??
-    input?.data?.content ??
-    input?.data ??
-    input
+  const wrapped = input?.content ?? input?.data?.content ?? input?.data ?? input
   if (Array.isArray(wrapped)) return normalizeOrder(wrapped)
   if (wrapped && typeof wrapped === 'object') return wrapped
   return undefined
@@ -70,101 +62,148 @@ function normalizeOrder(input: any): any | undefined {
 const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber }) => {
   const navigate = useNavigate()
   const { data, isLoading, isError } = usePaymentOrdersQuery(bookingId)
-
   const order = useMemo(() => normalizeOrder(data), [data])
 
-  const fee = 0
-  const delivery = 0
-  const subtotal = order?.amount ?? 0
-  const total = subtotal + fee + delivery
+  const getMethodIcon = (m?: string) => {
+    const label = methodLabel(m)
+    if (label.includes('포인트')) return <Receipt className={styles.icon16} />
+    if (label.includes('신용') || label.includes('체크카드')) return <CreditCard className={styles.icon16} />
+    return <RefreshCw className={styles.icon16} />
+  }
 
-  // ⬇️ status 기반 제어
+  // 상태 pill 텍스트/스타일
   const status = (order?.paymentStatus ?? '').toLowerCase()
-  const isCanceled = status === 'canceled' || status === 'cancelled' // 혹시 서버 철자 변형 여지 대비
+  const isCanceled = status === 'canceled' || status === 'cancelled'
   const isPaid = status === 'paid'
-  const canRefund = Boolean(order?.paymentId) && isPaid
-  const goRefund = () => {
-    if (!canRefund || !order?.paymentId) return
+  const statusText = isPaid ? '결제완료' : isCanceled ? '환불완료' : '결제대기'
 
-    navigate(`/payment/refund/${order.paymentId}`, {
+  const canRefund = Boolean(order?.paymentId) && isPaid
+  const onRefund = () => {
+    if (!canRefund) return
+    const paymentId = order.paymentId ?? order.id ?? order.paymentid
+    if (!paymentId) return
+    navigate(`/payment/refund/${paymentId}`, {
       state: {
-        paymentId: order.paymentId,
+        paymentId,
         paymentAmount: order.amount,
-        quantity: order.quantity, 
-        unitPrice: order.unitPrice,
+        currency: order.currency ?? 'KRW',
       },
     })
   }
 
-  return (
-    <div>
-      <h3 className={styles.title}>결제내역</h3>
-
-      {isLoading && <Spinner />}
-      {isError && (
-        <div className={`${styles.card} ${styles.empty}`}>
-          <div className={styles.emptyIcon} aria-hidden />
-          <h3 className={styles.emptyTitle}>결제 내역이 없습니다</h3>
-          <p className={styles.emptyDesc}>양도 받은 티켓은 결제 내역에서 제외됩니다.</p>
+  if (isLoading) {
+    return (
+      <section className={styles.card} aria-label="결제내역">
+        <Spinner />
+      </section>
+    )
+  }
+  if (isError) {
+    return (
+      <section className={styles.card} aria-label="결제내역">
+        <div className={styles.head}>
+          <div className={styles.headL}>
+            <span className={styles.iconBadge}><Receipt className={styles.icon14} /></span>
+            <span className={styles.headTitle}>예매 결제내역</span>
+          </div>
+          <span className={`${styles.pill} ${styles.pillGray}`}>결제대기</span>
         </div>
-      )}
-      {!isLoading && !isError && !order && (
-        <div className={styles.empty}>이 예매번호에 해당하는 결제내역이 없습니다.</div>
-      )}
+        <div className={styles.emptyBox}>결제 내역을 불러오지 못했어요.</div>
+      </section>
+    )
+  }
+  if (!order) {
+    return (
+      <section className={styles.card} aria-label="결제내역">
+        <div className={styles.head}>
+          <div className={styles.headL}>
+            <span className={styles.iconBadge}><Receipt className={styles.icon14} /></span>
+            <span className={styles.headTitle}>예매 결제내역</span>
+          </div>
+          <span className={`${styles.pill} ${styles.pillGray}`}>결제대기</span>
+        </div>
+        <div className={styles.emptyBox}>이 예매번호에 해당하는 결제내역이 없습니다.</div>
+      </section>
+    )
+  }
 
-      {order && (
-        <div className={styles.wrapper}>
-          <table className={styles.sharedTable}>
-            <colgroup>
-              <col style={{ width: '20%' }} />
-              <col style={{ width: '20%' }} />
-              <col style={{ width: '20%' }} />
-              <col style={{ width: '20%' }} />
-              <col style={{ width: '20%' }} />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>예매일</th>
-                <th>결제수단</th>
-                <th>예매번호</th>
-                <th>가격</th>
-                <th>환불</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{toDotYMD(order.payTime as unknown as string)}</td>
-                <td>{methodLabel(order.payMethod as unknown as string)}</td>
-                <td>{reservationNumber}</td>
-                <td>{krw(order.amount, order.currency)}</td>
-                <td>
-                  {isCanceled ? (
-                    <span className={styles.refundBadge}>환불완료</span>
-                  ) : (
-                    <Button
-                      type="button"
-                      onClick={goRefund}
-                      className={styles.refundBtn}
-                      disabled={!canRefund}
-                      aria-disabled={!canRefund}
-                    >
-                      환불하기
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+  return (
+    <section className={styles.card} aria-label="결제내역">
+      {/* 헤더 */}
+      <div className={styles.head}>
+        <div className={styles.headL}>
+          <span className={styles.iconBadge}>
+            <Receipt className={styles.icon14} />
+          </span>
+        <span className={styles.headTitle}>예매 결제내역</span>
+        </div>
+        <span
+          className={`${styles.pill} ${
+            isPaid ? styles.pillPrimary : isCanceled ? styles.pillGray : styles.pillSecondary
+          }`}
+        >
+          {statusText}
+        </span>
+      </div>
 
-          <div className={styles.paymentSummary}>
-            <div className={`${styles.row} ${styles.total}`}>
-              <span>총 결제금액</span>
-              <span>{krw(total, order.currency)}</span>
-            </div>
+      {/* 본문 그리드 (참고 코드 레이아웃) */}
+      <div className={styles.grid}>
+        {/* 예매일 */}
+        <div className={styles.item}>
+          <Calendar className={styles.icon18Muted} />
+          <div>
+            <p className={styles.k}>예매일</p>
+            <p className={styles.v}>{toDotYMD(order.payTime as string)}</p>
           </div>
         </div>
-      )}
-    </div>
+
+        {/* 결제수단 */}
+        <div className={styles.item}>
+          <span className={styles.icon18Wrap}>{getMethodIcon(order.payMethod)}</span>
+          <div>
+            <p className={styles.k}>결제수단</p>
+            <p className={styles.v}>{methodLabel(order.payMethod as string)}</p>
+          </div>
+        </div>
+
+        {/* 예매번호 */}
+        <div className={styles.item}>
+          <Receipt className={styles.icon18Muted} />
+          <div>
+            <p className={styles.k}>예매번호</p>
+            <p className={`${styles.v} ${styles.mono}`}>{reservationNumber}</p>
+          </div>
+        </div>
+
+        {/* 결제금액 */}
+        <div className={styles.item}>
+          <span className={styles.wonCircle}>₩</span>
+          <div>
+            <p className={styles.k}>결제금액</p>
+            <p className={styles.priceBlue}>{krw(order.amount, order.currency)}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 구분선 */}
+      <div className={styles.divider} />
+
+      {/* 액션 */}
+      <div className={styles.actions}>
+        {isCanceled ? (
+          <span className={styles.badgeGray}>환불완료</span>
+        ) : (
+          <button
+            type="button"
+            onClick={onRefund}
+            disabled={!canRefund}
+            className={styles.refundBtn}
+          >
+            환불하기
+          </button>
+        )}
+      </div>
+    </section>
   )
 }
 
