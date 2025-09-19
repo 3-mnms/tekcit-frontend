@@ -1,7 +1,7 @@
 // 2. 개선된 AddressItem 컴포넌트
 import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-
+import Spinner from '@/components/common/spinner/Spinner'
 import { getAddress, getDefaultAddress, AddressQueryKeys, type AddressDTO } from '@/shared/api/payment/address'
 import Button from '@/components/common/button/Button'
 import styles from './AddressItem.module.css'
@@ -169,11 +169,7 @@ export function AddressList({ onChangeSelected }: AddressListProps) {
   // 주소 목록 렌더링
   return (
     <div style={{ display: 'grid', gap: 12 }}>
-      {isLoadingDefault && (
-        <p style={{ fontSize: '0.9em', color: '#666' }}>
-          기본 배송지 확인 중...
-        </p>
-      )}
+      {isLoadingDefault && <Spinner />}
       
       {addresses.map((item, idx) => (
         <AddressItem

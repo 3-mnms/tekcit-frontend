@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './RefundPage.module.css';
-
+import Spinner from '@/components/common/spinner/Spinner';
 import Header from '@/components/common/header/Header';
 import Button from '@/components/common/Button';
 import AlertModal from '@/components/common/modal/AlertModal';
@@ -112,13 +112,14 @@ const RefundPage: React.FC = () => {
           >
             환불 취소
           </Button>
+          {loadingRefund && <Spinner />}
           <Button
             className={`${styles.button} ${styles.refundButton}`}
             onClick={handleRefundClick}
             disabled={loadingRefund || !paymentId}
             aria-busy={loadingRefund}
           >
-            {loadingRefund ? '처리 중…' : '환불'}
+            {loadingRefund ? '환불' : '환불'}
           </Button>
         </div>
 

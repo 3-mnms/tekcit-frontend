@@ -34,7 +34,7 @@ const AddressForm: React.FC = () => {
         isDefault,
       })
       alert('주소가 저장되었습니다.')
-      navigate('/mypage/myinfo/address')
+      window.location.href = '/mypage/myinfo/address'
     } catch (e: unknown) {
       alert((e as { message?: string }).message ?? '주소 저장에 실패했습니다.')
     }
