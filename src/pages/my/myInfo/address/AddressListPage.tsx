@@ -29,7 +29,7 @@ const AddressListPage: React.FC = () => {
       onError: (e: unknown) => {
         const msg =
           (e as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-          '배송지 삭제에 실패했습니다.'
+          '기본 배송지는 삭제할 수 없습니다.'
         alert(msg)
       },
     })
