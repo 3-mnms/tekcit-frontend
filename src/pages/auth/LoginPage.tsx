@@ -52,8 +52,7 @@ const LoginPage: React.FC = () => {
         setAuthHeaderToken(accessToken)
         setAccessToken(accessToken)
 
-        const token = await getAndSaveFcmToken()
-        console.log('fcm token:', token)
+        await getAndSaveFcmToken()
 
         navigate('/')
         return
