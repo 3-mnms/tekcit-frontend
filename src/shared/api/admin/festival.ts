@@ -31,15 +31,14 @@ export const getProducts = async (page: number, size: number, keyword: string) =
     return response.data.data;
 };
 
-export const getProductsAdmin = async (): Promise<Festival> => {
-  const response = await api.get<Festival>('/festival/manage');
-  if (response.data && !Array.isArray(response.data.data)) {
-    return {
-      ...response.data,
-      data: [response.data.data], 
-    };
-  }
-  return response.data;
+export const getProductsAdmin = async (): Promise<Festival[]> => {
+    const response = await api.get<ApiResponse<PagedResponse<Festival>>>('/festival/manage');
+    
+    if (response.data?.data?.content) {
+        return response.data.data.content;
+    }
+
+    return [];
 };
 
 /**
