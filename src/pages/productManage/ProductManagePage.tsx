@@ -154,7 +154,7 @@ const ProductManagePage: React.FC = () => {
                     onClick={() => handlePageClick(totalPages - 1)}
                     disabled={currentPage >= totalPages - 1}
                 >
-                    »
+                    » ㅁ
                 </button>
             </div>
         </Layout>
