@@ -10,7 +10,7 @@ import { getAnnouncements, updateAnnouncement, deleteAnnouncement, createAnnounc
 import Button from '@/components/common/Button';
 import Spinner from '@/components/common/spinner/Spinner';
 
-import {getProductsFull} from '@/shared/api/admin/festival'
+import {getProducts} from '@/shared/api/admin/festival'
 
 const AnnouncementListPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -27,8 +27,8 @@ const AnnouncementListPage: React.FC = () => {
 
   const { data: festivals } = useQuery({
     queryKey: ['allFestivals'],
-    queryFn: getProductsFull,
-    select: (response) => response.data.data || [],
+    queryFn: getProducts,
+    select: (response) => response.data || [],
   });
 
   const saveMutation = useMutation({
