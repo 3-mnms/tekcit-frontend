@@ -1,22 +1,34 @@
 import type { Festival } from '@/models/admin/festival';
 import type { TicketHolderType } from '@/models/admin/User';
 import { api } from '@/shared/config/axios';
+interface PagedResponse<T> {
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  size: number;
+  content: T[];
+  number: number;
+  last: boolean;
+  empty: boolean;
+  // 삐약! 기타 필드들은 필요에 따라 추가해요!
+}
 
+interface ApiResponse<T> {
+  success: boolean;
+  data: PagedResponse<T>;
+  message: string;
+}
 
-// 공연 조회
-// export const getProducts = async (page: number, size?: number) => {
-//   const response = await api.get('/festival/manage', {
-//     params: {
-//       page: page,
-//       size: size,
-//     },
-//   });
-//   return response.data;
-// };
+export const getProducts = async (page: number, size: number, keyword: string) => {
+    const response = await api.get<ApiResponse<Festival>>('/festival/manage', {
+        params: {
+            page: page,
+            size: size,
+            keyword: keyword,
+        },
+    });
 
-export const getProductsFull = async () => {
-    const response = await api.get(`/festival/manage`);
-    return response.data;
+    return response.data.data;
 };
 
 export const getProductsAdmin = async (): Promise<Festival> => {
@@ -77,14 +89,14 @@ export const getProductDetail = async (fid: string): Promise<Festival> => {
     return response.data;
 };
 
-interface ApiResponse<T> {
+interface ApiResponse2<T> {
   success: boolean;
   data: T;
   message: string;
 }
 
 export const getAttendeesByFestivalId = async (fid: string): Promise<TicketHolderType[]> => {
-  const response = await api.post<ApiResponse<TicketHolderType[]>>(`/host/booking/list`, null, {
+  const response = await api.post<ApiResponse2<TicketHolderType[]>>(`/host/booking/list`, null, {
     params: {
       festivalId: fid,
     },

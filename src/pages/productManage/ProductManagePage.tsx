@@ -1,45 +1,47 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query'; 
 import Layout from '@/components/layout/Layout';
 import SearchBar from '@/components/common/SearchBox';
 import Table, {type Column} from '@/components/shared/Table';
 import Button from '@/components/common/Button';
-// import { GrFormPrevious } from "react-icons/gr";
-// import { GrFormNext } from "react-icons/gr";
+import Spinner from '@/components/common/spinner/Spinner';
+import { GrFormPrevious } from "react-icons/gr";
+import { GrFormNext } from "react-icons/gr";
+import { BiSkipPrevious } from "react-icons/bi";
 import styles from './ProductManagePage.module.css';
 
-import { getProductsFull } from '@/shared/api/admin/festival';
+import { getProducts } from '@/shared/api/admin/festival';
 import type { Festival } from '@/models/admin/festival';
+
+const PAGE_SIZE = 13;
+const PAGE_RANGE = 5;
 
 const ProductManagePage: React.FC = () => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(0); 
 
-    // const [page, setPage] = useState(0); 
+    useEffect(() => {
+        setCurrentPage(0);
+    }, [searchTerm]);
 
-    const { 
-    data: allProducts, 
-    isLoading, 
-    isError 
-  } = useQuery({
-    queryKey: ['products-full'],
-    queryFn: getProductsFull,
-    staleTime: Infinity, // 한 번 불러온 데이터는 무한히 유효
-    select: (response) => {
-      // API 응답이 { data: [] } 형태이거나 바로 배열일 경우 모두 처리
-      return (response?.data && Array.isArray(response.data)) ? response.data : [];
-    },
-  });
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ['products', currentPage, searchTerm],
+        queryFn: () => getProducts(currentPage, PAGE_SIZE, searchTerm),
+        staleTime: 60_000,
+         placeholderData: (previousData) => previousData,
+     });
 
-    const filteredProducts = useMemo(() => {
-    const lowercasedTerm = searchTerm.toLowerCase();
-    return (allProducts || []).filter(
-      (product) =>
-        product.fname?.toLowerCase().includes(lowercasedTerm) ||
-        product.detail?.entrpsnmH?.toLowerCase().includes(lowercasedTerm)
-    );
-  }, [allProducts, searchTerm]);
+    const { content: displayedData, totalPages } = useMemo(() => {
+    const content = data?.content || [];
+    const total = data?.totalPages || 1;
+        return { content, totalPages: total };
+    }, [data]);
+
+     const startPage = Math.floor(currentPage / PAGE_RANGE) * PAGE_RANGE;
+    const endPage = Math.min(startPage + PAGE_RANGE, totalPages);
+    const pageNumbers = Array.from({ length: endPage - startPage }, (_, i) => i + startPage);
 
     const handleRowClick = (item: Festival) => {
         navigate(`/admin/product-detail/${item.fid}`);
@@ -83,18 +85,30 @@ const ProductManagePage: React.FC = () => {
     },
     ];
 
+     const handleNextPage = () => {
+        setCurrentPage((prevPage) => prevPage + 1);
+    };
+
+    const handlePrevPage = () => {
+        setCurrentPage((prevPage) => Math.max(0, prevPage - 1));
+    };
+
+    const handlePageClick = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+    };
+
+
     if (isLoading) {
-        return <Layout subTitle="상품 관리"><div>삐약! 상품 목록을 불러오는 중...</div></Layout>;
+        return <Spinner />;
     }
 
     if (isError) {
-        return <Layout subTitle="상품 관리"><div>삐약! 오류가 발생했어요. 다시 시도해 주세요.</div></Layout>;
+        return (
+        <Layout subTitle="상품 관리">
+            <div>삐약! 데이터를 불러오지 못했어요.</div>
+        </Layout>
+        );
     }
-
-    console.log('삐약! allProducts:', allProducts);
-    console.log('삐약! filteredProducts:', filteredProducts);
-    console.log('삐약! filteredProducts length:', filteredProducts.length);
-
     return (
         <Layout subTitle="상품 관리 ">
             <div className={styles.container}>
@@ -106,10 +120,42 @@ const ProductManagePage: React.FC = () => {
                 </div>
                 <Table 
                     columns={columns} 
-                    data={filteredProducts}
+                    data={displayedData}
                     onRowClick={handleRowClick}
                     getUniqueKey={(item) => item.fid}
                 />
+            </div>
+            <div className={styles.paginationControls}>
+                <button
+                    className={styles.pageButton}
+                    onClick={() => handlePageClick(0)}
+                    disabled={currentPage === 0}
+                >
+                    «
+                </button>
+                <GrFormPrevious onClick={handlePrevPage} disabled={currentPage === 0} />
+                {pageNumbers.map((pageNum) => (
+                    <button
+                        key={pageNum}
+                        onClick={() => handlePageClick(pageNum)}
+                        className={`${styles.pageButton} ${
+                            currentPage === pageNum ? styles.active : ''
+                        } ${currentPage === pageNum ? styles.underline : ''}`}
+                    >
+                        {pageNum + 1}
+                    </button>
+                ))}
+                <GrFormNext
+                    onClick={handleNextPage}
+                    disabled={currentPage >= totalPages - 1}
+                />
+                <button
+                    className={styles.pageButton}
+                    onClick={() => handlePageClick(totalPages - 1)}
+                    disabled={currentPage >= totalPages - 1}
+                >
+                    »
+                </button>
             </div>
         </Layout>
     );
