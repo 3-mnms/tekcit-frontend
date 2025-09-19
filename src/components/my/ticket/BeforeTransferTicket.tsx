@@ -4,13 +4,20 @@ import type { TransferListItem } from '@/models/my/ticket/ticketTypes'
 import Button from '@/components/common/button/Button'
 
 type Props = {
-  item: TransferListItem
-  onTransfer: (reservationNumber: string) => void
+  item: TransferListItem & { othersTransferAvailable?: boolean }
+  onTransfer: (reservationNumber: string, othersTransferAvailable?: boolean) => void
+  /** 페이지에서 명시적으로 내려주는 값이 있으면 이 값이 우선 */
+  othersTransferAvailable?: boolean
 }
 
-const BeforeTransferTicket: React.FC<Props> = ({ item, onTransfer }) => {
+const BeforeTransferTicket: React.FC<Props> = ({ item, onTransfer, othersTransferAvailable }) => {
   const fallbackPoster = '/dummy-poster.jpg'
   const posterSrc = item.posterFile ? encodeURI(item.posterFile) : fallbackPoster
+
+  const canOthers =
+    typeof othersTransferAvailable === 'boolean'
+      ? othersTransferAvailable
+      : item.othersTransferAvailable
 
   return (
     <div className={styles.card}>
@@ -30,7 +37,6 @@ const BeforeTransferTicket: React.FC<Props> = ({ item, onTransfer }) => {
             <span className={styles.divider}>|</span>
             <span className={styles.smallMeta}>예매번호 {item.number}</span>
           </div>
-          {/* 필요시 상태 배지 넣을 자리 */}
         </div>
 
         <h3 className={styles.title} title={item.title}>{item.title}</h3>
@@ -42,7 +48,7 @@ const BeforeTransferTicket: React.FC<Props> = ({ item, onTransfer }) => {
 
         <div className={styles.actions}>
           <Button
-            onClick={() => onTransfer(item.reservationNumber)}
+            onClick={() => onTransfer(item.reservationNumber, canOthers)}
             aria-label="티켓 양도하기"
           >
             양도하기
