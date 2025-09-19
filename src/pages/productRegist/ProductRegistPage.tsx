@@ -56,25 +56,49 @@ const ProductRegisterPage: React.FC = () => {
     }, [isEditMode, existingProduct]);
 
     const { mutate, isPending } = useMutation({
-        mutationFn: (formData: FormData) => isEditMode ? updateProduct(fid!, formData) : createProduct(formData),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['products'] }); 
-            if (isEditMode) {
-                queryClient.invalidateQueries({ queryKey: ['product', fid] });
-            }
-            alert(`상품이 성공적으로 ${isEditMode ? '수정' : '등록'}되었습니다!`);
-            navigate('/admin/productManage');
-        },
-        onError: (error) => {
-            const status = error.response?.status;
-            if (status === 500) {
-                alert('지금은 관리자 계정으로 로그인되어 있습니다. 다시 시도해주세요.');
-            } else {
-                console.error('상품 등록/수정 실패:', error);
-                alert(`상품 ${isEditMode ? '수정' : '등록'}에 실패했습니다.`);
-            }
-        },
-    });
+            mutationFn: (formData: FormData) =>
+                isEditMode ? updateProduct(fid!, formData) : createProduct(formData),
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ['products'] });
+                if (isEditMode) {
+                    queryClient.invalidateQueries({ queryKey: ['product', fid] });
+                }
+                alert(`상품이 성공적으로 ${isEditMode ? '수정' : '등록'}되었습니다!`);
+                navigate('/admin/productManage');
+            },
+            onError: (error: any) => {
+                const errorData = error.response?.data;
+
+                if (errorData?.errorCode) {
+                    switch (errorData.errorCode) {
+                        case "NOT_OWNER":
+                            alert("접근 권한이 없습니다.");
+                            break;
+                        case "DUPLICATE_FID":
+                            alert("공연 식별자 생성 중 중복이 발생했습니다.\n다시 시도해주세요.");
+                            break;
+                        case "INVALID_FESTIVAL_DATE":
+                            alert("공연 시작일과 종료일을 확인해주세요.\n시작일은 오늘 이후여야 하고, 종료일은 시작일 이후여야 합니다.");
+                            break;
+                        case "INVALID_SCHEDULE_DAY":
+                            alert("공연 일정 요일이 잘못되었습니다.\n공연 기간에 포함되는 요일을 선택해주세요.");
+                            break;
+                        case "INVALID_REQUEST":
+                            alert("잘못된 요청입니다.\n입력값을 다시 확인해주세요.");
+                            break;
+                        case "INTERNAL_SERVER_ERROR":
+                            alert("접근 권한이 없습니다.");
+                            break;
+                        default:
+                            alert(`[${errorData.errorCode}] ${errorData.message}`);
+                    }
+                } else {
+                    alert(`상품 ${isEditMode ? '수정' : '등록'}에 실패했습니다.`);
+                    console.error(error);
+                }
+            },
+        }
+    );
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
