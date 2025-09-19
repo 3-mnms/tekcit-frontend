@@ -125,6 +125,11 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
   const pollTimerRef = useRef<number | null>(null);
   const submittedRef = useRef(false); // 중복 요청 방지
 
+  function cleanServerMessage(msg?: string) {
+    // 앞쪽에 붙은 숫자 상태코드/대괄호/콜론/대시 등을 제거: "409 xxx", "[409] xxx", "409: xxx"
+    return (msg ?? '').replace(/^\s*\[?\s*\d{3}\s*\]?\s*[:\-]?\s*/, '').trim()
+  }
+
   useEffect(() => () => { if (tempUrl) URL.revokeObjectURL(tempUrl); }, [tempUrl]);
 
   useEffect(() => {
@@ -296,23 +301,15 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
           message.includes('이미 양도') ||
           message.includes('진행되고 있는 양도'));
 
-      if (
-        status === 409 ||
-        code === 'ALREADY_TRANSFERRED' ||
-        code === 'TRANSFER_ALREADY_COMPLETED' ||
-        msgHasTransferOnce
-      ) {
+      // ✅ 진짜 "이미 양도됨" 케이스만 여기서 처리
+      if (code === 'ALREADY_TRANSFERRED' || code === 'TRANSFER_ALREADY_COMPLETED' || msgHasTransferOnce) {
         alert('이미 양도처리된 티켓입니다.');
-        console.warn('%c[TransferRecipientForm] 409 handled: already transferred', 'color:#f59e0b');
+        console.warn('[TransferRecipientForm] already transferred');
         return;
       }
 
-      console.error(
-        '%c[TransferRecipientForm] ❌ requestTransfer failed',
-        'color:#b91c1c;font-weight:700',
-        e
-      );
-      throw e;
+      // ✅ 나머지는 서버 메시지(상태코드 접두어 제거)만 던짐
+      throw new Error(cleanServerMessage(message) || '처리 중 오류가 발생했어요.');
     }
   };
 
@@ -424,8 +421,9 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
       }
       throw (res.error || new Error('계정 조회 실패'));
     } catch (err) {
-      const e2 = err as Error & { message?: string };
-      alert(e2?.message || '양도 요청 중 오류가 발생했어요.');
+      const { message } = pickErr(err);
+      const fallback = (err as Error)?.message || '양도 요청 중 오류가 발생했어요.';
+      alert(cleanServerMessage(fallback));
     }
   };
 
@@ -456,13 +454,6 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
           친구에게
         </label>
       </div>
-
-      {/* (선택) 배너: 지인 양도 불가 안내 */}
-      {othersTransferAvailableFromNav === false && (
-        <div className={styles.bannerWarn} role="alert" aria-live="polite">
-          현재 이 예약건은 15분이 지나 지인에게 양도가 불가합니다.
-        </div>
-      )}
 
       {/* 전송할 EMAIL */}
       <label className={styles.label}>
