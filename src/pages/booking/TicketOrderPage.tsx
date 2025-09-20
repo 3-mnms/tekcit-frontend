@@ -292,21 +292,13 @@ const TicketOrderPage: React.FC = () => {
       } catch { /* */ }
     };
 
-    const onPageHide = () => fireOnce();
     const onBeforeUnload = () => fireOnce();
-    const onVisibility = () => {
-      if (document.visibilityState === 'hidden') fireOnce();
-    };
 
-    // window.addEventListener('pagehide', onPageHide);
     window.addEventListener('beforeunload', onBeforeUnload);
-    // document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
       fireOnce();
-      // window.removeEventListener('pagehide', onPageHide);
       window.removeEventListener('beforeunload', onBeforeUnload);
-      // document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
 

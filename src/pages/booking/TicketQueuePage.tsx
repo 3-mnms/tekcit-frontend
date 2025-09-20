@@ -234,11 +234,11 @@ const TicketQueuePage: React.FC = () => {
 
     const softFallback = setInterval(() => {
       const lag = Date.now() - lastMsgAtRef.current
-      if (lag > 50000) {
+      if (lag > 10000) {
         setAhead((n) => Math.max(0, n - 1))
         lastMsgAtRef.current = Date.now()
       }
-    }, 50000)
+    }, 5000)
 
     return () => {
       clearInterval(softFallback)
@@ -290,44 +290,7 @@ const TicketQueuePage: React.FC = () => {
       stompRef.current = null
       wsActiveRef.current = false
     }
-  }, [myUserId, fid, date]) // ← 기존 의존성 그대로
-
-  //client.activate()
-  //stompRef.current = client
-  // useEffect(() => {
-  //   if (!fid || !date) return
-  //   if (wsActiveRef.current) return
-  //   wsActiveRef.current = true
-
-  //   // const client = new Client({
-  //   //   webSocketFactory: () => new SockJS(WS_URL),
-  //   //   connectHeaders: connectHeadersRef.current,
-  //   //   debug: (s) => console.log('[STOMP]', s),
-  //   //   reconnectDelay: 3000,
-  //   //   heartbeatIncoming: 10000,
-  //   //   heartbeatOutgoing: 10000,
-  //   // })
-
-  //   // import { Client } from "@stomp/stompjs";
-
-  // const softFallback = setInterval(() => {
-  //   const lag = Date.now() - lastMsgAtRef.current
-  //   if (lag > 100000) {
-  //     setAhead((n) => Math.max(0, n - 1))
-  //     lastMsgAtRef.current = Date.now()
-  //   }
-  // }, 5000)
-
-  //   return () => {
-  //     // clearInterval(softFallback)
-  //     try {
-  //       client.deactivate()
-  //     } catch { }
-  //     stompRef.current = null
-  //     wsActiveRef.current = false
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [fid, date, time, accessToken])
+  }, [myUserId, fid, date]) 
 
   useEffect(() => {
     if (!fid) return
