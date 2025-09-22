@@ -8,7 +8,7 @@ import styles from './TransferFeePaymentPage.module.css'
 import Button from '@/components/common/button/Button'
 import ConfirmModal from '@/components/common/modal/AlertModal'
 import PasswordInputModal from '@/components/payment/modal/PasswordInputModal'
-
+import Spinner from '@/components/common/spinner/Spinner'
 import TransferFeeInfo from '@/components/payment/transfer/TransferFeeInfo'
 import TicketInfoSection from '@/components/payment/transfer/TicketInfoSection'
 import WalletPayment from '@/components/payment/pay/TekcitPay'
@@ -257,13 +257,14 @@ const TransferFeePaymentPage: React.FC = () => {
         </section>
 
         {/* 결제 버튼 */}
+        {isPaying &&<Spinner />}
         <div className={styles.buttonWrapper}>
           <Button
             className="w-full h-12"
             disabled={!isAgreed || isPaying}
             onClick={handlePayment}
           >
-            {isPaying ? '결제 중...' : '수수료 결제하기'}
+            {isPaying ? '수수료 결제하기' : '수수료 결제하기'}
           </Button>
         </div>
       </div>

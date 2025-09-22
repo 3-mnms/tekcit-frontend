@@ -1,5 +1,5 @@
 // src/pages/my/myInfo/address/AddressListPage.tsx
-import React, { useMemo } from 'react'  // ✅ useMemo 추가
+import React, { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AddressItem from '@/components/my/myinfo/address/AddressItem'
 import AddressEmpty from '@/components/my/myinfo/address/AddressEmpty'
@@ -29,24 +29,30 @@ const AddressListPage: React.FC = () => {
       onError: (e: unknown) => {
         const msg =
           (e as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-          '배송지 삭제에 실패했습니다.'
+          '기본 배송지는 삭제할 수 없습니다.'
         alert(msg)
       },
     })
   }
 
-  const hasAny = useMemo(
-    () => (data && data.some((a) => (a.address ?? '').trim() !== '')) ?? false,
-    [data],
-  )
+  const isBlank = (v?: string | null) => {
+    const t = (v ?? '').trim().toLowerCase();
+    return t === '' || t === 'null';
+  };
+
+  const valid = useMemo(
+    () => (data ?? []).filter(a => !isBlank(a.address)),
+    [data]
+  );
+
+  const hasAny = valid.length > 0;
 
   const sorted = useMemo(
-    () =>
-      (data ?? [])
-        .slice()
-        .sort((a, b) => Number(b?.isDefault ?? false) - Number(a?.isDefault ?? false)),
-    [data],
-  )
+    () => valid.slice().sort(
+      (a, b) => Number(b?.isDefault ?? false) - Number(a?.isDefault ?? false)
+    ),
+    [valid]
+  );
 
   return (
     <section className={styles.container}>

@@ -1,17 +1,19 @@
 import React, {useEffect, useMemo, useState } from 'react';
 import Layout from '@components/layout/Layout';
 import { useQuery } from '@tanstack/react-query';
-import { getProductsFull as getProductsAdmin } from '@/shared/api/admin/festival'; 
+import { getProductDetail } from '@/shared/api/admin/festival'; 
+
 import { getFestivalSchedules, getBookingStatsData, getUserStatsData, getEntranceCount  } from '@/shared/api/admin/statistics'; 
 import StatisticsContent from '@/components/operatManage/statistics/StatisticsSection';
 import EntranceCount from '@/components/operatManage/statistics/EntranceCount'; 
 import styles from './StatisticsPage.module.css';
 import TicketProgressGraph from '@/components/operatManage/statistics/TicketProgressGraph';
 import { useNavigate, useParams } from 'react-router-dom';
-import {type Festival } from '@/models/admin/festival';
 import Button from '@/components/common/Button';
 
 type TabType = '통계' | '입장 인원 수 조회';
+
+const POLL_MS=2000;
 
 const StatisticsPage: React.FC = () => {
   const { fid } = useParams<{ fid: string }>(); 
@@ -19,12 +21,24 @@ const StatisticsPage: React.FC = () => {
   const [selectedSchedule, setSelectedSchedule] = useState<string | null>(null);
   const navigate = useNavigate();
   
-  const { data: festival } = useQuery<Festival>({
-    queryKey: ['festival', fid],
-    queryFn: () => getProductsAdmin(0, 100), 
-    select: (response) => response.data.find((f: any) => f.fid === fid),
+  // const { data: festival } = useQuery({
+  //   queryKey: ['festival', fid],
+  //   queryFn: () => getProductDetail(fid), 
+  //   select: (response) => response.data,
+  //   enabled: !!fid,
+  // })
+  // console.log("festival : "+festival);
+
+  const { data: festivalInfo } = useQuery({
+    queryKey: ['festivalInfo', fid],
+    queryFn: () => getProductDetail(fid), 
+    select: (response) => response.data,
     enabled: !!fid,
-  })
+  })  
+
+  console.log(festivalInfo);
+  
+  
 
   const { data: schedules } = useQuery({
     queryKey: ['schedules', fid],
@@ -128,11 +142,11 @@ const StatisticsPage: React.FC = () => {
           <StatisticsContent data={userStatsData.data} />
         </>
       )}
-      {activeTab === '입장 인원 수 조회' && entranceStatsData  && festival && (
+      {activeTab === '입장 인원 수 조회' && entranceStatsData  && festivalInfo && (
         <EntranceCount
           count={entranceStatsData.data.checkedInCount} 
           totalCount={entranceStatsData.data.availableNOP} 
-          title={festival.fname}
+          title={festivalInfo.fname}
 
         />
       )}

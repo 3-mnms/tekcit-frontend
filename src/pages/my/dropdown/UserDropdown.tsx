@@ -38,7 +38,7 @@ const UserDropdown: React.FC = () => {
   const backFromDetail = () => setPanel('notifications')
 
   const handleGoToMypage = () => {
-    window.location.href = '/mypage'
+    window.location.href = '/mypage/myinfo/detail'
   }
   const handleLogout = async () => {
     if (loading) return

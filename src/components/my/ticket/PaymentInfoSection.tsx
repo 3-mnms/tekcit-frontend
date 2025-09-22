@@ -9,7 +9,7 @@ import { Calendar, CreditCard, Receipt, RefreshCw } from 'lucide-react'
 type Props = {
   bookingId: string
   reservationNumber: string
-  qrUsed: string
+  qrUsed: boolean
 }
 
 const methodLabel = (m?: string) => {
@@ -77,7 +77,6 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber, qrU
   const status = (order?.paymentStatus ?? '').toLowerCase()
   const isCanceled = status === 'canceled' || status === 'cancelled'
   const isPaid = status === 'paid'
-  const statusText = isPaid ? '결제완료' : isCanceled ? '환불완료' : '결제대기'
 
   const isQrUsed = useMemo(() => {
     const v = String(qrUsed ?? '')
@@ -104,6 +103,10 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber, qrU
   if (isLoading) {
     return (
       <section className={styles.card} aria-label="결제내역">
+        <span className={styles.iconBadge}>
+          <Receipt className={styles.icon14} />
+        </span>
+        <span className={styles.headTitle}>예매 결제내역</span>
         <Spinner />
       </section>
     )
@@ -118,9 +121,12 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber, qrU
             </span>
             <span className={styles.headTitle}>예매 결제내역</span>
           </div>
-          <span className={`${styles.pill} ${styles.pillGray}`}>결제대기</span>
         </div>
-        <div className={styles.emptyBox}>결제 내역을 불러오지 못했어요.</div>
+        <div className={`${styles.card2} ${styles.empty}`}>
+          <div className={styles.emptyIcon} aria-hidden />
+          <h3 className={styles.emptyTitle}>결제 내역이 없습니다</h3>
+          <p className={styles.emptyDesc}>양도 받은 티켓은 결제 내역에서 제외됩니다.</p>
+        </div>{' '}
       </section>
     )
   }
@@ -134,7 +140,6 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber, qrU
             </span>
             <span className={styles.headTitle}>예매 결제내역</span>
           </div>
-          <span className={`${styles.pill} ${styles.pillGray}`}>결제대기</span>
         </div>
         <div className={styles.emptyBox}>이 예매번호에 해당하는 결제내역이 없습니다.</div>
       </section>
@@ -150,13 +155,6 @@ const PaymentInfoSection: React.FC<Props> = ({ bookingId, reservationNumber, qrU
           </span>
           <span className={styles.headTitle}>예매 결제내역</span>
         </div>
-        <span
-          className={`${styles.pill} ${
-            isPaid ? styles.pillPrimary : isCanceled ? styles.pillGray : styles.pillSecondary
-          }`}
-        >
-          {statusText}
-        </span>
       </div>
 
       <div className={styles.grid}>

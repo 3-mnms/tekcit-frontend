@@ -8,12 +8,9 @@ import { useMutation } from '@tanstack/react-query' // 주석: useQuery 제거 �
 import { useNavigate, useLocation } from 'react-router-dom'
 import styles from './TeckitJoinPage.module.css'
 import Header from '@/components/common/header/Header'
-
+import Spinner from '@/components/common/spinner/Spinner'
 import { useAuthStore } from '@/shared/storage/useAuthStore'
-import {
-  CreateAccountRequestSchema,
-  createTekcitPayAccount,
-} from '@/shared/api/payment/join' // 주석: 계좌 생성 API 멍
+import { CreateAccountRequestSchema, createTekcitPayAccount } from '@/shared/api/payment/join' // 주석: 계좌 생성 API 멍
 
 /* ───────────────────────── 폼 스키마 ───────────────────────── */
 // 주석: 화면 폼은 password 두 번 입력 + 약관 동의 멍
@@ -52,7 +49,7 @@ export default function TeckitJoinPage() {
 
   const defaultValues = useMemo<Partial<JoinFormValues>>(
     () => ({ payPin: '', payPinConfirm: '', agree: false }),
-    []
+    [],
   )
 
   const {
@@ -114,7 +111,9 @@ export default function TeckitJoinPage() {
           <form className={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
             {/* 결제 PIN */}
             <div className={styles.field}>
-              <label htmlFor="payPin" className={styles.label}>결제 PIN(6자리)</label>
+              <label htmlFor="payPin" className={styles.label}>
+                결제 PIN(6자리)
+              </label>
               <input
                 id="payPin"
                 type="password"
@@ -131,7 +130,9 @@ export default function TeckitJoinPage() {
 
             {/* 결제 PIN 확인 */}
             <div className={styles.field}>
-              <label htmlFor="payPinConfirm" className={styles.label}>결제 PIN 확인</label>
+              <label htmlFor="payPinConfirm" className={styles.label}>
+                결제 PIN 확인
+              </label>
               <input
                 id="payPinConfirm"
                 type="password"
@@ -150,7 +151,12 @@ export default function TeckitJoinPage() {
 
             {/* 약관 동의 */}
             <div className={styles.agreeRow}>
-              <input id="agree" type="checkbox" className={styles.checkbox} {...register('agree')} />
+              <input
+                id="agree"
+                type="checkbox"
+                className={styles.checkbox}
+                {...register('agree')}
+              />
               <label htmlFor="agree" className={styles.agreeLabel}>
                 (필수) 테킷 페이 서비스 이용약관 및 개인정보 처리방침에 동의합니다
               </label>
@@ -158,6 +164,7 @@ export default function TeckitJoinPage() {
             {errors.agree && <p className={styles.error}>{errors.agree.message}</p>}
 
             {/* 액션 영역 */}
+            {createMutation.isPending && <Spinner />}
             <div className={styles.actions}>
               <button
                 type="submit"
@@ -165,13 +172,9 @@ export default function TeckitJoinPage() {
                 disabled={!isValid || isSubmitting || createMutation.isPending}
                 aria-busy={isSubmitting || createMutation.isPending}
               >
-                {createMutation.isPending ? '개설 중...' : '계정 개설하기'}
+                {createMutation.isPending ? '계정 개설하기' : '계정 개설하기'}
               </button>
-              <button
-                type="button"
-                className={styles.secondaryButton}
-                onClick={() => navigate(-1)}
-              >
+              <button type="button" className={styles.secondaryButton} onClick={() => navigate(-1)}>
                 이전으로
               </button>
             </div>

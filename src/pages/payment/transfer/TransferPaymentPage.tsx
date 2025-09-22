@@ -18,7 +18,7 @@ import TicketDeliverySelectSection, {
 import { useRespondFamilyTransfer, useRespondOthersTransfer } from '@/models/transfer/tanstack-query/useTransfer'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
 import { requestTransferPayment, type RequestTransferPaymentDTO, getPaymentIdByBookingId, getReservationStatus } from '@/shared/api/payment/payments'
-
+import Spinner from '@/components/common/spinner/Spinner'
 import styles from './TransferPaymentPage.module.css'
 
 type PayMethod = '킷페이'
@@ -274,7 +274,7 @@ const TransferPaymentPage: React.FC = () => {
                     <span className={`${styles.radio} ${openedMethod === '킷페이' ? styles.radioOn : ''}`} />
                     <span className={styles.methodText}>
                       테킷페이 (포인트 결제)
-                      {isBasePayLoading ? ' - 결제정보 조회중...' : ''}
+                      {isBasePayLoading ? <Spinner /> : ''}
                     </span>
                   </button>
                   {openedMethod === '킷페이' && (

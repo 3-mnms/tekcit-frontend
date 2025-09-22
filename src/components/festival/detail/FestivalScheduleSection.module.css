@@ -250,10 +250,11 @@
 }
 
 :global(.custom-day) {
+  position: relative;
   display: grid !important;
   place-items: center;
-  height: 38px;
-  line-height: 38px;
+  width: 2rem;
+  height: 2rem; 
   border-radius: 10px;
   font-size: 14px;
   user-select: none;
@@ -277,8 +278,21 @@
 }
 
 :global(.day-today) {
-  box-shadow: inset 0 0 0 2px rgba(77, 154, 253, .35);
   font-weight: 700;
+}
+
+:global(.day-today)::after {
+  content: 'today';
+  position: absolute;
+  top: 80%; 
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  color: #4D9AFD;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 :global(.day-weekend.day-active) {
