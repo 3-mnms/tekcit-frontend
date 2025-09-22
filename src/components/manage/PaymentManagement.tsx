@@ -28,8 +28,18 @@ const formatDateTime = (dateTime: string) =>
 const getTransactionTypeText = (type: string) =>
   type === 'DEBIT' ? '입금' : type === 'CREDIT' ? '출금' : type;
 
-const getPayMethodText = (method: string) =>
-  method === 'POINT_PAYMENT' ? '포인트 결제' : method;
+const getPayMethodText = (method: string) => {
+  switch (method) {
+    case 'POINT_PAYMENT':
+      return '포인트 결제';
+    case 'POINT_CHARGE':
+      return '포인트 충전'; // 이 부분을 추가해야 합니다.
+    case 'CARD':
+      return '일반 결제';
+    default:
+      return method;
+  }
+};
 
 export default function PaymentManagement() {
   const [page, setPage] = React.useState(0);
