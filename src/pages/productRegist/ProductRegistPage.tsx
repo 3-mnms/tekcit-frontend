@@ -374,14 +374,13 @@ const ProductRegisterPage: React.FC = () => {
                                         type="file"
                                         name="contentFiles"
                                         onChange={handleFileChange}
-                                        multiple // 삐약! 여러 파일을 받을 수 있게 합니다!
+                                        multiple 
                                     />
                                     {contentFiles.length > 0 && (
                                         <div className={styles.fileNames}>
                                              {contentFiles.map(file => (
                                                 <div key={file.name} className={styles.fileNameWrapper}>
                                                     <span className={styles.fileName}>{file.name}</span>
-                                                    {/* 삐약! 삭제 버튼을 추가합니다! */}
                                                     <button
                                                         type="button"
                                                         className={styles.removeFileButton}

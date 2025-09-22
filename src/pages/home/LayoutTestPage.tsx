@@ -5,7 +5,6 @@ import Layout from '@components/layout/Layout';
 const NoticeListPage: React.FC = () => {
   return (
     <Layout subTitle="공지사항 목록"> {/* subTitle을 전달하는지 확인! */}
-      {/* 여기에 실제 페이지 내용이 들어갑니다, 삐약! */}
       <div style={{ padding: '24px' }}>
         <h1>공지사항 목록 페이지 내용</h1>
         <p>이곳에 실제 공지사항 테이블이나 리스트가 들어갈 거예요, 삐약!</p>

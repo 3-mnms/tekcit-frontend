@@ -31,7 +31,7 @@ const AnnouncementList: React.FC<Props> = ({ announcements, onDelete, onEdit }) 
   ];
 
   return (
-    // 삐약! 🐥 직접 테이블을 만드는 대신, Table 컴포넌트를 사용해요.
+    // 직접 테이블을 만드는 대신, Table 컴포넌트를 사용해요.
     <Table
       columns={columns}
       data={announcements}

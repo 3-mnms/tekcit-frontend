@@ -23,14 +23,14 @@
 }
 
 .userName {
-    font-size: 12px; /* 글자 크기, 삐약! */
-    color: #ffffff; /* 흰색 글자, 삐약! */
-    margin-bottom: 5px; /* 이메일과의 간격, 삐약! */
+    font-size: 12px;
+    color: #ffffff;
+    margin-bottom: 5px;
 }
 
 .role {
-    font-size: 12px; /* 이메일 글자 크기, 삐약! */
-    color: #cccccc; /* 연한 회색, 삐약! */
+    font-size: 12px;
+    color: #cccccc; 
 }
 
 
@@ -85,7 +85,7 @@
 }
 
 .menuLinkActive {
-    background-color: #898989; /* 활성화된 메뉴 배경색 (어두운 회색), 삐약! */
+    background-color: #898989; /* 활성화된 메뉴 배경색 (어두운 회색) */
     color: #ffffff;
     font-weight: bold;
 }
@@ -99,9 +99,9 @@
 .sidebarFooter {
     margin-top: auto;
     padding-top: 20px;
-    border-top: 1px solid #333333; /* 푸터 경계선 색상 조정, 삐약! */
+    border-top: 1px solid #333333; /* 푸터 경계선 색상 조정 */
     text-align: center;
     font-size: 12px;
     color: #95a5a6;
-    padding-bottom: 10px; /* 하단 패딩 추가, 삐약! */
+    padding-bottom: 10px; /* 하단 패딩 추가 */
 }

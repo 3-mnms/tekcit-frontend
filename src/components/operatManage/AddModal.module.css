@@ -28,7 +28,6 @@
     gap: 1.5rem;
 }
 
-/* 삐약! 모달 제목 스타일이에요. 삐약! */
 .modalTitle {
     text-align: center;
     font-size: 1.75rem;
@@ -37,22 +36,18 @@
     margin-bottom: 0.5rem;
 }
 
-/* 삐약! 제목 아래 부제목 스타일이에요. 삐약! */
 .modalSubtitle {
     text-align: center;
     font-size: 1rem;
     color: #666;
     margin-bottom: 1.5rem;
 }
-
-/* 삐약! 입력 필드 그룹을 묶는 컨테이너예요. 삐약! */
 .formSection {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
 }
 
-/* 삐약! 각 입력 필드 그룹 스타일이에요. 삐약! */
 .formGroup {
     display: flex;
     flex-direction: column;
@@ -81,7 +76,6 @@
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
 }
 
-/* 삐약! 버튼 그룹 스타일이에요. 삐약! */
 .buttonGroup {
     display: flex;
     justify-content: flex-end;
@@ -91,7 +85,6 @@
     padding-top: 1.5rem;
 }
 
-/* 삐약! 닫기 버튼 스타일이에요. 삐약! */
 .closeButton {
     position: absolute;
     top: 15px;
