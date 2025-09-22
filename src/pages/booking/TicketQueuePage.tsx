@@ -9,18 +9,20 @@ import { useAuthStore } from '@/shared/storage/useAuthStore'
 import SockJS from 'sockjs-client'
 import { Client, type IMessage, type StompHeaders } from '@stomp/stompjs'
 import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery'
+import { getEnv } from '@/shared/config/env'
 
 /* =========================
    환경/토픽 설정
    ========================= */
-const WS_URL = 'http://localhost:10000/ws'
+const WS_URL = getEnv('API_URL', '') + '/ws'
+// const WS_URL = 'http://localhost:10000/ws'
 
 const makeBroadcastTopic = (fid: string, date: string, time?: string) => {
   const d = date?.trim()
   const t = time?.trim()
   return t ? `/topic/waiting/${fid}/${d}/${t}` : `/topic/waiting/${fid}/${d}`
 }
-const USER_QUEUE_TOPIC = '/user/queue/waitingNumber'
+// const USER_QUEUE_TOPIC = '/user/queue/waitingNumber'
 
 /* =========================
    유틸
