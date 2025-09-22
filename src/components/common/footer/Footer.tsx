@@ -28,7 +28,7 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
         {/* 1. 회사/프로젝트 정보 */}
         <section className={styles.col} aria-labelledby="footer-company">
           <h3 id="footer-company" className={styles.head}>
-            테킷 프로젝트
+            테킷
           </h3>
           <p className={styles.text}>Festival Ticketing Service "Tekcit"</p>
           <p className={styles.copy}>© 2025 Tekcit Project. All rights reserved.</p>
