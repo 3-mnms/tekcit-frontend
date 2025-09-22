@@ -4,27 +4,35 @@ import styles from './WaitingQueue.module.css';
 type Props = {
   title: string;
   dateTime: string;
-  waitingCount: number;     // 내 앞에 몇 명
-  progressPct: number;      // 0~100
-  posterUrl?: string;       // 없으면 회색 박스
-  fullBleed?: boolean;      // 🔥 웨이팅 페이지에서만 전체 화면 느낌
+  waitingCount: number;
+  progressPct: number;
+  posterUrl?: string;
+  fullBleed?: boolean;
 };
 
 const WaitingQueue: React.FC<Props> = ({
-  title,
-  dateTime,
-  waitingCount,
-  progressPct,
-  posterUrl,
-  fullBleed = false,
+  title, dateTime, waitingCount, progressPct, posterUrl, fullBleed = false,
 }) => {
+  const fallback = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"/>'; // 투명
+  const [src, setSrc] = React.useState(posterUrl || fallback);
+
+  React.useEffect(() => {
+    setSrc(posterUrl || fallback);
+  }, [posterUrl]);
+
   return (
     <div className={fullBleed ? styles.cardFull : styles.card}>
       {/* 포스터 */}
-      <div
-        className={styles.poster}
-        style={posterUrl ? { backgroundImage: `url(${posterUrl})` } : undefined}
-      />
+      <div className={styles.poster}>
+        {src && (
+          <img
+            className={styles.posterImg}
+            src={src}
+            alt=""
+            onError={() => setSrc(fallback)}
+          />
+        )}
+      </div>
 
       {/* 정보 */}
       <div className={styles.info}>
