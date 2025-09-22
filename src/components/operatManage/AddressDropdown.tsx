@@ -13,7 +13,6 @@ const AddressDropdown: React.FC<AddressDropdownProps> = ({ addresses }) => {
         return <span>주소 없음</span>;
     }
 
-    // 삐약! 기본(default) 주소를 맨 위로 정렬합니다!
     const sortedAddresses = [...addresses].sort((a, b) => {
         if (a.default && !b.default) {
             return -1;

@@ -21,7 +21,6 @@ interface AddHostModalProps {
 }
 
 const AddModal: React.FC<AddHostModalProps> = ({ isOpen, onClose, onSave }) => {
-    // 삐약! 입력 필드의 상태를 관리합니다!
     const [hostData, setHostData] = useState<NewHostData>({
         loginId: '',
         loginPw: '',
@@ -40,9 +39,8 @@ const AddModal: React.FC<AddHostModalProps> = ({ isOpen, onClose, onSave }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         
-        // 삐약! 전화번호 입력 필드에만 자동 하이픈 기능을 적용해요!
         if (name === 'phone') {
-            const onlyNumbers = value.replace(/[^0-9]/g, ''); // 삐약! 숫자만 남겨요!
+            const onlyNumbers = value.replace(/[^0-9]/g, '');
             let formattedValue = '';
             
             if (onlyNumbers.length < 4) {
@@ -72,7 +70,7 @@ const AddModal: React.FC<AddHostModalProps> = ({ isOpen, onClose, onSave }) => {
 
      const handleSave = () => {
         if (!hostData.loginId || !hostData.loginPw || !hostData.name) {
-            alert('삐약! 필수 정보를 모두 입력해주세요!');
+            alert('필수 정보를 모두 입력해주세요');
             return;
         }
         onSave(hostData);

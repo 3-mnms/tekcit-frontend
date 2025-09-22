@@ -134,14 +134,14 @@ const AnnouncementListPage: React.FC = () => {
         (a) => a.fname?.includes(searchTerm) || a.title.includes(searchTerm)
     );
 
-    // 삐약! `showSent` 상태에 따라 다시 한번 필터링!
+    //`showSent` 상태에 따라 다시 한번 필터링!
     if (showSent) {
         return filteredBySearch; // `true`면 전체 다 보여줘!
     } else {
         // `false`면 알림이 보내지지 않은 공지사항만 보여줘!
         return filteredBySearch.filter((a) => !a.sent);
     }
-  }, [announcements, searchTerm, showSent]); // 삐약! `showSent`를 의존성 배열에 추가!
+  }, [announcements, searchTerm, showSent]); // `showSent`를 의존성 배열에 추가!
 
 
   if (isLoading) return <Spinner />;

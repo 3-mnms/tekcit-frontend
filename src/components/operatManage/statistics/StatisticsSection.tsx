@@ -11,7 +11,6 @@ interface Props {
 const StatisticsSection: React.FC<Props> = ({ data }) => {
   if (!data) return null;
 
-  // 삐약! 🐥 API 응답에 맞춰서 데이터를 매핑해야 해요.
   const genderData = [
       { label: '남', value: data.genderCount.male },
       { label: '여', value: data.genderCount.female },

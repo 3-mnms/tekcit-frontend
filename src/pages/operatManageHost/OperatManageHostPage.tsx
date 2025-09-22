@@ -8,18 +8,18 @@ import AddModal from '@/components/operatManage/AddModal';
 import type {NewHostData} from '@/components/operatManage/AddModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getHosts, registerHost, toggleHostStatus, deleteHosts } from '@/shared/api/admin/host';
+import Spinner from '@/components/common/spinner/Spinner';
 
 const OperatManageHostPage: React.FC = () => {
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const { data: hosts, isLoading, isError, isFetching } = useQuery({
+    const { data: hosts, isLoading, isError } = useQuery({
         queryKey: ['hosts'],
         queryFn: () => getHosts(),
     });
     
-    // 삐약! useMutation 훅을 사용해 호스트를 등록합니다!
     const { mutate: registerHostMutation, isPending: isRegistering } = useMutation({
         mutationFn: (newHostData: NewHostData) => registerHost(newHostData),
         onSuccess: () => {
@@ -96,13 +96,12 @@ const OperatManageHostPage: React.FC = () => {
         setSelectedHostIds(selectedIds);
     };
 
-    // 삐약! 로딩 및 에러 상태를 처리하는 UI를 추가합니다!
     if (isLoading) {
-        return <Layout subTitle="주최자 목록"><div>삐약! 주최자 목록을 불러오는 중...</div></Layout>;
+        return <Spinner />;
     }
 
     if (isError) {
-        return <Layout subTitle="주최자 목록"><div>삐약! 오류가 발생했어요. 다시 시도해 주세요.</div></Layout>;
+        return <Layout subTitle="주최자 목록"><div>오류가 발생했어요. 다시 시도해 주세요.</div></Layout>;
     }
     return (
         <Layout subTitle="주최자 목록"> 
@@ -114,7 +113,7 @@ const OperatManageHostPage: React.FC = () => {
                         <Button onClick={() => setIsModalOpen(true)}>파트너 추가</Button>
                     </div>
                 </div>
-                {isFetching && <div className={styles.loadingIndicator}>주최자 목록을 가져오는 중...</div>}
+                {/* {isFetching && <div className={styles.loadingIndicator}>주최자 목록을 가져오는 중...</div>} */}
                 <div className={styles.tableSection}>
                     <HostList users={filteredHosts} onToggleStatus={handleToggleStatus} onSelectionChange={handleSelectionChange} />
                 </div>

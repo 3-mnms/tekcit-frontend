@@ -1,5 +1,4 @@
 // src/pages/payment/BookingPaymentPage.tsx
-
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -50,6 +49,29 @@ const combineDateTime = (day?: Date, hhmm?: string | null) => {
   return d;
 };
 
+// 1초 간격으로 최대 15초 폴링
+const checkStatusAndNavigate = async (bookingId: string, routeToResult: (ok: boolean) => void) => {
+  const POLLING_ATTEMPTS = 15;
+  const POLLING_INTERVAL_MS = 1000;
+
+  for (let i = 0; i < POLLING_ATTEMPTS; i++) {
+    try {
+      const statusRes = await getReservationStatus(bookingId);
+      if (statusRes.data === 'COMPLETED' || statusRes.data === 'CONFIRMED') {
+        console.log('API 요청 성공: 예약 상태 확인 (완료)');
+        routeToResult(true);
+        return;
+      }
+    } catch (e) {
+      console.error('API 요청 실패: 예약 상태 확인 중 오류 발생', e);
+    }
+    await new Promise((r) => setTimeout(r, POLLING_INTERVAL_MS));
+  }
+
+  console.error('API 응답 오류: 최대 대기 시간(15초) 초과');
+  routeToResult(false);
+};
+
 const BookingPaymentPage: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -63,7 +85,7 @@ const BookingPaymentPage: React.FC = () => {
 
   const [sellerId, setSellerId] = useState<number | null>(null);
   const storeName = useAuthStore((s) => s.user?.name) || undefined;
-  const userName = useMemo(() => storeName ?? getNameFromJwt(), [storeName]);
+  const userName = useMemo(() => storeName ?? getNameFromJwt(), [storeName]); // getNameFromJwt는 기존 유틸로 가정
 
   const tossRef = useRef<TossPaymentHandle>(null);
   const [openedMethod, setOpenedMethod] = useState<PaymentMethod | null>(null);
@@ -81,33 +103,23 @@ const BookingPaymentPage: React.FC = () => {
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState(DEADLINE_SECONDS);
 
-  // 최초 paymentId 생성 + 세션 저장
+  // [수정 1] paymentId는 즉시 생성만 담당 (세션 저장은 분리)
   useEffect(() => {
     if (!paymentId) {
       const id = createPaymentId();
       setPaymentId(id);
-      if (checkout?.bookingId && checkout?.festivalId && sellerId) {
-        // 💡 디버깅: saveBookingSession 시작
-        console.log('API 요청 시작: saveBookingSession', { paymentId: id });
-        saveBookingSession({
-          paymentId: id,
-          bookingId: checkout.bookingId,
-          festivalId: checkout.festivalId,
-          sellerId,
-          amount: finalAmount,
-          createdAt: Date.now(),
-        });
-        // NOTE: saveBookingSession은 응답이 없으므로 완료 로그는 불필요
-      }
+      console.log('paymentId 생성:', id);
     }
-  }, [paymentId, checkout, finalAmount, sellerId]);
+  }, [paymentId]);
 
-  // sellerId 확보
+  // [수정 2] sellerId 확보 (기존 로직 유지)
   useEffect(() => {
     (async () => {
       try {
-        // 💡 디버깅: fetchBookingDetail 시작
-        console.log('API 요청 시작: fetchBookingDetail', { festivalId: checkout.festivalId, bookingId: checkout.bookingId });
+        console.log('API 요청 시작: fetchBookingDetail', {
+          festivalId: checkout.festivalId,
+          bookingId: checkout.bookingId,
+        });
         const res = await fetchBookingDetail({
           festivalId: checkout.festivalId,
           performanceDate: checkout.performanceDate,
@@ -117,7 +129,7 @@ const BookingPaymentPage: React.FC = () => {
           console.error('API 응답 실패: fetchBookingDetail', res.message);
           throw new Error(res.message || '상세 조회 실패');
         }
-        const sid = (res.data?.sellerId ?? res.data?.sellerId) as number | undefined;
+        const sid = res.data?.sellerId as number | undefined;
         if (!sid) {
           console.error('API 응답 오류: sellerId 누락', res.data);
           throw new Error('sellerId 누락');
@@ -128,7 +140,26 @@ const BookingPaymentPage: React.FC = () => {
         console.error('API 요청 실패: 예매 상세 조회 실패', e);
       }
     })();
-  }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkout?.festivalId, checkout?.performanceDate, checkout?.bookingId]);
+
+  // [수정 3] paymentId + sellerId 준비된 뒤에 세션 저장 (처음 한 번)
+  const savedSessionRef = useRef(false);
+  useEffect(() => {
+    if (savedSessionRef.current) return;
+    if (!paymentId || !checkout?.bookingId || !checkout?.festivalId || !sellerId) return;
+
+    console.log('API 요청 시작: saveBookingSession', { paymentId });
+    saveBookingSession({
+      paymentId,
+      bookingId: checkout.bookingId,
+      festivalId: checkout.festivalId,
+      sellerId,
+      amount: finalAmount,
+      createdAt: Date.now(),
+    });
+    savedSessionRef.current = true;
+  }, [paymentId, sellerId, checkout?.bookingId, checkout?.festivalId, finalAmount]);
 
   const releaseMut = useReleaseWaitingMutation();
   const releasedOnceRef = useRef(false);
@@ -153,6 +184,7 @@ const BookingPaymentPage: React.FC = () => {
   };
 
   const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false);
+
   const routeToResult = (ok: boolean) => {
     callReleaseOnce(ok ? 'routeToResult:success' : 'routeToResult:fail');
     navigate(`/payment/booking-result?status=${ok ? 'success' : 'fail'}`);
@@ -164,8 +196,9 @@ const BookingPaymentPage: React.FC = () => {
     setErr(null);
   };
 
-  const handlePostPayment = async (paymentId: string) => {
-    setIsPaying(true)
+  // [수정 4] handlePostPayment 내부에 try/catch/finally 정리
+  const handlePostPayment = async (pid: string) => {
+    setIsPaying(true);
     if (!checkout.bookingId) {
       console.error('결제 후 처리 실패: 예약번호가 존재하지 않습니다.');
       setErr('예약번호가 존재하지 않습니다.');
@@ -174,27 +207,12 @@ const BookingPaymentPage: React.FC = () => {
     }
 
     try {
-      // 💡 디버깅: completePayment 시작
-      console.log('API 요청 시작: completePayment', { paymentId });
-      await completePayment(paymentId);
+      console.log('API 요청 시작: completePayment', { paymentId: pid });
+      await completePayment(pid);
       console.log('API 요청 성공: completePayment');
 
-      setIsPaying(true);
-
-      await new Promise(resolve => setTimeout(resolve, 15000));
-
-      // 💡 디버깅: getReservationStatus 시작
-      console.log('API 요청 시작: getReservationStatus', { bookingId: checkout.bookingId });
-      const statusRes = await getReservationStatus(checkout.bookingId);
-
-      if (statusRes.data === 'COMPLETED' || statusRes.data === 'CONFIRMED') {
-        console.log('API 요청 성공: 예약 상태 확인 (완료)');
-        routeToResult(true);
-      } else {
-        console.error('API 응답 오류: 예약 상태가 실패입니다.', statusRes.data);
-        setErr('예약 처리에 실패했습니다. 고객센터에 문의해주세요.');
-        routeToResult(false);
-      }
+      // 결제 후 15초 폴링로 상태 확인
+      await checkStatusAndNavigate(checkout.bookingId, routeToResult);
     } catch (e) {
       console.error('API 요청 실패: 결제 후 처리', e);
       setErr('결제 후 처리에 실패했습니다. 고객센터에 문의해주세요.');
@@ -228,11 +246,12 @@ const BookingPaymentPage: React.FC = () => {
       setErr('로그인이 필요합니다.');
       return;
     }
+
+    // 결제 시작 플래그
     setIsPaying(true);
 
     try {
       if (openedMethod === 'wallet') {
-        // 💡 디버깅: 지갑 결제 API 요청 시작
         console.log('API 요청 시작: requestPayment (지갑)', { paymentId: ensuredId, userId });
         const dto = {
           paymentId: ensuredId,
@@ -247,12 +266,15 @@ const BookingPaymentPage: React.FC = () => {
         };
         await requestPayment(dto, userId!);
         console.log('API 요청 성공: requestPayment (지갑)');
+
+        // 지갑은 비밀번호 모달 열고, 이후 onComplete에서 폴링
         setIsPaying(false);
         setIsPasswordModalOpen(true);
         return;
       }
 
-      console.log("결제 성공 요청 시작")
+      // 카드(토스) 결제
+      console.log('결제 성공 요청 시작');
       await tossRef.current?.requestPay({
         paymentId: ensuredId,
         amount: finalAmount,
@@ -260,29 +282,30 @@ const BookingPaymentPage: React.FC = () => {
         bookingId: checkout.bookingId,
         festivalId: festivalIdVal,
         sellerId: sellerId!,
-        complete: (paymentData) => {
-          // 💡 디버깅: toss complete 콜백 호출 로그
+        complete: async (paymentData) => {
+          console.log('Toss complete 콜백:', paymentData?.status);
 
-          console.log(" Payment Data Status ( 264 ) : " + paymentData?.status)
-
-          if (paymentData.status === "success") {
-            console.log('Toss 결제 성공: handlePostPayment 호출');
-            handlePostPayment(paymentData.paymentId);
+          if (paymentData?.status === 'success') {
+            // 콜백 내에서 후처리를 기다림(중요)
+            await handlePostPayment(paymentData.paymentId);
           } else {
-            console.error('Toss 결제 실패', paymentData.message);
-            setErr(paymentData.message || '결제에 실패했습니다.');
+            console.error('Toss 결제 실패', paymentData?.message);
+            setErr(paymentData?.message || '결제에 실패했습니다.');
             routeToResult(false);
           }
-          
-          console.log("결제 성공 요청 종료");
+
+          console.log('결제 성공 요청 종료');
         },
       });
+
+      // requestPay가 정상적으로 끝난 경우, setIsPaying(false)는 handlePostPayment에서 처리됨
     } catch (e) {
       console.error('결제 준비 또는 요청 중 오류가 발생했습니다.', e);
       setErr('결제 준비 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.');
       routeToResult(false);
     } finally {
-      setIsPaying(false);
+      // 지갑 흐름은 위에서 false 처리, 카드 흐름은 handlePostPayment에서 false 처리
+      // 여기서는 중복 false 방지를 위해 아무 것도 하지 않음
     }
   };
 
@@ -329,7 +352,7 @@ const BookingPaymentPage: React.FC = () => {
               type="button"
               className={styles.payButton}
               onClick={handlePayment}
-              disabled={isPaying} 
+              disabled={isPaying}
               aria-busy={isPaying}
             >
               결제하기
@@ -348,30 +371,11 @@ const BookingPaymentPage: React.FC = () => {
           onComplete={async () => {
             setIsPasswordModalOpen(false);
             setIsPaying(true);
-            // 💡 디버깅: 지갑 결제 onComplete 로직 시작
             console.log('지갑 결제 완료 모달: onComplete 시작');
 
-            await new Promise(resolve => setTimeout(resolve, 15000));
-
-            try {
-              console.log('API 요청 시작: getReservationStatus (지갑 onComplete)');
-              const statusRes = await getReservationStatus(checkout.bookingId);
-
-              if (statusRes.data === 'COMPLETED' || statusRes.data === 'CONFIRMED') {
-                console.log('API 요청 성공: 예약 상태 확인 (지갑 완료)');
-                routeToResult(true);
-              } else {
-                console.error('API 응답 오류: 지갑 결제 후 예약 상태가 실패입니다.');
-                setErr('예약 처리에 실패했습니다. 고객센터에 문의해주세요.');
-                routeToResult(false);
-              }
-            } catch (e) {
-              console.error('API 요청 실패: 지갑 결제 후 예약 상태 확인', e);
-              setErr('예약 상태 확인에 실패했습니다. 고객센터에 문의해주세요.');
-              routeToResult(false);
-            } finally {
-              setIsPaying(false);
-            }
+            // 지갑 결제 후 상태 폴링
+            await checkStatusAndNavigate(checkout.bookingId, routeToResult);
+            setIsPaying(false);
           }}
         />
       )}

@@ -8,7 +8,7 @@ import Button from '@/components/common/Button';
 import Spinner from '@/components/common/spinner/Spinner';
 import { GrFormPrevious } from "react-icons/gr";
 import { GrFormNext } from "react-icons/gr";
-import { BiSkipPrevious } from "react-icons/bi";
+// import { BiSkipPrevious } from "react-icons/bi";
 import styles from './ProductManagePage.module.css';
 
 import { getProducts } from '@/shared/api/admin/festival';
@@ -48,7 +48,7 @@ const ProductManagePage: React.FC = () => {
     };
 
     const handleViewTicketHolderList = (e: React.MouseEvent, fid: string) => {
-        e.stopPropagation(); // 삐약! 행 클릭 이벤트가 발생하는 것을 막아줍니다!
+        e.stopPropagation(); // 행 클릭 이벤트가 발생하는 것을 막아줍니다!
         navigate(`/admin/productManage/TicketHolderList/${fid}`);
     };
 
@@ -105,7 +105,7 @@ const ProductManagePage: React.FC = () => {
     if (isError) {
         return (
         <Layout subTitle="상품 관리">
-            <div>삐약! 데이터를 불러오지 못했어요.</div>
+            <div>데이터를 불러오지 못했어요.</div>
         </Layout>
         );
     }

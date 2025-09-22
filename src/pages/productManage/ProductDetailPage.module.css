@@ -31,7 +31,6 @@
     margin-bottom: 0.5rem;
 }
 
-/* 삐약! 스케줄 태그를 위한 스타일입니다! */
 .scheduleTags {
     display: flex;
     flex-wrap: wrap;

@@ -5,12 +5,13 @@ import styles from './OperatManageUser.module.css';
 import Layout from '@components/layout/Layout';
 import { getUsers, toggleHostStatus } from '@/shared/api/admin/user'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Spinner from '@/components/common/spinner/Spinner';
 
 const OperatManageUserPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const queryClient = useQueryClient();
 
-    const { data: users, isLoading, isError, isFetching } = useQuery({
+    const { data: users, isLoading, isError} = useQuery({
         queryKey: ['users', searchTerm],
         queryFn: () => getUsers(),
     });
@@ -48,18 +49,15 @@ const OperatManageUserPage: React.FC = () => {
                 user.email?.toLowerCase().includes(lowercasedTerm) ||
                 user.loginId?.toLowerCase().includes(lowercasedTerm) ||
                 user.phone?.toLowerCase().includes(lowercasedTerm) ||
-                // 삐약! user.addresses가 배열인지 확인하고, some() 메서드를 사용해 주소 검색!
                 user.addresses?.some(addressItem =>
                     addressItem.address.toLowerCase().includes(lowercasedTerm)
                 )
             );
-
-            // 삐약! 두 조건 중 하나라도 맞으면 true를 반환해서 필터링해요.
             return userCondition;
         });
     }, [users, searchTerm]);
     
-    if (isLoading) return <Layout subTitle="사용자 목록"><div>로딩 중...</div></Layout>;
+    if (isLoading) return <Spinner/>
     if (isError) return <Layout subTitle="사용자 목록"><div>에러 발생!</div></Layout>;
 
     return (
@@ -71,7 +69,7 @@ const OperatManageUserPage: React.FC = () => {
                         <SearchBar searchTerm={searchTerm} onSearch={setSearchTerm} />
                     </div>
                 </div>
-                {isFetching && <div className={styles.loadingIndicator}>사용자 목록을 가져오는 중...</div>}
+                {/* {isFetching && <div className={styles.loadingIndicator}>사용자 목록을 가져오는 중...</div>} */}
                 <div className={styles.tableSection}>
                     <UserList users={filteredUsers} onToggleStatus={handleToggleStatus}/>
                 </div>

@@ -4,13 +4,11 @@ import styles from './PostcodeSearch.module.css';
 import Button from '@components/common/Button';
 
 
-// 삐약! Daum Postcode API의 Address 타입을 직접 정의합니다!
 interface DaumAddress {
     address: string;
     addressType: 'R' | 'J';
     bname: string;
     buildingName: string;
-    // 삐약! 필요한 다른 속성들이 있다면 여기에 추가할 수 있어요!
 }
 
 interface PostcodeSearchProps {
@@ -22,7 +20,6 @@ const PostcodeSearch: React.FC<PostcodeSearchProps> = ({ onComplete }) => {
     const open = useDaumPostcodePopup(scriptUrl);
     const [address, setAddress] = useState('');
 
-    // 삐약! data의 타입을 직접 정의한 DaumAddress로 지정했습니다!
     const handleComplete = (data: DaumAddress) => {
         let fullAddress = data.address;
         let extraAddress = '';
