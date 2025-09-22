@@ -30,6 +30,9 @@ const makeBroadcastTopic = (fid: string, date: string, time?: string) => {
 const SMALL_W = 1000
 const SMALL_H = 700
 
+const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
+
+
 const parseYMD = (s?: string) => {
   if (!s) return undefined
   const t = s.trim().replace(/[./]/g, '-')
@@ -287,8 +290,8 @@ const TicketQueuePage: React.FC = () => {
 
   const progress =
     TOTAL_AHEAD === 0
-      ? 100
-      : Math.min(100, Math.max(0, ((TOTAL_AHEAD - ahead) / TOTAL_AHEAD) * 100))
+      ? 1
+      : Math.min(1, Math.max(0, ((TOTAL_AHEAD - ahead) / TOTAL_AHEAD) * 100) % 3 === 0 ? 1 : 2 );
 
   return (
     <div className={`${styles.page} ${styles.fullwrap}`}>
