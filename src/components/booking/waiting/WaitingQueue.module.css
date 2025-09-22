@@ -16,6 +16,7 @@
   background: #d9d9d9 center/cover no-repeat;
   border-radius: 0.5rem;
   margin-bottom: 1rem;
+  overflow: hidden;
 }
 
 .info {
@@ -70,7 +71,7 @@
 
 .cardFull .poster {
   width: 200px;
-  height: 600px;
+  height: 500px;
   background: #d9d9d9 center/contain no-repeat;
   border-radius: 12px;
   margin: 0 auto 16px;

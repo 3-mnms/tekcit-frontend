@@ -272,6 +272,13 @@ const TicketQueuePage: React.FC = () => {
   }, [fid, date, time, myUserId, accessToken, handleQueueMessage, proceedToBooking])
 
   useEffect(() => {
+    if (!fid) return
+    if (ahead === 0 && !proceedingToBookingRef.current) {
+      proceedToBooking()
+    }
+  }, [ahead, fid, proceedToBooking])
+  
+  useEffect(() => {
     isUnmountedRef.current = false
     if (!fid || !reservationDate) {
       return () => {
