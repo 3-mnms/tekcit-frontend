@@ -24,7 +24,6 @@ import { useTokenInfoQuery } from '@/shared/api/useTokenInfoQuery';
 import { useReleaseWaitingMutation } from '@/models/waiting/tanstack-query/useWaiting';
 
 import styles from './BookingPaymentPage.module.css';
-// import { log } from 'console';
 
 const DEADLINE_SECONDS = 5 * 60;
 
