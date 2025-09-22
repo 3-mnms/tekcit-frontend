@@ -8,7 +8,7 @@ import Button from '@/components/common/Button';
 import Spinner from '@/components/common/spinner/Spinner';
 import { GrFormPrevious } from "react-icons/gr";
 import { GrFormNext } from "react-icons/gr";
-import { BiSkipPrevious } from "react-icons/bi";
+// import { BiSkipPrevious } from "react-icons/bi";
 import styles from './ProductManagePage.module.css';
 
 import { getProducts } from '@/shared/api/admin/festival';

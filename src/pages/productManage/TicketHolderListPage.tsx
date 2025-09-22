@@ -9,6 +9,7 @@ import { getAttendeesByFestivalId } from '@/shared/api/admin/festival';
 import type { TicketHolderType } from '@/models/admin/User'; 
 import styles from './TicketHolderListPage.module.css';
 import SearchBar from '@/components/common/SearchBox';
+import Spinner from '@/components/common/spinner/Spinner';
 
 const TicketHolderListPage: React.FC = () => {
     const { fid } = useParams<{ fid: string }>();
@@ -52,7 +53,7 @@ const TicketHolderListPage: React.FC = () => {
     ];
 
     if (isLoading) {
-        return <Layout subTitle="예매자 명단"><div>예매자 명단을 불러오는 중...</div></Layout>;
+        <Spinner/>
     }
 
     if (isError || !attendees) {

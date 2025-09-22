@@ -6,6 +6,7 @@ import Button from '@/components/common/Button';
 import { getProductDetail, deleteProduct } from '@/shared/api/admin/festival';
 import styles from './ProductDetailPage.module.css';
 import type { FestivalScheduleDTO} from '@/models/admin/festival';
+import Spinner from '@/components/common/spinner/Spinner';
 
 const ProductDetailPage: React.FC = () => {
     const navigate = useNavigate();
@@ -59,7 +60,7 @@ const ProductDetailPage: React.FC = () => {
     }, [product]);
 
     if (isLoading) {
-        return <Layout subTitle="상품 상세 정보"><div> 상품 정보를 불러오는 중...</div></Layout>;
+        <Spinner/>
     }
 
     if (isError || !product) {
