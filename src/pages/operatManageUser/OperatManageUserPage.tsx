@@ -48,13 +48,10 @@ const OperatManageUserPage: React.FC = () => {
                 user.email?.toLowerCase().includes(lowercasedTerm) ||
                 user.loginId?.toLowerCase().includes(lowercasedTerm) ||
                 user.phone?.toLowerCase().includes(lowercasedTerm) ||
-                // 삐약! user.addresses가 배열인지 확인하고, some() 메서드를 사용해 주소 검색!
                 user.addresses?.some(addressItem =>
                     addressItem.address.toLowerCase().includes(lowercasedTerm)
                 )
             );
-
-            // 삐약! 두 조건 중 하나라도 맞으면 true를 반환해서 필터링해요.
             return userCondition;
         });
     }, [users, searchTerm]);

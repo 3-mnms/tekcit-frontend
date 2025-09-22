@@ -10,7 +10,6 @@ interface PagedResponse<T> {
   number: number;
   last: boolean;
   empty: boolean;
-  // 삐약! 기타 필드들은 필요에 따라 추가해요!
 }
 
 interface ApiResponse<T> {
@@ -75,7 +74,7 @@ export const updateProduct = async (fid: string, formData: FormData): Promise<Fe
  * @param id 삭제할 공연의 ID
  */
 export const deleteProduct = async (fid: string): Promise<void> => {
-    console.log(`삐약! ${fid}번 공연을 서버에 삭제 요청해요!`);
+    console.log(`${fid}번 공연을 서버에 삭제 요청해요!`);
     await api.delete(`/festival/manage/${fid}`);
 };
 

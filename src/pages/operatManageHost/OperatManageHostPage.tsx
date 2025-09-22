@@ -19,7 +19,6 @@ const OperatManageHostPage: React.FC = () => {
         queryFn: () => getHosts(),
     });
     
-    // 삐약! useMutation 훅을 사용해 호스트를 등록합니다!
     const { mutate: registerHostMutation, isPending: isRegistering } = useMutation({
         mutationFn: (newHostData: NewHostData) => registerHost(newHostData),
         onSuccess: () => {
@@ -96,13 +95,12 @@ const OperatManageHostPage: React.FC = () => {
         setSelectedHostIds(selectedIds);
     };
 
-    // 삐약! 로딩 및 에러 상태를 처리하는 UI를 추가합니다!
     if (isLoading) {
-        return <Layout subTitle="주최자 목록"><div>삐약! 주최자 목록을 불러오는 중...</div></Layout>;
+        return <Layout subTitle="주최자 목록"><div>주최자 목록을 불러오는 중...</div></Layout>;
     }
 
     if (isError) {
-        return <Layout subTitle="주최자 목록"><div>삐약! 오류가 발생했어요. 다시 시도해 주세요.</div></Layout>;
+        return <Layout subTitle="주최자 목록"><div>오류가 발생했어요. 다시 시도해 주세요.</div></Layout>;
     }
     return (
         <Layout subTitle="주최자 목록"> 

@@ -1,7 +1,5 @@
 import type { Announcement, NewAnnouncement } from '@/models/admin/Announcement';
 import { api } from '@/shared/config/axios';
-
-// 삐약! 서버 응답 전체의 모양을 타입으로 정의
 interface ApiResponse<T> {
   success: boolean;
   data: T;

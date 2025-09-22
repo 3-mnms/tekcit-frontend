@@ -78,10 +78,6 @@ const Sidebar: React.FC<SidebarProps> = ({ menuItems, userName, role,  ...props 
           ))}
         </ul>
       </nav>
-
-      <div className={styles.sidebarFooter}>
-        &copy; {new Date().getFullYear()} 티켓팅 삐약!
-      </div>
     </aside>
   );
 };

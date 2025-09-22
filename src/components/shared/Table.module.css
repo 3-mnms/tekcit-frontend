@@ -42,5 +42,5 @@
 }
 
 .clickableRow:hover {
-    background-color: #f0f0f0; /* 삐약! hover 시 배경색을 변경해서 클릭 가능한 느낌을 줍니다! */
+    background-color: #f0f0f0; /* hover 시 배경색을 변경해서 클릭 가능한 느낌을 줍니다! */
 }

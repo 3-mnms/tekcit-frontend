@@ -1,6 +1,6 @@
 // components/common/SubHeader.tsx
 import React from 'react';
-import styles from './SubHeader.module.css'; // SubHeader.module.css 파일을 import! 삐약!
+import styles from './SubHeader.module.css'; // SubHeader.module.css 파일을 import!
 
 interface SubHeaderProps {
   title: string;
