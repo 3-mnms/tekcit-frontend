@@ -85,25 +85,52 @@
 .searchRow {
   display: flex;
   align-items: stretch;
-  gap: 0;
+  gap: 0;                     /* ← 이미 0이지만 확실히 */
+  border: 1px solid #d1d5db;  /* 그룹 테두리 */
+  border-radius: 0.6rem;
+  background: #fff;
+}
+
+.searchRow:focus-within {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px #bfdbfe; /* 끊김 없는 파란 하이라이트 */
 }
 
 .input {
   width: 100%;
   height: 44px;
-  border: 1px solid #d1d5db;
-  border-radius: 0.6rem;
+  border: 0;                                /* ← 개별 테두리 제거 */
+  border-radius: 0.5rem 0 0 0.5rem;         /* 좌측만 둥글게 */
   padding: 0 0.8rem;
   background: #fff;
 }
 
-.inputAttached {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  border-right: 0;
+.input:focus { 
+  outline: none;
 }
 
-.searchBtn,
+.inputAttached {                             /* 쓰고 있으면 유지 */
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.searchBtn {
+  min-width: 88px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  white-space: nowrap;
+  word-break: keep-all;
+  line-height: 1;
+
+  border: 0;                                 /* 개별 테두리 제거 */
+  border-left: 1px solid #e5e7eb;            /* 경계선만 */
+  border-radius: 0 0.5rem 0.5rem 0;          /* 우측만 둥글게 */
+  /* ✨ 중요: 겹치기 꼼수 제거 */
+  margin-left: 0;                            /* ← 기존 -7px 삭제 */
+}
+
 .confirmBtn {
   width: auto;               /* 고정폭이면 해제 */
   min-width: 88px;           /* "검색 중…"도 한 줄로 들어가게 살짝 여유 */

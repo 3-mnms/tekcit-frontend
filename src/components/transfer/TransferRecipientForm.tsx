@@ -125,9 +125,11 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
   const pollTimerRef = useRef<number | null>(null);
   const submittedRef = useRef(false); // 중복 요청 방지
 
-  function cleanServerMessage(msg?: string) {
-    // 앞쪽에 붙은 숫자 상태코드/대괄호/콜론/대시 등을 제거: "409 xxx", "[409] xxx", "409: xxx"
-    return (msg ?? '').replace(/^\s*\[?\s*\d{3}\s*\]?\s*[:\-]?\s*/, '').trim()
+  function cleanServerMessage(msg?: string): string {
+    // 예) "404 ...", "[404] ...", "404: ...", "ERR_CODE: ...", "E-409 - ..."
+    return (msg ?? '')
+      .replace(/^\s*(?:\[\s*\d{3}\s*\]|\d{3}|[A-Z_]+(?:-\d+)?)(?:\s*[:\-]\s*)?\s*/, '')
+      .trim();
   }
 
   useEffect(() => () => { if (tempUrl) URL.revokeObjectURL(tempUrl); }, [tempUrl]);
@@ -223,11 +225,12 @@ const TransferRecipientForm: React.FC<Props> = (props) => {
         setVerifyDone(true);
         setProgress(100);
 
-        setHintMsg(ok ? null : (result?.message ?? '인증에 실패했어요.'));
+        setHintMsg(ok ? null : cleanServerMessage(result?.message ?? '인증에 실패했어요.'));
       } catch (err: unknown) {
         if (!cancelled) {
-          const e = err as Error;
-          setErrorMsg(e?.message || 'OCR 인증 실패');
+          const anyE = err as { response?: { data?: { message?: string } }, message?: string };
+          const raw = anyE?.response?.data?.message || anyE?.message || 'OCR 인증 실패';
+          setErrorMsg(cleanServerMessage(raw));
           setVerifyOk(false);
           setVerifyDone(true);
           setProgress(100);
