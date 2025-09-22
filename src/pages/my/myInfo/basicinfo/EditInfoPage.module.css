@@ -1,0 +1,157 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.header {
+  max-width: 64rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 1.75rem);
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 0.25rem 0;
+}
+
+.card {
+  max-width: 48rem;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: box-shadow .2s ease;
+  padding: 1.25rem;
+}
+
+.card:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.cardAccent {
+  border-left: 4px solid #4D9AFD;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.input {
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  height: 44px;
+  border-radius: 0.5rem;
+  transition: border-color .15s ease, box-shadow .15s ease;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.input :where(label) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 0.35rem !important;
+}
+
+.input :where(input:focus) {
+  outline: none;
+  border-color: #4D9AFD;
+  box-shadow: 0 0 0 3px rgba(77, 154, 253, 0.15);
+}
+
+.input :where(input[aria-invalid="true"]),
+.input :where(input.is-invalid),
+.input :where(.invalid input) {
+  border-color: #ef4444;
+  /* red-500 */
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+/* 에러 메시지(공통 Input이 노출한다면) */
+.input :where(.error, .helper, .message) {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  color: #ef4444;
+}
+
+/* 액션: 오른쪽 끝 정렬 + 반응형 스택 */
+.actions {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr 1fr;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* 버튼 (공통 Button 커스터마이즈) */
+.btn {
+  height: 44px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 0.5rem;
+  padding: 0 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* 기본 파랑 버튼: #4D9AFD 고정 */
+.btnPrimary {
+  background: #4D9AFD;
+  color: #fff;
+  border: 1px solid #4D9AFD;
+}
+
+.btnPrimary:hover:not([disabled]) {
+  filter: brightness(0.98);
+}
+
+/* 외곽선 버튼 */
+.btnOutline {
+  background: transparent;
+  color: #4D9AFD;
+  border: 1px solid #bfdbfe;
+  /* blue-200 비슷톤 */
+}
+
+.btnOutline:hover:not([disabled]) {
+  background: #eff6ff;
+  /* blue-50 비슷톤 */
+}
+
+.labelWithIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #374151;
+  /* gray-700 */
+}
+
+.labelIcon {
+  width: 14px;
+  height: 14px;
+  color: #4D9AFD;
+  /* 대표 포인트 색 */
+}
+
+/* 모바일에서 버튼이 줄바꿈되면 꽉 차게 */
+@media (max-width: 480px) {
+  .btn {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}

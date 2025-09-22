@@ -1,0 +1,34 @@
+// 예매 결제 페이지 관련 타입 정의
+
+// 결제 수단 선택 타입
+export type PaymentMethod = 'wallet' | 'Toss'
+
+// 프론트 예매 페이지에서 받아오는 정보 타입
+export type CheckoutState = {
+  bookingId?: string
+  reservationNumber: string
+  posterUrl?: string
+  title: string
+  performanceDate: string
+  unitPrice: number
+  quantity: number
+  deliveryMethod: string
+  buyerName: string
+  bookerName: string
+  festivalId: string
+}
+
+export interface TossPaymentBody {
+  paymentId: string   // 결제 ID (프론트 생성)
+  bookingId: string   // 가예매 ID
+  festivalId: string  // 공연 ID
+  sellerId: number    // 판매자 ID (API 응답으로 확보)
+  amount: number      // 결제 금액
+}
+
+// ✅ 서버 세션 생성 응답 타입(백엔드 스펙에 맞게 조정)
+// 판매자 ID는 예매 api 받아와야함
+export type CreateSessionResponse = {
+  bookingId: string   // 서버가 생성한 가예매/주문 ID
+  sellerId: number    // 판매자 ID
+}

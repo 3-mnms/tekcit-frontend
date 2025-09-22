@@ -1,0 +1,22 @@
+.button {
+  background-color: #4d9afd;
+  color: white;
+  font-weight: bold;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.button:hover {
+  background-color: #3585ea;
+  color: whitesmoke;
+}
+
+.button:focus {
+  outline: none; 
+}
+
+.button:disabled {
+  background-color: #a1cfff;
+  cursor: not-allowed;
+}

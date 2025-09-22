@@ -1,0 +1,42 @@
+/* ✅ 카드 리스트 래퍼: 스크롤바 정리 + 위아래 여백 멍 */
+.address-wrapper {
+  /* max-height: min(56vh, 540px);  */
+  overflow: auto;
+  padding-right: 4px;                
+  margin-top: 8px;
+}
+
+/* ✅ 스크롤바 미세 스타일 (크로미움) 멍 */
+.address-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+.address-wrapper::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 8px;
+}
+.address-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+/* ✅ 리스트 간격/아이템 패딩 정리 멍 */
+.address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;                     
+  padding: 8px 0 4px;
+}
+
+.address-list-item {
+  cursor: pointer;
+  /* height: auto; */
+}
+
+/* ✅ 선택된 아이템에는 외곽선 비활성, 내부 카드가 강조되므로 얇게만 멍 */
+.address-list-item.selected {
+  outline: none;
+}
+
+/* ✅ 하단 고정 버튼(있다면) 상단 그림자 멍 */
+.footerStickyShadow {
+  box-shadow: 0 -8px 24px rgba(0,0,0,.06);
+}

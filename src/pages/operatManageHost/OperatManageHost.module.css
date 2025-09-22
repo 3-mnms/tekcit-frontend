@@ -1,0 +1,47 @@
+.container {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.totalUsersText {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+}
+
+/* .tableSection {
+    테이블 섹션에 필요한 스타일 추가
+} */
+
+.floatingActionBar {
+  position: fixed; /* 화면에 고정 */
+  bottom: 5%; /* 화면 아래에서 20px 위 */
+  left: 50%; /* 화면 중앙으로 */
+  transform: translateX(-10%); /* 정확히 중앙 정렬 */
+  
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 15px 25px;
+  
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  
+  /* z-index: 1000; */
+  /* transition: all 0.3s ease-in-out; */
+}

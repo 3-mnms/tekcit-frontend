@@ -1,0 +1,136 @@
+.container {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 16px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+/* ⬆️ 헤더 크게 & 시원하게 */
+.title {
+  margin-bottom: 16px;
+  font-size: 1.375rem;   /* 22px로 키움 (기존보다 크게) */
+  line-height: 1.35;
+  font-weight: 700;      /* 굵게 */
+}
+
+.titleCompact {
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.priceBox {
+  margin-top: 12px;
+  display: grid;
+  gap: 4px;
+  font-size: 0.875rem;   /* 14px로 복귀 */
+}
+
+/* 가격 오른쪽 숫자만 별도 사이즈(예전 느낌) */
+.priceValue {
+  font-size: 1rem;       /* 16px */
+  font-weight: 500;      /* medium */
+  line-height: 1.2;
+}
+
+.row {
+  display: flex;
+  gap: 48px;
+  align-items: flex-start;
+}
+
+.poster {
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  flex-shrink: 0;
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  background: #f3f4f6;
+}
+
+.posterCompact { width: 120px; }
+.posterWide   { width: 100%; }
+
+.posterImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.info {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.stack {
+  display: grid;
+  gap: 6px;              /* 살짝 여유 */
+}
+
+/* ⬆️ 공연 제목도 살짝 키워 강조 */
+.titleText {
+  font-size: 1.125rem;   /* 18px (기존 16px) */
+  font-weight: 600;      /* 굵게 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.titleTextCompact {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ⬆️ 날짜/시간도 미세 확대 */
+.meta {
+  font-size: 0.9375rem;  /* 15px (기존 14px) */
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metaCompact {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.priceBox {
+  margin-top: 12px;
+  display: grid;
+  gap: 4px;
+  font-size: 0.9375rem;  /* 15px로 살짝 업 */
+}
+
+.rowBetween {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.muted { opacity: 0.8; }
+
+.subtotal {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.titleLarge {
+  margin-bottom: 16px;
+  font-size: 1.2rem;     /* 24px */
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #0f172a;        /* slate-900 느낌 */
+}

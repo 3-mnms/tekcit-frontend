@@ -1,0 +1,14 @@
+.inputGroup {
+    display: flex;
+    /* flex: 1;  */
+    gap: 0.5rem;
+}
+
+.input {
+    width: 100%;
+    padding: 0.5% 0.5rem;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.7rem;
+}

@@ -1,0 +1,42 @@
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 64px;
+  height: 64px;
+  border-radius: 9999px;
+  border: none;
+  padding: 0;
+  background: #ffffff;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 10020; /* 채팅창(10030)보다 낮게, 페이지 요소보다 높게 */
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.fab:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.24);
+}
+
+.fabActive {
+  box-shadow: 0 0 0 3px #4D9AFD22, 0 8px 28px rgba(0,0,0,0.18);
+}
+
+.logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none; /* 버튼 클릭을 가로막지 않도록 */
+}
+
+.closeIcon {
+  font-size: 28px;
+  font-weight: bold;
+  color: #000000;
+  /* line-height: 1; */
+  margin-bottom: 5px;
+}

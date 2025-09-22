@@ -1,0 +1,107 @@
+.sidebar {      
+    width: 18%;  
+    min-width: 150px;    
+    height: 100%;
+    
+    background-color: #000000;
+    color: #ecf0f1;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 10vh;
+    left: 0;
+    z-index: 100;
+    transition: width 0.3s ease;  /*화면 크기 바뀔 때 부드럽게*/
+}
+
+
+.userInfoArea {
+    padding: 2.5rem 1rem; 
+    border-bottom: 3px solid #333333; /* 하단 구분선*/
+}
+
+.userName {
+    font-size: 12px;
+    color: #ffffff;
+    margin-bottom: 5px;
+}
+
+.role {
+    font-size: 12px;
+    color: #cccccc; 
+}
+
+
+.sidebarNav {
+    flex-grow: 1;
+    padding: 0 0px;
+}
+
+.menuLink {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.5rem; 
+    font-size: 13px;
+    color: #ecf0f1;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border-left: 0.3rem solid transparent;
+    border-bottom: 3px solid #333333;
+}
+
+.menuLink:hover {
+    background-color: #1a1a1a; 
+    color: #ffffff;
+    font-weight: bold; 
+}
+
+.subMenuList {
+    padding: 0;
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;    /* 넘치는 내용 숨기기 */
+    opacity: 0
+}
+
+.subMenuLink {
+    display: flex; /* 전체 영역 클릭 가능 */
+    padding: 0.5rem 1.3rem; 
+    font-size: 12px;
+    color: #ecf0f1 !important;
+    background-color: #444444; /* 서브 메뉴 배경 */
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.subMenuLink:hover {
+  background-color: #666666; /* 호버 시 색 변경 */
+}
+
+.subMenuList.open {
+  max-height: 300px;        /* 충분히 크게 (소메뉴 개수 많을 때 대비) */
+  opacity: 1;
+}
+
+.menuLinkActive {
+    background-color: #898989; /* 활성화된 메뉴 배경색 (어두운 회색) */
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.subMenuLinkActive {
+  background-color: #555555; /* 서브메뉴 클릭됐을 때 색 */
+  color: white;
+  font-weight: bold;
+}
+
+.sidebarFooter {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid #333333; /* 푸터 경계선 색상 조정 */
+    text-align: center;
+    font-size: 12px;
+    color: #95a5a6;
+    padding-bottom: 10px; /* 하단 패딩 추가 */
+}

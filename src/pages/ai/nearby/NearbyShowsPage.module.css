@@ -1,0 +1,283 @@
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.page {
+  padding: 24px 150px;
+}
+
+.headerRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.titleWrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.titleWrap i {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: #4d9afd;
+  color: #fff;
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 8px;
+}
+
+
+.titleWrap h1 {
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 0;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.titleBlock h1 {
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 0;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.addr {
+  color: #444;
+  font-size: 14px;
+}
+
+.addrBtn {
+  margin-left: 6px;
+  font-size: 13px;
+  color: #0c5bc2;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  /* text-decoration: underline; */
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.embedMode {
+  display: block;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+}
+
+.cardAccent {
+  border-left: 4px solid #4D9AFD;
+}
+
+.poster {
+  width: 100%;
+  aspect-ratio: 4/5;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.meta {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto;
+  gap: 6px;
+  min-height: 140px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  /* line-height: 1.35; */
+}
+
+.navIcon {
+  width: 15px;
+  height: 15px;
+  margin-top: 3px;
+  margin-right: 3px;
+  color: gray;
+}
+
+.venue {
+  color: #666;
+  font-size: 13px;
+  display: flex;
+  margin: 10px 0;
+}
+
+.distance {
+  color: #222;
+  font-size: 13px;
+  display: flex;
+}
+
+.actions {
+  margin-top: 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  align-self: end;
+  justify-self: end;
+}
+
+.btnGhost {
+  background: #fff;
+  color: #111;
+  border: 1px solid #cbd5e1;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.btnGhost:hover {
+  background-color: #fcfcfc;
+  color: rgb(0, 0, 0);
+  border: 1px solid #cbd5e1;
+}
+
+.btnPrimary {
+  background: #4d9afd;
+  color: #fff;
+  border: 1px solid #4d9afd;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.btnPrimary:hover {
+  background-color: #3585ea;
+  color: whitesmoke;
+}
+
+.linkIcon {
+  width: 15px;
+  margin-right: 5px;
+}
+
+.mapWrap {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.mapHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.mapTools {
+  display: flex;
+  gap: 6px;
+}
+
+.mapTools button {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+}
+
+.mapArea {
+  position: relative;
+  flex: 1;
+  background: #f0f6ff;
+}
+
+.marker {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, .15);
+  border: 2px solid #fff;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+.marker1 {
+  background: #1e293b;
+  color: #fff;
+}
+
+.marker2 {
+  background: #0ea5e9;
+  color: #fff;
+}
+
+.marker3 {
+  background: #64748b;
+  color: #fff;
+}
+
+.kakaoBadge {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  font-size: 11px;
+  color: #888;
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .mapWrap {
+    order: -1;
+  }
+}

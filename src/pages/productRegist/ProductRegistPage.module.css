@@ -1,0 +1,174 @@
+.container {
+    padding: 1rem 2rem;
+    background-color: #fbfbfb;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.infoText {
+    color: red;
+    font-size: 0.8rem;
+    padding-bottom: 0.3rem;
+}
+
+.formRow {
+    display: flex;
+    margin-bottom: 1rem;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.formItem {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    
+}
+
+.formItem label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
+
+.select,
+.textarea {
+    width: 100%;
+    padding: 1%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    background-color: #fff;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.select:focus,
+.textarea:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.radioGroup {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding: 0 0.3rem;
+    flex-wrap: wrap;
+}
+
+.radioGroup label {
+    display: flex;
+    font-weight: normal;
+    font-size: 0.7rem;
+    color: #333;
+    cursor: pointer;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.radioGroup input[type="radio"] {
+    margin-right: 0.3rem;
+    accent-color: #007bff;
+}
+
+.fileUploadItem {
+    margin-bottom: 1rem;
+}
+
+.fileUploadItem label {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
+
+.fileName {
+    font-size: 0.7rem; 
+    color: #555;
+    margin-top: 0.5rem;
+    word-break: break-all;
+}
+
+.fileNames {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+.registerButtonWrapper {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.modalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modalText {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.modalButtons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.confirmButton {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.cancelButton {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.unit {
+    margin-left: 0.5rem;
+    font-size: 0.7rem;
+    flex-shrink: 0; 
+}
+
+.required::after {
+    content: '*'; /*  별표를 넣어요! */
+    color: red; /*  색상을 빨간색으로! */
+    margin-left: 4px; /* 글자와 약간의 간격을 줘요! */
+}

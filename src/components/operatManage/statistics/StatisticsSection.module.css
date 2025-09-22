@@ -1,0 +1,18 @@
+.container {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 10px;
+}
+
+.controls {
+  /* display: flex; */
+  margin-bottom: 30px;
+}
+
+.statsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}

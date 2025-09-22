@@ -1,0 +1,116 @@
+.item {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #4D9AFD;
+  /* 대표색 */
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+  transition: box-shadow .2s ease, transform .02s ease;
+}
+
+.item:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
+}
+
+.inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  gap: 0.75rem;
+}
+
+.left {
+  flex: 1;
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.iconWrap {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  color: #4D9AFD;
+  /* 대표색 */
+  align-items: center;
+  justify-content: center;
+}
+
+.recipient {
+  font-weight: 700;
+  color: #111827;
+}
+
+.badge {
+  margin-left: 4px;
+  background: #dbeafe;
+  /* 연한 블루 */
+  color: #1e40af;
+  /* 진한 블루 */
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.info {
+  display: grid;
+  gap: 3px;
+}
+
+.phone {
+  color: #111827;
+  font-weight: 600;
+}
+
+.addr {
+  color: #4b5563;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.actions {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: 8px;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.actionBtn:active {
+  transform: translateY(1px);
+}
+
+.editBtn {
+  border-color: #bfdbfe;
+  /* 연한 블루 */
+  color: #2563eb;
+  /* 파랑 계열 */
+  background: transparent;
+}
+
+.editBtn:hover {
+  background: #eff6ff;
+}
+
+.deleteBtn {
+  background: transparent;
+}

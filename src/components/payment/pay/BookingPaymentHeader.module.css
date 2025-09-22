@@ -1,0 +1,29 @@
+.header {
+  width: 100%;
+  padding: 8px 24px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.time {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #dc2626;
+  letter-spacing: -0.5px;
+  min-width: 64px;
+}

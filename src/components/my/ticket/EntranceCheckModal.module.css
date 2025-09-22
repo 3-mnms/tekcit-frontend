@@ -1,0 +1,70 @@
+/* ✅ 전체 오버레이 배경 (변경 없음) */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* ✅ 카드 자체 (작고 예쁘게 중앙에) */
+.highlightCard {
+  position: relative;
+  background: linear-gradient(135deg, #e0f0ff, #f4faff);
+  padding: 2rem 1.5rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  max-width: 90%;
+  text-align: center;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 5px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #888;
+  cursor: pointer;
+}
+
+.cardLabel {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 0.3rem;
+}
+
+.cardCount {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #4D9AFD;
+  margin-bottom: 0.8rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 12px;
+  background-color: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background-color: #4D9AFD;
+  transition: width 0.3s ease-in-out;
+}
+
+.percentLabel {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #4D9AFD;
+  font-weight: 500;
+}

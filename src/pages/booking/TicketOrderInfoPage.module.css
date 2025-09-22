@@ -1,0 +1,175 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  /* 상위 레이아웃 여백이 만들어내는 스크롤 방지 */
+  padding: 0;
+  place-content: center;
+  place-items: center;
+}
+
+.page {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 620px 350px;
+  /* 좌/우 */
+  gap: 20px;
+  padding: 12px;
+  overflow: hidden;
+  /* 내부 스크롤 금지 */
+  background: #fff;
+  border-radius: 12px;
+  place-content: center;
+}
+
+/* 좌/우 컬럼은 위쪽에만 붙고, 내부 스크롤 없음 */
+.leftCol {
+  display: grid;
+  gap: 10px;
+  /* 🔽 간격 줄여서 전체 높이 절약 */
+  align-content: start;
+  /* min-height: 0; */
+}
+
+.rightCol {
+  display: grid;
+  gap: 10px;
+  /* 🔽 간격 줄여서 전체 높이 절약 */
+  margin-right: 10px;
+  align-content: start;
+  /* min-height: 0; */
+  height: 100%;
+}
+
+/* 카드 내부에서 overflow:auto가 있어도 무시 */
+.noScroll {
+  overflow: visible !important;
+  max-height: none !important;
+}
+
+/* QR일 때 보이는 플레이스홀더 */
+.placeholder {
+  border: 1px solid #e5e7eb;
+  background: #f8f9fb;
+  border-radius: 14px;
+  padding: 12px;
+  /* 🔽 줄이기 */
+  color: #6b7280;
+}
+
+/* ====== 컴팩트/폭 제한 유틸 ====== */
+
+/* 수령 방법/주소 등의 섹션 너비를 적당히 제한 */
+.sectionMaxW {
+  max-width: 640px;
+}
+
+/* 수령 방법 카드 섹션의 패딩/타이포/간격을 컴팩트하게 조정 */
+.deliveryCompact {
+  padding: 16px !important;
+  /* Tailwind p-5 덮어쓰기 */
+  border-radius: 16px;
+}
+
+/* 섹션 타이틀 간격/크기 축소 */
+.deliveryCompact>h2 {
+  margin-bottom: 8px !important;
+  font-size: 15px !important;
+  line-height: 20px !important;
+}
+
+/* 라디오 그룹 간격 축소 */
+.deliveryCompact [role='radiogroup'] {
+  display: grid;
+  gap: 8px !important;
+}
+
+/* 지류(PAPER) 선택 시 표시되는 주소 폼 영역 컴팩트 */
+.addressBox {
+  max-width: 620px;
+}
+
+/* 주소 폼 내부 컨트롤 높이/폰트 축소 (과도한 세로팽창 방지) */
+.addressBox input,
+.addressBox select,
+.addressBox button,
+.addressBox textarea {
+  height: 40px;
+  font-size: 14px;
+  line-height: 20px;
+  box-sizing: border-box;
+}
+
+.addressBox textarea {
+  min-height: 80px;
+}
+
+/* 버튼들이 과하게 커지지 않도록 */
+.addressBox .btn,
+.addressBox button[type='button'],
+.addressBox button[type='submit'] {
+  height: 40px;
+  padding: 0 12px;
+  font-weight: 600;
+}
+
+/* (선택) 좌측 컬럼 안의 카드들 여백을 살짝 더 조밀하게 */
+.leftCol>section,
+.leftCol>div {
+  margin-bottom: 2px;
+}
+
+.boxCard {
+  max-width: 620px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+/* 수령방법 카드: 내부 섹션이 커지지 않게 유지(패딩만 살짝) */
+.deliveryCard {
+  max-width: 620px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+/* 주소 카드: 컨트롤이 과하게 커지지 않도록 컴팩트 사이징 */
+.addressCard {
+  max-width: 620px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.addressCard input,
+.addressCard select,
+.addressCard button,
+.addressCard textarea {
+  height: 40px;
+  font-size: 14px;
+  line-height: 20px;
+  box-sizing: border-box;
+}
+
+.addressCard textarea {
+  min-height: 80px;
+}
+
+/* 버튼 과대 방지 */
+.addressCard .btn,
+.addressCard button[type='button'],
+.addressCard button[type='submit'] {
+  height: 40px;
+  padding: 0 12px;
+  font-weight: 600;
+}
+
+/* 수령방법 컴포넌트가 내부에서 ring/border로 흔들려도 부모 카드 레이아웃은 고정 */
+.deliveryCard>* {
+  width: 100%;
+}

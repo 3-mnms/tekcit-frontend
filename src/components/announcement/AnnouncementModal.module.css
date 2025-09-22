@@ -1,0 +1,237 @@
+/* src/components/admin/announcement/AnnouncementModal.module.css */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh; 
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #888;
+  padding: 0;
+  line-height: 1;
+}
+
+.contentWrapper {
+  display: flex;
+  padding: 24px;
+  gap: 32px;
+  overflow-y: auto;
+}
+
+.leftPanel, .rightPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.leftPanel {
+  flex: 1;
+  min-width: 320px;
+}
+
+.rightPanel {
+  flex: 1.5;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGroup label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.formGroup textarea {
+  min-height: 300px;
+  resize: vertical;
+}
+
+.dispatchTimeWrapper {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.dispatchTimeWrapper input {
+  flex: 1; /* 양쪽 input이 공간을 균등하게 차지하도록 */
+}
+
+
+.footer {
+  padding: 16px 24px;
+  border-top: 1px solid #eee;
+  background-color: #f9f9f9;
+  flex-shrink: 0;
+}
+
+.warning {
+  color: #d9534f;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.buttons button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.save {
+  background-color: #007bff;
+  color: white;
+}
+
+.cancel {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+/* --- Calendar Styles --- */
+.calendar {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.calendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.calendarHeader button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  text-align: center;
+}
+
+.calendarDayName {
+  font-weight: bold;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.calendarDay {
+  padding: 8px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+}
+.calendarDay:hover:not(:disabled) {
+  background-color: #f0f0f0;
+}
+.calendarDay.selected {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+.calendarDay.disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+.calendarDayEmpty {
+  visibility: hidden;
+}
+
+/* --- Time Selector Styles --- */
+.timeSelector {
+  display: flex;
+  gap: 10px;
+}
+.timeButton {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: white;
+  cursor: pointer;
+}
+.timeButton.selected {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+.timeSelectorDisabled {
+    color: #888;
+    font-style: italic;
+}

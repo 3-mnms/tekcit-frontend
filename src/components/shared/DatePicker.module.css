@@ -1,0 +1,17 @@
+.datePickerGroup{
+    display: flex;
+    align-items: center;
+}
+
+.datePicker {
+    width: 100%;
+    padding: 0.5% 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.7rem; 
+}
+
+.datePicker:focus {
+    border-color: #4d9afd;
+    outline: none;
+}

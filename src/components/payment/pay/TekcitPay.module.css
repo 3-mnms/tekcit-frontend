@@ -1,0 +1,88 @@
+.wrapper {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px 24px;
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.error {
+  background: #fff1f2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.92rem;
+}
+
+.muted {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 8px;
+  font-size: 1rem;
+}
+
+.label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.value {
+  font-weight: 700;
+  color: #111827;
+}
+
+/* 부족 금액 안내 */
+.shortageBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fff6f6;
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #b91c1c;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.warningIcon {
+  font-size: 1.2rem;
+  margin-top: 2px;
+}
+
+/* 충전 버튼 영역 */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.chargeBtn {
+  background: #4D9AFD;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  min-width: 120px;
+  transition: background 0.2s ease;
+}
+
+.chargeBtn:hover {
+  background: #377ee7;
+}

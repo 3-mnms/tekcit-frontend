@@ -1,0 +1,334 @@
+/* 카드 & 타이틀 */
+.card {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: #111827;
+}
+
+.iconTitle {
+  width: 20px;
+  height: 20px;
+  color: #3b82f6;
+}
+
+/* 라디오 */
+.radioRow {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.radio input[type="radio"] {
+  appearance: none;
+  inline-size: 18px;
+  block-size: 18px;
+  border: 2px solid #94a3b8;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  transition: all .15s ease;
+}
+
+.radio input[type="radio"]:checked {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, .15);
+  background:
+    radial-gradient(#3b82f6 52%, rgba(59, 130, 246, 0) 55%);
+}
+
+/* 레이블 & 필드 */
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* 이메일 입력 + 검색 버튼 결합 */
+.idRow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  position: relative;
+  max-width: 560px;
+}
+
+.inputShort,
+.inputShortAttached {
+  width: 100%;
+  min-width: 280px;
+  height: 44px;
+  border: 1px solid #d1d5db;
+  border-right: 0;
+  border-radius: 12px 0 0 12px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  background-color: #fff;
+  outline: none;
+  font-size: 14px;
+}
+
+.inputShort:read-only {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.inputAttached {
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.searchBtn {
+  height: 44px;
+  border-radius: 0 12px 12px 0;
+  margin-left: -1px;
+  padding: 0 16px;
+  font-weight: 600;
+  width: 30%;
+}
+
+/* 일반 인풋 */
+.input {
+  width: 100%;
+  max-width: 560px;
+  height: 44px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #f3f4f6;
+  color: #6b7280;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+/* 포커스 링 (인풋+버튼 묶음) */
+.idRow:focus-within::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 14px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+  pointer-events: none;
+}
+
+/* 파일 업로드(가족증빙) */
+.proofWrap {
+  display: grid;
+  gap: 6px;
+}
+
+.proofLabel {
+  font-weight: 600;
+  color: #111827;
+}
+
+.dropzone {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 1px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 10px;
+  background: #f9fafb;
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileButton {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.fileHelp {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.fileMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.fileName {
+  font-size: 13px;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clearBtn {
+  background: transparent;
+  border: 0;
+  color: #6b7280;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* 제출 버튼 */
+.submitBtn {
+  width: 100%;
+  height: 52px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(59, 130, 246, .22);
+  transition: transform .06s ease, box-shadow .2s ease, opacity .2s ease;
+}
+
+.submitBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(59, 130, 246, .25);
+}
+
+.submitBtnDisabled,
+.submitBtn:disabled {
+  background: #93c5fd;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: .7;
+}
+
+/* ===== 모달 ===== */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .40);
+  display: grid;
+  place-items: center;
+  z-index: 60;
+}
+
+.modalCard {
+  width: 72vw;
+  max-width: 960px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  padding: 16px 20px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .2);
+}
+
+.modalTitle {
+  font-weight: 700;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.previewBox {
+  position: relative;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.previewArea {
+  height: 70vh;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.previewPdf {
+  width: 100%;
+  height: 70vh;
+  border: 0;
+}
+
+.previewFallback {
+  text-align: center;
+  padding: 12px;
+}
+
+.previewFilename {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.modalBtns {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modalBtn {
+  height: 40px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.modalBtnDisabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.modalBtnGray {
+  height: 40px;
+  border-radius: 10px;
+  background: #e5e7eb;
+  color: #111827;
+}
+
+@media (max-width: 960px) {
+  .modalCard {
+    width: 88vw;
+    max-width: 88vw;
+  }
+}
+
+@media (max-width: 520px) {
+  .modalCard {
+    width: 94vw;
+    max-width: 94vw;
+    padding: 14px 16px;
+  }
+
+  .searchBtn {
+    width: 108px;
+  }
+}

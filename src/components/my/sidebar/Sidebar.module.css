@@ -1,0 +1,30 @@
+.sidebar {
+  width: 240px;
+  padding: 2rem 1.5rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb; /* gray-200 */
+  border-radius: 12px;
+  position: sticky;
+  height: fit-content;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+  
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
+.parent {
+  font-weight: 700;
+  color: #111827;      
+  font-size: 1rem;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb; 
+}
+
+:global(.focus-ring):focus-visible,
+.parent:focus-visible {
+  outline: 2px solid #3b82f6;  /* blue-500 */
+  outline-offset: 2px;
+}

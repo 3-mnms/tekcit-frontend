@@ -1,0 +1,148 @@
+.page {
+  padding: 0;
+  background: #f9fafc;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  max-width: 980px;
+  height: calc(100vh - 60px);
+  margin: 0 auto;
+  padding: 20px;
+  gap: 20px;
+  box-sizing: border-box;
+  align-items: stretch;
+  /* 추가: 좌/우를 컨테이너 높이에 맞춰 늘림 */
+}
+
+.left,
+.right {
+  min-height: 0;
+  /* 추가: 부모 높이 안에서 정확히 맞춰짐 */
+}
+
+/* 왼쪽 */
+.left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+/* 오른쪽 */
+.right {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
+.sectionTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.sectionContainer,
+.summaryCard {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 10px;
+  flex: 1;
+  /* 추가: 오른쪽 컬럼의 남는 높이를 채움 */
+  min-height: 0;
+  /* 추가: 내부 스크롤 계산 정확도 향상 */
+  overflow: auto;
+}
+
+/* 수령 방법과 결제 수단 사이 여백 추가 */
+.receiveSection {
+  margin-bottom: 20px;
+}
+
+.paymentBox {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 10px;
+}
+
+.methodCard {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.methodHeader {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 14px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.92rem;
+}
+
+.radio {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid #ccc;
+  background: #fff;
+}
+
+.radioOn {
+  border-color: #111;
+  box-shadow: inset 0 0 0 4px #111;
+}
+
+.methodText {
+  font-weight: 600;
+  color: #111;
+}
+
+.methodBody {
+  padding: 14px;
+  background: #f9fafb;
+}
+
+.buttonWrapper {
+  margin-top: auto;
+}
+
+.payButton {
+  width: 100%;
+  background: #4D9AFD;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 0.95rem;
+  min-height: 48px;
+  /* ← 다시 추가 */
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+
+.payButton:hover {
+  background: #377ee7;
+}
+
+.errorMsg {
+  color: #b91c1c;
+  background: #fee2e2;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}

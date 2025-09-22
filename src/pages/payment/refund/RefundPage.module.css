@@ -1,0 +1,146 @@
+:root {
+  --color-primary-light: #f0f4f9;
+  --color-primary-medium: #d4dceb;
+  --color-primary-dark: #4D9AFD;
+  /* ✅ 대표 색상으로 변경 */
+  --color-text-dark: #1a202c;
+  --color-text-medium: #4a5568;
+  --color-background: #ffffff;
+  --color-border: #e2e8f0;
+  --border-radius-card: 16px;
+  --border-radius-button: 12px;
+  --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --max-width: 480px;
+}
+
+.page {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 40px auto;
+  padding: 24px;
+  background-color: var(--color-background);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-subtle);
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  text-align: center;
+}
+
+.header {
+  margin-bottom: 30px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--color-text-medium);
+}
+
+.card {
+  border-radius: var(--border-radius-card);
+  padding: 24px;
+  margin-bottom: 20px;
+  text-align: left;
+  background-color: var(--color-primary-light);
+  border: 1px solid var(--color-primary-medium);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.cardHeaderTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-left: 8px;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.label {
+  font-size: 15px;
+  color: var(--color-text-medium);
+}
+
+.value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+}
+
+.ticketPrice {
+  color: var(--color-primary-dark);
+}
+
+.finalAmount {
+  text-align: center;
+}
+
+.finalAmountLabel {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-bottom: 8px;
+}
+
+.finalAmountValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  margin-bottom: 12px;
+}
+
+.notice {
+  font-size: 13px;
+  color: var(--color-text-medium);
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.button {
+  flex: 1;
+  padding: 16px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--border-radius-button);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.cancelButton {
+  background-color: var(--color-primary-light);
+  color: var(--color-text-dark);
+}
+
+.refundButton {
+  background-color: var(--color-primary-dark);
+  color: var(--color-background);
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.button:active {
+  transform: translateY(0);
+}

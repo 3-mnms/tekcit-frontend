@@ -1,0 +1,72 @@
+.container {
+  /* padding: 1.5rem; */
+  width: 100%;
+  max-width: 768px;
+  gap: 1rem;
+}
+
+.header {
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 0.25rem 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skelCard {
+  border-left: 4px solid #4D9AFD;
+  /* 대표색 */
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+}
+
+.skeletonTitle {
+  width: 40%;
+  height: 18px;
+  background: #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.skeletonLine {
+  width: 70%;
+  height: 12px;
+  background: #eef0f3;
+  border-radius: 8px;
+}
+
+.errorText {
+  color: #ef4444;
+  font-size: 0.9rem;
+}
+
+.addButton {
+  margin-top: 1rem;
+  width: 100%;
+  background: #4D9AFD !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 600;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+}
+
+.addButton:hover {
+  background: #3b82f6 !important;
+}
+
+.addIcon {
+  margin-right: 6px;
+}

@@ -1,0 +1,198 @@
+.card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+    padding: 24px;
+}
+
+.cardHeader {
+    margin-bottom: 16px;
+}
+
+.cardTitle {
+    font-size: 16px;
+    line-height: 24px;
+    color: #0f766e;
+    font-weight: 700;
+}
+
+.cardAccent {
+    border-left: 4px solid #14b8a6;
+}
+
+.statCard {
+    margin-bottom: 16px;
+}
+
+.statRow {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.statItem {
+    min-width: 200px;
+}
+
+.statLabel {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.statValue {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.subtle {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.wrapper {
+    display: block;
+}
+
+.pageHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.pageTitle {
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+}
+
+.tableWrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.theadRow {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color .15s ease;
+}
+
+.tr:hover {
+    background: #f9fafb;
+}
+
+.table tbody tr:nth-child(even) {
+    background: rgba(249, 250, 251, 0.5);
+}
+
+.td {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #111827;
+    vertical-align: middle;
+}
+
+.amount {
+    font-weight: 600;
+}
+
+.muted {
+    color: #4b5563;
+}
+
+.idChip {
+    display: inline-block;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    color: #4b5563;
+    background: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.badgeTeal {
+    background: #ccfbf1;
+    color: #0f766e;
+}
+
+.badgeGreen {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badgeGray {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.empty {
+    text-align: center;
+    color: #6b7280;
+    padding: 24px 0;
+}
+
+.errorBox {
+    margin: 12px 0 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.pager {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.pagerBtn {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    cursor: pointer;
+}
+
+.pagerBtn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.pagerInfo {
+    font-size: 12px;
+    color: #6b7280;
+}

@@ -1,0 +1,81 @@
+/* src/pages/admin/ProductDetailPage.module.css */
+
+.container {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.detailCard {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    width: 100%;
+    max-width: 800px;
+}
+
+.detailCard h2 {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.detailCard p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.scheduleTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.scheduleTag {
+    display: inline-block;
+    background-color: #e9ecef;
+    border-radius: 20px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.8rem;
+    color: #495057;
+}
+
+.posterImage {
+    max-width: 300px;
+    height: auto;
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.fileList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.fileItem {
+    width: 150px;
+    height: 150px;
+    overflow: hidden;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fileImage {    
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}

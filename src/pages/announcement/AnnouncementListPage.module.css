@@ -1,0 +1,52 @@
+.container {
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filterGroup {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    padding-right: 10px;
+    border-right: 1px solid #ddd;
+}
+
+.filterCheckbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #4d9afd;
+}
+
+
+.registerBtn {
+  background-color: #4d9afd;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}

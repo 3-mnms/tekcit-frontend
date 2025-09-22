@@ -1,0 +1,19 @@
+.terms {
+  display: flex;
+  justify-content: flex-start; /* ← 페이지 내 왼쪽 정렬 */
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center; /* 체크박스 + 텍스트 수직 정렬 */
+  gap: 8px;
+  width: auto; /* 필요한 만큼만 */
+  max-width: 100%; /* 너무 길어질 때 대비 */
+}
+
+.checkboxText {
+  white-space: nowrap;        /* 줄바꿈 방지 */
+  max-width: 100%;            /* 부모 기준 너비 제한 */
+}

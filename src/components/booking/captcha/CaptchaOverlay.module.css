@@ -1,0 +1,181 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  z-index: 99999;
+  display: grid;
+  place-items: center;
+}
+
+/* ⬇️ 가로 폭 더 줄임 */
+.card {
+  position: relative;
+  width: min(410px, 92%);
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.16);
+  padding: 18px;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+
+/* 세로 스택 */
+.column {
+  display: grid;
+  row-gap: 8px; /* 전체 간격 소폭 */
+}
+
+/* 이미지만 표시 */
+.imageOnly {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  margin: 0;
+}
+
+.img {
+  width: 100%;
+  height: auto;
+  max-height: 110px; /* 이미지 더 컴팩트 */
+  object-fit: contain;
+  user-select: none;
+}
+
+.imgSkeleton {
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 4/1.4;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* 안내문구 */
+.desc {
+  color: #334155;
+  margin: 0; /* ⬅️ 아래 간격 제거 */
+  line-height: 1.35;
+  font-size: 0.95rem;
+  display: block;
+}
+
+/* 폼: 라벨을 바로 붙이기 위해 위쪽 여백 제거 */
+.form {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  margin-top: -0.8rem;         /* 기본 */
+}
+
+/* 혹시 column의 row-gap이 만들어내는 미세 간격까지 없애고 싶으면 주석 해제
+.form { margin-top: -4px; }
+*/
+
+.label {
+  font-size: .9rem;
+  color: #0f172a;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #475569;
+  font-size: 0.85rem;
+}
+.timerDot { opacity: .45; }
+.timerVal {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-weight: 700; color: #0f172a;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  outline: none;
+  transition: box-shadow .15s ease, border-color .15s ease;
+  background: #fff;
+  box-sizing: border-box;
+}
+.input:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, .35);
+}
+
+.error { color: #dc2626; font-size: .85rem; }
+.serverMsg { color: #1f2937; font-size: .9rem; }
+
+.actions {
+  margin-top: 2px;
+  display: grid;
+  gap: 6px;
+}
+
+.hiddenSubmit {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ⬇️ Button 전용(외부 Tailwind 제거) */
+.submitBtn {
+  width: 100%;
+  padding: 8px 12px;    /* py-2 */
+  font-size: 0.95rem;   /* text-sm ~ base 사이 */
+  border-radius: 10px;  /* 버튼 컴포넌트 기본에 더해지면 둥글게 */
+}
+
+.textBtn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  text-decoration: underline;
+  padding: 4px 0;
+  cursor: pointer;
+  justify-self: center;
+  font-size: 0.9rem;
+
+}
+
+@media (max-width: 520px) {
+  .card { padding: 14px; width: min(440px, 94%); }
+  .img { max-height: 100px; }
+}

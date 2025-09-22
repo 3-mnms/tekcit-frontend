@@ -1,0 +1,46 @@
+/* src/components/shared/Table.module.css */
+.tableContainer {
+    width: 100%;
+    overflow-x: auto; 
+    table-layout: fixed;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse; 
+    table-layout: fixed;
+    font-size: 0.6rem;
+    color: #555;
+    min-width: 800px;
+    text-overflow: ellipsis;
+}
+
+.table thead tr {
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table th, .table td {
+    padding: 0.5%;
+    text-align: left;
+    border-right: 1px solid #e0e0e0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table th:last-child, .table td:last-child {
+    border-right: none;
+}
+
+.table tbody tr:hover {
+    background-color: #f0f8ff; 
+}
+
+.clickableRow {
+    cursor: pointer;
+}
+
+.clickableRow:hover {
+    background-color: #f0f0f0; /* hover 시 배경색을 변경해서 클릭 가능한 느낌을 줍니다! */
+}

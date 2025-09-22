@@ -1,0 +1,22 @@
+.container {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.header {
+  display: flex;
+  justify-content: space-between; /* 양쪽 끝으로 정렬! */
+  align-items: center; /* 세로 중앙 정렬 */
+  margin-bottom: 24px; /* 테이블과의 간격 */
+}
+
+.totalText {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  color: #333;
+}
+.buttonWrapper {
+    margin-top: 1rem;
+    text-align: right;
+}

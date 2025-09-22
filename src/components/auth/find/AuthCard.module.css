@@ -1,0 +1,36 @@
+.page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #e0e7ff, #f0f9ff);
+}
+
+.card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+    height: 56%;
+    position: relative;
+    padding-bottom: 88px;
+}
+
+.logo {
+    width: 160px;
+    margin: 0 auto 1rem;
+    display: block;
+}
+
+.title {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.body {
+    padding-bottom: 88px;
+}

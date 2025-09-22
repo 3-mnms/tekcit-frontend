@@ -1,0 +1,321 @@
+/* ====== 컨테이너 기본 레이아웃 ====== */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 320px;
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  align-items: stretch;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+/* ====== 섹션/라벨 ====== */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* 시간 버튼 래퍼 */
+.timeGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 기본 시간 버튼 (공통 Button 위에 얹는 스타일) */
+.timeBtn {
+  /* 크기/여백 */
+  min-width: 84px;
+  height: 38px;
+  padding: 0 12px;
+
+  /* 테두리/배경/글자 */
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+
+  /* 효과 */
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+
+/* 호버는 살짝만 강조 (채우지 않음) */
+.timeBtn:hover {
+  background: #f5f9ff;
+  /* 아주 연한 파랑 톤 */
+  border-color: #c7d2fe;
+  /* 연보라 테두리 */
+  color: #111;
+  /* 글자 색 유지 */
+  box-shadow: 0 0 0 2px rgba(77, 154, 253, 0.08) inset;
+  /* 은은한 인셋 링 */
+}
+
+/* 선택된 버튼만 진하게! */
+.selectedBtn {
+  background: #4D9AFD;
+  /* Tekcit 블루 */
+  border-color: #4D9AFD;
+  color: #fff;
+}
+
+/* 선택 상태에서의 호버/포커스도 색 유지 */
+.selectedBtn:hover,
+.selectedBtn:focus-visible {
+  background: #3c86e6;
+  border-color: #3c86e6;
+  color: #fff;
+}
+
+/* 접근성: 키보드 포커스 링 */
+.timeBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(77, 154, 253, 0.25);
+}
+
+/* ====== 액션 버튼 ====== */
+.actionsRow {
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  justify-content: center;
+}
+
+.confirmBtn {
+  background-color: #4D9AFD;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  width: 100%;
+  transition: opacity 0.2s ease;
+}
+
+.confirmBtn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.datepickerWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.custom-day,
+.react-datepicker__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 60%;
+  transition: 0.2s;
+}
+
+.day-active {
+  color: #2563eb;
+}
+
+.day-inactive {
+  color: #ccc;
+}
+
+.day-selected,
+.react-datepicker__day--selected {
+  background-color: #2563eb !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+
+.react-datepicker__day--disabled {
+  color: #ccc !important;
+  pointer-events: none;
+}
+
+.react-datepicker__day:not(.react-datepicker__day--disabled):hover {
+  background-color: #e0eaff;
+}
+
+.notice {
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+:root {
+  --dp-bg: #ffffff;
+  --dp-border: #e5e7eb;
+  --dp-shadow: 0 10px 30px rgba(2, 6, 23, .08);
+  --dp-header-bg: #f8fafc;
+  --dp-header-text: #0f172a;
+  --dp-accent: #4D9AFD;
+  --dp-accent-pressed: #317ef0;
+  --dp-text: #0f172a;
+  --dp-muted: #94a3b8;
+  --dp-disabled: #d1d5db;
+  --dp-hover: rgba(77, 154, 253, .12);
+}
+
+.datepickerWrapper :global(.react-datepicker) {
+  background: transparent !important;
+  border: none !important;
+}
+
+.datepickerWrapper :global(.react-datepicker__month-container) {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.dpHeader {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  background: var(--dp-header-bg);
+  color: var(--dp-header-text);
+  border-radius: 12px;
+  margin: 4px 4px 10px;
+  height: 44px;
+}
+
+.dpMonthTitle {
+  text-align: center;
+  font-weight: 700;
+}
+
+.dpNavBtn {
+  height: 32px;
+  width: 32px;
+  margin: 0 auto;
+  border-radius: 10px;
+  border: 1px solid var(--dp-border);
+  background: #fff;
+  cursor: pointer;
+  transition: transform .08s ease, background .15s ease, border-color .15s ease;
+}
+
+.dpNavBtn:hover {
+  background: #f1f5f9;
+}
+
+.dpNavBtn:active {
+  transform: scale(.96);
+}
+
+.datepickerWrapper :global(.react-datepicker__day-names) {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin: 10px 6px 4px;
+}
+
+.datepickerWrapper :global(.react-datepicker__day-name) {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dp-muted);
+}
+
+.datepickerWrapper :global(.react-datepicker__week) {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin: 6px;
+}
+
+.datepickerWrapper :global(.react-datepicker__header) {
+  background: transparent !important;
+  border-bottom: none !important;
+  padding-top: 0 !important;
+}
+
+:global(.custom-day) {
+  position: relative;
+  display: grid !important;
+  place-items: center;
+  width: 2rem;
+  height: 2rem; 
+  border-radius: 10px;
+  font-size: 14px;
+  user-select: none;
+  transition: background .15s ease, color .15s ease, box-shadow .15s ease, transform .06s ease;
+}
+
+:global(.day-inactive),
+:global(.react-datepicker__day--outside-month) {
+  color: var(--dp-disabled) !important;
+  cursor: not-allowed !important;
+  opacity: .75;
+}
+
+:global(.day-active) {
+  cursor: pointer;
+  color: var(--dp-text);
+}
+
+:global(.day-active):hover {
+  background: var(--dp-hover);
+}
+
+:global(.day-today) {
+  font-weight: 700;
+}
+
+:global(.day-today)::after {
+  content: 'today';
+  position: absolute;
+  top: 80%; 
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  color: #4D9AFD;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+:global(.day-weekend.day-active) {
+  color: #334155;
+}
+
+:global(.day-selected),
+:global(.react-datepicker__day--selected) {
+  background: var(--dp-accent) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 14px rgba(77, 154, 253, .35);
+}
+
+:global(.day-selected:active) {
+  transform: scale(.98);
+}
+
+.datepickerWrapper :global(.react-datepicker__day--disabled) {
+  color: var(--dp-disabled) !important;
+}
+
+:global(.custom-day:focus-visible) {
+  outline: 3px solid rgba(77, 154, 253, .55);
+  outline-offset: 2px;
+  background: var(--dp-hover);
+}
