@@ -16,6 +16,7 @@ import {
 } from '@/models/festival/tanstack-query/useFestivalDetail'
 import Spinner from '@/components/common/spinner/Spinner'
 import styles from './FestivalDetailPage.module.css'
+import Footer from '@/components/common/footer/Footer';
 
 const FestivalDetailPage: React.FC = () => {
   const { fid } = useParams<{ fid: string }>()
@@ -126,6 +127,7 @@ const FestivalDetailPage: React.FC = () => {
           </div>
         </aside>
       </div>
+      <Footer />
     </div>
   )
 }
