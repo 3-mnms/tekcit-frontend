@@ -30,8 +30,6 @@ const makeBroadcastTopic = (fid: string, date: string, time?: string) => {
 const SMALL_W = 1000
 const SMALL_H = 700
 
-const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
-
 const parseYMD = (s?: string) => {
   if (!s) return undefined
   const t = s.trim().replace(/[./]/g, '-')
@@ -94,62 +92,6 @@ const TicketQueuePage: React.FC = () => {
   const fdto = sp.get('fdto') ?? ''
   const initialWN = Number(sp.get('wn') ?? '0')
 
-  const initialCount = useMemo(() => {
-    const n = Number(sp.get('wn') ?? '')
-    return clamp(Number.isFinite(n) ? n : 10, 0, 99999)
-  }, [sp])
-  const isDemo = sp.get('skipEnter') === '1'
-
-  const [count, setCount] = useState<number>(initialCount)
-  const initialRef = useRef<number>(initialCount)
-  const timerRef = useRef<number | null>(null)
-  const stoppedRef = useRef<boolean>(false)
-
-  const progressPct = useMemo(() => {
-    const total = Math.max(initialRef.current, 1)
-    const progressed = initialRef.current - count
-    return clamp(Math.round((progressed / total) * 100), 0, 100)
-  }, [count])
-
-  useEffect(() => {
-    if (!isDemo) return
-
-    stoppedRef.current = false
-
-    const tick = () => {
-      if (stoppedRef.current) return
-
-      let willStop = false
-      setCount((prev) => {
-        if (prev <= 0) {
-          willStop = true
-          return 0
-        }
-        const step = Math.random() < 0.7 ? 1 : 2 // 70%로 1명, 30%로 2명
-        const next = Math.max(0, prev - step)
-        willStop = next === 0
-        return next
-      })
-
-      if (willStop) return // 0 되면 종료
-
-      // 0.8초 ~ 1.6초 랜덤 간격
-      const delay = 800 + Math.floor(Math.random() * 800)
-      timerRef.current = window.setTimeout(tick, delay)
-    }
-
-    // 첫 스타트는 약간의 딜레이 후 시작
-    timerRef.current = window.setTimeout(tick, 800)
-
-    return () => {
-      stoppedRef.current = true
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-        timerRef.current = null
-      }
-    }
-  }, [isDemo])
-
   const posterUrl =
     (detail as any)?.poster ||
     (detail as any)?.posterUrl ||
@@ -166,7 +108,7 @@ const TicketQueuePage: React.FC = () => {
   const wsActiveRef = useRef(false)
   const stompRef = useRef<Client | null>(null)
   const lastMsgAtRef = useRef<number>(Date.now())
-  const heartbeatWatchdogRef = useRef<number | null>(null)
+  const heartbeatWatchdogRef = useRef<number | null>(null) 
 
   const exitMut = useExitWaitingMutation()
 
@@ -295,17 +237,38 @@ const TicketQueuePage: React.FC = () => {
 
     client.activate()
 
-    return () => {
-      if (heartbeatWatchdogRef.current != null) {
-        clearInterval(heartbeatWatchdogRef.current)
-        heartbeatWatchdogRef.current = null
+    function randomInt(min: number, max: number) {
+      return Math.floor(Math.random() * (max - min + 1)) + min
+    }
+
+    const softFallback = setInterval(() => {
+      const lag = Date.now() - lastMsgAtRef.current
+      if (lag > 5000) {
+        setAhead((n) => Math.max(0, n - randomInt(1, 2)))
+        lastMsgAtRef.current = Date.now()
       }
+    }, randomInt(3,5)*1000)
+
+    return () => {
+      clearInterval(softFallback)
       try {
         client.deactivate()
       } catch {}
-      wsActiveRef.current = false
       stompRef.current = null
+      wsActiveRef.current = false // 🔓 다음 마운트를 위해 해제
     }
+
+    // return () => {
+    //   if (heartbeatWatchdogRef.current != null) {
+    //     clearInterval(heartbeatWatchdogRef.current)
+    //     heartbeatWatchdogRef.current = null
+    //   }
+    //   try {
+    //     client.deactivate()
+    //   } catch {}
+    //   wsActiveRef.current = false
+    //   stompRef.current = null
+    // }
   }, [fid, date, time, myUserId, accessToken, handleQueueMessage, proceedToBooking])
 
   useEffect(() => {
