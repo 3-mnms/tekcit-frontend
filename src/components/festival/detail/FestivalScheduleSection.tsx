@@ -423,11 +423,11 @@ const FestivalScheduleSection: React.FC<Props> = ({
                   }
                 }
 
-                const FORCE_WAIT = false // 테스트 끝나면 false
+                const FORCE_WAIT = true // 테스트 끝나면 false
                 if (FORCE_WAIT && selectedDate && fid) {
                   const fdfrom = startDate ? ymd(startDate) : null
                   const fdto = endDate ? ymd(endDate) : null
-                  __fs_openWaitingPopup(fid, selectedDate, selectedTime, 1000, fdfrom, fdto)
+                  __fs_openWaitingPopup(fid, selectedDate, selectedTime, 9, fdfrom, fdto)
                   return
                 }
 
