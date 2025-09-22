@@ -22,7 +22,6 @@ const makeBroadcastTopic = (fid: string, date: string, time?: string) => {
   const t = time?.trim()
   return t ? `/topic/waiting/${fid}/${d}/${t}` : `/topic/waiting/${fid}/${d}`
 }
-// const USER_QUEUE_TOPIC = '/user/queue/waitingNumber'
 
 /* =========================
    유틸
@@ -55,6 +54,7 @@ const combineDateTime = (day?: Date, hhmm?: string | null) => {
 
 const centerAndResizeExact = (targetInnerW: number, targetInnerH: number) => {
   try {
+    console.log('[UI] centerAndResizeExact called', { targetInnerW, targetInnerH })
     const dw = Math.max(0, window.outerWidth - window.innerWidth)
     const dh = Math.max(0, window.outerHeight - window.innerHeight)
     const targetOuterW = Math.round(targetInnerW + dw)
@@ -68,9 +68,12 @@ const centerAndResizeExact = (targetInnerW: number, targetInnerH: number) => {
     const left = Math.max(availLeft, Math.round(availLeft + (availW - targetOuterW) / 2))
     const top = Math.max(availTop, Math.round(availTop + (availH - targetOuterH) / 2))
 
+    console.log('[UI] window.resizeTo/moveTo', { targetOuterW, targetOuterH, left, top })
     window.resizeTo(targetOuterW, targetOuterH)
     window.moveTo(left, top)
-  } catch {}
+  } catch (e) {
+    console.log('[UI] centerAndResizeExact error', e)
+  }
 }
 
 /* =========================
@@ -122,17 +125,23 @@ const TicketQueuePage: React.FC = () => {
   const connectHeadersRef = useRef<StompHeaders | undefined>()
   useEffect(() => {
     connectHeadersRef.current = accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined
+    console.log('[AUTH] connectHeaders updated', connectHeadersRef.current)
   }, [accessToken])
 
   const navParamsRef = useRef({ fid, date, time, fdfrom, fdto })
   useEffect(() => {
     navParamsRef.current = { fid, date, time, fdfrom, fdto }
+    console.log('[NAV] params updated', navParamsRef.current)
   }, [fid, date, time, fdfrom, fdto])
 
   const proceedToBooking = useCallback(() => {
     const { fid, date, time, fdfrom, fdto } = navParamsRef.current
-    if (!fid || proceedingToBookingRef.current) return
+    if (!fid || proceedingToBookingRef.current) {
+      console.log('[NAV] proceedToBooking skipped', { fid, alreadyProceeding: proceedingToBookingRef.current })
+      return
+    }
 
+    console.log('[NAV] proceedToBooking triggered', { fid, date, time, fdfrom, fdto })
     proceedingToBookingRef.current = true
     const params = new URLSearchParams()
     if (date) params.set('date', date)
@@ -141,7 +150,9 @@ const TicketQueuePage: React.FC = () => {
     if (fdto) params.set('fdto', fdto)
 
     startTransition(() => {
-      navigate(`/booking/${fid}?${params.toString()}`)
+      const to = `/booking/${fid}?${params.toString()}`
+      console.log('[NAV] navigating to', to)
+      navigate(to)
     })
   }, [navigate])
 
@@ -163,8 +174,9 @@ const TicketQueuePage: React.FC = () => {
     (msg: IMessage) => {
       if (isUnmountedRef.current) return
       try {
+        console.log('[WS] message raw', msg.body)
         const data = JSON.parse(msg.body || '{}')
-        console.log('데이터', data)
+        console.log('[WS] message parsed', data)
 
         // 입장 이벤트
         if (
@@ -172,6 +184,7 @@ const TicketQueuePage: React.FC = () => {
           data?.event === 'PROCEED' ||
           data?.status === 'ENTER_BOOKING'
         ) {
+          console.log('[WS] PROCEED event received -> navigating')
           setAhead(0)
           proceedToBooking()
           return
@@ -180,6 +193,7 @@ const TicketQueuePage: React.FC = () => {
         // 숫자 업데이트
         const next = extractAhead(data)
         if (typeof next === 'number') {
+          console.log('[WS] ahead update', { prev: ahead, next })
           setAhead((prev) => (prev !== next ? next : prev))
         }
 
@@ -188,36 +202,71 @@ const TicketQueuePage: React.FC = () => {
         console.warn('[WS] message parse error', e, msg.body)
       }
     },
-    [proceedToBooking],
+    [proceedToBooking, ahead],
   )
 
   useEffect(() => {
+    console.log('[UI] initial center and resize')
     centerAndResizeExact(SMALL_W, SMALL_H)
-    const t = setTimeout(() => centerAndResizeExact(SMALL_W, SMALL_H), 0)
+    const t = setTimeout(() => {
+      console.log('[UI] defer center and resize (0ms)')
+      centerAndResizeExact(SMALL_W, SMALL_H)
+    }, 0)
     return () => clearTimeout(t)
   }, [])
 
   useEffect(() => {
-    if (!fid || !date || !myUserId || wsActiveRef.current) return
+    console.log('[INIT] queue page mount', { fid, date, time, myUserId, reservationDate, WS_URL })
+  }, [fid, date, time, myUserId, reservationDate])
 
+  useEffect(() => {
+    if (!fid || !date || !myUserId || wsActiveRef.current) {
+      console.log('[WS] skip activate', { fid, date, myUserId, alreadyActive: wsActiveRef.current })
+      return
+    }
+
+    console.log('[WS] activating STOMP client', { WS_URL, myUserId })
     const client = new Client({
-      webSocketFactory: () => new SockJS(`${WS_URL}?token=Bearer ${accessToken}`),
+      webSocketFactory: () => {
+        const url = `${WS_URL}?token=Bearer ${accessToken}`
+        console.log('[WS] SockJS url', url)
+        return new SockJS(url)
+      },
       connectHeaders: { Authorization: `Bearer ${accessToken}`, userId: String(myUserId) },
       reconnectDelay: 5000,
     })
 
+    // STOMP 디버그 전체 로깅
+    client.debug = (str: string) => {
+      // stomp debug.~ 요청 → 콘솔로 모두 출력
+      console.log('[STOMP]', str)
+    }
+
     client.onConnect = () => {
+      console.log('[WS] onConnect')
       lastMsgAtRef.current = Date.now()
 
-      client.subscribe('/user/queue/waitingNumber', handleQueueMessage)
+      client.subscribe('/user/queue/waitingNumber', (frame) => {
+        console.log('[WS] /user/queue/waitingNumber message')
+        handleQueueMessage(frame)
+      })
       const broad = makeBroadcastTopic(String(fid), date, time || undefined)
-      client.subscribe(broad, handleQueueMessage)
+      client.subscribe(broad, (frame) => {
+        console.log('[WS] subscribe broadcast message', { topic: broad })
+        handleQueueMessage(frame)
+      })
+      console.log('[WS] subscribed topics', { userTopic: '/user/queue/waitingNumber', broadcast: broad })
 
       if (heartbeatWatchdogRef.current == null) {
+        console.log('[WS] start heartbeat watchdog')
         heartbeatWatchdogRef.current = window.setInterval(() => {
           const SILENCE_MS = 15_000
-          if (!proceedingToBookingRef.current && Date.now() - lastMsgAtRef.current > SILENCE_MS) {
+          const silentFor = Date.now() - lastMsgAtRef.current
+          if (!proceedingToBookingRef.current && silentFor > SILENCE_MS) {
+            console.log('[WS] heartbeat watchdog: silence detected -> proceedToBooking', { silentFor })
             proceedToBooking()
+          } else {
+            console.log('[WS] heartbeat watchdog tick', { silentFor })
           }
         }, 3000)
       }
@@ -226,8 +275,14 @@ const TicketQueuePage: React.FC = () => {
       stompRef.current = client
     }
 
+    client.onStompError = (frame) => {
+      console.error('[WS] onStompError', { headers: frame.headers, body: frame.body })
+    }
+
     client.onDisconnect = () => {
+      console.log('[WS] onDisconnect')
       if (heartbeatWatchdogRef.current != null) {
+        console.log('[WS] clear heartbeat watchdog (onDisconnect)')
         clearInterval(heartbeatWatchdogRef.current)
         heartbeatWatchdogRef.current = null
       }
@@ -235,16 +290,30 @@ const TicketQueuePage: React.FC = () => {
       stompRef.current = null
     }
 
+    client.onWebSocketClose = (evt) => {
+      console.warn('[WS] onWebSocketClose', evt)
+    }
+
+    client.onWebSocketError = (evt) => {
+      console.error('[WS] onWebSocketError', evt)
+    }
+
     client.activate()
+    console.log('[WS] client.activate() called')
 
     return () => {
+      console.log('[WS] cleanup: deactivating client')
       if (heartbeatWatchdogRef.current != null) {
+        console.log('[WS] clear heartbeat watchdog (cleanup)')
         clearInterval(heartbeatWatchdogRef.current)
         heartbeatWatchdogRef.current = null
       }
       try {
         client.deactivate()
-      } catch {}
+        console.log('[WS] client.deactivate() called')
+      } catch (e) {
+        console.log('[WS] deactivate error', e)
+      }
       wsActiveRef.current = false
       stompRef.current = null
     }
@@ -253,33 +322,60 @@ const TicketQueuePage: React.FC = () => {
   useEffect(() => {
     isUnmountedRef.current = false
     if (!fid || !reservationDate) {
+      console.log('[EXIT] skip binding exit handlers: missing fid or reservationDate', { fid, reservationDate })
       return () => {
+        console.log('[EXIT] cleanup (no handlers); set unmounted')
         isUnmountedRef.current = true
       }
     }
+
     const callExit = () => {
+      console.log('[EXIT] callExit invoked', {
+        festivalId: String(fid),
+        reservationDate,
+        proceeding: proceedingToBookingRef.current,
+        unmounted: isUnmountedRef.current,
+      })
       if (proceedingToBookingRef.current || isUnmountedRef.current) return
       try {
         exitMut.mutate({ festivalId: String(fid), reservationDate })
-      } catch {}
+        console.log('[EXIT] exitMut.mutate called')
+      } catch (e) {
+        console.log('[EXIT] exitMut.mutate error', e)
+      }
     }
-    window.addEventListener('pagehide', callExit)
-    window.addEventListener('beforeunload', callExit)
+
+    const onPageHide = () => {
+      console.log('[EXIT] pagehide event')
+      callExit()
+    }
+    const onBeforeUnload = () => {
+      console.log('[EXIT] beforeunload event')
+      callExit()
+    }
+
+    window.addEventListener('pagehide', onPageHide)
+    window.addEventListener('beforeunload', onBeforeUnload)
+    console.log('[EXIT] bound pagehide & beforeunload')
+
     return () => {
+      console.log('[EXIT] cleanup: remove listeners & maybe callExit, set unmounted')
       isUnmountedRef.current = true
       if (!proceedingToBookingRef.current) callExit()
-      window.removeEventListener('pagehide', callExit)
-      window.removeEventListener('beforeunload', callExit)
+      window.removeEventListener('pagehide', onPageHide)
+      window.removeEventListener('beforeunload', onBeforeUnload)
     }
   }, [fid, reservationDate, exitMut])
 
   // ✅ body 스크롤 잠금
   useEffect(() => {
+    console.log('[UI] lock body scroll')
     const prevOverflow = document.body.style.overflow
     const prevTouch = document.body.style.touchAction
     document.body.style.overflow = 'hidden'
     document.body.style.touchAction = 'none'
     return () => {
+      console.log('[UI] restore body scroll')
       document.body.style.overflow = prevOverflow
       document.body.style.touchAction = prevTouch
     }
@@ -289,6 +385,16 @@ const TicketQueuePage: React.FC = () => {
     TOTAL_AHEAD === 0
       ? 100
       : Math.min(100, Math.max(0, ((TOTAL_AHEAD - ahead) / TOTAL_AHEAD) * 100))
+
+  console.log('[RENDER] TicketQueuePage', {
+    title,
+    date,
+    time,
+    ahead,
+    TOTAL_AHEAD,
+    progressPct: Math.max(2, Math.round(progress)),
+    posterUrl: !!posterUrl,
+  })
 
   return (
     <div className={`${styles.page} ${styles.fullwrap}`}>
