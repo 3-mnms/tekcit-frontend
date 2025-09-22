@@ -106,7 +106,7 @@ const TicketQueuePage: React.FC = () => {
   const wsActiveRef = useRef(false)
   const stompRef = useRef<Client | null>(null)
   const lastMsgAtRef = useRef<number>(Date.now())
-  const softFallbackRef = useRef<number | null>(null)
+  const heartbeatWatchdogRef = useRef<number | null>(null) 
 
   const exitMut = useExitWaitingMutation()
 
@@ -154,12 +154,7 @@ const TicketQueuePage: React.FC = () => {
 
     if (typeof n !== 'number' || !isFinite(n)) return undefined
 
-    // 서버 의미에 맞춰 한쪽만 주석 해제해서 사용하세요.
-    // [A] waitingNumber = "앞사람 수" (보정 없음)
-    // return Math.max(0, Math.floor(n));
-
-    // [B] waitingNumber = "내 순번(나 포함)" (앞사람 수로 보려면 -1)
-    return Math.max(0, Math.floor(n) - 1)
+    return Math.max(0, Math.floor(n))
   }
 
   const handleQueueMessage = useCallback(
@@ -167,6 +162,7 @@ const TicketQueuePage: React.FC = () => {
       if (isUnmountedRef.current) return
       try {
         const data = JSON.parse(msg.body || '{}')
+        console.log('데이터', data)
 
         // 입장 이벤트
         if (
@@ -199,105 +195,58 @@ const TicketQueuePage: React.FC = () => {
     return () => clearTimeout(t)
   }, [])
 
-  //
-  const client = new Client({
-    //brokerURL: "ws://localhost:10000/ws",
-    webSocketFactory: () => new SockJS(WS_URL + '?token=Bearer ' + accessToken),
-    connectHeaders: {
-      //userId: String(myUserId), // 🔑 여기서 userId 넘김
-      // 만약 JWT 토큰 인증도 하고 싶으면 Authorization 헤더도 가능
-      // Authorization: "Bearer " + token
-      Authorization: 'Bearer ' + useAuthStore((s) => s.accessToken),
-    },
-    // debug: (str) => console.log('[STOMP]', str),
-    reconnectDelay: 5000,
-  })
-  console.log('아이디', myUserId)
-
-  client.activate()
-
-  client.onConnect = () => {
-    console.log('✅ STOMP 연결 성공!')
-    lastMsgAtRef.current = Date.now()
-
-    // 내 개인  큐
-    client.subscribe('/user/queue/waitingNumber', (msg: IMessage) => {
-      const data = JSON.parse(msg.body)
-      console.log('데이터', data)
-    })
-
-    // (선택) 브로드캐스트
-    const broad = makeBroadcastTopic(String(fid), date, time || undefined)
-    client.subscribe(broad, (msg: IMessage) => {
-      handleQueueMessage(msg)
-    })
-
-    const softFallback = setInterval(() => {
-      const lag = Date.now() - lastMsgAtRef.current
-      if (lag > 10000) {
-        setAhead((n) => Math.max(0, n - 1))
-        lastMsgAtRef.current = Date.now()
-      }
-    }, 5000)
-
-    return () => {
-      clearInterval(softFallback)
-      try {
-        client.deactivate()
-      } catch {}
-      stompRef.current = null
-      wsActiveRef.current = false
-    }
-  }
-
-  client.onStompError = (frame) => {
-    console.error('❌ [WS] STOMP error:', frame.headers?.message, frame.body)
-  }
-  client.onWebSocketError = (err) => {
-    console.error('❌ [WS] WebSocket error:', err)
-  }
-
-  client.onDisconnect = () => {
-    if (softFallbackRef.current != null) {
-      clearInterval(softFallbackRef.current)
-      softFallbackRef.current = null
-    }
-  }
-
-  // myUserId가 바뀔 때만 activate 실행
   useEffect(() => {
-    if (!fid || !date) return
-    if (!myUserId) return
+    if (!fid || !date || !myUserId || wsActiveRef.current) return
 
-    console.log('🆔 myUserId 준비됨:', myUserId)
+    const client = new Client({
+      webSocketFactory: () => new SockJS(`${WS_URL}?token=Bearer ${accessToken}`),
+      connectHeaders: { Authorization: `Bearer ${accessToken}`, userId: String(myUserId) },
+      reconnectDelay: 5000,
+    })
 
-    if (!wsActiveRef.current) {
-      client.connectHeaders.userId = String(myUserId)
-      client.activate()
-      stompRef.current = client
+    client.onConnect = () => {
+      lastMsgAtRef.current = Date.now()
+
+      client.subscribe('/user/queue/waitingNumber', handleQueueMessage)
+      const broad = makeBroadcastTopic(String(fid), date, time || undefined)
+      client.subscribe(broad, handleQueueMessage)
+
+      if (heartbeatWatchdogRef.current == null) {
+        heartbeatWatchdogRef.current = window.setInterval(() => {
+          const SILENCE_MS = 15_000
+          if (!proceedingToBookingRef.current && Date.now() - lastMsgAtRef.current > SILENCE_MS) {
+            proceedToBooking()
+          }
+        }, 3000)
+      }
+
       wsActiveRef.current = true
+      stompRef.current = client
     }
 
-    // ✅ cleanup: interval/소켓 정리
+    client.onDisconnect = () => {
+      if (heartbeatWatchdogRef.current != null) {
+        clearInterval(heartbeatWatchdogRef.current)
+        heartbeatWatchdogRef.current = null
+      }
+      wsActiveRef.current = false
+      stompRef.current = null
+    }
+
+    client.activate()
+
     return () => {
-      if (softFallbackRef.current != null) {
-        clearInterval(softFallbackRef.current)
-        softFallbackRef.current = null
+      if (heartbeatWatchdogRef.current != null) {
+        clearInterval(heartbeatWatchdogRef.current)
+        heartbeatWatchdogRef.current = null
       }
       try {
         client.deactivate()
       } catch {}
-      stompRef.current = null
       wsActiveRef.current = false
+      stompRef.current = null
     }
-  }, [myUserId, fid, date]) 
-
-  useEffect(() => {
-    if (!fid) return
-    if (ahead === 0 && !proceedingToBookingRef.current) {
-      proceedToBooking()
-    }
-  }, [ahead, fid, proceedToBooking])
+  }, [fid, date, time, myUserId, accessToken, handleQueueMessage, proceedToBooking])
 
   useEffect(() => {
     isUnmountedRef.current = false
