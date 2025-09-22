@@ -5,12 +5,13 @@ import styles from './OperatManageUser.module.css';
 import Layout from '@components/layout/Layout';
 import { getUsers, toggleHostStatus } from '@/shared/api/admin/user'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Spinner from '@/components/common/spinner/Spinner';
 
 const OperatManageUserPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const queryClient = useQueryClient();
 
-    const { data: users, isLoading, isError, isFetching } = useQuery({
+    const { data: users, isLoading, isError} = useQuery({
         queryKey: ['users', searchTerm],
         queryFn: () => getUsers(),
     });
@@ -56,7 +57,7 @@ const OperatManageUserPage: React.FC = () => {
         });
     }, [users, searchTerm]);
     
-    if (isLoading) return <Layout subTitle="사용자 목록"><div>로딩 중...</div></Layout>;
+    if (isLoading) return <Spinner/>
     if (isError) return <Layout subTitle="사용자 목록"><div>에러 발생!</div></Layout>;
 
     return (
@@ -68,7 +69,7 @@ const OperatManageUserPage: React.FC = () => {
                         <SearchBar searchTerm={searchTerm} onSearch={setSearchTerm} />
                     </div>
                 </div>
-                {isFetching && <div className={styles.loadingIndicator}>사용자 목록을 가져오는 중...</div>}
+                {/* {isFetching && <div className={styles.loadingIndicator}>사용자 목록을 가져오는 중...</div>} */}
                 <div className={styles.tableSection}>
                     <UserList users={filteredUsers} onToggleStatus={handleToggleStatus}/>
                 </div>

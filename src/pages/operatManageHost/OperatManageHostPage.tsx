@@ -8,13 +8,14 @@ import AddModal from '@/components/operatManage/AddModal';
 import type {NewHostData} from '@/components/operatManage/AddModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getHosts, registerHost, toggleHostStatus, deleteHosts } from '@/shared/api/admin/host';
+import Spinner from '@/components/common/spinner/Spinner';
 
 const OperatManageHostPage: React.FC = () => {
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const { data: hosts, isLoading, isError, isFetching } = useQuery({
+    const { data: hosts, isLoading, isError } = useQuery({
         queryKey: ['hosts'],
         queryFn: () => getHosts(),
     });
@@ -96,7 +97,7 @@ const OperatManageHostPage: React.FC = () => {
     };
 
     if (isLoading) {
-        return <Layout subTitle="주최자 목록"><div>주최자 목록을 불러오는 중...</div></Layout>;
+        return <Spinner />;
     }
 
     if (isError) {
@@ -112,7 +113,7 @@ const OperatManageHostPage: React.FC = () => {
                         <Button onClick={() => setIsModalOpen(true)}>파트너 추가</Button>
                     </div>
                 </div>
-                {isFetching && <div className={styles.loadingIndicator}>주최자 목록을 가져오는 중...</div>}
+                {/* {isFetching && <div className={styles.loadingIndicator}>주최자 목록을 가져오는 중...</div>} */}
                 <div className={styles.tableSection}>
                     <HostList users={filteredHosts} onToggleStatus={handleToggleStatus} onSelectionChange={handleSelectionChange} />
                 </div>
