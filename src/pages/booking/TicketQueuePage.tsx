@@ -237,47 +237,19 @@ const TicketQueuePage: React.FC = () => {
 
     client.activate()
 
-    function randomInt(min: number, max: number) {
-      return Math.floor(Math.random() * (max - min + 1)) + min
-    }
-
-    const softFallback = setInterval(() => {
-      const lag = Date.now() - lastMsgAtRef.current
-      if (lag > 5000) {
-        setAhead((n) => Math.max(0, n - randomInt(1, 2)))
-        lastMsgAtRef.current = Date.now()
-      }
-    }, randomInt(3,5)*1000)
-
     return () => {
-      clearInterval(softFallback)
+      if (heartbeatWatchdogRef.current != null) {
+        clearInterval(heartbeatWatchdogRef.current)
+        heartbeatWatchdogRef.current = null
+      }
       try {
         client.deactivate()
       } catch {}
+      wsActiveRef.current = false
       stompRef.current = null
-      wsActiveRef.current = false // 🔓 다음 마운트를 위해 해제
     }
-
-    // return () => {
-    //   if (heartbeatWatchdogRef.current != null) {
-    //     clearInterval(heartbeatWatchdogRef.current)
-    //     heartbeatWatchdogRef.current = null
-    //   }
-    //   try {
-    //     client.deactivate()
-    //   } catch {}
-    //   wsActiveRef.current = false
-    //   stompRef.current = null
-    // }
   }, [fid, date, time, myUserId, accessToken, handleQueueMessage, proceedToBooking])
 
-  useEffect(() => {
-    if (!fid) return
-    if (ahead === 0 && !proceedingToBookingRef.current) {
-      proceedToBooking()
-    }
-  }, [ahead, fid, proceedToBooking])
-  
   useEffect(() => {
     isUnmountedRef.current = false
     if (!fid || !reservationDate) {
