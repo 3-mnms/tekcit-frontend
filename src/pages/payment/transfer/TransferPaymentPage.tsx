@@ -170,7 +170,7 @@ const TransferPaymentPage: React.FC = () => {
       if (isFamily) {
         await respondFamily.mutateAsync(buildApproveDTO())
         alert('성공적으로 티켓 양도를 받았습니다.')
-        navigate('/mypage/ticket/history')
+        window.location.href = '/mypage/ticket/history'
         return
       }
       if (!userId) throw new Error('로그인이 필요합니다.')
