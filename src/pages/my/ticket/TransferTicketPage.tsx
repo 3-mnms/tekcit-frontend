@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import styles from './TransferTicketPage.module.css'
 import { useNavigate } from 'react-router-dom'
 import { useTransferTicketsQuery } from '@/models/my/ticket/tanstack-query/useTickets'
+import { useAuthStore } from '@/shared/storage/useAuthStore'
 import {
   useWatchTransferQuery,
   useRespondFamilyTransfer,
@@ -65,7 +66,9 @@ const normalizeServerStatus = (v: unknown): 'REQUESTED' | 'APPROVED' | 'COMPLETE
   }
   return 'REQUESTED'
 }
-const toUiStatusLabel = (s: ReturnType<typeof normalizeServerStatus>): '양도 요청' | '양도 승인' | '양도 거부' => {
+const toUiStatusLabel = (
+  s: ReturnType<typeof normalizeServerStatus>,
+): '양도 요청' | '양도 승인' | '양도 거부' => {
   switch (s) {
     case 'REQUESTED':
     case 'APPROVED':
@@ -103,8 +106,10 @@ const pickToAllowed = (p: unknown): ('QR' | 'PAPER')[] =>
 
 const TransferTicketPage: React.FC = () => {
   const navigate = useNavigate()
+  const { user } = useAuthStore.getState()
+  const userId = String(user?.userId ?? '')
   const { data: me } = useTransferor({ enabled: true })
-  const { data: myTickets } = useTransferTicketsQuery()
+  const { data: myTickets } = useTransferTicketsQuery(userId)
   const {
     data: inbox,
     isLoading: inboxLoading,
@@ -171,8 +176,8 @@ const TransferTicketPage: React.FC = () => {
             reservationNumber: item.reservationNumber,
 
             // ✅ 추가 전달
-            ticketPick: pick,                 // 1=둘 다, 2=QR만
-            allowedDelivery,                  // ['QR','PAPER'] or ['QR']
+            ticketPick: pick, // 1=둘 다, 2=QR만
+            allowedDelivery, // ['QR','PAPER'] or ['QR']
           },
         })
         return
@@ -252,10 +257,11 @@ const TransferTicketPage: React.FC = () => {
           <div className={styles.emptyIcon} aria-hidden />
           <h3 className={styles.emptyTitle}>예매 내역이 없습니다</h3>
           <p className={styles.emptyDesc}>양도 가능한 티켓 내역이 없습니다.</p>
-          <button className={styles.primaryBtn} onClick={() => navigate('/')}>티켓 예매하기</button>
+          <button className={styles.primaryBtn} onClick={() => navigate('/')}>
+            티켓 예매하기
+          </button>
         </div>
-      )
-      }
+      )}
     </div>
   )
 }

@@ -4,6 +4,7 @@ import styles from './ReservationTable.module.css'
 import { useNavigate } from 'react-router-dom'
 import { useTicketsQuery } from '@/models/my/ticket/tanstack-query/useTickets'
 import type { TicketListItem } from '@/models/my/ticket/ticketTypes'
+import { useAuthStore } from '@/shared/storage/useAuthStore'
 
 interface Props {
   startDate: Date | null
@@ -13,7 +14,14 @@ interface Props {
 
 const ReservationTable: React.FC<Props> = ({ startDate, endDate, statusFilter }) => {
   const navigate = useNavigate()
-  const { data, isLoading, isError } = useTicketsQuery()
+  const { user } = useAuthStore.getState() 
+const userId = String(user?.userId ?? '')
+
+const { data, isLoading, isError } = useTicketsQuery(userId, {
+  status: statusFilter,           
+  startDate,                      
+  endDate,                        
+})
 
   const filteredData = useMemo(() => {
     if (!data) return []
