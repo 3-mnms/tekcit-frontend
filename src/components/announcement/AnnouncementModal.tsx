@@ -84,7 +84,7 @@ const AnnouncementModal: React.FC<Props> = ({ isOpen, onClose, onSave, editTarge
 
   useEffect(() => {
   if (selectedFestival) {
-    console.log("선택된 축제 정보:", selectedFestival);
+    // console.log("선택된 축제 정보:", selectedFestival);
   }
 }, [selectedFestival]);
 
@@ -167,7 +167,7 @@ const AnnouncementModal: React.FC<Props> = ({ isOpen, onClose, onSave, editTarge
     startAt: startAtString,
     sendTime: sendTimeString,
   };
-  console.log("서버로 전송하는 데이터:", saveData); 
+  ("서버로 전송하는 데이터:", saveData); 
 
   if (editTarget) {
     // 수정일 경우, scheduleId를 포함한 완전한 객체를 onSave로 넘겨줘요.

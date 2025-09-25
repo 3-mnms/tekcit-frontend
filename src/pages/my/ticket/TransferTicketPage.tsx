@@ -156,7 +156,6 @@ const TransferTicketPage: React.FC = () => {
         // ✅ 핵심: watch에서 받은 ticketPick(1|2)→ allowedDelivery 계산 후 함께 전달
         const pick: 1 | 2 = Number(item.ticketPick) === 2 ? 2 : 1
         const allowedDelivery = pickToAllowed(pick)
-        console.log('[toPayment] ticketPick:', pick, 'allowedDelivery:', allowedDelivery)
 
         navigate('/payment/transfer', {
           state: {

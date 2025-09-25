@@ -37,7 +37,7 @@ const Step1Form: React.FC<Props> = ({ acc, onNext, updateAcc }) => {
   })
 
   const checkLoginIdMut = useCheckLoginId()
-  console.log('로그인', checkLoginIdMut)
+  ('로그인', checkLoginIdMut)
   const [idChecked, setIdChecked] = useState(false)
 
   const loginId = watch('loginId') ?? ''

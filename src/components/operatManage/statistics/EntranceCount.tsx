@@ -10,7 +10,6 @@ interface Props {
 
 const EntranceCount: React.FC<Props> = ({ count, totalCount, title }) => {
   const percentage = Math.floor((count / totalCount) * 100);
-  console.log(title);
   
   return (
     <div className={styles.highlightCard}>

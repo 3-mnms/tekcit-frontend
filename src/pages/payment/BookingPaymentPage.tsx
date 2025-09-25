@@ -58,17 +58,16 @@ const checkStatusAndNavigate = async (bookingId: string, routeToResult: (ok: boo
     try {
       const statusRes = await getReservationStatus(bookingId);
       if (statusRes.data === 'COMPLETED' || statusRes.data === 'CONFIRMED') {
-        console.log('API 요청 성공: 예약 상태 확인 (완료)');
         routeToResult(true);
         return;
       }
     } catch (e) {
-      console.error('API 요청 실패: 예약 상태 확인 중 오류 발생', e);
+      // console.error('API 요청 실패: 예약 상태 확인 중 오류 발생', e);
     }
     await new Promise((r) => setTimeout(r, POLLING_INTERVAL_MS));
   }
 
-  console.error('API 응답 오류: 최대 대기 시간(15초) 초과');
+  // console.error('API 응답 오류: 최대 대기 시간(15초) 초과');
   routeToResult(false);
 };
 
@@ -108,7 +107,6 @@ const BookingPaymentPage: React.FC = () => {
     if (!paymentId) {
       const id = createPaymentId();
       setPaymentId(id);
-      console.log('paymentId 생성:', id);
     }
   }, [paymentId]);
 
@@ -116,7 +114,6 @@ const BookingPaymentPage: React.FC = () => {
   useEffect(() => {
     (async () => {
       try {
-        console.log('API 요청 시작: fetchBookingDetail', {
           festivalId: checkout.festivalId,
           bookingId: checkout.bookingId,
         });
@@ -135,7 +132,7 @@ const BookingPaymentPage: React.FC = () => {
           throw new Error('sellerId 누락');
         }
         setSellerId(sid);
-        console.log('API 요청 성공: fetchBookingDetail', { sellerId: sid });
+        // console.log('API 요청 성공: fetchBookingDetail', { sellerId: sid });
       } catch (e) {
         console.error('API 요청 실패: 예매 상세 조회 실패', e);
       }
@@ -149,7 +146,6 @@ const BookingPaymentPage: React.FC = () => {
     if (savedSessionRef.current) return;
     if (!paymentId || !checkout?.bookingId || !checkout?.festivalId || !sellerId) return;
 
-    console.log('API 요청 시작: saveBookingSession', { paymentId });
     saveBookingSession({
       paymentId,
       bookingId: checkout.bookingId,
@@ -177,10 +173,6 @@ const BookingPaymentPage: React.FC = () => {
       festivalId: String(checkout.festivalId),
       reservationDate,
     });
-    console.log('[waiting.release] fired:', why, {
-      festivalId: checkout.festivalId,
-      reservationDate: reservationDate.toISOString(),
-    });
   };
 
   const handleTimeUpModalClose = () => setIsTimeUpModalOpen(false);
@@ -207,10 +199,8 @@ const BookingPaymentPage: React.FC = () => {
     }
 
     try {
-      console.log('API 요청 시작: completePayment', { paymentId: pid });
       await completePayment(pid);
-      console.log('API 요청 성공: completePayment');
-
+      
       // 결제 후 15초 폴링로 상태 확인
       await checkStatusAndNavigate(checkout.bookingId, routeToResult);
     } catch (e) {
@@ -252,7 +242,6 @@ const BookingPaymentPage: React.FC = () => {
 
     try {
       if (openedMethod === 'wallet') {
-        console.log('API 요청 시작: requestPayment (지갑)', { paymentId: ensuredId, userId });
         const dto = {
           paymentId: ensuredId,
           bookingId: checkout.bookingId ?? null,
@@ -265,8 +254,7 @@ const BookingPaymentPage: React.FC = () => {
           payMethod: 'POINT_PAYMENT',
         };
         await requestPayment(dto, userId!);
-        console.log('API 요청 성공: requestPayment (지갑)');
-
+        
         // 지갑은 비밀번호 모달 열고, 이후 onComplete에서 폴링
         setIsPaying(false);
         setIsPasswordModalOpen(true);
@@ -274,7 +262,6 @@ const BookingPaymentPage: React.FC = () => {
       }
 
       // 카드(토스) 결제
-      console.log('결제 성공 요청 시작');
       await tossRef.current?.requestPay({
         paymentId: ensuredId,
         amount: finalAmount,
@@ -283,7 +270,6 @@ const BookingPaymentPage: React.FC = () => {
         festivalId: festivalIdVal,
         sellerId: sellerId!,
         complete: async (paymentData) => {
-          console.log('Toss complete 콜백:', paymentData?.status);
 
           if (paymentData?.status === 'success') {
             // 콜백 내에서 후처리를 기다림(중요)
@@ -294,7 +280,6 @@ const BookingPaymentPage: React.FC = () => {
             routeToResult(false);
           }
 
-          console.log('결제 성공 요청 종료');
         },
       });
 
@@ -371,7 +356,6 @@ const BookingPaymentPage: React.FC = () => {
           onComplete={async () => {
             setIsPasswordModalOpen(false);
             setIsPaying(true);
-            console.log('지갑 결제 완료 모달: onComplete 시작');
 
             // 지갑 결제 후 상태 폴링
             await checkStatusAndNavigate(checkout.bookingId, routeToResult);

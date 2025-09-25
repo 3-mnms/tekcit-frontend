@@ -157,7 +157,6 @@ export async function payByTekcitPay(params: { amount: number; paymentId: string
   // 최대 10회 재시도 (약 15초 총 대기)
   for (let attempt = 1; attempt <= 10; attempt++) {
     try {
-      console.log(`💳 테킷페이 결제 시도 ${attempt}/10 - paymentId: ${params.paymentId}`)
       return await postWithUserId('/tekcitpay', body)
     } catch (error: any) {
       const errorCode = error?.response?.data?.errorCode
@@ -165,7 +164,6 @@ export async function payByTekcitPay(params: { amount: number; paymentId: string
       // NOT_FOUND_PAYMENT_ID 에러이고 마지막 시도가 아니면 재시도
       if (errorCode === 'NOT_FOUND_PAYMENT_ID' && attempt < 10) {
         const delay = attempt * 500 // 500ms, 1000ms, 1500ms, ... 최대 4.5초
-        console.log(`⏳ PaymentOrder 대기 중... (${attempt}/10) - ${delay}ms 후 재시도`)
         await new Promise(resolve => setTimeout(resolve, delay))
         continue
       }
@@ -209,7 +207,6 @@ export async function requestTekcitPayment(params: {
     if (v !== undefined && v !== null) clean[k] = v
   }
 
-  console.log('📤 결제 요청 데이터:', clean)
   return postWithUserId('/payments/request', clean)
 }
 
@@ -250,7 +247,6 @@ export async function postTekcitpayTransfer(input: TransferPayBody) {
     commission: Math.round(body.commission),
   }
 
-  console.log('📤 양도 결제 요청 바디:', clean) // 디버그 멍
 
   // 주석: 공통 래퍼가 X-User-Id 헤더를 보장 멍
   //       baseURL이 '/api'라면 여기 경로는 '/tekcitpay/transfer'면 됩니다 멍

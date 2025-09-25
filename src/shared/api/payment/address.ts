@@ -69,13 +69,12 @@ export async function getAddress(): Promise<AddressDTO[]> {
 
 export async function getDefaultAddress(): Promise<AddressDTO | null> {
   try {
-    console.log('[getDefaultAddress] API 호출 시작')
 
     const { data } = await api.get<ApiResponse<any | null>>('/addresses/defaultAddress', {
       headers: getAuthHeaders(),
     })
 
-    console.log('[getDefaultAddress] 서버 응답:', data)
+    ('[getDefaultAddress] 서버 응답:', data)
 
     const address = unwrapOrThrow(data)
     return address ? DefaultAddress(address) : null

@@ -27,7 +27,6 @@ const SocialLogin: React.FC = () => {
       const access = (data as ReissueResponseDTO)?.accessToken
       if (access) {
         useAuthStore.getState().setAccessToken(access) // <<<<<< 변경 핵심
-        console.log('[Kakao] accessToken (raw):', access)
         void getAndSaveFcmToken()
       }
     } catch (e) {

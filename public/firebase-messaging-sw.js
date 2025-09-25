@@ -23,11 +23,9 @@ self.addEventListener("activate", (event) => {
 
 // ✅ 백그라운드 알림 처리
 messaging.onBackgroundMessage((payload) => {
-  console.log("📱 백그라운드 알림 도착:", payload);
 
   // OS가 이미 notification을 표시해주는 경우 → 중복 방지
   if (payload.notification) {
-    console.log("⚠️ OS가 자체적으로 알림 표시 (showNotification 중복 방지)");
     return;
   }
 

@@ -108,7 +108,6 @@ const AddressDetailPage: React.FC = () => {
       qc.invalidateQueries({ queryKey: ['addresses', addressId] })
       qc.invalidateQueries({ queryKey: ['addresses', 'default'] })
     } catch (e: any) {
-      console.log('[PATCH error]', e?.response?.status, e?.response?.data)
       alert(e?.response?.data?.message || '주소 저장에 실패했어요.')
     }
   }

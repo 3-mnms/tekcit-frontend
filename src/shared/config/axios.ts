@@ -150,7 +150,6 @@ api.interceptors.response.use(
       if (!refreshPromise) {
         refreshPromise = (async () => {
           const data = await reissue()
-          console.log('[401 reissue]', data)
           const newAccess = (data as ReissueResponseDTO)?.accessToken ?? null
           if (newAccess) { setAuthHeaderToken(newAccess); return newAccess }
           return null

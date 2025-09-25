@@ -36,7 +36,6 @@ const StatisticsPage: React.FC = () => {
     enabled: !!fid,
   })  
 
-  console.log(festivalInfo);
   
   
 

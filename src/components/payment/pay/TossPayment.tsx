@@ -73,29 +73,26 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
 
         try {
           // ✅ API 요청 시작 로그
-          console.log('API 요청 시작: requestPayment', { paymentId, userId: DUMMY_USER_ID });
           await requestPayment(dto, DUMMY_USER_ID);
           // ✅ API 요청 성공 로그
-          console.log('API 요청 성공: requestPayment');
         } catch (err) {
           // ✅ API 요청 실패 로그
-          console.error('API 요청 실패: requestPayment', err);
           alert('결제 준비에 실패했습니다. 잠시 후 다시 시도해 주세요.');
           throw err;
         }
 
         try {
           // ✅ 포트원 결제 요청 시작 로그
-          console.log('포트원 결제창 요청 시작: PortOne.requestPayment', { paymentId, totalAmount: amount });
-          console.log(            "storeId: ",  STORE_ID,
-            "channelKey: ",  CHANNEL_KEY,
-            "bookingId: ", bookingId,
-            "paymentId: ", paymentId,
-            "orderName: ", orderName,
-            "totalAmount: ",  amount,
-            "currency: ",  Currency.KRW,
-            "payMethod: ",  PayMethod.CARD,
-            "redirectUrl: ", finalRedirect);
+          // console.log('포트원 결제창 요청 시작: PortOne.requestPayment', { paymentId, totalAmount: amount });
+          // console.log(            "storeId: ",  STORE_ID,
+          //   "channelKey: ",  CHANNEL_KEY,
+          //   "bookingId: ", bookingId,
+          //   "paymentId: ", paymentId,
+          //   "orderName: ", orderName,
+          //   "totalAmount: ",  amount,
+          //   "currency: ",  Currency.KRW,
+          //   "payMethod: ",  PayMethod.CARD,
+          //   "redirectUrl: ", finalRedirect);
           const portOneResult = await PortOne.requestPayment({
             storeId: STORE_ID,
             channelKey: CHANNEL_KEY,
@@ -107,12 +104,12 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
             payMethod: PayMethod.CARD,
             redirectUrl: finalRedirect,
           })
-          console.log("portOneResult : ", portOneResult);
+          // console.log("portOneResult : ", portOneResult);
           if (portOneResult?.paymentId) {
             
-          console.log("args complete 준비 : ");
+          // console.log("args complete 준비 : ");
             if(args.complete){
-              console.log("args complete 실행 : ");
+              // console.log("args complete 실행 : ");
               args.complete({
                 paymentId: paymentId,
                 status:   'success' ,
@@ -121,10 +118,9 @@ const TossPayment = forwardRef<TossPaymentHandle, TossPaymentProps>(
             }
           }
           // ✅ 포트원 결제 요청 성공 로그 (이 로그는 리디렉션 때문에 거의 실행되지 않습니다)
-          console.log('포트원 결제창 요청 성공: PortOne.requestPayment');
         } catch (err) {
           // ✅ 포트원 결제 요청 실패 로그
-          console.error('포트원 결제창 요청 실패: PortOne.requestPayment', err);
+          // console.error('포트원 결제창 요청 실패: PortOne.requestPayment', err);
           alert('결제창을 여는 데 실패했습니다. 잠시 후 다시 시도해 주세요.');
           throw err;
         }

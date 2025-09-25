@@ -164,7 +164,6 @@ const TicketQueuePage: React.FC = () => {
       if (isUnmountedRef.current) return
       try {
         const data = JSON.parse(msg.body || '{}')
-        // console.log('데이터', data)
 
         // 입장 이벤트
         if (

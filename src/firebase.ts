@@ -22,9 +22,9 @@ export const requestForToken = async () => {
         "BF5YpNLRHPs9tJiv-Se3mIj4ORE7PdZ_q761BsWXCivfkYmMYFGsR1PDNTlKKZ1ho6r3s-79LWUaYF3Px2EQu6Q",
     });
     if (currentToken) {
-      console.log("FCM Registration Token:", currentToken);
+      // console.log("FCM Registration Token:", currentToken);
     } else {
-      console.log("No registration token available.");
+      // console.log("No registration token available.");
     }
   } catch (err) {
     console.error("An error occurred while retrieving token.", err);

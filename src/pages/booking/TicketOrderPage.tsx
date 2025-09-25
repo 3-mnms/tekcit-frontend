@@ -257,7 +257,6 @@ const TicketOrderPage: React.FC = () => {
           },
         });
       } catch (e) {
-        console.log('예약 오류', e);
         alert('예매 가능한 최대 매수를 초과하였습니다.');
       } finally {
         clickLockRef.current = false;
